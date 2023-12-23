@@ -101,7 +101,7 @@
 			>
 				<a-select v-model="form.icon" allow-search placeholder="请选择菜单图标">
 					<template v-for="item in iconOptions" :key="item">
-						<a-option>
+						<a-option :value="item">
 							<a-space align="center">
 								<Icon :name="item" :size="18" />
 								{{ item }}

@@ -30,7 +30,7 @@
 		]
 	},
 	"dependencies": {
-		"@arco-design/web-vue": "^2.44.7",
+		"@arco-design/web-vue": "^2.53.3",
 		"@tinymce/tinymce-vue": "^5.1.1",
 		"@vueuse/core": "^9.3.0",
 		"arco-design-pro-vue": "^2.7.2",
@@ -38,6 +38,7 @@
 		"crypto-js": "^4.2.0",
 		"dayjs": "^1.11.5",
 		"echarts": "^5.4.0",
+		"guid-typescript": "^1.0.9",
 		"js-yaml": "^4.1.0",
 		"jsencrypt": "^3.3.2",
 		"lodash": "^4.17.21",
