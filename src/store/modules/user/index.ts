@@ -13,6 +13,7 @@ import useAppStore from '../app';
 const useUserStore = defineStore('user', {
 	state: (): User => ({
 		id: 0,
+		job_ids: [],
 		department_id: 0,
 		role_id: 0,
 		role_ids: [],
