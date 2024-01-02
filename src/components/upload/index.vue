@@ -304,15 +304,15 @@ const customRequest = (options: RequestOption) => {
 <style lang="less">
 .upload {
 	.arco-upload-list-picture {
-		width: v-bind(domwidth);
-		height: v-bind(domheight);
-		margin-right: v-bind(dommargin);
-		margin-bottom: v-bind(dommargin);
-		line-height: v-bind(domheight);
+		width: v-bind(domWidth);
+		height: v-bind(domHeight);
+		margin-right: v-bind(domMargin);
+		margin-bottom: v-bind(domMargin);
+		line-height: v-bind(domHeight);
 	}
 
 	.arco-upload-list-picture-mask {
-		line-height: v-bind(domheight);
+		line-height: v-bind(domHeight);
 	}
 }
 </style>
@@ -324,8 +324,8 @@ const customRequest = (options: RequestOption) => {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	width: v-bind(domwidth);
-	height: v-bind(domheight);
+	width: v-bind(domWidth);
+	height: v-bind(domHeight);
 	background-color: #f4f5f7;
 	border-radius: 2px;
 
