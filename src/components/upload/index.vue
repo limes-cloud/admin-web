@@ -1,32 +1,34 @@
 <template>
-	<a-upload
-		ref="uploadRef"
-		class="upload"
-		:list-type="(listType as ListType)"
-		:custom-request="customRequest"
-		:file-list="uploadedFileList"
-		:show-upload-button="true"
-		:show-file-list="true"
-		:auto-upload="autoUpload"
-		:draggable="draggable"
-		image-preview
-		:limit="limit"
-		:multiple="multiple"
-		:accept="accept"
-		@change="uploadChange"
-	>
-		<template #upload-button>
-			<div class="upload-card" :class="shape">
-				<icon-camera v-if="accept == 'image/*'" class="icon" />
-				<icon-plus v-else class="icon"></icon-plus>
-				<span v-if="text" class="text">{{ text }}</span>
-			</div>
-		</template>
-	</a-upload>
+	<div style="width: 100%">
+		<a-upload
+			ref="uploadRef"
+			class="upload"
+			:custom-request="customRequest"
+			image-preview
+			:limit="limit"
+			:multiple="multiple"
+			:accept="accept"
+			:list-type="(listType as ListType)"
+			:show-upload-button="true"
+			:file-list="uploadedFileList"
+			:show-file-list="true"
+			:auto-upload="autoUpload"
+			:draggable="draggable"
+			@change="uploadChange"
+		>
+			<template #upload-button>
+				<div class="upload-card" :class="shape">
+					<icon-camera v-if="accept == 'image/*'" class="icon" />
+					<icon-plus v-else class="icon"></icon-plus>
+					<span v-if="text" class="text">{{ text }}</span>
+				</div>
+			</template>
+		</a-upload>
+	</div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { ListType, type FileItem, type RequestOption } from '@arco-design/web-vue/es/upload/interfaces';
 import { useAppStore } from '@/store';
 import { prepareUpload, upload } from '@/api/resource/file';
@@ -101,14 +103,20 @@ const uploadRef = ref();
 const uploadedFileList = ref<FileItem[]>([]);
 const domWidth = ref(`${props.size}px`);
 const domHeight = ref(`${props.size}px`);
+const domMargin = ref('8px');
 
 if (props.width) {
 	// eslint-disable-next-line vue/no-setup-props-destructure
 	domWidth.value = props.width;
 }
+
 if (props.height) {
 	// eslint-disable-next-line vue/no-setup-props-destructure
 	domHeight.value = props.height;
+}
+
+if (props.limit === 1) {
+	domMargin.value = '0px !important';
 }
 
 const GetUploadList = (): FileItem[] => {
@@ -150,30 +158,16 @@ const WaitUploadSuccess = () => {
 defineExpose({ GetUploadList, Upload, WaitUploadSuccess });
 
 // init 组件初始化
-const initFiles = () => {
-	props.files.forEach((item: any) => {
-		uploadedFileList.value.push({
-			url: item.url,
-			name: item.name,
-			response: {
-				src: item.url,
-				sha: item.sha
-			}
-		} as FileItem);
-	});
-};
-
-watch(
-	() => props.files,
-	() => {
-		uploadedFileList.value = [];
-		initFiles();
-	},
-	{
-		deep: true,
-		immediate: true
-	}
-);
+props.files.forEach((item: any) => {
+	uploadedFileList.value.push({
+		url: item.url,
+		name: item.name,
+		response: {
+			src: item.url,
+			sha: item.sha
+		}
+	} as FileItem);
+});
 
 // 上传修改触发
 const uploadChange = (list: FileItem[], item: FileItem) => {
@@ -259,7 +253,7 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 			.then((res) => {
 				onProgress(Math.ceil((index + 1) / pArrr.length));
 				if ((index + 1) / pArrr.length) {
-					onSuccess(res);
+					onSuccess(res.data);
 					fileItem.url = formatUrl(res.data.src as string);
 				}
 			})
@@ -312,6 +306,8 @@ const customRequest = (options: RequestOption) => {
 	.arco-upload-list-picture {
 		width: v-bind(domwidth);
 		height: v-bind(domheight);
+		margin-right: v-bind(dommargin);
+		margin-bottom: v-bind(dommargin);
 		line-height: v-bind(domheight);
 	}
 

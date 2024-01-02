@@ -1,5 +1,12 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="580px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer
+		v-model:visible="visible"
+		:title="isAdd ? '新建' : '修改'"
+		width="580px"
+		unmount-on-close
+		@cancel="visible = false"
+		@before-ok="handleSubmit"
+	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="classify_id"
@@ -62,11 +69,12 @@
 			>
 				<Upload
 					ref="upload"
-					:size="100"
+					width="300px"
+					height="180px"
 					:multiple="true"
 					:auto-upload="true"
 					:limit="1"
-					:file-list="form.cover ? [{ url: $rurl(form.cover_url, 100, 100), sha: form.cover }] : []"
+					:files="files()"
 					directory-path="news/cover"
 					app="partyaffairs"
 					list-type="picture-card"
@@ -107,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref, watch, getCurrentInstance, ComponentInternalInstance } from 'vue';
 import { News } from '@/api/partyaffairs/types/news';
 import { FileItem } from '@arco-design/web-vue';
 import { NewsClassify } from '@/api/partyaffairs/types/news_classify';
@@ -115,6 +123,7 @@ import { NewsClassify } from '@/api/partyaffairs/types/news_classify';
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const props = defineProps<{
 	data: News;
@@ -123,6 +132,17 @@ const props = defineProps<{
 
 const form = ref({} as News);
 const emit = defineEmits(['add', 'update']);
+const files = () => {
+	return form.value.resource
+		? [
+				{
+					url: proxy?.$rurl(form.value.resource.src, 300, 180),
+					sha: form.value.resource.sha,
+					name: form.value.resource.name
+				}
+		  ]
+		: [];
+};
 
 watch(
 	() => props.data,
@@ -132,8 +152,12 @@ watch(
 );
 
 const handleUploadImage = (fs: FileItem[]) => {
-	const file = fs[0];
-	form.value.cover = file.response.sha;
+	if (!fs || fs.length === 0) {
+		form.value.cover = '';
+	} else {
+		const file = fs[0];
+		form.value.cover = file.response.sha;
+	}
 };
 
 const showAddDrawer = () => {

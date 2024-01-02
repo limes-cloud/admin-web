@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Vue from 'vue';
 
 type FormatUrlFunc = (i: string, w?: number, h?: number) => string;

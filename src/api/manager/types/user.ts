@@ -6,6 +6,7 @@ export interface User {
 	department_id: number;
 	role_id: number;
 	role_ids: number[];
+	job_ids: number[];
 	name: string;
 	nickname: string;
 	gender: string;

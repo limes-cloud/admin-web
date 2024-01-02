@@ -59,7 +59,7 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-if="record.id != 1" v-permission="'manager:user:reset:password'" color="orangered" @click="emit('update', record)">
+					<a-tag v-if="record.id != 1" v-permission="'manager:user:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>

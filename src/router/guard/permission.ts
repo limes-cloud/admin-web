@@ -63,7 +63,6 @@ export default function setupPermissionGuard(router: Router) {
 			}
 			// 初始化解析器
 			const parser = new Parser(data);
-
 			// 获取路由并注册
 			const routers = parser.GetRouter();
 			routers.forEach((item) => {

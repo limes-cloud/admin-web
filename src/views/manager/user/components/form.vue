@@ -1,5 +1,12 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer
+		v-model:visible="visible"
+		:title="isAdd ? '新建' : '修改'"
+		width="380px"
+		unmount-on-close
+		@cancel="visible = false"
+		@before-ok="handleSubmit"
+	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="name"
@@ -103,6 +110,28 @@
 					allow-search
 				/>
 			</a-form-item>
+
+			<a-form-item
+				field="job_ids"
+				label="用户职位"
+				:rules="[
+					{
+						required: true,
+						message: '用户职位是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-select
+					v-model="form.job_ids"
+					placeholder="请选择服务"
+					:scrollbar="true"
+					:options="jobs"
+					:field-names="{ value: 'id', label: 'name' }"
+					multiple
+					@search="searchJob"
+				></a-select>
+			</a-form-item>
 		</a-form>
 	</a-drawer>
 </template>
@@ -111,6 +140,9 @@
 import { ref, watch } from 'vue';
 import { CascaderOption } from '@arco-design/web-vue';
 import { User } from '@/api/manager/types/user';
+import { Job } from '@/api/manager/types/job';
+import { pageJob, userJobs } from '@/api/manager/job';
+import { getUserRoles } from '@/api/manager/user-role';
 
 const formRef = ref();
 const visible = ref(false);
@@ -124,13 +156,6 @@ const props = defineProps<{
 
 const form = ref({} as User);
 const emit = defineEmits(['add', 'update']);
-
-watch(
-	() => props.data,
-	(val) => {
-		form.value = val;
-	}
-);
 
 const showAddDrawer = () => {
 	visible.value = true;
@@ -161,4 +186,68 @@ const handleSubmit = async () => {
 	}
 	return true;
 };
+
+const jobs = ref<Job[]>([]);
+// const current = ref<Job>();
+
+const searchJob = async (val?: string) => {
+	const { data } = await pageJob({ page: 1, page_size: 10, keyword: val });
+	const { list } = data;
+	if (!list) {
+		return;
+	}
+
+	// 初始化
+	const searchd: Job[] = [];
+	list.forEach((item) => {
+		if (!form.value.job_ids || !form.value.job_ids.includes(item.id)) {
+			searchd.push(item);
+		}
+	});
+
+	const selectd: Job[] = [];
+	jobs.value.forEach((item) => {
+		if (form.value.job_ids && form.value.job_ids.includes(item.id)) {
+			selectd.push(item);
+		}
+	});
+
+	jobs.value = searchd.concat(selectd);
+};
+
+const handleGetUserRoleIds = async (id: number) => {
+	const { data } = await getUserRoles(id);
+	const ids: number[] = [];
+	data.forEach((item) => {
+		ids.push(item.role_id);
+	});
+	return ids;
+};
+
+const handleGetUserJobIds = async (id: number) => {
+	const { data } = await userJobs(id);
+	const ids: number[] = [];
+	if (data) {
+		data.forEach((item) => {
+			ids.push(item.id);
+		});
+	}
+	return ids;
+};
+
+const handlePreData = async () => {
+	searchJob();
+	const roleIds = await handleGetUserRoleIds(props.data.id);
+	const jobIds = await handleGetUserJobIds(props.data.id);
+	form.value.role_ids = roleIds;
+	form.value.job_ids = jobIds;
+};
+
+watch(
+	() => props.data,
+	async (val) => {
+		form.value = val;
+		await handlePreData();
+	}
+);
 </script>

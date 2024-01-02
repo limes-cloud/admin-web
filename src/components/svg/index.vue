@@ -1,6 +1,6 @@
 <template>
-	<svg aria-hidden="true" class="svg-icon-spin" :style="{ width: size + 'px', height: size + 'px' }">
-		<use :xlink:href="symbolId" :fill="color" />
+	<svg aria-hidden="true" class="svg-icon" :style="{ width: size + 'px', height: size + 'px' }">
+		<use :xlink:href="symbolId" :fill="color ? color : 'currentcolor'" />
 	</svg>
 </template>
 
@@ -19,8 +19,7 @@ export default defineComponent({
 			required: true
 		},
 		color: {
-			type: String,
-			default: '#333'
+			type: String
 		},
 		size: {
 			type: Number,
@@ -35,8 +34,13 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.svg-icon-spin {
+.svg-icon {
+	// width: 1em;
+	// height: 1em;
+	// vertical-align: -0.15em;
+	// fill: currentColor;
+	// overflow: hidden;
 	vertical-align: middle;
-	fill: currentcolor;
+	fill: currentcolor !important;
 }
 </style>

@@ -40,7 +40,7 @@ import { getRoleTree } from '@/api/manager/role';
 import { Role } from '@/api/manager/types/role';
 import { pageUser, addUser, deleteUser, updateUser, disableUser, enableUser, offlineUser, resetPassword } from '@/api/manager/user';
 import { PageUserReq, User } from '@/api/manager/types/user';
-import { getUserRoles } from '@/api/manager/user-role';
+
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -138,15 +138,6 @@ const handleGetDepartment = async () => {
 const handleGetRole = async () => {
 	const { data } = await getRoleTree();
 	roles.value = data;
-};
-
-const handleGetUserRoleIds = async (id: number) => {
-	const { data } = await getUserRoles(id);
-	const ids: number[] = [];
-	data.forEach((item) => {
-		ids.push(item.role_id);
-	});
-	return ids;
 };
 
 // handleGet 处理查询
@@ -247,8 +238,7 @@ const handleToolAdd = () => {
 
 // 处理table点击更新
 const handleTableUpdate = async (data: User) => {
-	const ids = await handleGetUserRoleIds(data.id);
-	form.value = { ...data, role_ids: ids };
+	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 

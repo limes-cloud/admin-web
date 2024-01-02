@@ -1,15 +1,17 @@
+import { Resource } from '@/types/global';
+
 export interface News {
 	id: number;
 	title: string;
 	unit: string;
 	cover: string;
-	cover_url: string;
 	desc: string;
 	content: string;
 	read: number;
 	classify_id: number;
 	created_at: number;
 	updated_at: number;
+	resource: Resource;
 }
 
 export interface PageNewsReq {

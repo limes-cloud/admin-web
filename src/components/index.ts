@@ -6,8 +6,11 @@ import { GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, Gr
 import Chart from './chart/index.vue';
 import Breadcrumb from './breadcrumb/index.vue';
 import SvgIcon from './svg/index.vue';
+import Icon from './icon/index.vue';
 import Upload from './upload/index.vue';
 import Tinymce from './tinymce/index.vue';
+import FormEditor from './form-editor/index.vue';
+
 // Manually introduce ECharts modules to reduce packing size
 
 use([
@@ -30,5 +33,7 @@ export default {
 		Vue.component('SvgIcon', SvgIcon);
 		Vue.component('Upload', Upload);
 		Vue.component('Tinymce', Tinymce);
+		Vue.component('FormEditor', FormEditor);
+		Vue.component('Icon', Icon);
 	}
 };

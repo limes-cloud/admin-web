@@ -1,5 +1,5 @@
 import { Guid } from 'guid-typescript';
-import { Component, ComponentRule } from './type';
+import { Component, ComponentRule } from './types';
 
 const uuid = (): string => {
 	let ustr = Guid.create().toString();
@@ -8,16 +8,16 @@ const uuid = (): string => {
 };
 
 export const defaultComponentRule: ComponentRule[] = [
-	{ name: '无', value: '' },
-	{ name: '字符', value: 'string' },
-	{ name: '数字', value: 'number' },
-	{ name: '整数', value: 'integer' },
-	{ name: '浮点数', value: 'float' },
-	{ name: '日期', value: 'date' },
-	{ name: '链接', value: 'url' },
-	{ name: '邮箱', value: 'email' },
-	{ name: '手机号', value: 'mobile' },
-	{ name: '身份证号', value: 'idcard' }
+	{ label: '无', value: '' },
+	{ label: '字符', value: 'string' },
+	{ label: '数字', value: 'number' },
+	{ label: '整数', value: 'integer' },
+	{ label: '浮点数', value: 'float' },
+	{ label: '日期', value: 'date' },
+	{ label: '链接', value: 'url' },
+	{ label: '邮箱', value: 'email' },
+	{ label: '手机号', value: 'mobile' },
+	{ label: '身份证号', value: 'idcard' }
 ];
 
 // inputComponent 单行文本输入
@@ -33,7 +33,8 @@ export const createInputComponent = (): Component => {
 			max_length: 30,
 			value: '',
 			placeholder: '请输入',
-			rule: undefined
+			rule: undefined,
+			options: []
 		}
 	};
 };
@@ -50,7 +51,8 @@ export const createTextareaComponent = (): Component => {
 			disabled: false,
 			max_length: 150,
 			value: '',
-			placeholder: '请输入'
+			placeholder: '请输入',
+			options: []
 		}
 	};
 };
@@ -69,7 +71,8 @@ export const createNumberComponent = (): Component => {
 			placeholder: '请输入',
 			min: 0,
 			max: 100,
-			step: 1
+			step: 1,
+			options: []
 		}
 	};
 };
@@ -86,7 +89,8 @@ export const createPasswordComponent = (): Component => {
 			disabled: false,
 			value: 0,
 			placeholder: '请输入',
-			max_length: 30
+			max_length: 30,
+			options: []
 		}
 	};
 };
@@ -103,7 +107,8 @@ export const createRadioComponent = (): Component => {
 			disabled: false,
 			value: undefined,
 			placeholder: '请输入',
-			max_length: 30
+			max_length: 30,
+			options: ['选择一', '选择二']
 		}
 	};
 };
@@ -120,9 +125,9 @@ export const createCheckboxComponent = (): Component => {
 			disabled: false,
 			value: [],
 			placeholder: '请输入',
-			max_length: 30
-		},
-		options: ['选择一', '选择二']
+			max_length: 30,
+			options: ['选择一', '选择二']
+		}
 	};
 };
 // selectComponent 下拉选择器
@@ -137,9 +142,9 @@ export const createSelectComponent = (): Component => {
 			disabled: false,
 			value: [],
 			placeholder: '请输入',
-			max_length: 30
-		},
-		options: ['选择一', '选择二']
+			max_length: 30,
+			options: ['选择一', '选择二']
+		}
 	};
 };
 
@@ -155,7 +160,8 @@ export const createPcdComponent = (): Component => {
 			disabled: false,
 			value: [],
 			placeholder: '请输入',
-			max_length: 30
+			max_length: 30,
+			options: []
 		}
 	};
 };
@@ -170,7 +176,8 @@ export const createTimeComponent = (): Component => {
 			require: true,
 			disabled: false,
 			value: '',
-			placeholder: '请选择'
+			placeholder: '请选择',
+			options: []
 		}
 	};
 };
@@ -185,7 +192,8 @@ export const createDateComponent = (): Component => {
 			require: true,
 			disabled: false,
 			value: '',
-			placeholder: '请选择'
+			placeholder: '请选择',
+			options: []
 		}
 	};
 };
@@ -200,7 +208,8 @@ export const createDatetimeComponent = (): Component => {
 			require: true,
 			disabled: false,
 			value: '',
-			placeholder: '请选择'
+			placeholder: '请选择',
+			options: []
 		}
 	};
 };
@@ -216,7 +225,8 @@ export const createUploadComponent = (): Component => {
 			require: true,
 			disabled: false,
 			value: '',
-			placeholder: '请选择'
+			placeholder: '请选择',
+			options: []
 		}
 	};
 };

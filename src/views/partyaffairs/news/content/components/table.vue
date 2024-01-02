@@ -15,7 +15,7 @@
 			</template>
 
 			<template #cover="{ record }">
-				<img alt="avatar" :src="$rurl(record.cover_url, 100, 100)" />
+				<img alt="avatar" :src="$rurl(record.resource.src, 100, 100)" />
 			</template>
 
 			<template #createdAt="{ record }">

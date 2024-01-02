@@ -1,5 +1,5 @@
 export interface ComponentRule {
-	name: string; // 规则名称
+	label: string; // 规则名称
 	value: string; // 规则值
 }
 
@@ -21,6 +21,7 @@ export interface ComponentConfig {
 	max?: number; // 最大值
 	step?: number; // 步数
 	filetype?: string; // 上传文件类型
+	options: string[]; // 选项
 }
 
 export interface Component {
@@ -29,5 +30,12 @@ export interface Component {
 	config: ComponentConfig; // 组件配置
 	field: string; // 字段名称
 	relation?: ComponentRelation; // 关联展示
-	options?: string[]; // 选项
+}
+
+type Creater = () => Component;
+
+export interface ComponentDesc {
+	type: string; // 组件类型
+	name: string; // 组件名称
+	creater: Creater; // 字段名称
 }

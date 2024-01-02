@@ -1,15 +1,17 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer
+		v-model:visible="visible"
+		:title="isAdd ? '新建' : '修改'"
+		width="380px"
+		unmount-on-close
+		@cancel="visible = false"
+		@before-ok="handleSubmit"
+	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="classify_id"
 				label="所属板块"
-				:rules="[
-					{
-						required: true,
-						message: '资料标题是必填项'
-					}
-				]"
+				:rules="[{ required: true, message: '所属板块是必填项' }]"
 				:validate-trigger="['change', 'input']"
 			>
 				<a-select
@@ -21,55 +23,27 @@
 				/>
 			</a-form-item>
 
-			<a-form-item
-				field="title"
-				label="资料标题"
-				:rules="[
-					{
-						required: true,
-						message: '资料标题是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
+			<a-form-item field="title" label="资料标题" :rules="[{ required: true, message: '资料标题是必填项' }]" :validate-trigger="['change', 'input']">
 				<a-input v-model="form.title" allow-clear placeholder="请输入资料标题" />
 			</a-form-item>
 
-			<a-form-item
-				field="url"
-				label="资料封面"
-				:rules="[
-					{
-						required: true,
-						message: '资料封面是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
+			<a-form-item field="url" label="资料文件" :rules="[{ required: true, message: '资料文件是必填项' }]" :validate-trigger="['change', 'input']">
 				<Upload
 					ref="upload"
-					:size="100"
+					width="100%"
+					height="100px"
+					text="点击或拖拽上传"
 					:limit="1"
 					:draggable="true"
 					:multiple="false"
 					:auto-upload="true"
-					:files="
-						form.url
-							? [
-									{
-										url: $rurl(form.url, 100, 100),
-										sha: form.sha,
-										name: '已上传文件'
-									}
-							  ]
-							: []
-					"
+					:files="files()"
 					directory-path="resource"
 					app="partyaffairs"
 					list-type="text"
 					accept="*"
 					@change="handleUploadImage"
-				></Upload>
+				/>
 			</a-form-item>
 
 			<a-form-item
@@ -90,11 +64,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ComponentInternalInstance, getCurrentInstance, ref, watch } from 'vue';
 import { Resource } from '@/api/partyaffairs/types/resource';
 import { FileItem } from '@arco-design/web-vue';
 import { ResourceClassify } from '@/api/partyaffairs/types/resource_classify';
 
+const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
@@ -114,9 +89,25 @@ watch(
 	}
 );
 
+const files = () => {
+	return form.value.resource
+		? [
+				{
+					url: proxy?.$rurl(form.value.resource.src, 100, 100),
+					sha: form.value.resource.sha,
+					name: form.value.resource.name
+				}
+		  ]
+		: [];
+};
+
 const handleUploadImage = (fs: FileItem[]) => {
-	const file = fs[0];
-	form.value.url = file.response.sha;
+	if (!fs || !fs.length) {
+		form.value.url = '';
+	} else {
+		const file = fs[0];
+		form.value.url = file.response.sha;
+	}
 };
 
 const showAddDrawer = () => {

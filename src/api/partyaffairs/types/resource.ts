@@ -1,11 +1,13 @@
+import { Resource as FileResource } from '@/types/global';
+
 export interface Resource {
 	id: number;
 	title: string;
 	desc: string;
 	url: string;
-	sha: string;
 	download_count: number;
 	classify_id: number;
+	resource: FileResource;
 	created_at: number;
 	updated_at: number;
 }

@@ -1,5 +1,12 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer
+		v-model:visible="visible"
+		:title="isAdd ? '新建' : '修改'"
+		width="380px"
+		unmount-on-close
+		@cancel="visible = false"
+		@before-ok="handleSubmit"
+	>
 		<a-form ref="formRef" :model="form" label-align="right" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="title"
@@ -29,12 +36,12 @@
 				<Upload
 					ref="upload"
 					width="100%"
-					height="120px"
+					height="180px"
 					:limit="1"
 					:draggable="true"
 					:multiple="false"
 					:auto-upload="true"
-					:files="uploadList"
+					:files="files()"
 					directory-path="resource/banner"
 					app="partyaffairs"
 					accept="image/*"
@@ -102,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, getCurrentInstance } from 'vue';
+import { ref, watch, getCurrentInstance } from 'vue';
 import { Banner } from '@/api/partyaffairs/types/banner';
 import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
 
@@ -123,18 +130,18 @@ const props = defineProps<{
 
 const form = ref<Banner>({} as Banner);
 const emit = defineEmits(['add', 'update']);
-const uploadList = computed(() => {
+const files = () => {
 	if (props.data.resource) {
 		return [
 			{
-				url: proxy.$rurl(props.data.resource.src),
+				url: proxy.$rurl(props.data.resource.src, 300, 180),
 				sha: props.data.resource.sha,
 				name: props.data.resource.name
 			}
 		];
 	}
 	return [];
-});
+};
 
 watch(
 	() => props.data,
@@ -144,7 +151,8 @@ watch(
 );
 
 const handleUploadImage = (fs: FileItem[]) => {
-	if (!fs.length) return;
+	console.log(fs);
+	if (!fs || !fs.length) return;
 	const file = fs[0];
 	form.value.src = file.response.sha;
 };

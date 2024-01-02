@@ -95,7 +95,7 @@ class Parser {
 			let router: any = null;
 			this.home = undefined;
 
-			if (menu.path && menu.component) {
+			if (menu.path) {
 				// 获取首页
 				if (menu.is_home) {
 					this.home = {
@@ -105,13 +105,18 @@ class Parser {
 					};
 				}
 
+				const pm = 'ParentMenu';
+				if (!menu.component) {
+					menu.component = pm;
+				}
+
 				// 加载组件
 				let component: Component;
 				switch (menu.component) {
 					case 'Layout':
 						component = DEFAULT_LAYOUT;
 						break;
-					case 'ParentMenu':
+					case pm:
 						component = null;
 						break;
 					default:

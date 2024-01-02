@@ -188,17 +188,7 @@
 					<a-input v-model="form.path" placeholder="请输入菜单路径" allow-clear />
 				</a-form-item>
 
-				<a-form-item
-					field="component"
-					label="菜单组件"
-					:rules="[
-						{
-							required: true,
-							message: '菜单路径是必填项'
-						}
-					]"
-					:validate-trigger="['change', 'input']"
-				>
+				<a-form-item field="component" label="菜单组件" :validate-trigger="['change', 'input']">
 					<a-input v-model="form.component" placeholder="请输入菜单组件" allow-clear />
 				</a-form-item>
 			</template>
