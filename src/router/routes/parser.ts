@@ -93,7 +93,6 @@ class Parser {
 		menus.forEach((menu) => {
 			// 处理菜单
 			let router: any = null;
-			this.home = undefined;
 
 			if (menu.path) {
 				// 获取首页
