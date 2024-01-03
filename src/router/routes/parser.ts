@@ -32,6 +32,7 @@ class Parser {
 	constructor(menus: Menu[]) {
 		// 加载组件，最大支持5个层级
 		this.components = {
+			...import.meta.glob(`@/views/*/*.vue`),
 			...import.meta.glob(`@/views/*/*/*.vue`),
 			...import.meta.glob(`@/views/*/*/*/*.vue`),
 			...import.meta.glob(`@/views/*/*/*/*/*.vue`)
