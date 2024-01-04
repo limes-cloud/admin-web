@@ -12,7 +12,7 @@
 		>
 			<template #fields="{ record }">
 				<a-space>
-					<template v-for="field in split(record.fields, ',')" :key="field">
+					<template v-for="(field, index) in split(record.fields, ',')" :key="index">
 						<a-tag>{{ field }}</a-tag>
 					</template>
 				</a-space>

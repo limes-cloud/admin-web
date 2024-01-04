@@ -44,6 +44,7 @@
 				:value="template?.content"
 				:lang="submitForm.format"
 				:show-line="false"
+				:switch-lang="true"
 				:style="{
 					width: '100%',
 					height: '100%'
@@ -52,6 +53,11 @@
 				@change="
 					(val) => {
 						submitForm.content = val;
+					}
+				"
+				@change-lang="
+					(val) => {
+						submitForm.format = val;
 					}
 				"
 			></CodeEditor>
@@ -219,9 +225,10 @@ const syncConfigure = () => {
 watch(
 	() => props.template,
 	(val) => {
-		if (val) {
-			submitForm.value.content = val.content;
-		}
+		if (!val) return;
+		submitForm.value.content = val.content;
+		submitForm.value.format = val.format;
+		coder.value.setEditLang(val.format);
 	},
 	{ deep: true }
 );

@@ -17,7 +17,7 @@ import customTheme from './theme';
 
 customTheme();
 const content = ref('');
-const emit = defineEmits(['change']);
+const emit = defineEmits(['change', 'changeLang']);
 const props = defineProps({
 	lang: {
 		type: String,
@@ -78,6 +78,7 @@ const initEditor = () => {
 	if (!editor.value) {
 		return;
 	}
+
 	monacoEditor.value = monaco.editor.create(editor.value, {
 		padding: { top: 10, bottom: 10 },
 		fontSize: 13,
@@ -151,7 +152,33 @@ const setEditValue = (val: string) => {
 	monacoEditor.value?.getAction('editor.action.formatDocument')?.run();
 };
 
-defineExpose({ setEditValue });
+// json <-> yaml
+const changeLang = () => {
+	monaco.editor.setModelLanguage(getModel() as monaco.editor.ITextModel, innerLang.value);
+	emit('changeLang', innerLang.value);
+	if (!content.value) {
+		return;
+	}
+
+	let newVal = '';
+	if (innerLang.value === 'yaml') {
+		try {
+			newVal = jsonYaml.dump(JSON.parse(content.value));
+		} catch (error) {
+			newVal = content.value;
+		}
+	} else {
+		newVal = JSON.stringify(jsonYaml.load(content.value));
+	}
+	setEditValue(newVal);
+};
+
+const setEditLang = (lang: string) => {
+	innerLang.value = lang;
+	changeLang();
+};
+
+defineExpose({ setEditValue, setEditLang });
 
 watch(
 	() => props.value,
@@ -164,18 +191,6 @@ watch(
 	},
 	{ deep: true }
 );
-
-// json <-> yaml
-const changeLang = () => {
-	monaco.editor.setModelLanguage(getModel() as monaco.editor.ITextModel, innerLang.value);
-	let newVal = '';
-	if (innerLang.value === 'yaml') {
-		newVal = jsonYaml.dump(JSON.parse(content.value));
-	} else {
-		newVal = JSON.stringify(jsonYaml.load(content.value));
-	}
-	setEditValue(newVal);
-};
 
 onMounted(() => {
 	initEditor();
