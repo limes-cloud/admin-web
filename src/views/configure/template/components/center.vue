@@ -154,6 +154,7 @@ import { Template } from '@/api/configure/types/template';
 import CodeEditor from '@/components/code-editor/index.vue';
 import { Message } from '@arco-design/web-vue';
 import { watch, ref } from 'vue';
+import jsonYaml from 'js-yaml';
 
 const props = defineProps<{
 	template?: Template;
@@ -188,11 +189,10 @@ const submitTemplate = async () => {
 		return false;
 	}
 
-	try {
+	if (submitForm.value.format === 'json') {
 		submitForm.value.content = JSON.stringify(JSON.parse(submitForm.value.content));
-	} catch (error) {
-		Message.error('配置格式错误');
-		return false;
+	} else {
+		content.value = submitForm.value.content;
 	}
 	emit('submit', submitForm.value);
 	return true;
