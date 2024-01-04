@@ -152,9 +152,7 @@ import { parseTemplateTest } from '@/api/configure/template';
 import { Env } from '@/api/configure/types/env';
 import { Template } from '@/api/configure/types/template';
 import CodeEditor from '@/components/code-editor/index.vue';
-import { Message } from '@arco-design/web-vue';
 import { watch, ref } from 'vue';
-import jsonYaml from 'js-yaml';
 
 const props = defineProps<{
 	template?: Template;
