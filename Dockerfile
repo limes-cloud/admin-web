@@ -9,10 +9,8 @@ RUN pnpm config set registry=https://registry.npmmirror.com/
 
 ADD . /app/
 
+ENV NODE_OPTIONS=--max_old_space_size=4096
 RUN pnpm install
-RUN pnpm install -g increase-memory-limit
-RUN pnpm install -g cross-env
-RUN pnpm run fix-memory-limit
 RUN pnpm build
 
 
