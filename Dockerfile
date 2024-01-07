@@ -10,7 +10,9 @@ RUN pnpm config set registry=https://registry.npmmirror.com/
 ADD . /app/
 
 RUN pnpm install
-
+RUN pnpm install -g increase-memory-limit
+RUN pnpm install -g cross-env
+RUN pnpm run fix-memory-limit
 RUN pnpm build
 
 
