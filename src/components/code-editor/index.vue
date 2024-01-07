@@ -197,8 +197,6 @@ watch(
 		if (val === getVal()) {
 			return;
 		}
-		console.log('change');
-
 		setEditValue(val as string);
 	},
 	{ deep: true }
