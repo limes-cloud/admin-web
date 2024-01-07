@@ -30,12 +30,17 @@
 		</div>
 		<div v-if="form.server_id" class="hr" style="margin-top: 20px; margin-bottom: 10px">
 			<span class="icon"></span>
-			<span>配置信息</span>
+			<span>模板信息</span>
 		</div>
 		<div v-if="template?.id">
 			<div class="item">
 				<span class="label">当前版本</span>
-				<span class="value">{{ template?.version }}</span>
+				<span class="value">
+					{{ template?.version }}
+					<a-tooltip content="切换模板版本" position="top">
+						<span class="swap" @click="handleClickSwapTemplate"><icon-swap /></span>
+					</a-tooltip>
+				</span>
 			</div>
 			<div class="item">
 				<span class="label">创建时间</span>
@@ -54,25 +59,100 @@
 				{{ form?.server_id ? '暂无配置数据' : '请先选择服务' }}
 			</a-empty>
 		</div>
+
+		<a-modal
+			v-model:visible="templateVisible"
+			title="切换配置"
+			ok-text="确认切换"
+			:ok-button-props="{ disabled: curTempId == template?.id }"
+			width="900px"
+			:body-style="{ height: '500px', padding: '0' }"
+			unmount-on-close
+			@cancel="templateVisible = false"
+			@before-ok="handleSwitchTemplate"
+		>
+			<a-tabs
+				:default-active-key="template?.id"
+				direction="vertical"
+				destroy-on-hide
+				@change="
+					(key) => {
+						curTempId = key as number;
+					}
+				"
+			>
+				<a-tab-pane v-for="item in templateList" :key="item.id">
+					<template #title>
+						<div class="pane-title">
+							<div class="version">
+								版本号：{{ item.version }}
+								<a-tag v-if="template?.id === item.id" size="small" color="arcoblue">使用中</a-tag>
+							</div>
+							<a-tooltip :content="item.description">
+								<div class="description">版本描述：{{ item.description }}</div>
+							</a-tooltip>
+							<div class="version">提交时间：{{ $formatTime(item.created_at) }}</div>
+							<div class="version">
+								变更详情：
+								<span class="compare" @click="showCompareInfo(item)">
+									查看
+									<icon-right />
+								</span>
+							</div>
+						</div>
+					</template>
+					<CodeEditor
+						:value="item?.content"
+						:lang="item?.format"
+						:show-line="false"
+						:read-only="true"
+						:style="{
+							width: '100%',
+							height: '500px'
+						}"
+					></CodeEditor>
+				</a-tab-pane>
+			</a-tabs>
+		</a-modal>
+
+		<a-modal
+			v-model:visible="compareVisible"
+			title="变更详情"
+			width="900px"
+			unmount-on-close
+			:body-style="{ height: '500px', padding: '0' }"
+			@cancel="compareVisible = false"
+			@before-ok="compareVisible = false"
+		>
+			<Compare :data="compareData"></Compare>
+		</a-modal>
 	</div>
 </template>
 
 <script lang="ts" setup>
+import { onMounted, ref } from 'vue';
 import { pageServer } from '@/api/configure/server';
 import { Server } from '@/api/configure/types/server';
 import { Template } from '@/api/configure/types/template';
-import { onMounted, ref } from 'vue';
+import { pageTemplate, switchTemplate } from '@/api/configure/template';
+import { Message } from '@arco-design/web-vue';
+import Compare from './compare.vue';
 
-defineProps<{
+const props = defineProps<{
 	template?: Template;
 }>();
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'switch']);
 
 const form = ref<{
 	server_id?: number;
 }>({});
 const servers = ref<Server[]>([]);
 const current = ref<Server>();
+const templateVisible = ref(false);
+const templateList = ref<Template[]>([]);
+const curTempId = ref(props.template?.id);
+const compareVisible = ref(false);
+const compareData = ref([]);
 
 const search = async (val?: string) => {
 	const { data } = await pageServer({ page: 1, page_size: 10, keyword: val });
@@ -109,13 +189,63 @@ const change = (val: any) => {
 	emit('select', val);
 };
 
+const handleClickSwapTemplate = async () => {
+	const { data } = await pageTemplate({ page: 1, page_size: 15, server_id: form.value.server_id as number });
+	templateList.value = data.list;
+
+	templateVisible.value = true;
+};
+
+const handleSwitchTemplate = async () => {
+	await switchTemplate({ server_id: form.value.server_id as number, id: curTempId.value as number });
+	templateVisible.value = false;
+	Message.success('模板切换成功');
+	emit('switch');
+};
+
+const showCompareInfo = (item: Template) => {
+	if (!item.compare) {
+		Message.error('无变更信息');
+		return;
+	}
+	compareData.value = JSON.parse(item.compare);
+	compareVisible.value = true;
+};
+
 onMounted(() => {
 	search();
 });
 </script>
 
 <style scoped lang="less">
+.compare {
+	color: rgb(var(--arcoblue-6));
+}
+
+.arco-tabs-vertical {
+	height: 500px;
+}
+
+.pane-title {
+	width: 200px;
+	padding: 5px 0;
+	overflow: hidden;
+	font-size: 12px !important;
+
+	.description {
+		width: 100%;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+}
+
 .service {
+	.swap {
+		color: rgb(var(--arcoblue-6));
+		cursor: pointer;
+	}
+
 	.select-input {
 		width: 150px;
 		max-width: 150px;
@@ -135,7 +265,7 @@ onMounted(() => {
 	.hr {
 		display: flex;
 		align-items: center;
-		color: #666;
+		color: var(--color-text-2);
 		font-weight: 700;
 		font-size: 14px;
 
@@ -144,7 +274,7 @@ onMounted(() => {
 			width: 5px;
 			height: 16px;
 			margin-right: 10px;
-			background-color: #409eff;
+			background-color: rgb(var(--arcoblue-6));
 			border-radius: 4px;
 		}
 	}
@@ -160,13 +290,13 @@ onMounted(() => {
 			width: 55px;
 			min-width: 55px;
 			margin-right: 10px;
-			color: #666;
+			color: var(--color-text-2);
 			font-weight: 700;
 			white-space: nowrap;
 		}
 
 		.value {
-			color: #777;
+			color: var(--color-text-3);
 		}
 	}
 

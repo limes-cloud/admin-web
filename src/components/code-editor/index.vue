@@ -13,9 +13,12 @@
 import { onMounted, Ref, ref, toRaw, watch } from 'vue';
 import * as monaco from 'monaco-editor';
 import jsonYaml from 'js-yaml';
+import { useAppStore } from '@/store';
 import customTheme from './theme';
 
 customTheme();
+
+const appStore = useAppStore();
 const content = ref('');
 const emit = defineEmits(['change', 'changeLang']);
 const props = defineProps({
@@ -38,8 +41,7 @@ const props = defineProps({
 		default: true
 	},
 	theme: {
-		type: String,
-		default: 'vs-dark'
+		type: String
 	},
 	readOnly: {
 		type: Boolean,
@@ -51,6 +53,10 @@ const props = defineProps({
 const innerLang = ref(props.lang);
 const editor: Ref<HTMLDivElement | undefined> = ref(undefined);
 const monacoEditor: Ref<monaco.editor.IStandaloneCodeEditor | undefined> = ref(undefined);
+const editTheme = ref(props.theme);
+if (!editTheme.value) {
+	editTheme.value = `vs-${appStore.theme}`;
+}
 
 const getVal = () => {
 	if (monacoEditor.value) return toRaw(monacoEditor.value).getValue();
@@ -125,7 +131,7 @@ const initEditor = () => {
 		roundedSelection: false, // 选区是否有圆角
 		scrollBeyondLastLine: false, // 设置编辑器是否可以滚动到最后一行之后
 		readOnly: props.readOnly, // 是否为只读模式
-		theme: props.theme // props.theme // vs, hc-black, or vs-dark
+		theme: editTheme.value // props.theme // vs, hc-black, or vs-dark
 	});
 
 	monacoEditor.value?.getAction('editor.action.formatDocument')?.run();
@@ -144,6 +150,11 @@ const initEditor = () => {
 			}
 		});
 	}
+};
+
+const setEditTheme = (val: string) => {
+	const theme = `vs-${val}`;
+	monaco.editor.setTheme(theme);
 };
 
 const setEditValue = (val: string) => {
@@ -183,13 +194,21 @@ defineExpose({ setEditValue, setEditLang });
 watch(
 	() => props.value,
 	(val) => {
-		if (!val) {
-			val = '';
+		if (val === getVal()) {
+			return;
 		}
-		setEditValue(val);
-		content.value = val;
+		console.log('change');
+
+		setEditValue(val as string);
 	},
 	{ deep: true }
+);
+
+watch(
+	() => appStore.theme,
+	(val) => {
+		setEditTheme(val);
+	}
 );
 
 onMounted(() => {

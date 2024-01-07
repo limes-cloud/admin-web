@@ -156,8 +156,7 @@ export default {
 			max-width: 250px;
 			height: 100%;
 			padding: 10px 15px;
-			background: #fff;
-			border: 1px solid #f2f2fe;
+			background-color: var(--color-bg-2);
 			border-radius: 4px;
 		}
 
@@ -170,8 +169,7 @@ export default {
 			margin-right: 15px;
 			margin-left: 15px;
 			padding: 10px 15px;
-			background: #fff;
-			border: 1px solid #f2f2fe;
+			background-color: var(--color-bg-2);
 			border-radius: 4px;
 		}
 	}

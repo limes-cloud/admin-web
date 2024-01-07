@@ -37,7 +37,7 @@
 				<div v-for="(item, index) in resourceList" :key="index" class="item">
 					<div class="item-row">
 						<span class="label">字段</span>
-						<span style="color: #409eff">{{ item.keyword }}</span>
+						<span class="keyword">{{ item.keyword }}</span>
 					</div>
 					<div class="item-row">
 						<span class="label">说明</span>
@@ -79,7 +79,7 @@ const businessList = ref<Business[]>([]);
 const query = ref({ page: 1, page_size: 10, keyword: '' });
 
 const variableValue = (val: string) => {
-	return `{{${val}}}`;
+	return `\${${val}}`;
 };
 
 const handleGetResource = async () => {
@@ -137,7 +137,7 @@ watch(
 	.hr {
 		display: flex;
 		align-items: center;
-		color: #666;
+		color: var(--color-text-2);
 		font-weight: 700;
 		font-size: 14px;
 
@@ -146,7 +146,7 @@ watch(
 			width: 5px;
 			height: 16px;
 			margin-right: 10px;
-			background-color: #409eff;
+			background-color: rbga(--arcoblue);
 			border-radius: 4px;
 		}
 	}
@@ -178,7 +178,7 @@ watch(
 			margin-bottom: 15px;
 			padding: 10px 8px;
 			font-size: 13px;
-			border: 1px solid #f2f2f2;
+			border: 1px solid var(--color-border-1);
 			border-radius: 4px;
 
 			.copy {
@@ -203,12 +203,17 @@ watch(
 					display: block;
 					width: 30px;
 					min-width: 30px;
+					color: var(--color-text-1);
 					font-size: 12px;
 					white-space: nowrap;
 				}
 
+				.keyword {
+					color: rgb(var(--arcoblue-6));
+				}
+
 				.value {
-					color: #777;
+					color: var(--color-text-3);
 					font-size: 12px;
 				}
 			}

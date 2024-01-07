@@ -9,7 +9,7 @@
 				height: 'calc(100vh - ' + pageOhterHeight + 'px' + ')'
 			}"
 		>
-			<Left class="left" :template="template" @select="handleSelectServer"></Left>
+			<Left class="left" :template="template" @select="handleSelectServer" @switch="handleSwitchTemplate"></Left>
 			<Center :template="template" :envs="envs" class="center" @submit="handleTemplateSubmit" @sync="handleSyncConfig"></Center>
 			<Right :server-id="serverId" class="right"></Right>
 		</div>
@@ -21,12 +21,12 @@ import { useAppStore } from '@/store';
 import { ref } from 'vue';
 import { addTemplate, currentTemplate } from '@/api/configure/template';
 import { Message } from '@arco-design/web-vue';
-import { Template, addTemplateReq } from '@/api/configure/types/template';
+import { Template, AddTemplateReq } from '@/api/configure/types/template';
 import { syncConfigure } from '@/api/configure/configure';
 
 import { Env } from '@/api/configure/types/env';
 import { allEnv } from '@/api/configure/env';
-import { syncConfigureReq } from '@/api/configure/types/configure';
+import { SyncConfigureReq } from '@/api/configure/types/configure';
 import Left from './components/left.vue';
 import Center from './components/center.vue';
 import Right from './components/right.vue';
@@ -56,7 +56,7 @@ const handleSelectServer = (val: number) => {
 	getCurrentTemplate(val);
 };
 
-const handleTemplateSubmit = async (form: addTemplateReq) => {
+const handleTemplateSubmit = async (form: AddTemplateReq) => {
 	form.server_id = serverId.value;
 	await addTemplate(form);
 	getCurrentTemplate(form.server_id);
@@ -68,9 +68,13 @@ const getCurrentTemplate = async (id: number) => {
 	template.value = data;
 };
 
-const handleSyncConfig = async (data: syncConfigureReq) => {
+const handleSyncConfig = async (data: SyncConfigureReq) => {
 	await syncConfigure(data);
 	Message.success('配置同步成功');
+};
+
+const handleSwitchTemplate = () => {
+	getCurrentTemplate(serverId.value);
 };
 </script>
 
@@ -92,9 +96,7 @@ export default {
 		max-width: 250px;
 		height: 100%;
 		padding: 10px 15px;
-		background: #fff;
-		border: 1px solid #f2f2fe;
-		// box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+		background-color: var(--color-bg-2);
 		border-radius: 4px;
 	}
 
@@ -107,9 +109,7 @@ export default {
 		margin-right: 15px;
 		margin-left: 15px;
 		padding: 10px 15px;
-		background: #fff;
-		border: 1px solid #f2f2fe;
-		// box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+		background-color: var(--color-bg-2);
 		border-radius: 4px;
 	}
 
@@ -121,9 +121,7 @@ export default {
 		max-width: 250px;
 		height: 100%;
 		padding: 10px 15px;
-		background: #fff;
-		border: 1px solid #f2f2fe;
-		// box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+		background-color: var(--color-bg-2);
 		border-radius: 4px;
 	}
 }

@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor';
 
 const customTheme = () => {
-	monaco.editor.defineTheme('BlackTheme', {
+	monaco.editor.defineTheme('vs-light', {
 		base: 'vs',
 		inherit: true,
 		rules: [],
