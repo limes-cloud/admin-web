@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { PageDictReq, PageDictRes, Dict } from './types/dict';
 
+export function getDict(id: number) {
+	return axios.get<Dict>('/manager/v1/dict', { params: { id } });
+}
+
 export function pageDict(req: PageDictReq) {
 	return axios.get<PageDictRes>('/manager/v1/dicts', { params: { ...req } });
 }

@@ -13,8 +13,13 @@
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}
 			</template>
+
 			<template #updatedAt="{ record }">
 				{{ $formatTime(record.updated_at) }}
+			</template>
+
+			<template #type="{ record }">
+				{{ record.type == 'trends' ? '动态字典' : '静态字典' }}
 			</template>
 
 			<template #operations="{ record }">

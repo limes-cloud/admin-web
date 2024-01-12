@@ -29,11 +29,10 @@
 				</a-button>
 			</div> -->
 		</div>
-
 		<div class="edit">
 			<CodeEditor
 				ref="coder"
-				:value="submitTemplateForm?.content"
+				v-model="submitTemplateForm.content"
 				:lang="submitTemplateForm.format"
 				:show-line="false"
 				:switch-lang="true"
@@ -41,11 +40,6 @@
 					width: '100%',
 					height: '100%'
 				}"
-				@change="
-					(val:string) => {
-						submitTemplateForm.content = val;
-					}
-				"
 				@change-lang="
 					(val:string) => {
 						submitTemplateForm.format = val;
@@ -134,7 +128,7 @@
 import { parseTemplate, compareTemplate } from '@/api/configure/template';
 import { Env } from '@/api/configure/types/env';
 import { CompareTemplateInfo, Template } from '@/api/configure/types/template';
-import { watch, ref } from 'vue';
+import { watch, ref, reactive } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import { compareConfigure } from '@/api/configure/configure';
 import Compare from './compare.vue';
@@ -162,7 +156,7 @@ const descVisible = ref(false);
 const descFormRef = ref();
 const descForm = ref<{ description?: string }>({});
 
-const submitTemplateForm = ref({
+const submitTemplateForm = reactive({
 	description: '',
 	content: '',
 	format: 'json'
@@ -174,13 +168,13 @@ const content = ref('');
 const compareData = ref<CompareTemplateInfo[]>([]);
 
 const submitTemplate = async () => {
-	submitTemplateForm.value.description = descForm.value.description as string;
-	if (submitTemplateForm.value.format === 'json') {
-		submitTemplateForm.value.content = JSON.stringify(JSON.parse(submitTemplateForm.value.content));
+	submitTemplateForm.description = descForm.value.description as string;
+	if (submitTemplateForm.format === 'json') {
+		submitTemplateForm.content = JSON.stringify(JSON.parse(submitTemplateForm.content));
 	} else {
-		content.value = submitTemplateForm.value.content;
+		content.value = submitTemplateForm.content;
 	}
-	emit('submit', submitTemplateForm.value);
+	emit('submit', submitTemplateForm);
 	return true;
 };
 
@@ -196,8 +190,8 @@ const syncConfigure = () => {
 const handleCompareTemplate = async () => {
 	const { data } = await compareTemplate({
 		id: props.template?.id as number,
-		content: submitTemplateForm.value.content,
-		format: submitTemplateForm.value.format
+		content: submitTemplateForm.content,
+		format: submitTemplateForm.format
 	});
 	if (!data || !data.length) {
 		Message.error('模板不存在变更');
@@ -225,6 +219,7 @@ const handleSureCompare = () => {
 	compareVisible.value = false;
 	descForm.value.description = '';
 	descVisible.value = true;
+	return true;
 };
 
 const handleSubmit = async () => {
@@ -250,18 +245,14 @@ const handleClickSync = () => {
 	operator.value = SYNC_CONFIGURE;
 };
 
-// const handleClickSyncLog = () => {
-// 	// console.log('a');
-// };
-
 const handlePreviewTemplate = async () => {
 	const { data } = await parseTemplate({
 		env_keyword: envForm.value.env_keyword as string,
-		content: submitTemplateForm.value.content,
-		format: submitTemplateForm.value.format,
+		content: submitTemplateForm.content,
+		format: submitTemplateForm.format,
 		server_id: props.template?.server_id as number
 	});
-	if (submitTemplateForm.value.format === 'json') {
+	if (submitTemplateForm.format === 'json') {
 		content.value = JSON.stringify(JSON.parse(data.content), null, 3);
 	} else {
 		content.value = data.content;
@@ -289,8 +280,8 @@ watch(
 	() => props.template,
 	(val) => {
 		if (!val) return;
-		submitTemplateForm.value.content = val.content;
-		submitTemplateForm.value.format = val.format;
+		submitTemplateForm.content = val.content;
+		submitTemplateForm.format = val.format;
 		coder.value.setEditLang(val.format);
 	},
 	{ deep: true }

@@ -3,7 +3,14 @@
 		<Breadcrumb />
 		<a-card class="general-card">
 			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
+			<Tool
+				v-model:size="size"
+				v-model:columns="columns"
+				:type="dict.type"
+				@reload-value="getReloadValues"
+				@refresh="handleGet"
+				@add="handleToolAdd"
+			></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -21,6 +28,39 @@
 			></Table>
 			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
+
+		<a-modal
+			v-model:visible="reloadVisible"
+			title="变更详情"
+			width="600px"
+			unmount-on-close
+			:body-style="{ height: '400px', padding: '0' }"
+			@cancel="reloadVisible = false"
+			@before-ok="handleReloadValue"
+		>
+			<a-table
+				:columns="reloadValuecolumns"
+				:pagination="false"
+				:data="reloadValues"
+				:bordered="false"
+				:scroll="{
+					x: '100%',
+					y: '400px'
+				}"
+			>
+				<template #type="{ record }">
+					<a-tag v-if="record.type === 'add'" color="arcoblue">增加字段</a-tag>
+					<a-tag v-if="record.type === 'del'" color="red">删除字段</a-tag>
+					<a-tag v-if="record.type === 'update'" color="orange">修改字段</a-tag>
+				</template>
+				<template #old="{ record }">
+					<a-textarea readonly :model-value="record.old"></a-textarea>
+				</template>
+				<template #cur="{ record }">
+					<a-textarea readonly :model-value="record.cur"></a-textarea>
+				</template>
+			</a-table>
+		</a-modal>
 	</div>
 </template>
 
@@ -31,9 +71,11 @@ import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 
-import { pageDictValue, addDictValue, deleteDictValue, updateDictValue } from '@/api/manager/dict-value';
-import { PageDictValueReq, DictValue } from '@/api/manager/types/dict-value';
+import { pageDictValue, addDictValue, deleteDictValue, updateDictValue, loadDictValue, importDictValue } from '@/api/manager/dict-value';
+import { PageDictValueReq, DictValue, ImportDictValueData } from '@/api/manager/types/dict-value';
 import router from '@/router';
+import { getDict } from '@/api/manager/dict';
+import { Dict } from '@/api/manager/types/dict';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -49,8 +91,27 @@ const size = ref<TableSize>('medium');
 const total = ref(0);
 const searchForm = ref<PageDictValueReq>({
 	page: 1,
-	page_size: 10
+	page_size: 10,
+	dict_id: params.dict_id as unknown as number
 });
+const dict = ref<Dict>({ type: '' } as Dict);
+const reloadVisible = ref(false);
+const reloadValues = ref<ImportDictValueData[]>([]);
+
+const reloadValuecolumns = ref<TableCloumn[]>([
+	{
+		title: '标签',
+		dataIndex: 'label'
+	},
+	{
+		title: '值',
+		dataIndex: 'value'
+	},
+	{
+		title: '描述',
+		dataIndex: 'description'
+	}
+]);
 
 const columns = ref<TableCloumn[]>([
 	{
@@ -110,7 +171,14 @@ const handleGet = async () => {
 	}
 };
 
+// handleGet 处理查询
+const handleGetDict = async () => {
+	const { data } = await getDict(searchForm.value.dict_id);
+	dict.value = data;
+};
+
 handleGet();
+handleGetDict();
 
 // 处理查询
 const handleSearch = async (req: PageDictValueReq) => {
@@ -169,6 +237,75 @@ const handleTableUpdate = async (data: DictValue) => {
 const handleTableAdd = (id: number) => {
 	form.value = { id } as DictValue;
 	formRef.value.showAddDrawer();
+};
+
+const extractValues = (data: any, expression: string) => {
+	// 定义一个递归函数来处理嵌套的对象和数组
+	function recursiveExtract(obj: any, path: string[]): any[] {
+		return Object.keys(obj).reduce((acc: any, key: string) => {
+			const value = obj[key];
+			const newPath = path.concat(key);
+
+			if (Array.isArray(value)) {
+				return acc.concat(value.map((item) => recursiveExtract(item, newPath)));
+			}
+			if (typeof value === 'object' && value !== null) {
+				return acc.concat(recursiveExtract(value, newPath));
+			}
+			const finalPath = newPath.join('.');
+			if (finalPath === expression) {
+				return acc.concat({ [key]: value });
+			}
+			return acc;
+		}, []);
+	}
+
+	if (Array.isArray(data)) {
+		const result: any[][] = [];
+		data.forEach((item) => {
+			const rs = extractValues(item, expression);
+			result.push(...rs);
+		});
+		return result;
+	}
+	return recursiveExtract(data, []);
+
+	// 调用递归函数并返回结果
+};
+
+// getReloadValues 处理重新载入字典数据
+const getReloadValues = async () => {
+	const req = JSON.parse(dict.value.extra);
+	req.params = JSON.parse(req.params);
+	const { data } = await loadDictValue(req);
+
+	// 提取label
+	const labels = extractValues(data, req.label);
+	// 提取value
+	const values = extractValues(data, req.value);
+	// 提取value
+	const descriptions = extractValues(data, req.description);
+
+	// 组成新的数组
+	const dvs = [];
+	const len = labels.length;
+	for (let i = 0; i < len; i += 1) {
+		dvs.push({
+			label: labels[i][req.label],
+			value: values[i][req.value],
+			description: descriptions[i][req.description]
+		});
+	}
+
+	// 弹框提示
+	reloadValues.value = dvs as ImportDictValueData[];
+	reloadVisible.value = true;
+};
+
+const handleReloadValue = async () => {
+	const { data } = await importDictValue({ dict_id: searchForm.value.dict_id, list: reloadValues.value });
+	Message.success(`成功同步字典值${data.count}行`);
+	handleGet();
 };
 </script>
 

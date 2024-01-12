@@ -23,11 +23,11 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:dict:update'" color="orangered" @click="emit('update', record)">
+					<a-tag v-permission="'manager:dict:value:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
-					<template v-if="$hasPermission('manager:dict:delete')">
+					<template v-if="$hasPermission('manager:dict:value:delete')">
 						<a-popconfirm content="您确认删除此字典值" type="warning" @ok="emit('delete', record.id)">
 							<a-tag color="red">
 								<template #icon><icon-delete /></template>

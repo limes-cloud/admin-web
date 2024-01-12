@@ -1,5 +1,5 @@
 <template>
-	<a-row v-permission="'manager:dict:query'">
+	<a-row v-permission="'manager:dict:value:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">

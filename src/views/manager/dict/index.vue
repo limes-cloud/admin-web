@@ -19,7 +19,7 @@
 				@update="handleTableUpdate"
 				@delete="handleDelete"
 			></Table>
-			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :data="form" :menus="menus" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
 	</div>
 </template>
@@ -33,6 +33,8 @@ import { Message } from '@arco-design/web-vue';
 
 import { pageDict, addDict, deleteDict, updateDict } from '@/api/manager/dict';
 import { PageDictReq, Dict } from '@/api/manager/types/dict';
+import { getRoleMenuTree } from '@/api/manager/role-menu';
+import { Menu } from '@/api/manager/types/menu';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -49,6 +51,7 @@ const searchForm = ref<PageDictReq>({
 	page: 1,
 	page_size: 10
 });
+const menus = ref<Menu[]>([]);
 
 const columns = ref<TableCloumn[]>([
 	{
@@ -58,6 +61,11 @@ const columns = ref<TableCloumn[]>([
 	{
 		title: '字典关键词',
 		dataIndex: 'keyword'
+	},
+	{
+		title: '字典类型',
+		dataIndex: 'type',
+		slotName: 'type'
 	},
 	{
 		title: '字典描述',
@@ -96,7 +104,13 @@ const handleGet = async () => {
 	}
 };
 
+const handleGetMenu = async () => {
+	const { data } = await getRoleMenuTree();
+	menus.value = data;
+};
+
 handleGet();
+handleGetMenu();
 
 // 处理查询
 const handleSearch = async (req: PageDictReq) => {
@@ -126,6 +140,7 @@ const handleAdd = async (data: Dict) => {
 
 // 处理修改
 const handleUpdate = async (data: Dict) => {
+	data.extra = JSON.stringify(data.extra_info);
 	await updateDict(data);
 	handleGet();
 	Message.success('更新成功');
@@ -146,6 +161,9 @@ const handleToolAdd = () => {
 
 // 处理table点击更新
 const handleTableUpdate = async (data: Dict) => {
+	if (data.extra) {
+		data.extra_info = JSON.parse(data.extra);
+	}
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
