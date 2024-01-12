@@ -13,14 +13,7 @@
 					]"
 					:validate-trigger="['change', 'input']"
 				>
-					<CodeEditor
-						:id="String(item.id)"
-						:value="cloneForm[item.id]"
-						:style="{ width: '100%', height: '150px' }"
-						:show-folding="false"
-						:show-line="false"
-						@change="codeChange"
-					></CodeEditor>
+					<CodeEditor v-model="form[item.id]" :style="{ width: '100%', height: '150px' }" :show-folding="false" :show-line="false"></CodeEditor>
 				</a-form-item>
 			</template>
 		</a-form>
@@ -44,7 +37,7 @@ const props = defineProps<{
 }>();
 
 const form = ref<Record<string, string>>({});
-const cloneForm = ref<Record<string, string>>({});
+// const cloneForm = ref<Record<string, string>>({});
 
 const emit = defineEmits(['update']);
 
@@ -56,7 +49,6 @@ watch(
 		val.forEach((item) => {
 			form.value[item.environment_id] = item.values;
 		});
-		cloneForm.value = { ...form.value };
 	}
 );
 
@@ -93,9 +85,5 @@ const handleSubmit = async () => {
 	}
 	emit('update', [...list]);
 	return true;
-};
-
-const codeChange = (val: string, id: string) => {
-	form.value[id] = val;
 };
 </script>

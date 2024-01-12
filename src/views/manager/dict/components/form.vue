@@ -160,7 +160,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { Dict } from '@/api/manager/types/dict';
+import { Dict, DictExtra } from '@/api/manager/types/dict';
 import { TreeNodeData } from '@arco-design/web-vue/es/tree/interface';
 import { Menu } from '@/api/manager/types/menu';
 
@@ -173,12 +173,13 @@ const props = defineProps<{
 	menus: Menu[];
 }>();
 
-const form = ref({} as Dict);
+const form = ref({ extra_info: {} as DictExtra } as Dict);
 const emit = defineEmits(['add', 'update']);
 
 watch(
 	() => props.data,
 	(val) => {
+		if (!val || !Object.keys(val).length) return;
 		form.value = val;
 	}
 );

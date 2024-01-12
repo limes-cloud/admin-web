@@ -37,18 +37,7 @@
 					</template>
 
 					<template v-if="type === 'object'">
-						<CodeEditor
-							:id="String(item.id)"
-							:value="cloneForm[String(item.id)]"
-							:style="{ width: '100%', height: '150px' }"
-							:show-folding="false"
-							:show-line="false"
-							@change="
-								(val, id) => {
-									form[id] = val;
-								}
-							"
-						></CodeEditor>
+						<CodeEditor v-model="form[String(item.id)]" :style="{ width: '100%', height: '150px' }" :show-folding="false" :show-line="false"></CodeEditor>
 					</template>
 				</a-form-item>
 			</template>
@@ -71,7 +60,6 @@ const props = defineProps<{
 	envs: SelectOptionData[];
 }>();
 
-const cloneForm = ref<Record<string, any>>({});
 const form = ref<Record<string, any>>({});
 const emit = defineEmits(['update']);
 
@@ -91,7 +79,6 @@ watch(
 
 			form.value[String(item.environment_id)] = res;
 		});
-		cloneForm.value = { ...form.value };
 	}
 );
 

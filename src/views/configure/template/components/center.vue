@@ -2,7 +2,7 @@
 	<div class="configure">
 		<div class="header">
 			<div class="header-item">
-				<a-button v-permission="'configure:template:preview'" type="primary" status="success" :disabled="!props.template" @click="handleClickPreview">
+				<a-button v-permission="'configure:configure:preview'" type="primary" status="success" :disabled="!props.template" @click="handleClickPreview">
 					<template #icon><icon-brush /></template>
 					生成预览
 				</a-button>

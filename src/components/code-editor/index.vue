@@ -18,7 +18,6 @@ import customTheme from './theme';
 
 customTheme();
 const appStore = useAppStore();
-const content = ref('');
 
 const emit = defineEmits(['update:modelValue', 'change', 'changeLang']);
 const props = defineProps({
@@ -53,12 +52,27 @@ const props = defineProps({
 	id: String,
 	switchLang: Boolean
 });
+const content = ref();
 const innerLang = ref(props.lang);
 const editor: Ref<HTMLDivElement | undefined> = ref(undefined);
 const monacoEditor: Ref<monaco.editor.IStandaloneCodeEditor | undefined> = ref(undefined);
 const editTheme = ref(props.theme);
 if (!editTheme.value) {
 	editTheme.value = `vs-${appStore.theme}`;
+}
+
+if (props.value) {
+	content.value = props.value as string;
+}
+if (props.modelValue) {
+	content.value = props.modelValue as string;
+}
+if (props.lang === 'json') {
+	try {
+		content.value = JSON.stringify(JSON.parse(content.value), null, 4);
+	} catch (e) {
+		/* empty */
+	}
 }
 
 const getVal = () => {
@@ -95,7 +109,7 @@ const initEditor = () => {
 		glyphMargin: false,
 		selectOnLineNumbers: true,
 		language: props.lang,
-		value: props.modelValue ? props.modelValue : props.value,
+		value: content.value,
 		acceptSuggestionOnCommitCharacter: true, // 接受关于提交字符的建议
 		acceptSuggestionOnEnter: 'on', // 接受输入建议 "on" | "off" | "smart"
 		accessibilityPageSize: 10, // 辅助功能页面大小 Number 说明：控制编辑器中可由屏幕阅读器读出的行数。警告：这对大于默认值的数字具有性能含义。

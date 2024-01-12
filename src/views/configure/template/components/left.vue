@@ -37,8 +37,8 @@
 				<span class="label">当前版本</span>
 				<span class="value">
 					{{ template?.version }}
-					<a-tooltip v-permission="'configure:template:history'" content="切换模板版本" position="top">
-						<span class="swap" @click="handleClickSwapTemplate"><icon-swap /></span>
+					<a-tooltip content="切换模板版本" position="top">
+						<span v-permission="'configure:template:history'" class="swap" @click="handleClickSwapTemplate"><icon-swap /></span>
 					</a-tooltip>
 				</span>
 			</div>
