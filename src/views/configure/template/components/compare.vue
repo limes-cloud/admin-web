@@ -26,15 +26,14 @@
 </template>
 
 <script setup lang="ts">
-import { TableCloumn } from '@/types/global';
-import { TableData } from '@arco-design/web-vue';
+import { TableColumnData, TableData } from '@arco-design/web-vue';
 import { ref } from 'vue';
 
 defineProps<{
 	data: TableData[];
 }>();
 
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumnData[]>([
 	{
 		title: '变更类型',
 		dataIndex: 'type',
