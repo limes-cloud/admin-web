@@ -3,7 +3,7 @@ WORKDIR /app/
 
 # 节省构建时间
 ADD package.json /app/
-RUN npm config set registry http://mirrors.cloud.tencent.com/npm/
+RUN pnpm config set registry=https://registry.npmmirror.com/
 RUN pnpm install
 
 ADD . /app/
