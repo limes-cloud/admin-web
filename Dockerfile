@@ -3,14 +3,10 @@ WORKDIR /app/
 
 # 节省构建时间
 ADD package.json /app/
-
-# 设置 yarn 用淘宝源安装包
-RUN pnpm config set registry=https://registry.npmmirror.com/
+RUN npm config set registry http://mirrors.cloud.tencent.com/npm/
+RUN pnpm install
 
 ADD . /app/
-
-ENV NODE_OPTIONS=--max_old_space_size=4096
-RUN pnpm install
 RUN pnpm build
 
 
