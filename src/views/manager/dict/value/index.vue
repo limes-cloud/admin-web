@@ -287,7 +287,7 @@ const getReloadValues = async () => {
 	const descriptions = extractValues(data, req.description);
 
 	// 组成新的数组
-	const dvs = [];
+	const dvs: ImportDictValueData[] = [];
 	const len = labels.length;
 	for (let i = 0; i < len; i += 1) {
 		dvs.push({
@@ -298,7 +298,7 @@ const getReloadValues = async () => {
 	}
 
 	// 弹框提示
-	reloadValues.value = dvs as ImportDictValueData[];
+	reloadValues.value = dvs;
 	reloadVisible.value = true;
 };
 
