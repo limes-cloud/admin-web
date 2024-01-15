@@ -1,5 +1,12 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer
+		v-model:visible="visible"
+		:title="isAdd ? '新建' : '修改'"
+		width="380px"
+		unmount-on-close
+		@cancel="visible = false"
+		@before-ok="handleSubmit"
+	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="keyword"

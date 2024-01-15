@@ -40,13 +40,11 @@ class Parser {
 		this.routers = [];
 		this.permissions = new Map();
 		this.apiRouters = [];
-
 		// 循环获取应用路由
 		menus.forEach((menu) => {
 			// 获取指令/路由/首页
 			const routers: RouteRecordNormalized[] = [];
 			this.apiRouters = [];
-
 			this.handler([{ ...menu }], routers);
 
 			if (routers.length && routers[0].children.length) {
@@ -120,12 +118,12 @@ class Parser {
 						component = null;
 						break;
 					default:
-						if (!this.components[`/src/views/${menu.component}.vue`]) {
+						if (!this.components[`/src/views${menu.component}.vue`]) {
 							// eslint-disable-next-line no-console
-							console.error(`不存在组件：/src/views/${menu.component}.vue`);
+							console.error(`不存在组件：/src/views${menu.component}.vue`);
 							return;
 						}
-						component = () => this.components[`/src/views/${menu.component}.vue`]();
+						component = () => this.components[`/src/views${menu.component}.vue`]();
 				}
 
 				// 判断是否为api挂载的页面

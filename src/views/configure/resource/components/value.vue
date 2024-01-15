@@ -1,5 +1,5 @@
 <template>
-	<a-drawer v-model:visible="visible" title="变量值配置" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<a-drawer v-model:visible="visible" title="变量值配置" width="380px" unmount-on-close @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="vertical" auto-label-width>
 			<template v-for="(item, index) in envs" :key="index">
 				<a-form-item

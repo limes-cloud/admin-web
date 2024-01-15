@@ -219,6 +219,9 @@ watch(
 		if (val === getVal()) {
 			return;
 		}
+		if (!val) {
+			val = '';
+		}
 		setEditValue(val as string);
 	},
 	{ deep: true }

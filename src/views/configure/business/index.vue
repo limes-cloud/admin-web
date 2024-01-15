@@ -14,6 +14,7 @@
 					current: searchForm.page,
 					pageSize: searchForm.page_size
 				}"
+				@page-change="handlePageChange"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@delete="handleDelete"
@@ -28,7 +29,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { TableCloumn, TableSize } from '@/types/global';
+import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import { addBusiness, deleteBusiness, pageBusiness, updateBusiness } from '@/api/configure/business';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
@@ -186,6 +187,13 @@ const handleTableSet = (data: Business) => {
 
 const handleSearchSelect = (id: number) => {
 	searchForm.value.server_id = id;
+	handleGet();
+};
+
+// 处理页面变更
+const handlePageChange = async (page: Pagination) => {
+	searchForm.value.page = page.current;
+	searchForm.value.page_size = page.pageSize;
 	handleGet();
 };
 </script>

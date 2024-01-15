@@ -28,41 +28,46 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
-import { addServer, deleteServer, pageServer, updateServer } from '@/api/configure/server';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { PageServerReq, Server } from '@/api/configure/types/server';
+import { pageTask, getTask, addTask, deleteTask, updateTask } from '@/api/party-affairs/task';
+import { PageTaskReq, Task } from '@/api/party-affairs/types/task';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref<Server>({} as Server);
+const form = ref<Task>({} as Task);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<PageServerReq>({
+const searchForm = ref<PageTaskReq>({
 	page: 1,
 	page_size: 10
 });
+
 const columns = ref<TableCloumn[]>([
 	{
-		title: '服务标志',
-		dataIndex: 'keyword',
-		slotName: 'keyword'
+		title: '任务标题',
+		dataIndex: 'title'
 	},
 	{
-		title: '服务名称',
-		dataIndex: 'name',
-		slotName: 'name'
+		title: '开始时间',
+		dataIndex: 'start',
+		slotName: 'start'
 	},
 	{
-		title: '服务描述',
-		dataIndex: 'description',
-		slotName: 'description'
+		title: '结束时间',
+		dataIndex: 'end',
+		slotName: 'end'
+	},
+	{
+		title: '结束时间',
+		dataIndex: 'is_update',
+		slotName: 'isUpdate'
 	},
 	{
 		title: '创建时间',
@@ -77,7 +82,9 @@ const columns = ref<TableCloumn[]>([
 	{
 		title: '操作',
 		dataIndex: 'operations',
-		slotName: 'operations'
+		slotName: 'operations',
+		fixed: 'right',
+		width: 100
 	}
 ]);
 
@@ -85,8 +92,8 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageServer(searchForm.value);
-		tableData.value = data.list;
+		const { data } = await pageTask(searchForm.value);
+		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
 		setLoading(false);
@@ -95,54 +102,16 @@ const handleGet = async () => {
 
 handleGet();
 
-// 处理新增
-const handleAdd = async (data: Server) => {
-	await addServer(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Server) => {
-	await updateServer(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteServer(id);
-	handleGet();
-	Message.success('删除成功');
-};
-
 // 处理查询
-const handleSearch = async (req: PageServerReq) => {
+const handleSearch = async (req: PageTaskReq) => {
 	const pageSize = searchForm.value.page_size;
 	searchForm.value = {
 		...req,
 		page: 1,
 		page_size: pageSize
 	};
+
 	handleGet();
-};
-
-//  处理tool按钮新建
-const handleToolAdd = () => {
-	form.value = {} as Server;
-	formRef.value.showAddDrawer();
-};
-
-// 处理table点击更新
-const handleTableUpdate = (data: Server) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
-};
-
-// 处理table点击添加
-const handleTableAdd = (id: number) => {
-	form.value = {} as Server;
-	formRef.value.showAddDrawer();
 };
 
 // 处理页面变更
@@ -151,10 +120,50 @@ const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page_size = page.pageSize;
 	handleGet();
 };
+
+// 处理新增
+const handleAdd = async (data: Task) => {
+	await addTask(data);
+	handleGet();
+	Message.success('创建成功');
+};
+
+// 处理修改
+const handleUpdate = async (data: Task) => {
+	await updateTask(data);
+	handleGet();
+	Message.success('更新成功');
+};
+
+// 处理数据删除
+const handleDelete = async (id: number) => {
+	await deleteTask(id);
+	handleGet();
+	Message.success('删除成功');
+};
+
+//  处理tool按钮新建
+const handleToolAdd = () => {
+	form.value = {} as Task;
+	formRef.value.showAddDrawer();
+};
+
+// 处理table点击更新
+const handleTableUpdate = async (task: Task) => {
+	const { data } = await getTask(task.id);
+	form.value = { ...data };
+	formRef.value.showUpdateDrawer();
+};
+
+// 处理table点击添加
+const handleTableAdd = (id: number) => {
+	form.value = { id } as Task;
+	formRef.value.showAddDrawer();
+};
 </script>
 
 <script lang="ts">
 export default {
-	name: 'ManagerServer'
+	name: 'ManagerTask'
 };
 </script>
