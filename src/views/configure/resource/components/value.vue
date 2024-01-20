@@ -47,7 +47,7 @@ watch(
 		if (!val) return;
 		form.value = {};
 		val.forEach((item) => {
-			form.value[item.environment_id] = item.values;
+			form.value[item.env_id] = item.value;
 		});
 	}
 );
@@ -74,9 +74,8 @@ const handleSubmit = async () => {
 		props.envs.forEach((item) => {
 			const content = JSON.stringify(JSON.parse(form.value[item.id]));
 			list.push({
-				env_keyword: item.keyword,
-				environment_id: item.id,
-				values: JSON.stringify(JSON.parse(content))
+				env_id: item.id,
+				value: JSON.stringify(JSON.parse(content))
 			});
 		});
 	} catch (error) {

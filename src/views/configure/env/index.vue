@@ -80,7 +80,7 @@ const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await allEnv();
-		tableData.value = data;
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}

@@ -100,13 +100,13 @@ const columns = ref<TableCloumn[]>([
 // handleGetBusinessEnvs 查询所有的环境
 const handleGetBusinessEnvs = async () => {
 	const { data } = await allEnv();
-	envs.value = data;
+	envs.value = data.list;
 };
 
 // handleGet 处理查询指定变量的所有值
 const handleGetBusinessValues = async (id: number) => {
 	const { data } = await allBusinessValue(id);
-	values.value = data;
+	values.value = data.list;
 };
 
 // handleGet 处理查询

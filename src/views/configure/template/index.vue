@@ -46,7 +46,7 @@ if (appStore.tabBar) {
 // handleGet 处理查询
 const handleGetEnv = async () => {
 	const { data } = await allEnv();
-	envs.value = data;
+	envs.value = data.list;
 };
 
 handleGetEnv();

@@ -105,7 +105,7 @@ const columns = ref<TableCloumn[]>([
 // handleGetResourceEnvs 查询所有的环境
 const handleGetResourceEnvs = async () => {
 	const { data } = await allEnv();
-	envs.value = data;
+	envs.value = data.list;
 };
 
 // handleGet 处理查询指定资源的所有值
@@ -117,7 +117,7 @@ const handleGetResourceValues = async (id: number) => {
 // handleGetResourceServers 查询指定资源的所属服务
 const handleGetResourceServers = async (id: number) => {
 	const { data } = await allResourceServer(id);
-	servers.value = data;
+	servers.value = data.list;
 };
 
 // handleGet 处理查询

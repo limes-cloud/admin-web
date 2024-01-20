@@ -8,7 +8,8 @@ import {
 	PageTemplateRes,
 	SwitchTemplateReq,
 	CompareTemplateReq,
-	CompareTemplateInfo
+	CompareTemplateInfo,
+	CompareTemplateRes
 } from './types/template';
 
 export function currentTemplate(id: number) {
@@ -26,7 +27,7 @@ export function addTemplate(req: AddTemplateReq) {
 }
 
 export function parseTemplate(req: ParseTemplateReq) {
-	return axios.post<ParseTemplateRes>(`/configure/v1/template/preview/${req.env_keyword}`, req);
+	return axios.post<ParseTemplateRes>(`/configure/v1/template/preview`, req);
 }
 
 export function pageTemplate(req: PageTemplateReq) {
@@ -36,7 +37,7 @@ export function pageTemplate(req: PageTemplateReq) {
 }
 
 export function compareTemplate(req: CompareTemplateReq) {
-	return axios.post<CompareTemplateInfo[]>('/configure/v1/template/compare', req);
+	return axios.post<CompareTemplateRes>('/configure/v1/template/compare', req);
 }
 
 export default null;

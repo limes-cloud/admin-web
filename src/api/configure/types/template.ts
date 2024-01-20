@@ -22,9 +22,9 @@ export interface AddTemplateReq {
 }
 
 export interface ParseTemplateReq {
-	env_keyword: string;
 	content: string;
 	format: string;
+	env_id: number;
 	server_id: number;
 }
 
@@ -54,4 +54,8 @@ export interface CompareTemplateInfo {
 	key: string;
 	old: string;
 	cur: string;
+}
+
+export interface CompareTemplateRes {
+	list: CompareTemplateInfo[];
 }

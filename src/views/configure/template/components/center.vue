@@ -51,7 +51,7 @@
 		<a-modal v-model:visible="envVisible" simple title="请选择环境" @cancel="envVisible = false" @before-ok="handleChooseEnv">
 			<a-form ref="envFormRef" :model="envForm" layout="vertical">
 				<a-form-item
-					field="env_keyword"
+					field="env_id"
 					:label="'请选择需要' + envForm.title + '的环境'"
 					:rules="[
 						{
@@ -61,9 +61,9 @@
 					]"
 					:validate-trigger="['change', 'input']"
 				>
-					<a-select v-model="envForm.env_keyword" allow-search placeholder="请选择">
+					<a-select v-model="envForm.env_id" allow-search placeholder="请选择">
 						<template v-for="(item, index) in envs" :key="index">
-							<a-option :value="item.keyword">{{ item.name }}</a-option>
+							<a-option :value="item.id">{{ item.name }}</a-option>
 						</template>
 					</a-select>
 				</a-form-item>
@@ -150,7 +150,7 @@ const operator = ref('');
 
 const envVisible = ref(false);
 const envFormRef = ref();
-const envForm = ref<{ env_keyword?: string; title?: string }>({});
+const envForm = ref<{ env_id?: number; title?: string }>({});
 
 const descVisible = ref(false);
 const descFormRef = ref();
@@ -181,7 +181,7 @@ const submitTemplate = async () => {
 const syncConfigure = () => {
 	emit('sync', {
 		server_id: props.template?.server_id,
-		env_keyword: envForm.value.env_keyword,
+		env_id: envForm.value.env_id,
 		description: descForm.value.description
 	});
 	return true;
@@ -193,26 +193,26 @@ const handleCompareTemplate = async () => {
 		content: submitTemplateForm.content,
 		format: submitTemplateForm.format
 	});
-	if (!data || !data.length) {
+	if (!data.list.length) {
 		Message.error('模板不存在变更');
 		return;
 	}
 	operator.value = SUBMIT_TEMPLATE;
 	compareVisible.value = true;
-	compareData.value = data;
+	compareData.value = data.list;
 };
 
 const handleCompareConfigure = async () => {
 	const { data } = await compareConfigure({
 		server_id: props.template?.server_id as number,
-		env_keyword: envForm.value.env_keyword as string
+		env_id: envForm.value.env_id as number
 	});
-	if (!data || !data.length) {
+	if (!data.list.length) {
 		Message.error('配置不存在变更');
 		return;
 	}
 	compareVisible.value = true;
-	compareData.value = data;
+	compareData.value = data.list;
 };
 
 const handleSureCompare = () => {
@@ -233,23 +233,23 @@ const handleSubmit = async () => {
 
 const handleClickPreview = () => {
 	envVisible.value = true;
-	envForm.value.env_keyword = undefined;
+	envForm.value.env_id = undefined;
 	envForm.value.title = '预览';
 	operator.value = PREVIEW_CONFIGURE;
 };
 
 const handleClickSync = () => {
 	envVisible.value = true;
-	envForm.value.env_keyword = undefined;
+	envForm.value.env_id = undefined;
 	envForm.value.title = '同步';
 	operator.value = SYNC_CONFIGURE;
 };
 
 const handlePreviewTemplate = async () => {
 	const { data } = await parseTemplate({
-		env_keyword: envForm.value.env_keyword as string,
 		content: submitTemplateForm.content,
 		format: submitTemplateForm.format,
+		env_id: envForm.value.env_id as number,
 		server_id: props.template?.server_id as number
 	});
 	if (submitTemplateForm.format === 'json') {

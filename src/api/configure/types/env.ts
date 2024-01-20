@@ -7,3 +7,7 @@ export interface Env {
 	created_at: number;
 	updated_at: number;
 }
+
+export interface AllEnv {
+	list: Env[];
+}

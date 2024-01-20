@@ -1,4 +1,5 @@
 import { Resource } from './resource';
+import { Server } from './server';
 
 export interface PageServerResourceReq {
 	server_id: number;
@@ -10,4 +11,8 @@ export interface PageServerResourceReq {
 export interface PageServerResourceRes {
 	total: number;
 	list: Resource[];
+}
+
+export interface AllResourceServerRes {
+	list: Server[];
 }

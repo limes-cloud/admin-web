@@ -77,7 +77,7 @@ watch(
 				res = item.value === 'true';
 			}
 
-			form.value[String(item.environment_id)] = res;
+			form.value[String(item.env_id)] = res;
 		});
 	}
 );
@@ -104,20 +104,9 @@ const handleSubmit = async () => {
 		const value = form.value[String(item.id)];
 		list.push({
 			env_keyword: item.keyword,
-			environment_id: item.id,
+			env_id: item.id,
 			value: String(value)
 		});
-
-		// try {
-		//   const value = JSON.stringify(JSON.parse(form.value[String(item.id)]));
-		//   list.push({
-		//     env_keyword: item.keyword,
-		//     environment_id: item.id,
-		//     value,
-		//   });
-		// } catch (error) {
-		//   console.log(error);
-		// }
 	});
 	emit('update', [...list]);
 	return true;

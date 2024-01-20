@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { BusinessValue } from './types/business-value';
+import { AllBusinessValue, BusinessValue } from './types/business-value';
 
 export function allBusinessValue(id: number) {
-	return axios.get<BusinessValue[]>('/configure/v1/business/values', {
+	return axios.get<AllBusinessValue>('/configure/v1/business/values', {
 		params: { business_id: id }
 	});
 }
