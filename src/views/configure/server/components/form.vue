@@ -30,6 +30,22 @@
 			</a-form-item>
 
 			<a-form-item
+				field="is_business"
+				label="业务服务"
+				:rules="[
+					{
+						required: true,
+						message: '业务服务是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-radio-group v-model="form.is_business">
+					<a-radio :value="true">是</a-radio>
+					<a-radio :value="false">否</a-radio>
+				</a-radio-group>
+			</a-form-item>
+			<a-form-item
 				field="description"
 				label="服务描述"
 				:rules="[

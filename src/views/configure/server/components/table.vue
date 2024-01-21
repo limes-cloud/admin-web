@@ -10,6 +10,9 @@
 			:bordered="false"
 			:size="size"
 		>
+			<template #isBusiness="{ record }">
+				{{ record.is_business ? '是' : '否' }}
+			</template>
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}
 			</template>

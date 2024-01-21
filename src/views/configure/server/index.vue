@@ -60,6 +60,11 @@ const columns = ref<TableCloumn[]>([
 		slotName: 'name'
 	},
 	{
+		title: '是否业务服务',
+		dataIndex: 'is_business',
+		slotName: 'isBusiness'
+	},
+	{
 		title: '服务描述',
 		dataIndex: 'description',
 		slotName: 'description'
