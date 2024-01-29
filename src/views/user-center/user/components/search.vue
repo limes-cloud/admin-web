@@ -39,11 +39,6 @@
 							<a-input v-model="form.email" allow-clear placeholder="请输入用户邮箱" />
 						</a-form-item>
 					</a-col>
-					<a-col :span="8">
-						<a-form-item field="id_card" label="身份证号">
-							<a-input v-model="form.id_card" allow-clear placeholder="请输入身份证号" />
-						</a-form-item>
-					</a-col>
 				</a-row>
 			</a-form>
 		</a-col>

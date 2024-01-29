@@ -14,23 +14,21 @@ const loading = computed(() => appStore.isLoading);
 const title = computed(() => appStore.loadingTitle);
 </script>
 
-//
 <style lang="less" scoped>
-// .loadingBox {
-// 	position: fixed;
-// 	top: 0;
-// 	left: 0;
-// 	z-index: 1000000;
-// 	background-color: rgba(0, 0, 0, 0.4);
-// 	width: 100%;
-// 	height: 100%;
-// 	display: flex;
-// 	align-items: center;
-// 	justify-content: center;
-// 	text-align: center;
-// 	overflow: hidden;
-// }
-//
+.loadingBox {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1000000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	text-align: center;
+	background-color: rgb(0 0 0 / 40%);
+}
 </style>
 
 <style lang="less">

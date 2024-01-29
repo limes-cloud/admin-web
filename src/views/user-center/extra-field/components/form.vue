@@ -3,51 +3,73 @@
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="name"
-				label="服务名称"
+				label="字段名称"
 				:rules="[
 					{
 						required: true,
-						message: '服务名称是必填项'
+						message: '字段名称是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.name" placeholder="请输入服务名称" allow-clear />
+				<a-input v-model="form.name" placeholder="请输入字段名称" allow-clear />
 			</a-form-item>
 
 			<a-form-item
 				field="keyword"
-				label="服务标志"
+				label="字段标识"
 				:rules="[
 					{
 						required: true,
-						message: '服务标志是必填项'
+						message: '字段标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入服务标志" allow-clear />
+				<a-input v-model="form.keyword" placeholder="请输入字段标识" allow-clear />
+			</a-form-item>
+
+			<a-form-item
+				field="type"
+				label="字段类型"
+				:rules="[
+					{
+						required: true,
+						message: '字段类型是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-select
+					v-model="form.type"
+					placeholder="请选择字段类型"
+					:scrollbar="true"
+					:options="types"
+					allow-search
+					:field-names="{ value: 'type', label: 'name' }"
+				></a-select>
 			</a-form-item>
 
 			<a-form-item
 				field="description"
-				label="服务描述"
+				label="字段描述"
 				:rules="[
 					{
 						required: true,
-						message: '服务描述是必填项'
+						message: '字段描述是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-textarea v-model="form.description" placeholder="请输入服务描述" allow-clear />
+				<a-textarea v-model="form.description" placeholder="请输入字段描述" allow-clear />
 			</a-form-item>
 		</a-form>
 	</a-drawer>
 </template>
 
 <script lang="ts" setup>
-import { Server } from '@/api/configure/types/server';
+import { ExtraField, ExtraFieldType } from '@/api/user-center/types/extra-field';
+import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import { ref, watch } from 'vue';
 
 const formRef = ref();
@@ -55,7 +77,9 @@ const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: Server;
+	data: ExtraField;
+	channels: SelectOptionData[];
+	types: ExtraFieldType[];
 }>();
 
 const form = ref({ ...props.data });

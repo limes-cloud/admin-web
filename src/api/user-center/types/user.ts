@@ -1,6 +1,30 @@
-import { S } from 'mockjs';
-import { UserApp } from './user-app';
-import { UserExtra } from './user-extra';
+import { Resource } from '@/types/global';
+
+export interface App {
+	id: number;
+	logo: string;
+	name: string;
+	registry_at: number;
+	login_at: number;
+	resource: Resource;
+}
+
+export interface Channel {
+	id: number;
+	logo: string;
+	name: string;
+	auth_at: number;
+	login_at: number;
+	resource: Resource;
+}
+
+export interface Extra {
+	keyword: string;
+	name: string;
+	type: string;
+	type_name: string;
+	value: any;
+}
 
 export interface User {
 	id: number;
@@ -17,8 +41,10 @@ export interface User {
 	form: string;
 	created_at: number;
 	updated_at: number;
-	user_apps: UserApp[];
-	user_extras: UserExtra[];
+	apps: App[];
+	channels: Channel[];
+	extra: Record<string, any>;
+	extra_list: Extra[];
 }
 
 export interface PageUserReq {

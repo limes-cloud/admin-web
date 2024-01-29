@@ -36,6 +36,7 @@ import { PrepareUploadRes } from '@/api/resource/types/file';
 import cryptoJs from 'crypto-js';
 import { AxiosResponse } from 'axios';
 import { formatUrl } from '@/utils/url';
+import { Message } from '@arco-design/web-vue';
 
 const emit = defineEmits(['change']);
 const appStore = useAppStore();
@@ -96,6 +97,9 @@ const props = defineProps({
 	},
 	width: {
 		type: String
+	},
+	fileSize: {
+		type: Number
 	},
 	autoUpload: Boolean
 });
@@ -268,6 +272,12 @@ const customRequest = (options: RequestOption) => {
 	const controller = new AbortController();
 	(async function requestWrap() {
 		const { onError, onSuccess, onProgress, fileItem } = options;
+		if (props.fileSize && fileItem.file && (fileItem.file?.size as number) / 1024 > props.fileSize) {
+			onError('overflow max size');
+			Message.error(`文件不能超过${props.fileSize}kb`);
+			appStore.stopLoading();
+			return;
+		}
 		try {
 			onProgress(0);
 			// 获取文件二进制数据
@@ -288,6 +298,7 @@ const customRequest = (options: RequestOption) => {
 			}
 		} catch (error) {
 			onError(error);
+			Message.error('文件上传失败');
 		} finally {
 			appStore.stopLoading();
 		}
@@ -304,15 +315,15 @@ const customRequest = (options: RequestOption) => {
 <style lang="less">
 .upload {
 	.arco-upload-list-picture {
-		width: v-bind(domWidth);
-		height: v-bind(domHeight);
-		margin-right: v-bind(domMargin);
-		margin-bottom: v-bind(domMargin);
-		line-height: v-bind(domHeight);
+		width: v-bind(domwidth);
+		height: v-bind(domheight);
+		margin-right: v-bind(dommargin);
+		margin-bottom: v-bind(dommargin);
+		line-height: v-bind(domheight);
 	}
 
 	.arco-upload-list-picture-mask {
-		line-height: v-bind(domHeight);
+		line-height: v-bind(domheight);
 	}
 }
 </style>
@@ -324,8 +335,8 @@ const customRequest = (options: RequestOption) => {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	width: v-bind(domWidth);
-	height: v-bind(domHeight);
+	width: v-bind(domwidth);
+	height: v-bind(domheight);
 	background-color: #f4f5f7;
 	border-radius: 2px;
 

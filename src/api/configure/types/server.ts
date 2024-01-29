@@ -1,18 +1,20 @@
+import { Resource } from '@/types/global';
+
 export interface Server {
 	id: number;
 	keyword: string;
 	name: string;
-	is_business: boolean;
+	logo: string;
 	fullName: string;
 	description: string;
 	created_at: number;
 	updated_at: number;
+	resource: Resource;
 }
 
 export interface PageServerReq {
 	keyword?: string;
 	name?: string;
-	is_business?: boolean;
 	page: number;
 	page_size: number;
 }

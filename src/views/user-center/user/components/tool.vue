@@ -1,12 +1,14 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'uc:user:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建用户
-			</a-button>
+			<a-space>
+				<a-button v-permission="'uc:user:add'" type="primary" @click="emit('add')">
+					<template #icon>
+						<icon-plus />
+					</template>
+					新建用户
+				</a-button>
+			</a-space>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -61,7 +63,7 @@ const props = defineProps<{
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'extra']);
 const cloneColumns = ref<TableCloumn[]>([]);
 const showColumns = ref<TableCloumn[]>([]);
 

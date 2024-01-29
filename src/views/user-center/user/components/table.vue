@@ -59,33 +59,42 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<!-- <a-tag v-permission="'manager:user:update'" color="arcoblue" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						应用
-					</a-tag> -->
-
 					<a-tag v-permission="'uc:user:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
 
-					<template v-if="$hasPermission('uc:user:offline')">
-						<a-popconfirm content="您确认要下线此用户" type="warning" @ok="emit('offline', record.id)">
-							<a-tag color="red">
-								<template #icon><icon-poweroff /></template>
-								下线
-							</a-tag>
-						</a-popconfirm>
-					</template>
+					<a-popconfirm content="您确认删除此用户" type="warning" @ok="emit('delete', record.id)">
+						<a-tag v-permission="'uc:user:delete'" color="red">
+							<template #icon><icon-delete /></template>
+							删除
+						</a-tag>
+					</a-popconfirm>
 
-					<template v-if="$hasPermission('uc:user:delete')">
-						<a-popconfirm content="您确认删除此用户" type="warning" @ok="emit('delete', record.id)">
-							<a-tag color="red">
-								<template #icon><icon-delete /></template>
-								删除
-							</a-tag>
-						</a-popconfirm>
-					</template>
+					<a-dropdown position="br">
+						<a-tag v-if="$hasPermission('uc:user:offline') || $hasPermission('uc:user:more')" color="orangered">
+							<template #icon><icon-more /></template>
+							更多
+						</a-tag>
+						<template #content>
+							<a-doption>
+								<!--  more-->
+								<a-tag v-permission="'uc:user:offline'" color="arcoblue" @click.stop="emit('more', record.id)">
+									<template #icon><icon-more /></template>
+									详细信息
+								</a-tag>
+							</a-doption>
+
+							<a-doption>
+								<a-popconfirm content="您确认要下线此用户" type="warning" @ok="emit('offline', record.id)">
+									<a-tag v-permission="'uc:user:offline'" color="red" @click.stop>
+										<template #icon><icon-poweroff /></template>
+										下线用户
+									</a-tag>
+								</a-popconfirm>
+							</a-doption>
+						</template>
+					</a-dropdown>
 				</a-space>
 			</template>
 		</a-table>
@@ -100,6 +109,8 @@
 			@page-size-change="pageSizeChange"
 		/>
 	</a-space>
+
+	<a-modal v-model:visible="visible" simple title="用户详细信息" @cancel="visible = false"></a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -109,7 +120,7 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
 import { User } from '@/api/user-center/types/user';
 
-const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable', 'offline', 'resetPassword']);
+const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable', 'offline', 'more']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
@@ -124,6 +135,8 @@ const page = ref({
 	current: 1,
 	pageSize: 10
 });
+
+const visible = ref(false);
 
 watch(
 	() => props.pagination,

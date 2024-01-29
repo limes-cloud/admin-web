@@ -7,13 +7,12 @@
 // 	created_at: number;
 // }
 
-export interface AddUserExtraReq {
+export interface AddUserChannelReq {
 	user_id: number;
-	keyword: string;
-	value: any;
+	app_id: number;
 }
 
-export interface DeleteUserExtraReq {
+export interface DeleteUserChannelReq {
 	user_id: number;
-	keyword: string;
+	app_id: number;
 }

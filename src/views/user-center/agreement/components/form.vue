@@ -2,80 +2,69 @@
 	<a-drawer
 		v-model:visible="visible"
 		:title="isAdd ? '新建' : '修改'"
-		width="380px"
+		width="580px"
 		unmount-on-close
 		@cancel="visible = false"
 		@before-ok="handleSubmit"
 	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="real_name"
-				label="用户姓名"
+				field="name"
+				label="协议名称"
 				:rules="[
 					{
 						required: true,
-						message: '用户姓名是必填项'
+						message: '协议名称是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.real_name" allow-clear placeholder="请输入用户姓名" />
+				<a-input v-model="form.name" allow-clear placeholder="请输入协议名称" />
 			</a-form-item>
 
 			<a-form-item
-				field="gender"
-				label="用户性别"
+				field="status"
+				label="协议状态"
 				:rules="[
 					{
 						required: true,
-						message: '用户性别是必填项'
+						message: '协议状态是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-radio-group v-model="form.gender">
-					<template v-for="(val, key) in $genderList" :key="key">
-						<a-radio :value="key">{{ val }}</a-radio>
-					</template>
+				<a-radio-group v-model="form.status">
+					<a-radio :value="true">启用</a-radio>
+					<a-radio :value="false">禁用</a-radio>
 				</a-radio-group>
 			</a-form-item>
 
 			<a-form-item
-				field="phone"
-				label="用户电话"
+				field="description"
+				label="协议描述"
 				:rules="[
 					{
-						required: false,
-						validator: (value, cb) => {
-							if (!value) {
-								cb();
-								return;
-							}
-							var myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
-							if (!myreg.test(value)) {
-								cb('错误的电话格式');
-							} else {
-								cb();
-							}
-						}
+						required: true,
+						message: '协议描述是必填项'
 					}
 				]"
+				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.phone" allow-clear placeholder="请输入用户电话" />
+				<a-textarea v-model="form.description" allow-clear placeholder="请输入协议描述" />
 			</a-form-item>
 
 			<a-form-item
-				field="email"
-				label="用户邮箱"
+				field="content"
+				label="协议内容"
 				:rules="[
 					{
-						required: false,
-						type: 'email',
-						message: '错误的邮箱格式'
+						required: true,
+						message: '协议内容是必填项'
 					}
 				]"
+				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.email" allow-clear placeholder="请输入用户邮箱" />
+				<Tinymce v-model="form.content" allow-clear placeholder="请输入协议内容" />
 			</a-form-item>
 		</a-form>
 	</a-drawer>
@@ -83,18 +72,17 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { User } from '@/api/user-center/types/user';
-import { Message } from '@arco-design/web-vue';
+import { Agreement } from '@/api/user-center/types/agreement';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: User;
+	data: Agreement;
 }>();
 
-const form = ref({ form: 'user-center' } as User);
+const form = ref({} as Agreement);
 const emit = defineEmits(['add', 'update']);
 
 watch(
@@ -109,7 +97,7 @@ const showAddDrawer = () => {
 	isAdd.value = true;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = async () => {
 	visible.value = true;
 	isAdd.value = false;
 };
@@ -123,11 +111,6 @@ defineExpose({ showAddDrawer, showUpdateDrawer, closeDrawer });
 const handleSubmit = async () => {
 	const isError = await formRef.value.validate();
 	if (isError) {
-		return false;
-	}
-
-	if (!form.value.phone && !form.value.email) {
-		Message.error('邮箱和手机号至少填写一个');
 		return false;
 	}
 

@@ -21,8 +21,12 @@
 				@disable="handleDisable"
 				@enable="handleEnable"
 				@offline="handleOffline"
+				@more="handleMore"
 			></Table>
 			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<More ref="moreRef" :user="curUser" @add-app="handleAddUserApp" @delete-app="handleDeleteUserApp"></More>
+			<!-- @add-channel="handleAddUserApp"
+				@delete-channel="handleDeleteUserApp" -->
 		</a-card>
 	</div>
 </template>
@@ -35,20 +39,26 @@ import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 
 import { PageUserReq, User } from '@/api/user-center/types/user';
-import { pageUser, addUser, deleteUser, updateUser, disableUser, enableUser, offlineUser } from '@/api/user-center/user';
+import { getUser, pageUser, addUser, deleteUser, updateUser, disableUser, enableUser, offlineUser } from '@/api/user-center/user';
 
+import { AddUserAppReq, DeleteUserAppReq } from '@/api/user-center/types/user-app';
+import { addUserApp, deleteUserApp } from '@/api/user-center/user-app';
+// import { AddUserChannelReq, DeleteUserChannelReq } from '@/api/user-center/types/user-channel';
+// import { addUserChannel, deleteUserChannel } from '@/api/user-center/user-channel';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import More from './components/more.vue';
 
+const moreRef = ref();
 const formRef = ref();
 const form = ref<User>({} as User);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-
+const curUser = ref<User>({} as User);
 const total = ref(0);
 const searchForm = ref<PageUserReq>({
 	page: 1,
@@ -75,21 +85,16 @@ const columns = ref<TableCloumn[]>([
 		slotName: 'gender'
 	},
 	{
+		title: '账户',
+		dataIndex: 'username'
+	},
+	{
 		title: '电话',
 		dataIndex: 'phone'
 	},
 	{
 		title: '邮箱',
 		dataIndex: 'email'
-	},
-	{
-		title: '账户',
-		dataIndex: 'username'
-	},
-	{
-		title: '身份证',
-		dataIndex: 'id_card',
-		slotName: 'id_card'
 	},
 	{
 		title: '用户状态',
@@ -119,7 +124,7 @@ const columns = ref<TableCloumn[]>([
 		dataIndex: 'operations',
 		slotName: 'operations',
 		fixed: 'right',
-		width: 300
+		width: 230
 	}
 ]);
 
@@ -222,6 +227,54 @@ const handleTableAdd = (id: number) => {
 	form.value = { id } as User;
 	formRef.value.showAddDrawer();
 };
+
+const handleMore = async (id: number) => {
+	const { data } = await await getUser(id);
+	curUser.value = data;
+	moreRef.value.show();
+};
+
+const handleAddUserApp = async (ua: AddUserAppReq) => {
+	await addUserApp(ua);
+	const { data } = await await getUser(ua.user_id);
+	curUser.value = data;
+	Message.success('添加成功');
+};
+
+const handleDeleteUserApp = async (ua: DeleteUserAppReq) => {
+	await deleteUserApp(ua);
+	const { data } = await await getUser(ua.user_id);
+	curUser.value = data;
+	Message.success('删除成功');
+};
+
+// const handleAddUserChannel = async (uc: AddUserChannelReq) => {
+// 	await addUserChannel(uc);
+// 	const { data } = await await getUser(uc.user_id);
+// 	curUser.value = data;
+// 	Message.success('添加成功');
+// };
+
+// const handleDeleteUserChannel = async (uc: DeleteUserChannelReq) => {
+// 	await deleteUserChannel(uc);
+// 	const { data } = await await getUser(uc.user_id);
+// 	curUser.value = data;
+// 	Message.success('删除成功');
+// };
+
+// const handleAddUserExtra = async (ua: AddUserAppReq) => {
+// 	await addUserApp(ua);
+// 	const { data } = await await getUser(ua.user_id);
+// 	curUser.value = data;
+// 	Message.success('添加成功');
+// };
+
+// const handleDeleteUserExtra = async (ua: DeleteUserAppReq) => {
+// 	await deleteUserApp(ua);
+// 	const { data } = await await getUser(ua.user_id);
+// 	curUser.value = data;
+// 	Message.success('删除成功');
+// };
 </script>
 
 <script lang="ts">

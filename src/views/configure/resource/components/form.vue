@@ -139,6 +139,7 @@ watch(
 watch(
 	() => props.servers,
 	(val) => {
+		innerServers.value = [];
 		val.forEach((item) => {
 			if (!form.value.servers) form.value.servers = [];
 
