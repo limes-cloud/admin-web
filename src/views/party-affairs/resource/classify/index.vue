@@ -66,7 +66,7 @@ const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await allResourceClassify();
-		tableData.value = data;
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}

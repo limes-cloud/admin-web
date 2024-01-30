@@ -1,4 +1,4 @@
-import { User } from './user';
+import { User } from '@/api/user-center/types/user';
 
 export interface TaskValue {
 	id: number;

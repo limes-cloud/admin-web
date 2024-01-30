@@ -91,7 +91,7 @@ const columns = ref<TableCloumn[]>([
 
 const handleGetClassifys = async () => {
 	const { data } = await allResourceClassify();
-	classifys.value = data;
+	classifys.value = data.list;
 };
 
 // handleGet 处理查询

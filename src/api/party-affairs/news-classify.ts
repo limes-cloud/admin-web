@@ -2,7 +2,7 @@ import axios from 'axios';
 import { UpdateNewsClassifyReq, NewsClassify, AddNewsClassifyReq } from './types/news-classify';
 
 export function allNewsClassify() {
-	return axios.get<NewsClassify[]>('/party-affairs/admin/v1/news/classify');
+	return axios.get<{ list: NewsClassify[] }>('/party-affairs/admin/v1/news/classify');
 }
 
 export function addNewsClassify(data: AddNewsClassifyReq) {

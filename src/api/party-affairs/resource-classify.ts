@@ -2,7 +2,7 @@ import axios from 'axios';
 import { UpdateResourceClassifyReq, ResourceClassify, AddResourceClassifyReq } from './types/resource-classify';
 
 export function allResourceClassify() {
-	return axios.get<ResourceClassify[]>('/party-affairs/admin/v1/resource/classify');
+	return axios.get<{ list: ResourceClassify[] }>('/party-affairs/admin/v1/resource/classify');
 }
 
 export function addResourceClassify(data: AddResourceClassifyReq) {
