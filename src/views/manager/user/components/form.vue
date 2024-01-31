@@ -237,6 +237,9 @@ const handleGetUserJobIds = async (id: number) => {
 
 const handlePreData = async () => {
 	searchJob();
+	if (isAdd.value) {
+		return;
+	}
 	const roleIds = await handleGetUserRoleIds(props.data.id);
 	const jobIds = await handleGetUserJobIds(props.data.id);
 	form.value.role_ids = roleIds;

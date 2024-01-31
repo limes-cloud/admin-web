@@ -19,7 +19,7 @@
 				@update="handleTableUpdate"
 				@delete="handleDelete"
 			></Table>
-			<Form ref="formRef" :data="form" :channels="channels" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :data="form" :extra-fields="extraFields" :channels="channels" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
 	</div>
 </template>
@@ -34,6 +34,8 @@ import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { PageAppReq, App } from '@/api/user-center/types/app';
 import { Channel } from '@/api/user-center/types/channel';
+import { ExtraField } from '@/api/user-center/types/extra-field';
+import { pageExtraField } from '@/api/user-center/extra-field';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -47,10 +49,12 @@ const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
 const channels = ref<Channel[]>([]);
+const extraFields = ref<ExtraField[]>([]);
 const searchForm = ref<PageAppReq>({
 	page: 1,
 	page_size: 10
 });
+
 const columns = ref<TableCloumn[]>([
 	{
 		title: '应用图标',
@@ -76,6 +80,21 @@ const columns = ref<TableCloumn[]>([
 		slotName: 'status'
 	},
 	{
+		title: '信息字段',
+		dataIndex: 'user_fields',
+		slotName: 'user_fields'
+	},
+	{
+		title: '应用版本',
+		dataIndex: 'version',
+		slotName: 'version'
+	},
+	{
+		title: '应用版权',
+		dataIndex: 'copyright',
+		slotName: 'copyright'
+	},
+	{
 		title: '应用描述',
 		dataIndex: 'description',
 		slotName: 'description'
@@ -95,10 +114,16 @@ const columns = ref<TableCloumn[]>([
 	}
 ]);
 
-// handleGet 处理查询
-const handleChannel = async () => {
+// handleChannel 处理查询渠道
+const handleGetChannel = async () => {
 	const { data } = await allChannel();
 	channels.value = data.list;
+};
+
+// handleGet 处理查询
+const handleGetExtraField = async () => {
+	const { data } = await pageExtraField({ page: 1, page_size: 50 });
+	extraFields.value = data.list;
 };
 
 // handleGet 处理查询
@@ -112,7 +137,9 @@ const handleGet = async () => {
 		setLoading(false);
 	}
 };
-handleChannel();
+
+handleGetChannel();
+handleGetExtraField();
 handleGet();
 
 // 处理新增
@@ -156,8 +183,6 @@ const handleToolAdd = () => {
 // 处理table点击更新
 const handleTableUpdate = (data: App) => {
 	form.value = { ...data };
-	const ids = data.channels.map((obj) => obj.id);
-	form.value.channel_ids = ids;
 	formRef.value.showUpdateDrawer();
 };
 

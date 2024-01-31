@@ -7,7 +7,7 @@
 		@cancel="visible = false"
 		@before-ok="handleSubmit"
 	>
-		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
+		<a-form ref="formRef" :model="form" label-align="right" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="logo"
 				label="应用图标"
@@ -97,7 +97,17 @@
 				</a-radio-group>
 			</a-form-item>
 
-			<a-form-item field="channel_ids" label="授权渠道">
+			<a-form-item
+				field="channel_ids"
+				label="授权渠道"
+				:rules="[
+					{
+						required: true,
+						message: '授权渠道是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
 				<a-select
 					v-model="form.channel_ids"
 					placeholder="请选择授权渠道"
@@ -110,17 +120,27 @@
 				></a-select>
 			</a-form-item>
 
-			<a-form-item
-				field="description"
-				label="应用描述"
-				:rules="[
-					{
-						required: true,
-						message: '应用描述是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
+			<a-form-item field="user_field_arr" label="信息字段">
+				<a-select
+					v-model="form.user_field_arr"
+					placeholder="请选择信息字段"
+					multiple
+					:max-tag-count="2"
+					:scrollbar="true"
+					:options="extraFields"
+					:field-names="{ value: 'keyword', label: 'name' }"
+				></a-select>
+			</a-form-item>
+
+			<a-form-item field="version" label="应用版本">
+				<a-input v-model="form.version" placeholder="请输入应用版本" allow-clear />
+			</a-form-item>
+
+			<a-form-item field="copyright" label="应用版权">
+				<a-input v-model="form.copyright" placeholder="请输入应用版权" allow-clear />
+			</a-form-item>
+
+			<a-form-item field="description" label="应用描述">
 				<a-textarea v-model="form.description" placeholder="请输入应用描述" allow-clear />
 			</a-form-item>
 		</a-form>
@@ -136,20 +156,25 @@ import { ref, watch, getCurrentInstance } from 'vue';
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-
 const props = defineProps<{
 	data: App;
 	channels: SelectOptionData[];
+	extraFields: SelectOptionData[];
 }>();
 
 const { proxy } = getCurrentInstance() as any;
-const form = ref({ ...props.data });
+const form = ref<App>({ ...props.data });
 const emit = defineEmits(['add', 'update']);
 
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
+		form.value = { ...val };
+		if (form.value.user_fields) {
+			form.value.user_field_arr = form.value.user_fields.split(',');
+		}
+		const ids = form.value.channels.map((obj) => obj.id);
+		form.value.channel_ids = ids;
 	}
 );
 
@@ -175,6 +200,7 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	form.value.user_fields = form.value.user_field_arr.join(',');
 	if (isAdd.value) {
 		emit('add', { ...form.value });
 	} else {

@@ -9,6 +9,10 @@ export interface App {
 	status: boolean;
 	allow_registry: boolean;
 	description: string;
+	user_fields: string;
+	user_field_arr: string[];
+	version: string;
+	copyright: string;
 	resource: Resource;
 	channels: Channel[];
 	channel_ids: number[];
