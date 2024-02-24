@@ -28,7 +28,7 @@ export const createInputComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			max_length: 30,
 			value: '',
@@ -47,7 +47,7 @@ export const createTextareaComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			max_length: 150,
 			value: '',
@@ -65,7 +65,7 @@ export const createNumberComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: 0,
 			placeholder: '请输入',
@@ -85,7 +85,7 @@ export const createPasswordComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: 0,
 			placeholder: '请输入',
@@ -103,7 +103,7 @@ export const createRadioComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: undefined,
 			placeholder: '请输入',
@@ -121,7 +121,7 @@ export const createCheckboxComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: [],
 			placeholder: '请输入',
@@ -138,9 +138,9 @@ export const createSelectComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
-			value: [],
+			value: '',
 			placeholder: '请输入',
 			max_length: 30,
 			options: ['选择一', '选择二']
@@ -156,7 +156,7 @@ export const createPcdComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: [],
 			placeholder: '请输入',
@@ -165,6 +165,7 @@ export const createPcdComponent = (): Component => {
 		}
 	};
 };
+
 // timeComponent 时间选择器
 export const createTimeComponent = (): Component => {
 	return {
@@ -173,7 +174,7 @@ export const createTimeComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: '',
 			placeholder: '请选择',
@@ -189,7 +190,7 @@ export const createDateComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: '',
 			placeholder: '请选择',
@@ -205,7 +206,7 @@ export const createDatetimeComponent = (): Component => {
 		field: uuid(),
 		config: {
 			label: '标题',
-			require: true,
+			required: true,
 			disabled: false,
 			value: '',
 			placeholder: '请选择',
@@ -222,7 +223,7 @@ export const createUploadComponent = (): Component => {
 		config: {
 			label: '文件上传',
 			filetype: 'image',
-			require: true,
+			required: true,
 			disabled: false,
 			value: '',
 			placeholder: '请选择',

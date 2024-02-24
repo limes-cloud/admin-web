@@ -46,7 +46,7 @@
 					</template>
 
 					<a-form-item label="是否必填">
-						<a-switch v-model="form.config.require" type="round">
+						<a-switch v-model="form.config.required" type="round">
 							<template #checked>是</template>
 							<template #unchecked>否</template>
 						</a-switch>
@@ -108,9 +108,9 @@ const handleAddOption = () => {
 const fileTypes = [
 	{ value: 'image', label: '图片' },
 	{ value: 'video', label: '视频' },
-	{ value: 'music', label: '音频' },
-	{ value: 'document', label: '文档' },
-	{ value: 'compress', label: '压缩包' }
+	// { value: 'music', label: '音频' },
+	// { value: 'document', label: '文档' },
+	{ value: 'file', label: '文件' }
 ];
 
 watch(

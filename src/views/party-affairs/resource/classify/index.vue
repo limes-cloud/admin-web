@@ -16,8 +16,8 @@ import { TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { Role } from '@/api/manager/types/role';
-import { ResourceClassify } from '@/api/party-affairs/types/resource-classify';
-import { allResourceClassify, addResourceClassify, deleteResourceClassify, updateResourceClassify } from '@/api/party-affairs/resource-classify';
+import { ResourceClassify } from '@/api/party-affairs/types/resource';
+import { allResourceClassify, addResourceClassify, deleteResourceClassify, updateResourceClassify } from '@/api/party-affairs/resource';
 
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';

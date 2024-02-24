@@ -122,13 +122,13 @@
 
 			<a-form-item field="user_field_arr" label="信息字段">
 				<a-select
-					v-model="form.user_field_arr"
+					v-model="form.field_ids"
 					placeholder="请选择信息字段"
 					multiple
 					:max-tag-count="2"
 					:scrollbar="true"
 					:options="extraFields"
-					:field-names="{ value: 'keyword', label: 'name' }"
+					:field-names="{ value: 'id', label: 'name' }"
 				></a-select>
 			</a-form-item>
 
@@ -170,11 +170,12 @@ watch(
 	() => props.data,
 	(val) => {
 		form.value = { ...val };
-		if (form.value.user_fields) {
-			form.value.user_field_arr = form.value.user_fields.split(',');
+		if (form.value.fields) {
+			form.value.field_ids = form.value.fields.map((obj) => obj.id);
 		}
-		const ids = form.value.channels.map((obj) => obj.id);
-		form.value.channel_ids = ids;
+		if (form.value.channels) {
+			form.value.channel_ids = form.value.channels.map((obj) => obj.id);
+		}
 	}
 );
 
@@ -199,8 +200,6 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-
-	form.value.user_fields = form.value.user_field_arr.join(',');
 	if (isAdd.value) {
 		emit('add', { ...form.value });
 	} else {

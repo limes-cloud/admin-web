@@ -39,7 +39,6 @@
 </template>
 
 <script lang="ts" setup>
-import { NewsClassify } from '@/api/party-affairs/types/news-classify';
 import { TableCloumn } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 

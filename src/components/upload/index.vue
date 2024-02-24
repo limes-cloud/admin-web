@@ -257,8 +257,8 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 			.then((res) => {
 				onProgress(Math.ceil((index + 1) / pArrr.length));
 				if ((index + 1) / pArrr.length) {
-					onSuccess(res.data);
 					fileItem.url = formatUrl(res.data.src as string);
+					onSuccess(res.data);
 				}
 			})
 			.catch((res) => {
@@ -289,9 +289,9 @@ const customRequest = (options: RequestOption) => {
 			const { data } = await prepareUpload(params);
 			// 触发秒传
 			if (data.uploaded) {
+				fileItem.url = formatUrl(data.src as string);
 				onProgress(100);
 				onSuccess(data);
-				fileItem.url = formatUrl(data.src as string);
 			} else {
 				// 处理上传逻辑
 				await handleUpload(data, binary, options);
@@ -315,15 +315,15 @@ const customRequest = (options: RequestOption) => {
 <style lang="less">
 .upload {
 	.arco-upload-list-picture {
-		width: v-bind(domWidth);
-		height: v-bind(domHeight);
-		margin-right: v-bind(domMargin);
-		margin-bottom: v-bind(domMargin);
-		line-height: v-bind(domHeight);
+		width: v-bind(domwidth);
+		height: v-bind(domheight);
+		margin-right: v-bind(dommargin);
+		margin-bottom: v-bind(dommargin);
+		line-height: v-bind(domheight);
 	}
 
 	.arco-upload-list-picture-mask {
-		line-height: v-bind(domHeight);
+		line-height: v-bind(domheight);
 	}
 }
 </style>
@@ -335,8 +335,8 @@ const customRequest = (options: RequestOption) => {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	width: v-bind(domWidth);
-	height: v-bind(domHeight);
+	width: v-bind(domwidth);
+	height: v-bind(domheight);
 	background-color: #f4f5f7;
 	border-radius: 2px;
 

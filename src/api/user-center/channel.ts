@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { AllChannelRes, AllPlatformRes, Channel } from './types/channel';
+import { AllChannelRes, AllTypeRes, Channel } from './types/channel';
 
-export function allPlatform() {
-	return axios.get<AllPlatformRes>('/user-center/admin/v1/login/platforms');
+export function allType() {
+	return axios.get<AllTypeRes>('/user-center/admin/v1/channel/types');
 }
 
 export function allChannel() {

@@ -30,24 +30,29 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { allResourceClassify } from '@/api/party-affairs/resource-classify';
-import { PageResourceReq, Resource } from '@/api/party-affairs/types/resource';
-import { pageResource, getResource, addResource, deleteResource, updateResource } from '@/api/party-affairs/resource-content';
-import { ResourceClassify } from '@/api/party-affairs/types/resource-classify';
+import {
+	allResourceClassify,
+	pageResourceContent,
+	getResourceContent,
+	addResourceContent,
+	deleteResourceContent,
+	updateResourceContent
+} from '@/api/party-affairs/resource';
+import { PageResourceContentReq, ResourceContent, ResourceClassify } from '@/api/party-affairs/types/resource';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref<Resource>({} as Resource);
+const form = ref<ResourceContent>({} as ResourceContent);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const classifys = ref<ResourceClassify[]>([]);
 const total = ref(0);
-const searchForm = ref<PageResourceReq>({
+const searchForm = ref<PageResourceContentReq>({
 	page: 1,
 	page_size: 10
 });
@@ -98,7 +103,7 @@ const handleGetClassifys = async () => {
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageResource(searchForm.value);
+		const { data } = await pageResourceContent(searchForm.value);
 		tableData.value = data.list as TableData[];
 		total.value = data.total;
 	} finally {
@@ -110,7 +115,7 @@ handleGet();
 handleGetClassifys();
 
 // 处理查询
-const handleSearch = async (req: PageResourceReq) => {
+const handleSearch = async (req: PageResourceContentReq) => {
 	const pageSize = searchForm.value.page_size;
 	searchForm.value = {
 		...req,
@@ -129,42 +134,42 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 // 处理新增
-const handleAdd = async (data: Resource) => {
-	await addResource(data);
+const handleAdd = async (data: ResourceContent) => {
+	await addResourceContent(data);
 	handleGet();
 	Message.success('创建成功');
 };
 
 // 处理修改
-const handleUpdate = async (data: Resource) => {
-	await updateResource(data);
+const handleUpdate = async (data: ResourceContent) => {
+	await updateResourceContent(data);
 	handleGet();
 	Message.success('更新成功');
 };
 
 // 处理数据删除
 const handleDelete = async (id: number) => {
-	await deleteResource(id);
+	await deleteResourceContent(id);
 	handleGet();
 	Message.success('删除成功');
 };
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Resource;
+	form.value = {} as ResourceContent;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (resource: Resource) => {
-	const { data } = await getResource(resource.id);
+const handleTableUpdate = async (resource: ResourceContent) => {
+	const { data } = await getResourceContent(resource.id);
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as Resource;
+	form.value = { id } as ResourceContent;
 	formRef.value.showAddDrawer();
 };
 </script>

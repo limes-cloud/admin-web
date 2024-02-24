@@ -1,5 +1,6 @@
 import { Resource } from '@/types/global';
 import { Channel } from './channel';
+import { Field } from './field';
 
 export interface App {
 	id: number;
@@ -9,13 +10,13 @@ export interface App {
 	status: boolean;
 	allow_registry: boolean;
 	description: string;
-	user_fields: string;
-	user_field_arr: string[];
 	version: string;
 	copyright: string;
 	resource: Resource;
 	channels: Channel[];
 	channel_ids: number[];
+	fields: Field[];
+	field_ids: number[];
 	created_at: number;
 	updated_at: number;
 }

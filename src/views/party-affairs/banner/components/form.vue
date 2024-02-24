@@ -49,48 +49,9 @@
 				></Upload>
 			</a-form-item>
 
-			<a-form-item label="跳转应用">
-				<a-select v-model="jumpType">
-					<template v-for="(item, key) in jumpTypes" :key="key">
-						<a-option :value="key">{{ item }}</a-option>
-					</template>
-				</a-select>
+			<a-form-item field="path" label="跳转路径">
+				<a-input v-model="form.path" allow-clear placeholder="请输入应用标志" />
 			</a-form-item>
-
-			<template v-if="jumpType == 'url'">
-				<a-form-item
-					field="url"
-					label="外部链接"
-					:rules="[
-						{
-							required: true,
-							message: '外部链接是必填项'
-						}
-					]"
-					:validate-trigger="['change', 'input']"
-				>
-					<a-input v-model="form.url" allow-clear placeholder="请输入外部链接" />
-				</a-form-item>
-			</template>
-			<template v-if="jumpType == 'app'">
-				<a-form-item
-					field="app"
-					label="应用标志"
-					:rules="[
-						{
-							required: true,
-							message: '应用标志是必填项'
-						}
-					]"
-					:validate-trigger="['change', 'input']"
-				>
-					<a-input v-model="form.app" allow-clear placeholder="请输入应用标志" />
-				</a-form-item>
-
-				<a-form-item field="params" label="跳转参数">
-					<a-input v-model="form.params" allow-clear placeholder="请输入跳转参数" />
-				</a-form-item>
-			</template>
 			<a-form-item
 				field="weight"
 				label="轮播权重"
@@ -117,12 +78,6 @@ const { proxy } = getCurrentInstance() as any;
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-const jumpType = ref('none');
-const jumpTypes = {
-	none: '不跳转',
-	app: '跳转应用',
-	url: '外部url'
-};
 
 const props = defineProps<{
 	data: Banner;

@@ -15,6 +15,16 @@ export interface Resource {
 	src: string;
 }
 
+export interface SimpleUser {
+	id: number;
+	username: string;
+	nick_name: string;
+	real_name: string;
+	avatar: string;
+	gender: string;
+	resource: Resource;
+}
+
 export interface Options {
 	value: unknown;
 	label: string;

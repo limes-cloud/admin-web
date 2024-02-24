@@ -16,8 +16,8 @@ import { TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { Role } from '@/api/manager/types/role';
-import { NewsClassify } from '@/api/party-affairs/types/news-classify';
-import { allNewsClassify, addNewsClassify, deleteNewsClassify, updateNewsClassify } from '@/api/party-affairs/news-classify';
+import { NewsClassify } from '@/api/party-affairs/types/news';
+import { allNewsClassify, addNewsClassify, deleteNewsClassify, updateNewsClassify } from '@/api/party-affairs/news';
 
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';

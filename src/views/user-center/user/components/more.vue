@@ -32,8 +32,8 @@
 							</a-avatar>
 						</template>
 
-						<template #registryAt="{ record }">
-							{{ $formatTime(record.registry_at) }}
+						<template #createdAt="{ record }">
+							{{ $formatTime(record.created_at) }}
 						</template>
 						<template #loginAt="{ record }">
 							{{ $formatTime(record.login_at) }}
@@ -73,9 +73,11 @@
 								<span>{{ record.name }}</span>
 							</a-avatar>
 						</template>
-
-						<template #authAt="{ record }">
-							{{ $formatTime(record.auth_at) }}
+						<template #name="{ record }">
+							{{ record.name }}
+						</template>
+						<template #createdAt="{ record }">
+							{{ $formatTime(record.created_at) }}
 						</template>
 						<template #loginAt="{ record }">
 							{{ $formatTime(record.login_at) }}
@@ -146,8 +148,8 @@ const appColumns = ref<TableCloumn[]>([
 	},
 	{
 		title: '注册时间',
-		dataIndex: 'registry_at',
-		slotName: 'registryAt'
+		dataIndex: 'created_at',
+		slotName: 'createdAt'
 	},
 	{
 		title: '最近登录',
@@ -169,12 +171,13 @@ const channelColumns = ref<TableCloumn[]>([
 	},
 	{
 		title: '渠道名称',
-		dataIndex: 'name'
+		dataIndex: 'name',
+		slotName: 'name'
 	},
 	{
 		title: '授权时间',
-		dataIndex: 'auth_at',
-		slotName: 'authAt'
+		dataIndex: 'created_at',
+		slotName: 'createdAt'
 	},
 	{
 		title: '最近登录',

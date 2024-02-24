@@ -4,8 +4,7 @@ export interface App {
 	id: number;
 	logo: string;
 	name: string;
-	registry_at: number;
-	login_at: number;
+	created_at: number;
 	resource: Resource;
 }
 
@@ -13,8 +12,8 @@ export interface Channel {
 	id: number;
 	logo: string;
 	name: string;
-	auth_at: number;
 	login_at: number;
+	created_at: number;
 	resource: Resource;
 }
 

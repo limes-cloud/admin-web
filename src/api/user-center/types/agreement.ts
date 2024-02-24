@@ -1,4 +1,4 @@
-export interface Agreement {
+export interface Content {
 	id: number;
 	name: string;
 	content: string;
@@ -8,13 +8,36 @@ export interface Agreement {
 	updated_at: number;
 }
 
-export interface PageAgreementReq {
+export interface PageContentReq {
 	page: number;
 	page_size: number;
 	name?: string;
 }
 
-export interface PageAgreementRes {
+export interface PageContentRes {
 	total: number;
-	list: Agreement[];
+	list: Content[];
+}
+
+export interface Scene {
+	id: number;
+	keyword: string;
+	name: string;
+	description: string;
+	contents: Content[];
+	content_ids: number[];
+	created_at: number;
+	updated_at: number;
+}
+
+export interface PageSceneReq {
+	page: number;
+	page_size: number;
+	name?: string;
+	keyword?: string;
+}
+
+export interface PageSceneRes {
+	total: number;
+	list: Scene[];
 }

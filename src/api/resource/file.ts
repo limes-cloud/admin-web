@@ -15,6 +15,12 @@ export function pageFile(req: PageFileReq) {
 	});
 }
 
+export function getFileBySha(sha: string) {
+	return axios.get<File>(`/resource/v1/file/sha`, {
+		params: { sha }
+	});
+}
+
 export function updateFile(req: UpdateFileReq) {
 	return axios.put(`/resource/v1/file`, req);
 }

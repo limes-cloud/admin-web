@@ -28,6 +28,13 @@
 				/>
 			</a-form-item>
 
+			<a-form-item field="is_top" label="是否置顶" required>
+				<a-switch v-model="form.is_top" type="round">
+					<template #checked>是</template>
+					<template #unchecked>否</template>
+				</a-switch>
+			</a-form-item>
+
 			<a-form-item
 				field="title"
 				label="新闻标题"
@@ -116,9 +123,8 @@
 
 <script lang="ts" setup>
 import { ref, watch, getCurrentInstance, ComponentInternalInstance } from 'vue';
-import { News } from '@/api/party-affairs/types/news';
+import { NewsContent, NewsClassify } from '@/api/party-affairs/types/news';
 import { FileItem } from '@arco-design/web-vue';
-import { NewsClassify } from '@/api/party-affairs/types/news-classify';
 
 const formRef = ref();
 const visible = ref(false);
@@ -126,11 +132,11 @@ const isAdd = ref(false);
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const props = defineProps<{
-	data: News;
+	data: NewsContent;
 	classifys: NewsClassify[];
 }>();
 
-const form = ref({} as News);
+const form = ref({} as NewsContent);
 const emit = defineEmits(['add', 'update']);
 const files = () => {
 	return form.value.resource

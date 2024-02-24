@@ -1,7 +1,7 @@
 import {
 	createCheckboxComponent,
 	createDateComponent,
-	// createDatetimeComponent,
+	createDatetimeComponent,
 	createInputComponent,
 	createNumberComponent,
 	createPasswordComponent,
@@ -10,7 +10,7 @@ import {
 	createSelectComponent,
 	createTextareaComponent,
 	createTimeComponent,
-	// createUploadComponent,
+	createUploadComponent,
 	defaultComponentRule
 } from './data';
 import { Component } from './types';
@@ -38,14 +38,14 @@ class Editor {
 				{ type: 'select', name: '下拉选择', creater: createSelectComponent },
 				// { type: 'pcd', name: '地区选择', creater: createPcdComponent },
 				{ type: 'time', name: '时间选择', creater: createTimeComponent },
-				{ type: 'date', name: '日期选择', creater: createDateComponent }
-				// { type: 'datetime', name: '日期时间', creater: createDatetimeComponent }
+				{ type: 'date', name: '日期选择', creater: createDateComponent },
+				{ type: 'datetime', name: '日期时间', creater: createDatetimeComponent }
 			]
+		},
+		{
+			title: '功能型组件',
+			items: [{ type: 'upload', name: '文件上传', icon: '', creater: createUploadComponent }]
 		}
-		// {
-		// 	title: '功能型组件',
-		// 	items: [{ type: 'upload', name: '文件上传', icon: '', creater: createUploadComponent }]
-		// }
 	];
 
 	// 查找指定元素

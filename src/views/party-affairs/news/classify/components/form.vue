@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { NewsClassify } from '@/api/party-affairs/types/news-classify';
+import { NewsClassify } from '@/api/party-affairs/types/news';
 
 const formRef = ref();
 const visible = ref(false);

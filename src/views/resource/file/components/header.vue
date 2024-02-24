@@ -97,6 +97,7 @@ const handleUploadFile = async () => {
 		.WaitUploadSuccess()
 		.then(() => {
 			is = true;
+			emit('upload');
 		})
 		.catch(() => {
 			is = false;

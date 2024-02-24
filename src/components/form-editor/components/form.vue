@@ -6,7 +6,7 @@
 					<div v-if="ite.type === 'input'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -24,7 +24,7 @@
 					>
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -37,7 +37,7 @@
 					<div v-if="ite.type === 'number'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -61,7 +61,7 @@
 					>
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -80,7 +80,7 @@
 					<div v-if="ite.type === 'radio'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -102,7 +102,7 @@
 					>
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -119,7 +119,7 @@
 					<div v-if="ite.type === 'select'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -136,7 +136,7 @@
 					<div v-if="ite.type === 'time'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -149,7 +149,7 @@
 					<div v-if="ite.type === 'date'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
@@ -159,17 +159,35 @@
 						</a-form-item>
 					</div>
 
-					<!-- <div v-if="ite.type === 'upload'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
+					<div
+						v-if="ite.type === 'datetime'"
+						class="form-item"
+						:class="curField === ite.field ? 'form-item-active' : ''"
+						@click="chooseComponent(ite, ind)"
+					>
 						<a-form-item
 							row-class="form-row"
-							:required="ite.config.require"
+							:required="ite.config.required"
 							:field="ite.field"
 							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
 							:label="ite.config.label"
 						>
+							<a-date-picker show-time :placeholder="ite.config.placeholder" />
 							<Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
 						</a-form-item>
-					</div> -->
+					</div>
+					<div v-if="ite.type === 'upload'" class="form-item" :class="curField === ite.field ? 'form-item-active' : ''" @click="chooseComponent(ite, ind)">
+						<a-form-item
+							row-class="form-row"
+							:required="ite.config.required"
+							:field="ite.field"
+							:tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
+							:label="ite.config.label"
+						>
+							<Upload></Upload>
+							<Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
+						</a-form-item>
+					</div>
 				</template>
 			</a-form>
 		</div>

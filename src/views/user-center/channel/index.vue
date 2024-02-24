@@ -21,10 +21,10 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
-import { addChannel, deleteChannel, allChannel, updateChannel, allPlatform } from '@/api/user-center/channel';
+import { addChannel, deleteChannel, allChannel, updateChannel, allType } from '@/api/user-center/channel';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { Channel, Platform } from '@/api/user-center/types/channel';
+import { Channel, Type } from '@/api/user-center/types/channel';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -34,7 +34,7 @@ const form = ref<Channel>({} as Channel);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
-const platforms = ref<Platform[]>([]);
+const platforms = ref<Type[]>([]);
 
 const size = ref<TableSize>('medium');
 const columns = ref<TableCloumn[]>([
@@ -92,7 +92,7 @@ const columns = ref<TableCloumn[]>([
 ]);
 
 const handleGetPlatform = async () => {
-	const { data } = await allPlatform();
+	const { data } = await allType();
 	platforms.value = data.list;
 };
 

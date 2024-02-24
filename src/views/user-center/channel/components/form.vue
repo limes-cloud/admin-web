@@ -118,7 +118,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Channel, Platform } from '@/api/user-center/types/channel';
+import { Channel, Type } from '@/api/user-center/types/channel';
 import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
 import { ref, watch, getCurrentInstance } from 'vue';
 
@@ -129,7 +129,7 @@ const { proxy } = getCurrentInstance() as any;
 
 const props = defineProps<{
 	data: Channel;
-	platforms: Platform[];
+	platforms: Type[];
 }>();
 
 const form = ref({ ...props.data });

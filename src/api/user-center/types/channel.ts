@@ -14,13 +14,13 @@ export interface Channel {
 	updated_at: number;
 }
 
-export interface Platform {
+export interface Type {
 	platform: string;
 	name: string;
 }
 
-export interface AllPlatformRes {
-	list: Platform[];
+export interface AllTypeRes {
+	list: Type[];
 }
 
 export interface AllChannelRes {

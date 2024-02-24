@@ -65,9 +65,8 @@
 
 <script lang="ts" setup>
 import { ComponentInternalInstance, getCurrentInstance, ref, watch } from 'vue';
-import { Resource } from '@/api/party-affairs/types/resource';
+import { ResourceContent, ResourceClassify } from '@/api/party-affairs/types/resource';
 import { FileItem } from '@arco-design/web-vue';
-import { ResourceClassify } from '@/api/party-affairs/types/resource-classify';
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const formRef = ref();
@@ -75,11 +74,11 @@ const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: Resource;
+	data: ResourceContent;
 	classifys: ResourceClassify[];
 }>();
 
-const form = ref({} as Resource);
+const form = ref({} as ResourceContent);
 const emit = defineEmits(['add', 'update']);
 
 watch(

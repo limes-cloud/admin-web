@@ -11,7 +11,7 @@ export interface ComponentRelation {
 
 export interface ComponentConfig {
 	label: string; // 字段标签
-	require: boolean; // 是否必填
+	required: boolean; // 是否必填
 	disabled: boolean; // 是否禁用
 	max_length?: number; // 最大长度
 	value: any; // 默认值

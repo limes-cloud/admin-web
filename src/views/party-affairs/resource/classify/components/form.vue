@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { ResourceClassify } from '@/api/party-affairs/types/resource-classify';
+import { ResourceClassify } from '@/api/party-affairs/types/resource';
 
 const formRef = ref();
 const visible = ref(false);

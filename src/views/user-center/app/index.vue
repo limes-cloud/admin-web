@@ -34,8 +34,8 @@ import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { PageAppReq, App } from '@/api/user-center/types/app';
 import { Channel } from '@/api/user-center/types/channel';
-import { ExtraField } from '@/api/user-center/types/extra-field';
-import { pageExtraField } from '@/api/user-center/extra-field';
+import { Field } from '@/api/user-center/types/field';
+import { pageField } from '@/api/user-center/field';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -49,7 +49,7 @@ const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
 const channels = ref<Channel[]>([]);
-const extraFields = ref<ExtraField[]>([]);
+const extraFields = ref<Field[]>([]);
 const searchForm = ref<PageAppReq>({
 	page: 1,
 	page_size: 10
@@ -121,8 +121,8 @@ const handleGetChannel = async () => {
 };
 
 // handleGet 处理查询
-const handleGetExtraField = async () => {
-	const { data } = await pageExtraField({ page: 1, page_size: 50 });
+const handleGetField = async () => {
+	const { data } = await pageField({ page: 1, page_size: 50 });
 	extraFields.value = data.list;
 };
 
@@ -139,7 +139,7 @@ const handleGet = async () => {
 };
 
 handleGetChannel();
-handleGetExtraField();
+handleGetField();
 handleGet();
 
 // 处理新增

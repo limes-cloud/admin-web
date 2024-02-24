@@ -4,9 +4,7 @@ export interface Banner {
 	id: number;
 	title: string;
 	src: string;
-	app?: string;
-	url?: string;
-	params?: string;
+	path?: string;
 	weight: number;
 	resource: Resource;
 	created_at: number;
@@ -20,9 +18,7 @@ export interface AllBannerRes {
 export interface AddBannerReq {
 	title: string;
 	src: string;
-	app?: string;
-	url?: string;
-	params?: string;
+	path?: string;
 	weight: number;
 }
 
@@ -30,8 +26,6 @@ export interface UpdateBannerReq {
 	id: number;
 	title: string;
 	src: string;
-	app?: string;
-	url?: string;
-	params?: string;
+	path?: string;
 	weight: number;
 }

@@ -1,24 +1,40 @@
 import axios from 'axios';
-import { PageAgreementRes, Agreement, PageAgreementReq } from './types/agreement';
+import { PageContentRes, Content, PageContentReq, PageSceneReq, PageSceneRes, Scene } from './types/agreement';
 
-export function getAgreement(id: number) {
-	return axios.get<Agreement>('/user-center/admin/v1/agreement', { params: { id } });
+export function getContent(id: number) {
+	return axios.get<Content>('/user-center/admin/v1/agreement/content', { params: { id } });
 }
 
-export function pageAgreement(req: PageAgreementReq) {
-	return axios.get<PageAgreementRes>('/user-center/admin/v1/agreements', { params: { ...req } });
+export function pageContent(req: PageContentReq) {
+	return axios.get<PageContentRes>('/user-center/admin/v1/agreement/contents', { params: { ...req } });
 }
 
-export function addAgreement(data: Agreement) {
-	return axios.post('/user-center/admin/v1/agreement', data);
+export function addContent(data: Content) {
+	return axios.post('/user-center/admin/v1/agreement/content', data);
 }
 
-export function updateAgreement(data: Agreement) {
-	return axios.put('/user-center/admin/v1/agreement', data);
+export function updateContent(data: Content) {
+	return axios.put('/user-center/admin/v1/agreement/content', data);
 }
 
-export function deleteAgreement(id: number) {
-	return axios.delete('/user-center/admin/v1/agreement', { params: { id } });
+export function deleteContent(id: number) {
+	return axios.delete('/user-center/admin/v1/agreement/content', { params: { id } });
+}
+
+export function pageScene(req: PageSceneReq) {
+	return axios.get<PageSceneRes>('/user-center/admin/v1/agreement/scenes', { params: { ...req } });
+}
+
+export function addScene(data: Scene) {
+	return axios.post('/user-center/admin/v1/agreement/scene', data);
+}
+
+export function updateScene(data: Scene) {
+	return axios.put('/user-center/admin/v1/agreement/scene', data);
+}
+
+export function deleteScene(id: number) {
+	return axios.delete('/user-center/admin/v1/agreement/scene', { params: { id } });
 }
 
 export default null;

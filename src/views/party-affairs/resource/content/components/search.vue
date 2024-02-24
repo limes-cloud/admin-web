@@ -45,7 +45,7 @@
 
 <script lang="ts" setup>
 import { PageUserReq } from '@/api/manager/types/user';
-import { PageNewsReq } from '@/api/party-affairs/types/news';
+import { PageResourceContentReq } from '@/api/party-affairs/types/resource';
 import { CascaderOption } from '@arco-design/web-vue/es/cascader/interface';
 import { ref } from 'vue';
 
@@ -53,7 +53,7 @@ defineProps<{
 	classifys: CascaderOption[];
 }>();
 
-const form = ref<PageNewsReq>({} as PageNewsReq);
+const form = ref<PageResourceContentReq>({} as PageResourceContentReq);
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {

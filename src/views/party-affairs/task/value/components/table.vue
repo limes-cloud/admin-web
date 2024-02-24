@@ -11,7 +11,10 @@
 			:size="size"
 		>
 			<template #name="{ record }">
-				{{ record.user.name }}
+				{{ record.user.real_name }}
+			</template>
+			<template #email="{ record }">
+				{{ record.user.email }}
 			</template>
 			<template #phone="{ record }">
 				{{ record.user.phone }}
@@ -28,6 +31,10 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
+					<a-tag v-permission="'party-affairs:task:value:query'" color="arcoblue" @click="emit('more', record)">
+						<template #icon><icon-more /></template>
+						详情
+					</a-tag>
 					<a-popconfirm content="您确认删除此任务记录" type="warning" @ok="emit('delete', record.id)">
 						<a-tag v-permission="'party-affairs:task:value:delete'" color="red">
 							<template #icon><icon-delete /></template>
@@ -55,7 +62,7 @@ import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
 
-const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable', 'offline', 'resetPassword']);
+const emit = defineEmits(['delete', 'more', 'add', 'pageChange']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
