@@ -18,8 +18,7 @@ const props = withDefaults(
 	}>(),
 	{
 		skipLine: 0,
-		disabled: false,
-		handlers: {} as Record<string, (any) => any>
+		disabled: false
 	}
 );
 
@@ -30,7 +29,7 @@ const readFile = (file: File) => {
 		const reader = new FileReader();
 		reader.readAsBinaryString(file);
 		reader.onload = (ev) => {
-			resolve(ev.target.result);
+			resolve(ev.target?.result);
 		};
 	});
 };
@@ -58,9 +57,9 @@ const handleChange = async (_, info) => {
 		return;
 	}
 
-	const mapping = {};
-	const columns = [];
-	const header = data.shift();
+	const mapping: Record<string, { type: string; index: number }> = {};
+	const columns: string[] = [];
+	const header = data.shift() as [];
 	header.forEach((title, ind) => {
 		if (props.mapping[title]) {
 			const { field } = props.mapping[title];
@@ -78,12 +77,12 @@ const handleChange = async (_, info) => {
 	}
 
 	const result: any[] = [];
-	data.forEach((item) => {
+	data.forEach((item: any) => {
 		const temp: any = {};
 		columns.forEach((column) => {
 			const { index, type } = mapping[column];
 			temp[column] = transfromVal(type, item[index]);
-			if (props.handlers[column]) {
+			if (props.handlers && props.handlers[column]) {
 				temp[column] = props.handlers[column](temp[column]);
 			}
 		});
