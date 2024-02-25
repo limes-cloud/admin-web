@@ -8,6 +8,14 @@
 					</template>
 					新建用户
 				</a-button>
+				<Xlsx :mapping="xlsxMapping" @success="handleXlsxUploadSuccess" @error="handleXlsxUploadError">
+					<a-button v-permission="'uc:user:import'" type="primary">
+						<template #icon>
+							<icon-upload />
+						</template>
+						导入用户
+					</a-button>
+				</Xlsx>
 			</a-space>
 		</a-col>
 
@@ -50,8 +58,9 @@
 </template>
 
 <script lang="ts" setup>
+import { importUser } from '@/api/user-center/user';
 import { TableCloumn, TableSize } from '@/types/global';
-import { TableColumnData } from '@arco-design/web-vue';
+import { Message, TableColumnData } from '@arco-design/web-vue';
 import { cloneDeep } from 'lodash';
 import Sortable from 'sortablejs';
 import { nextTick, ref } from 'vue';
@@ -62,6 +71,20 @@ const props = defineProps<{
 	size: TableSize;
 }>();
 
+const xlsxMapping = {
+	邮箱: { type: 'string', field: 'email' },
+	手机: { type: 'string', field: 'phone' },
+	姓名: { type: 'string', field: 'real_name' },
+	性别: { type: 'string', field: 'gender' }
+};
+// const xlsxHandlers = {
+// 	// gender: (val: string) => {
+// 	// 	switch(val){
+// 	// 		case "男":
+// 	// 	}
+// 	// 	return val.split(',');
+// 	// }
+// };
 // 定义事件
 const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'extra']);
 const cloneColumns = ref<TableCloumn[]>([]);
@@ -116,6 +139,16 @@ const handleChange = (checked: boolean | (string | boolean | number)[], column: 
 		cloneColumns.value.splice(index, 0, column);
 	}
 	emit('update:columns', cloneColumns.value);
+};
+
+const handleXlsxUploadSuccess = async (list) => {
+	await importUser(list);
+	Message.success('导入成功');
+	emit('refresh');
+};
+
+const handleXlsxUploadError = (msg: string) => {
+	Message.error(msg);
 };
 </script>
 

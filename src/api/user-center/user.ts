@@ -9,6 +9,10 @@ export function pageUser(req: PageUserReq) {
 	return axios.get<PageUserRes>('/user-center/admin/v1/users', { params: { ...req } });
 }
 
+export function importUser(data: User) {
+	return axios.post('/user-center/admin/v1/users', { list: data });
+}
+
 export function addUser(data: User) {
 	return axios.post('/user-center/admin/v1/user', data);
 }

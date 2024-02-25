@@ -11,6 +11,8 @@ import Upload from './upload/index.vue';
 import Tinymce from './tinymce/index.vue';
 import FormEditor from './form-editor/index.vue';
 import CodeEditor from './code-editor/index.vue';
+import Xlsx from './xlsx/index.vue';
+
 // Manually introduce ECharts modules to reduce packing size
 
 use([
@@ -36,5 +38,6 @@ export default {
 		Vue.component('FormEditor', FormEditor);
 		Vue.component('Icon', Icon);
 		Vue.component('CodeEditor', CodeEditor);
+		Vue.component('Xlsx', Xlsx);
 	}
 };

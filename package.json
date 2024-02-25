@@ -55,7 +55,8 @@
 		"vue-echarts": "^6.2.3",
 		"vue-i18n": "^9.2.2",
 		"vue-router": "^4.0.14",
-		"web-vue@^2.54.0": "link:arco-design/web-vue@^2.54.0"
+		"web-vue@^2.54.0": "link:arco-design/web-vue@^2.54.0",
+		"xlsx": "^0.18.5"
 	},
 	"devDependencies": {
 		"@arco-plugins/vite-vue": "^1.4.5",
