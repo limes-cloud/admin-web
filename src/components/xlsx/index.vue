@@ -77,9 +77,9 @@ const handleChange = async (_, info) => {
 		return;
 	}
 
-	const result = [];
+	const result: any[] = [];
 	data.forEach((item) => {
-		const temp = {};
+		const temp: any = {};
 		columns.forEach((column) => {
 			const { index, type } = mapping[column];
 			temp[column] = transfromVal(type, item[index]);
