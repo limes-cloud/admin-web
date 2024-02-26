@@ -12,7 +12,8 @@
 		"preview": "npm run build && vite preview --host",
 		"type:check": "vue-tsc --noEmit --skipLibCheck",
 		"lint-staged": "npx lint-staged",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit"
 	},
 	"lint-staged": {
 		"*.{js,ts,jsx,tsx}": [
