@@ -51,7 +51,7 @@
 								cb();
 								return;
 							}
-							var myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
+							var myreg:any = /^[1][3,4,5,7,8,9][0-9]{9}$/;
 							if (!myreg.test(value)) {
 								cb('错误的电话格式');
 							} else {
