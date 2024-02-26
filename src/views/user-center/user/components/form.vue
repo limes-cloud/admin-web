@@ -46,18 +46,7 @@
 				:rules="[
 					{
 						required: false,
-						validator: (value, cb) => {
-							if (!value) {
-								cb();
-								return;
-							}
-							var myreg:RegExp = /^[1][3,4,5,7,8,9][0-9]{9}$/;
-							if (!myreg.test(value)) {
-								cb('错误的电话格式');
-							} else {
-								cb();
-							}
-						}
+						validator: validatePhone
 					}
 				]"
 			>
@@ -137,5 +126,18 @@ const handleSubmit = async () => {
 		emit('update', { ...form.value });
 	}
 	return true;
+};
+
+const validatePhone = (value, cb) => {
+	if (!value) {
+		cb();
+		return;
+	}
+	const myreg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
+	if (!myreg.test(value)) {
+		cb('错误的电话格式');
+	} else {
+		cb();
+	}
 };
 </script>
