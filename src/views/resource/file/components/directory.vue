@@ -169,7 +169,6 @@ const handleUpdateDirectory = async () => {
 };
 
 const handleDelDirectory = async (nodeData: TreeNodeData) => {
-	console.log(nodeData);
 	const node = nodeData as Directory;
 	await deleteDirectory({ id: node.id, app: form.value.keyword });
 	nodeData = {} as TreeNodeData;
