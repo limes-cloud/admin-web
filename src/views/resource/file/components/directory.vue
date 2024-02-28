@@ -115,7 +115,7 @@ const fetchDirectory = (nodeData: TreeNodeData) => {
 			app: form.value.keyword,
 			parent_id: parentId.value
 		}).then((res) => {
-			nodeData.children = res.data;
+			nodeData.children = res.data.list;
 			resolve();
 		});
 	});
@@ -169,6 +169,7 @@ const handleUpdateDirectory = async () => {
 };
 
 const handleDelDirectory = async (nodeData: TreeNodeData) => {
+	console.log(nodeData);
 	const node = nodeData as Directory;
 	await deleteDirectory({ id: node.id, app: form.value.keyword });
 	nodeData = {} as TreeNodeData;

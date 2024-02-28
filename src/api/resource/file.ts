@@ -5,8 +5,12 @@ export function prepareUpload(req: PrepareUploadReq) {
 	return axios.post<PrepareUploadRes>(`/resource/v1/upload/prepare`, req);
 }
 
-export function upload(req: UploadReq) {
-	return axios.post(`/resource/v1/upload`, req);
+export function upload(req: FormData) {
+	return axios.post(`/resource/v1/upload`, req, {
+		headers: {
+			'Content-Type': 'multipart/form-data'
+		}
+	});
 }
 
 export function pageFile(req: PageFileReq) {

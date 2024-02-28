@@ -2,7 +2,7 @@ import axios from 'axios';
 import { AddDirectoryReq, DeleteDirectoryReq, Directory, GetDirectoryReq, UpdateDirectoryReq } from './types/directory';
 
 export function getDirectory(req: GetDirectoryReq) {
-	return axios.get<Directory[]>(`/resource/v1/directory`, {
+	return axios.get<{ list: Directory[] }>(`/resource/v1/directories`, {
 		params: req
 	});
 }

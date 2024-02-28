@@ -183,16 +183,6 @@ const uploadChange = (list: FileItem[], item: FileItem) => {
 	emit('change', uploadedFileList.value);
 };
 
-function binaryToBase64(buffer: ArrayBuffer) {
-	let binary = '';
-	const bytes = new Uint8Array(buffer);
-	const len = bytes.byteLength;
-	for (let i = 0; i < len; i += 1) {
-		binary += String.fromCharCode(bytes[i]);
-	}
-	return window.btoa(binary);
-}
-
 const readBinary = (file: File) => {
 	return new Promise((resolve, reject) => {
 		const fileReader = new FileReader();
@@ -226,13 +216,11 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 	const pArrr: Promise<AxiosResponse<any, any>>[] = [];
 	const uploaed = info.upload_chunks;
 	if (count <= 1) {
-		pArrr.push(
-			upload({
-				data: binaryToBase64(binary),
-				upload_id: info.upload_id as string,
-				index: 1
-			})
-		);
+		const formData = new FormData();
+		formData.append('data', new Blob([binary]));
+		formData.append('upload_id', info.upload_id as string);
+		formData.append('index', String(1));
+		pArrr.push(upload(formData));
 	} else {
 		for (let i = 0; i < count; i += 1) {
 			// eslint-disable-next-line no-continue
@@ -243,13 +231,12 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 			} else {
 				data = binary.slice(i * size, (i + 1) * size);
 			}
-			pArrr.push(
-				upload({
-					data: binaryToBase64(data),
-					upload_id: info.upload_id as string,
-					index: i + 1
-				})
-			);
+
+			const formData = new FormData();
+			formData.append('data', new Blob([data]));
+			formData.append('upload_id', info.upload_id as string);
+			formData.append('index', String(i + 1));
+			pArrr.push(upload(formData));
 		}
 	}
 	pArrr.forEach((fn: Promise<AxiosResponse<any, any>>, index: number) => {
