@@ -32,3 +32,5 @@ jobs:  # workflow中的job
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: VITE_API_BASE_URL=${{ secrets.BASE_URL }}
+
