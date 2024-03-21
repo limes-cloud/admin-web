@@ -1,7 +1,7 @@
 <template>
 	<a-space direction="vertical" fill>
 		<a-table
-			v-permission="'manager:dict:query'"
+			v-permission="'manager:dictionary:value:query'"
 			row-key="id"
 			:loading="loading"
 			:columns="columns"
@@ -10,30 +10,25 @@
 			:pagination="false"
 			:size="size"
 		>
+			<template #status="{ record }">
+				<a-tag v-if="record.status" color="arcoblue">启用</a-tag>
+				<a-tag v-else color="warning">禁用</a-tag>
+			</template>
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}
 			</template>
-
 			<template #updatedAt="{ record }">
 				{{ $formatTime(record.updated_at) }}
 			</template>
 
-			<template #type="{ record }">
-				{{ record.type == 'trends' ? '动态字典' : '静态字典' }}
-			</template>
-
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:dict:value:query'" color="arcoblue" @click="nav(record.id)">
-						<template #icon><icon-mind-mapping /></template>
-						字典词
-					</a-tag>
-					<a-tag v-permission="'manager:dict:update'" color="orangered" @click="emit('update', record)">
+					<a-tag v-permission="'manager:dictionary:value:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
-					<template v-if="$hasPermission('manager:dict:delete')">
-						<a-popconfirm content="您确认删除此字典" type="warning" @ok="emit('delete', record.id)">
+					<template v-if="$hasPermission('manager:dictionary:value:delete')">
+						<a-popconfirm content="您确认删除此字典值" type="warning" @ok="emit('delete', record.id)">
 							<a-tag color="red">
 								<template #icon><icon-delete /></template>
 								删除
@@ -57,7 +52,6 @@
 </template>
 
 <script lang="ts" setup>
-import router from '@/router';
 import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
@@ -94,9 +88,5 @@ const pageChange = (current: number) => {
 const pageSizeChange = (size: number) => {
 	page.value.pageSize = size;
 	emit('pageChange', page.value);
-};
-
-const nav = (id: number) => {
-	router.push({ name: 'DictValue', query: { dict_id: id } });
 };
 </script>

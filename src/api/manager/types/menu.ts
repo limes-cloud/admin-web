@@ -8,6 +8,8 @@ export interface Menu {
 	icon?: string;
 	path: string;
 	permission?: string;
+	check_object: boolean;
+	check_object_rule?: string;
 	component: string;
 	redirect?: string;
 	api: string;

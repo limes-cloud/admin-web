@@ -2,7 +2,7 @@
 	<a-drawer
 		v-model:visible="visible"
 		:title="isAdd ? '新建' : '修改'"
-		width="380px"
+		width="480px"
 		unmount-on-close
 		@cancel="visible = false"
 		@before-ok="handleSubmit"
@@ -162,6 +162,50 @@
 				<a-input v-model="form.api" placeholder="请输入接口路径" allow-clear />
 			</a-form-item>
 
+			<template v-if="form.type === 'A'">
+				<a-form-item field="check_object" label="资源鉴权">
+					<a-radio-group v-model="form.check_object" :default-value="false">
+						<a-radio :value="false">否</a-radio>
+						<a-radio :value="true">是</a-radio>
+					</a-radio-group>
+				</a-form-item>
+				<a-form-item v-if="form.check_object" field="object_rule" label="鉴权规则" :content-flex="false">
+					<template v-for="(item, index) in objectRule" :key="index">
+						<view class="check-box" :class="index != objectRule.length - 1 ? 'mgb' : ''">
+							<a-row :gutter="12">
+								<a-col :span="7"><a-input v-model="item.field" placeholder="字段" allow-clear /></a-col>
+								<a-col :span="6">
+									<a-select
+										v-model="item.operate"
+										placeholder="规则"
+										:options="[
+											{ label: 'add', value: 'add' },
+											{ label: 'in', value: 'in' }
+										]"
+									></a-select>
+								</a-col>
+								<a-col :span="7">
+									<a-select
+										v-model="item.object"
+										placeholder="请选择资源对象"
+										:scrollbar="true"
+										:options="objects"
+										allow-search
+										:field-names="{ value: 'id', label: 'name' }"
+									></a-select>
+								</a-col>
+								<a-col :span="4">
+									<view class="operate check-item">
+										<icon-plus-circle :size="24" :style="{ color: 'rgb(var(--primary-6))' }" @click="handleAddCheckRule(index)" />
+										<icon-minus-circle v-if="index != 0" :size="24" :style="{ color: 'rgb(var(--danger-6))' }" @click="handleDelCheckRule(index)" />
+									</view>
+								</a-col>
+							</a-row>
+						</view>
+					</template>
+				</a-form-item>
+			</template>
+
 			<!-- api 可选菜单路径 -->
 			<template v-if="form.type === 'A' || form.type === 'G'">
 				<a-form-item field="path" label="菜单路径">
@@ -233,9 +277,11 @@ import { Menu } from '@/api/manager/types/menu';
 import { computed, ref, watch } from 'vue';
 import icons from '@/utils/icon';
 import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
-import { TableData } from '@arco-design/web-vue';
+import { TableData, Message } from '@arco-design/web-vue';
 import Icon from '@/components/icon/index.vue';
+import { ObjectDef, ObjectRule } from '@/api/manager/types/object';
 
+const objectRule = ref<ObjectRule[]>([]);
 const formRef = ref();
 const iconOptions = computed(() => icons);
 const visible = ref(false);
@@ -266,6 +312,7 @@ const menuTypes = computed<SelectOptionData[]>(() => [
 const props = defineProps<{
 	menus?: TableData[];
 	data: Menu;
+	objects: ObjectDef[];
 }>();
 
 const form = ref({} as Menu);
@@ -277,6 +324,11 @@ watch(
 		form.value = val;
 		if (props.data.weight === undefined) {
 			form.value.weight = 0;
+		}
+		if (form.value.check_object_rule) {
+			objectRule.value = JSON.parse(form.value.check_object_rule);
+		} else {
+			objectRule.value.push({} as ObjectRule);
 		}
 	}
 );
@@ -302,6 +354,31 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
+	if (form.value.check_object) {
+		try {
+			let isAllow = true;
+			objectRule.value.forEach((item) => {
+				const keys = Object.keys(item);
+				if (keys.length !== 3) {
+					isAllow = false;
+					return;
+				}
+				Object.keys(item).forEach((key) => {
+					if (!item[key]) {
+						isAllow = false;
+					}
+				});
+			});
+			if (!isAllow) {
+				Message.error('资源对象数据填写不完整');
+				return false;
+			}
+			form.value.check_object_rule = JSON.stringify(objectRule.value);
+		} catch (error) {
+			Message.error('资源对象数据填写不完整');
+			return false;
+		}
+	}
 
 	if (isAdd.value) {
 		emit('add', { ...form.value });
@@ -310,4 +387,34 @@ const handleSubmit = async () => {
 	}
 	return true;
 };
+
+const handleAddCheckRule = (index) => {
+	objectRule.value.splice(index + 1, 0, {} as ObjectRule);
+};
+const handleDelCheckRule = (index) => {
+	objectRule.value.splice(index, 1);
+};
 </script>
+
+<style lang="less" scoped>
+.check-box {
+	display: flex;
+	flex-direction: row;
+
+	.chexk-item {
+		width: 33%;
+		min-width: 33%;
+	}
+
+	.operate {
+		display: flex;
+		flex: 1;
+		justify-content: space-between;
+		width: 50px;
+	}
+}
+
+.mgb {
+	margin-bottom: 10px;
+}
+</style>

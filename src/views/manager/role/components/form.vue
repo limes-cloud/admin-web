@@ -94,8 +94,8 @@
 				:validate-trigger="['change']"
 			>
 				<a-cascader
+					v-model="formData.department_ids"
 					:options="departments"
-					:default-value="formData.department_ids"
 					:style="{ width: '320px' }"
 					check-strictly
 					:field-names="{ value: 'id', label: 'name' }"

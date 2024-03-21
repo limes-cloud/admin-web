@@ -36,6 +36,7 @@ import { PageAppReq, App } from '@/api/user-center/types/app';
 import { Channel } from '@/api/user-center/types/channel';
 import { Field } from '@/api/user-center/types/field';
 import { pageField } from '@/api/user-center/field';
+import { addDepartmentObject, deleteDepartmentObject } from '@/api/manager/department';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -143,9 +144,11 @@ handleGetField();
 handleGet();
 
 // 处理新增
-const handleAdd = async (data: App) => {
-	await addApp(data);
+const handleAdd = async (app: App) => {
+	const { data } = await addApp(app);
+	addDepartmentObject('app', data.id);
 	handleGet();
+
 	Message.success('创建成功');
 };
 
@@ -159,6 +162,7 @@ const handleUpdate = async (data: App) => {
 // 处理数据删除
 const handleDelete = async (id: number) => {
 	await deleteApp(id);
+	deleteDepartmentObject('app', id);
 	handleGet();
 	Message.success('删除成功');
 };

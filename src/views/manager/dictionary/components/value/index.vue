@@ -1,26 +1,23 @@
 <template>
 	<div class="container">
-		<Breadcrumb />
-		<a-card class="general-card">
-			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
-			<Table
-				:columns="columns"
-				:loading="loading"
-				:data="tableData"
-				:size="size"
-				:total="total"
-				:pagination="{
-					current: searchForm.page,
-					pageSize: searchForm.page_size
-				}"
-				@page-change="handlePageChange"
-				@add="handleTableAdd"
-				@update="handleTableUpdate"
-				@delete="handleDelete"
-			></Table>
-			<Form ref="formRef" :data="form" :menus="menus" @add="handleAdd" @update="handleUpdate"></Form>
-		</a-card>
+		<Search @search="handleSearch"></Search>
+		<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
+		<Table
+			:columns="columns"
+			:loading="loading"
+			:data="tableData"
+			:size="size"
+			:total="total"
+			:pagination="{
+				current: searchForm.page,
+				pageSize: searchForm.page_size
+			}"
+			@page-change="handlePageChange"
+			@add="handleTableAdd"
+			@update="handleTableUpdate"
+			@delete="handleDelete"
+		></Table>
+		<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
 	</div>
 </template>
 
@@ -31,44 +28,52 @@ import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 
-import { pageDict, addDict, deleteDict, updateDict } from '@/api/manager/dict';
-import { PageDictReq, Dict } from '@/api/manager/types/dict';
-import { getRoleMenuTree } from '@/api/manager/role-menu';
-import { Menu } from '@/api/manager/types/menu';
+import router from '@/router';
+import { addDictionaryValue, deleteDictionaryValue, pageDictionaryValue, updateDictionaryValue } from '@/api/manager/dictionary';
+import { DictionaryValue, PageDictionaryValueReq } from '@/api/manager/types/dictionary';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
+const props = defineProps<{ id: number }>();
+const params = router.currentRoute.value.query;
 const formRef = ref();
-const form = ref<Dict>({} as Dict);
+const form = ref<DictionaryValue>({} as DictionaryValue);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<PageDictReq>({
+const searchForm = ref<PageDictionaryValueReq>({
 	page: 1,
-	page_size: 10
+	page_size: 10,
+	dictionary_id: props.id
 });
-const menus = ref<Menu[]>([]);
 
 const columns = ref<TableCloumn[]>([
 	{
-		title: '字典名称',
-		dataIndex: 'name'
+		title: '标签',
+		dataIndex: 'label'
 	},
 	{
-		title: '字典关键词',
-		dataIndex: 'keyword'
+		title: '标识',
+		dataIndex: 'value'
 	},
 	{
-		title: '字典类型',
-		dataIndex: 'type',
-		slotName: 'type'
+		title: '状态',
+		slotName: 'status'
 	},
 	{
-		title: '字典描述',
+		title: '权重',
+		dataIndex: 'weight'
+	},
+	{
+		title: '扩展信息',
+		dataIndex: 'extra'
+	},
+	{
+		title: '描述',
 		dataIndex: 'description'
 	},
 	{
@@ -96,7 +101,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageDict(searchForm.value);
+		const { data } = await pageDictionaryValue(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -104,21 +109,13 @@ const handleGet = async () => {
 	}
 };
 
-const handleGetMenu = async () => {
-	const { data } = await getRoleMenuTree();
-	menus.value = data;
-};
-
 handleGet();
-handleGetMenu();
 
 // 处理查询
-const handleSearch = async (req: PageDictReq) => {
-	const pageSize = searchForm.value.page_size;
+const handleSearch = async (req: PageDictionaryValueReq) => {
 	searchForm.value = {
-		...req,
-		page: 1,
-		page_size: pageSize
+		...searchForm.value,
+		...req
 	};
 
 	handleGet();
@@ -132,51 +129,48 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 // 处理新增
-const handleAdd = async (data: Dict) => {
-	await addDict(data);
+const handleAdd = async (data: DictionaryValue) => {
+	data.dictionary_id = params.dictionary_id as unknown as number;
+	await addDictionaryValue(data);
 	handleGet();
 	Message.success('创建成功');
 };
 
 // 处理修改
-const handleUpdate = async (data: Dict) => {
-	data.extra = JSON.stringify(data.extra_info);
-	await updateDict(data);
+const handleUpdate = async (data: DictionaryValue) => {
+	await updateDictionaryValue(data);
 	handleGet();
 	Message.success('更新成功');
 };
 
 // 处理数据删除
 const handleDelete = async (id: number) => {
-	await deleteDict(id);
+	await deleteDictionaryValue(id);
 	handleGet();
 	Message.success('删除成功');
 };
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Dict;
+	form.value = {} as DictionaryValue;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (data: Dict) => {
-	if (data.extra) {
-		data.extra_info = JSON.parse(data.extra);
-	}
+const handleTableUpdate = async (data: DictionaryValue) => {
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as Dict;
+	form.value = { id } as DictionaryValue;
 	formRef.value.showAddDrawer();
 };
 </script>
 
 <script lang="ts">
 export default {
-	name: 'ManagerDict'
+	name: 'ManagerDictionaryValue'
 };
 </script>

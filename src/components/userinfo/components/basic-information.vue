@@ -43,7 +43,7 @@ import { ref } from 'vue';
 import { FormInstance } from '@arco-design/web-vue/es/form';
 import { useUserStore } from '@/store';
 import Message from '@arco-design/web-vue/es/message';
-import { updateUserBasic } from '@/api/manager/user';
+import { updateCurrentUser } from '@/api/manager/user';
 
 const userInfo = useUserStore();
 
@@ -56,7 +56,7 @@ const formData = ref<any>({
 const validate = async () => {
 	const res = await formRef.value?.validate();
 	if (!res) {
-		await updateUserBasic({ ...formData.value });
+		await updateCurrentUser({ ...formData.value });
 		Message.success('基础信息更新成功');
 		userInfo.info();
 	}

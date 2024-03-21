@@ -141,8 +141,7 @@ import { ref, watch } from 'vue';
 import { CascaderOption } from '@arco-design/web-vue';
 import { User } from '@/api/manager/types/user';
 import { Job } from '@/api/manager/types/job';
-import { pageJob, userJobs } from '@/api/manager/job';
-import { getUserRoles } from '@/api/manager/user-role';
+import { pageJob } from '@/api/manager/job';
 
 const formRef = ref();
 const visible = ref(false);
@@ -190,48 +189,24 @@ const handleSubmit = async () => {
 const jobs = ref<Job[]>([]);
 // const current = ref<Job>();
 
-const searchJob = async (val?: string) => {
-	const { data } = await pageJob({ page: 1, page_size: 10, keyword: val });
-	const { list } = data;
-	if (!list) {
-		return;
-	}
-
-	// 初始化
-	const searchd: Job[] = [];
-	list.forEach((item) => {
-		if (!form.value.job_ids || !form.value.job_ids.includes(item.id)) {
-			searchd.push(item);
-		}
-	});
-
-	const selectd: Job[] = [];
-	jobs.value.forEach((item) => {
-		if (form.value.job_ids && form.value.job_ids.includes(item.id)) {
-			selectd.push(item);
-		}
-	});
-
-	jobs.value = searchd.concat(selectd);
+const searchJob = async () => {
+	const { data } = await pageJob({ page: 1, page_size: 50 });
+	jobs.value = data.list;
 };
 
-const handleGetUserRoleIds = async (id: number) => {
-	const { data } = await getUserRoles(id);
+const handleGetUserRoleIds = async (user: User) => {
 	const ids: number[] = [];
-	data.forEach((item) => {
-		ids.push(item.role_id);
+	user.roles?.forEach((item) => {
+		ids.push(item.id);
 	});
 	return ids;
 };
 
-const handleGetUserJobIds = async (id: number) => {
-	const { data } = await userJobs(id);
+const handleGetUserJobIds = async (user: User) => {
 	const ids: number[] = [];
-	if (data) {
-		data.forEach((item) => {
-			ids.push(item.id);
-		});
-	}
+	user.jobs?.forEach((item) => {
+		ids.push(item.id);
+	});
 	return ids;
 };
 
@@ -240,8 +215,8 @@ const handlePreData = async () => {
 	if (isAdd.value) {
 		return;
 	}
-	const roleIds = await handleGetUserRoleIds(props.data.id);
-	const jobIds = await handleGetUserJobIds(props.data.id);
+	const roleIds = await handleGetUserRoleIds(props.data);
+	const jobIds = await handleGetUserJobIds(props.data);
 	form.value.role_ids = roleIds;
 	form.value.job_ids = jobIds;
 };

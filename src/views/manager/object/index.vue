@@ -18,8 +18,10 @@
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@delete="handleDelete"
+				@preview="handlePreview"
 			></Table>
-			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :data="form" :menus="menus" @add="handleAdd" @update="handleUpdate"></Form>
+			<Preview ref="previewRef"></Preview>
 		</a-card>
 	</div>
 </template>
@@ -30,41 +32,47 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { pageJob, addJob, deleteJob, updateJob } from '@/api/manager/job';
-import { PageJobReq, Job } from '@/api/manager/types/job';
+
+import { pageObject, addObject, deleteObject, updateObject, loadObjectValue } from '@/api/manager/object';
+import { PageObjectReq, ObjectDef } from '@/api/manager/types/object';
+import { getMenuFromRole } from '@/api/manager/menu';
+import { Menu } from '@/api/manager/types/menu';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import Preview from './components/preview.vue';
 
+const previewRef = ref();
 const formRef = ref();
-const form = ref<Job>({} as Job);
+const form = ref<ObjectDef>({} as ObjectDef);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-
 const total = ref(0);
-const searchForm = ref<PageJobReq>({
+const searchForm = ref<PageObjectReq>({
 	page: 1,
 	page_size: 10
 });
+const menus = ref<Menu[]>([]);
 
 const columns = ref<TableCloumn[]>([
 	{
-		title: '职位名称',
+		title: '字典名称',
 		dataIndex: 'name'
 	},
 	{
-		title: '职位标识',
+		title: '字典关键词',
 		dataIndex: 'keyword'
 	},
 	{
-		title: '职位权重',
-		dataIndex: 'weight'
+		title: '字典类型',
+		dataIndex: 'type',
+		slotName: 'type'
 	},
 	{
-		title: '职位描述',
+		title: '字典描述',
 		dataIndex: 'description'
 	},
 	{
@@ -92,7 +100,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageJob(searchForm.value);
+		const { data } = await pageObject(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -100,10 +108,16 @@ const handleGet = async () => {
 	}
 };
 
+const handleGetMenu = async () => {
+	const { data } = await getMenuFromRole();
+	menus.value = data.list;
+};
+
 handleGet();
+handleGetMenu();
 
 // 处理查询
-const handleSearch = async (req: PageJobReq) => {
+const handleSearch = async (req: PageObjectReq) => {
 	const pageSize = searchForm.value.page_size;
 	searchForm.value = {
 		...req,
@@ -122,47 +136,52 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 // 处理新增
-const handleAdd = async (data: Job) => {
-	await addJob(data);
+const handleAdd = async (data: ObjectDef) => {
+	await addObject(data);
 	handleGet();
 	Message.success('创建成功');
 };
 
 // 处理修改
-const handleUpdate = async (data: Job) => {
-	await updateJob(data);
+const handleUpdate = async (data: ObjectDef) => {
+	await updateObject(data);
 	handleGet();
 	Message.success('更新成功');
 };
 
 // 处理数据删除
 const handleDelete = async (id: number) => {
-	await deleteJob(id);
+	await deleteObject(id);
 	handleGet();
 	Message.success('删除成功');
 };
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Job;
+	form.value = {} as ObjectDef;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (data: Job) => {
+const handleTableUpdate = async (data: ObjectDef) => {
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as Job;
+	form.value = { id } as ObjectDef;
 	formRef.value.showAddDrawer();
+};
+
+const handlePreview = async (data: ObjectDef) => {
+	const res = await loadObjectValue(data);
+	previewRef.value.show(res);
 };
 </script>
 
 <script lang="ts">
 export default {
-	name: 'ManagerJob'
+	name: 'ManagerObject'
 };
 </script>

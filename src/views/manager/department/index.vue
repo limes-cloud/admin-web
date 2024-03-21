@@ -11,8 +11,10 @@
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@delete="handleDelete"
+				@object="handleObject"
 			></Table>
 			<Form ref="formRef" :departments="tableData" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<ObjectElem ref="objectRef"></ObjectElem>
 		</a-card>
 	</div>
 </template>
@@ -22,13 +24,16 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
 import { addDepartment, deleteDepartment, getDepartmentTree, updateDepartment } from '@/api/manager/department';
+
 import useLoading from '@/hooks/loading';
 import { Department } from '@/api/manager/types/department';
 import { Message } from '@arco-design/web-vue';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
+import ObjectElem from './components/object.vue';
 
+const objectRef = ref();
 const formRef = ref();
 const form = ref<Department>({} as Department);
 const { setLoading } = useLoading(true);
@@ -36,6 +41,11 @@ const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const columns = ref<TableCloumn[]>([
+	{
+		title: '部门标志',
+		dataIndex: 'keyword',
+		slotName: 'keyword'
+	},
 	{
 		title: '部门名称',
 		dataIndex: 'name',
@@ -45,11 +55,6 @@ const columns = ref<TableCloumn[]>([
 		title: '部门描述',
 		dataIndex: 'description',
 		slotName: 'description'
-	},
-	{
-		title: '部门标志',
-		dataIndex: 'keyword',
-		slotName: 'keyword'
 	},
 	{
 		title: '创建时间',
@@ -100,6 +105,10 @@ const handleDelete = async (id: number) => {
 	await deleteDepartment(id);
 	handleGet();
 	Message.success('删除成功');
+};
+
+const handleObject = async (id: number) => {
+	objectRef.value.show(id);
 };
 
 //  处理tool按钮新建

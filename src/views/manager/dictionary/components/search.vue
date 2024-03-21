@@ -1,16 +1,16 @@
 <template>
-	<a-row v-permission="'manager:dict:value:query'">
+	<a-row v-permission="'manager:dictionary:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="8">
-						<a-form-item field="name" label="字典值名称">
-							<a-input v-model="form.name" allow-clear placeholder="请输入字典值名称" />
+						<a-form-item field="name" label="字典名称">
+							<a-input v-model="form.name" allow-clear placeholder="请输入字典名称" />
 						</a-form-item>
 					</a-col>
 					<a-col :span="8">
-						<a-form-item field="keyword" label="字典值关键词">
-							<a-input v-model="form.keyword" allow-clear placeholder="请输入字典值关键词" />
+						<a-form-item field="keyword" label="字典关键词">
+							<a-input v-model="form.keyword" allow-clear placeholder="请输入字典关键词" />
 						</a-form-item>
 					</a-col>
 				</a-row>

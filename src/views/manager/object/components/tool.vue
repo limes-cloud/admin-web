@@ -1,11 +1,11 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'configure:env:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'manager:object:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>
-				新建环境
+				新建对象
 			</a-button>
 		</a-col>
 

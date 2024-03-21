@@ -41,4 +41,37 @@ export const findNode = (root: Node, id: number): Node | null => {
 	return null;
 };
 
+export const extractValues = (data: any, path: string) => {
+	const result: any[] = [];
+
+	const getValue = (value: any, keys: string[]) => {
+		const type = typeof value;
+		const copyKeys = [...keys];
+		if (copyKeys.length === 0) {
+			return;
+		}
+
+		if (Array.isArray(value)) {
+			value.forEach((val) => {
+				if (copyKeys.length >= 1) {
+					getValue(val, copyKeys);
+				} else {
+					result.push(val[copyKeys[0]]);
+				}
+			});
+		} else if (type === 'object') {
+			const key = copyKeys.shift() as string;
+			const val = value[key];
+
+			if (copyKeys.length >= 1) {
+				getValue(val, copyKeys);
+			} else {
+				result.push(val);
+			}
+		}
+	};
+	getValue(data, path.split('.'));
+	return result;
+};
+
 export default null;

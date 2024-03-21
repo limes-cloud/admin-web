@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Role } from './types/role';
+import { Role, UpdateRoleMenuReq } from './types/role';
 
 export function getRoleTree() {
 	return axios.get<Role>('/manager/v1/role/tree');
@@ -15,6 +15,14 @@ export function updateRole(data: Role) {
 
 export function deleteRole(id: number) {
 	return axios.delete('/manager/v1/role', { params: { id } });
+}
+
+export function getRoleMenuIds(id: number) {
+	return axios.get('/manager/v1/role/menu/ids', { params: { role_id: id } });
+}
+
+export function updateRoleMenu(data: UpdateRoleMenuReq) {
+	return axios.put('/manager/v1/role/menu', data);
 }
 
 export default null;

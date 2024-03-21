@@ -89,6 +89,7 @@
 					allow-search
 					:field-names="{ value: 'id', label: 'name' }"
 					@search="search"
+					@focus="search()"
 				></a-select>
 			</a-form-item>
 

@@ -30,6 +30,9 @@ axios.interceptors.request.use(
 		if (!config.headers) {
 			config.headers = {};
 		}
+		if (config.url === '/resource/v1/upload') {
+			config.timeout = 60000;
+		}
 		config.headers['Content-Type'] = 'application/json';
 		return config;
 	},

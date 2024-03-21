@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DeleteFileReq, PageFileReq, PageFileRes, PrepareUploadReq, PrepareUploadRes, UpdateFileReq, UploadReq } from './types/file';
+import { DeleteFileReq, PageFileReq, PageFileRes, PrepareUploadReq, PrepareUploadRes, UpdateFileReq } from './types/file';
 
 export function prepareUpload(req: PrepareUploadReq) {
 	return axios.post<PrepareUploadRes>(`/resource/v1/upload/prepare`, req);

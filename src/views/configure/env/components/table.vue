@@ -1,6 +1,6 @@
 <template>
 	<a-table
-		v-permission="'configure:environment:query'"
+		v-permission="'configure:env:query'"
 		row-key="id"
 		:loading="loading"
 		:columns="columns"
@@ -23,22 +23,22 @@
 
 		<template #operations="{ record }">
 			<a-space class="cursor-pointer">
-				<a-tag v-permission="'configure:environment:token:query'" color="arcoblue" @click="emit('queryToken', record.id)">
+				<a-tag v-permission="'configure:env:token:query'" color="arcoblue" @click="emit('queryToken', record.id)">
 					<template #icon><icon-edit /></template>
 					获取token
 				</a-tag>
 
-				<a-tag v-permission="'configure:environment:token:reset'" color="orangered" @click="emit('resetToken', record.id)">
+				<a-tag v-permission="'configure:env:token:reset'" color="orangered" @click="emit('resetToken', record.id)">
 					<template #icon><icon-edit /></template>
 					重置token
 				</a-tag>
 
-				<a-tag v-permission="'configure:environment:update'" color="orangered" @click="emit('update', record)">
+				<a-tag v-permission="'configure:env:update'" color="orangered" @click="emit('update', record)">
 					<template #icon><icon-edit /></template>
 					修改
 				</a-tag>
 
-				<template v-if="$hasPermission('configure:environment:delete')">
+				<template v-if="$hasPermission('configure:env:delete')">
 					<a-popconfirm content="您确认删除此环境" type="warning" @ok="emit('delete', record.id)">
 						<a-tag color="red">
 							<template #icon><icon-delete /></template>

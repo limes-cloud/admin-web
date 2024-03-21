@@ -24,6 +24,11 @@
 
 		<template #operations="{ record }">
 			<a-space class="cursor-pointer">
+				<a-tag v-permission="'manager:department:object:query'" color="arcoblue" @click="emit('object', record.id)">
+					<template #icon><icon-list /></template>
+					资源
+				</a-tag>
+
 				<a-tag v-permission="'manager:department:add'" color="arcoblue" @click="emit('add', record.id)">
 					<template #icon><icon-plus /></template>
 					新建
@@ -51,7 +56,7 @@
 import { TableSize, TableCloumn } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
-const emit = defineEmits(['delete', 'update', 'add']);
+const emit = defineEmits(['delete', 'update', 'add', 'object']);
 
 defineProps<{
 	columns: TableCloumn[];

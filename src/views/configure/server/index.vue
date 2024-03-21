@@ -32,6 +32,7 @@ import { addServer, deleteServer, pageServer, updateServer } from '@/api/configu
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { PageServerReq, Server } from '@/api/configure/types/server';
+import { addDepartmentObject, deleteDepartmentObject } from '@/api/manager/department';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -101,8 +102,9 @@ const handleGet = async () => {
 handleGet();
 
 // 处理新增
-const handleAdd = async (data: Server) => {
-	await addServer(data);
+const handleAdd = async (server: Server) => {
+	const { data } = await addServer(server);
+	addDepartmentObject('server', data.id);
 	handleGet();
 	Message.success('创建成功');
 };
@@ -117,6 +119,7 @@ const handleUpdate = async (data: Server) => {
 // 处理数据删除
 const handleDelete = async (id: number) => {
 	await deleteServer(id);
+	deleteDepartmentObject('server', id);
 	handleGet();
 	Message.success('删除成功');
 };

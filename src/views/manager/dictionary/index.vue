@@ -15,11 +15,12 @@
 					pageSize: searchForm.page_size
 				}"
 				@page-change="handlePageChange"
-				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@delete="handleDelete"
+				@value="handleTableValue"
 			></Table>
 			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Value ref="valueRef"></Value>
 		</a-card>
 	</div>
 </template>
@@ -30,41 +31,39 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { pageJob, addJob, deleteJob, updateJob } from '@/api/manager/job';
-import { PageJobReq, Job } from '@/api/manager/types/job';
+
+import { pageDictionary, addDictionary, deleteDictionary, updateDictionary } from '@/api/manager/dictionary';
+import { PageDictionaryReq, Dictionary } from '@/api/manager/types/dictionary';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import Value from './components/value.vue';
 
+const valueRef = ref();
 const formRef = ref();
-const form = ref<Job>({} as Job);
+const form = ref<Dictionary>({} as Dictionary);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-
 const total = ref(0);
-const searchForm = ref<PageJobReq>({
+const searchForm = ref<PageDictionaryReq>({
 	page: 1,
 	page_size: 10
 });
 
 const columns = ref<TableCloumn[]>([
 	{
-		title: '职位名称',
+		title: '字典名称',
 		dataIndex: 'name'
 	},
 	{
-		title: '职位标识',
+		title: '字典标识',
 		dataIndex: 'keyword'
 	},
 	{
-		title: '职位权重',
-		dataIndex: 'weight'
-	},
-	{
-		title: '职位描述',
+		title: '字典描述',
 		dataIndex: 'description'
 	},
 	{
@@ -92,7 +91,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageJob(searchForm.value);
+		const { data } = await pageDictionary(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -103,7 +102,7 @@ const handleGet = async () => {
 handleGet();
 
 // 处理查询
-const handleSearch = async (req: PageJobReq) => {
+const handleSearch = async (req: PageDictionaryReq) => {
 	const pageSize = searchForm.value.page_size;
 	searchForm.value = {
 		...req,
@@ -122,47 +121,45 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 // 处理新增
-const handleAdd = async (data: Job) => {
-	await addJob(data);
+const handleAdd = async (data: Dictionary) => {
+	await addDictionary(data);
 	handleGet();
 	Message.success('创建成功');
 };
 
 // 处理修改
-const handleUpdate = async (data: Job) => {
-	await updateJob(data);
+const handleUpdate = async (data: Dictionary) => {
+	await updateDictionary(data);
 	handleGet();
 	Message.success('更新成功');
 };
 
 // 处理数据删除
 const handleDelete = async (id: number) => {
-	await deleteJob(id);
+	await deleteDictionary(id);
 	handleGet();
 	Message.success('删除成功');
 };
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Job;
+	form.value = {} as Dictionary;
 	formRef.value.showAddDrawer();
+};
+
+const handleTableValue = (data: Dictionary) => {
+	valueRef.value.show(data.id, data.name);
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (data: Job) => {
+const handleTableUpdate = async (data: Dictionary) => {
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
-};
-
-// 处理table点击添加
-const handleTableAdd = (id: number) => {
-	form.value = { id } as Job;
-	formRef.value.showAddDrawer();
 };
 </script>
 
 <script lang="ts">
 export default {
-	name: 'ManagerJob'
+	name: 'ManagerDictionary'
 };
 </script>

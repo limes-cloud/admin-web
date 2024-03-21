@@ -12,7 +12,7 @@
 				@update="handleTableUpdate"
 				@delete="handleDelete"
 			></Table>
-			<Form ref="formRef" :menus="tableData" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :menus="tableData" :objects="objects" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
 	</div>
 </template>
@@ -25,6 +25,8 @@ import { addMenu, deleteMenu, getMenuTree, updateMenu } from '@/api/manager/menu
 import useLoading from '@/hooks/loading';
 import { Menu } from '@/api/manager/types/menu';
 import { Message } from '@arco-design/web-vue';
+import { pageObject } from '@/api/manager/object';
+import { ObjectDef } from '@/api/manager/types/object';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -35,6 +37,7 @@ const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
+const objects = ref<ObjectDef[]>([]);
 const columns = ref<TableCloumn[]>([
 	{
 		title: '菜单标题',
@@ -78,14 +81,19 @@ const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await getMenuTree();
-		tableData.value = data;
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
 };
 
-handleGet();
+const handleGetObject = async (val?: string) => {
+	const { data } = await pageObject({ page: 1, page_size: 50 });
+	objects.value = data.list;
+};
 
+handleGet();
+handleGetObject();
 // 处理新增
 const handleAdd = async (data: Menu) => {
 	if (data.type === 'R') {

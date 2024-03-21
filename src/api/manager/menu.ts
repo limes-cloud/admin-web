@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { Menu } from './types/menu';
 
+export function getMenuFromRole() {
+	return axios.get<{ list: Menu[] }>('/manager/v1/menu/tree/from/role');
+}
+
 export function getMenuTree() {
-	return axios.get<Menu[]>('/manager/v1/menu/tree');
+	return axios.get<{ list: Menu[] }>('/manager/v1/menu/tree');
 }
 
 export function addMenu(data: Menu) {

@@ -8,7 +8,7 @@ export function pageServer(req: PageServerReq) {
 }
 
 export function addServer(data: Server) {
-	return axios.post('/configure/v1/server', data);
+	return axios.post<{ id: number }>('/configure/v1/server', data);
 }
 
 export function updateServer(data: Server) {

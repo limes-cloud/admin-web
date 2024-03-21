@@ -8,7 +8,6 @@ import {
 	PageTemplateRes,
 	SwitchTemplateReq,
 	CompareTemplateReq,
-	CompareTemplateInfo,
 	CompareTemplateRes
 } from './types/template';
 

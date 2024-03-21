@@ -3,58 +3,44 @@
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="keyword"
-				label="职位标识"
+				label="字典标识"
 				:rules="[
 					{
 						required: true,
-						message: '职位标识是必填项'
+						message: '字典标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" allow-clear placeholder="请输入职位标识" />
+				<a-input v-model="form.keyword" allow-clear placeholder="请输入字典标识" />
 			</a-form-item>
 
 			<a-form-item
 				field="name"
-				label="职位名称"
+				label="字典名称"
 				:rules="[
 					{
 						required: true,
-						message: '职位名称是必填项'
+						message: '字典名称是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.name" allow-clear placeholder="请输入职位名称" />
+				<a-input v-model="form.name" allow-clear placeholder="请输入字典名称" />
 			</a-form-item>
 
 			<a-form-item
 				field="description"
-				label="职位描述"
+				label="字典描述"
 				:rules="[
 					{
 						required: true,
-						message: '职位描述是必填项'
+						message: '字典描述是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-textarea v-model="form.description" allow-clear placeholder="请输入职位描述" />
-			</a-form-item>
-
-			<a-form-item
-				field="weight"
-				label="职位权重"
-				:rules="[
-					{
-						required: true,
-						message: '职位权重是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-input-number v-model="form.weight" placeholder="请输入职位权重" :default-value="0" mode="button" />
+				<a-textarea v-model="form.description" allow-clear placeholder="请输入字典描述" />
 			</a-form-item>
 		</a-form>
 	</a-drawer>
@@ -62,24 +48,23 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { Job } from '@/api/manager/types/job';
+import { Dictionary } from '@/api/manager/types/dictionary';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: Job;
+	data: Dictionary;
 }>();
 
-const form = ref({} as Job);
+const form = ref({} as Dictionary);
 const emit = defineEmits(['add', 'update']);
 
 watch(
 	() => props.data,
 	(val) => {
 		form.value = val;
-		if (!form.value.weight) form.value.weight = 0;
 	}
 );
 

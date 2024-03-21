@@ -10,3 +10,8 @@ export interface Role {
 	created_at: number;
 	updated_at: number;
 }
+
+export interface UpdateRoleMenuReq {
+	role_id: number;
+	menu_ids: number[];
+}

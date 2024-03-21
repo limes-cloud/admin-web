@@ -37,7 +37,7 @@
 							<div class="login-form-password-actions">
 								<a-checkbox checked="rememberPassword" :model-value="loginConfig.rememberPassword" @change="setRememberPassword as any">记住密码</a-checkbox>
 							</div>
-							<a-button size="large" type="primary" html-type="submit" long :loading="loading">确认登陆</a-button>
+							<a-button size="large" type="primary" html-type="submit" long :loading="loading">确认登录</a-button>
 						</a-space>
 					</a-form>
 				</div>

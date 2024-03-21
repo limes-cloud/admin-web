@@ -23,15 +23,16 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
-import { addRole, deleteRole, getRoleTree, updateRole } from '@/api/manager/role';
+import { addRole, deleteRole, getRoleMenuIds, getRoleTree, updateRole, updateRoleMenu } from '@/api/manager/role';
 import { getDepartmentTree } from '@/api/manager/department';
 import useLoading from '@/hooks/loading';
-import { Role } from '@/api/manager/types/role';
+import { Role, UpdateRoleMenuReq } from '@/api/manager/types/role';
 import { Message, TreeNodeData } from '@arco-design/web-vue';
 import { Department } from '@/api/manager/types/department';
-import { getRoleMenuIds, getRoleMenuTree, updateRoleMenu } from '@/api/manager/role-menu';
+
+import { getMenuFromRole } from '@/api/manager/menu';
+
 import { Menu } from '@/api/manager/types/menu';
-import { UpdateRoleMenuReq } from '@/api/manager/types/role-menu';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -90,8 +91,8 @@ const handleGetDepartment = async () => {
 };
 
 const handleGetMenu = async () => {
-	const { data } = await getRoleMenuTree();
-	menus.value = data;
+	const { data } = await getMenuFromRole();
+	menus.value = data.list;
 };
 
 // handleGet 处理查询

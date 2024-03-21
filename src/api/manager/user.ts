@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ChangePasswordCaptchRes, ChangePasswordReq, PageUserReq, PageUserRes, UpdateUserbasicReq, User } from './types/user';
+import { ChangePasswordCaptchRes, ChangePasswordReq, PageUserReq, PageUserRes, SwitchUserRole, UpdateUserbasicReq, User } from './types/user';
 
 export function pageUser(req: PageUserReq) {
 	return axios.get<PageUserRes>('/manager/v1/users', { params: { ...req } });
@@ -17,8 +17,8 @@ export function updateUser(data: User) {
 	return axios.put('/manager/v1/user', data);
 }
 
-export function updateUserBasic(data: UpdateUserbasicReq) {
-	return axios.put('/manager/v1/user/basic', data);
+export function updateCurrentUser(data: UpdateUserbasicReq) {
+	return axios.put('/manager/v1/user/current', data);
 }
 
 export function deleteUser(id: number) {
@@ -47,6 +47,12 @@ export function changePassword(req: ChangePasswordReq) {
 
 export function sendChangePasswordEmail() {
 	return axios.post<ChangePasswordCaptchRes>('/manager/v1/user/password/captcha');
+}
+
+export function switchUserRole(id: number) {
+	return axios.post<SwitchUserRole>('/manager/v1/user/role/switch', {
+		role_id: id
+	});
 }
 
 export default null;

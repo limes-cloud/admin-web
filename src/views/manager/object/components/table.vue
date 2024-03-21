@@ -1,7 +1,7 @@
 <template>
 	<a-space direction="vertical" fill>
 		<a-table
-			v-permission="'manager:job:query'"
+			v-permission="'manager:object:query'"
 			row-key="id"
 			:loading="loading"
 			:columns="columns"
@@ -13,23 +13,29 @@
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}
 			</template>
+
 			<template #updatedAt="{ record }">
 				{{ $formatTime(record.updated_at) }}
 			</template>
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:job:update'" color="orangered" @click="emit('update', record)">
+					<a-tag color="arcoblue" @click="preview(record)">
+						<template #icon><icon-mind-mapping /></template>
+						预览
+					</a-tag>
+					<a-tag v-permission="'manager:object:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
-
-					<a-popconfirm content="您确认删除此职位" type="warning" @ok="emit('delete', record.id)">
-						<a-tag v-permission="'manager:job:delete'" color="red">
-							<template #icon><icon-delete /></template>
-							删除
-						</a-tag>
-					</a-popconfirm>
+					<template v-if="$hasPermission('manager:object:delete')">
+						<a-popconfirm content="您确认删除此对象" type="warning" @ok="emit('delete', record.id)">
+							<a-tag color="red">
+								<template #icon><icon-delete /></template>
+								删除
+							</a-tag>
+						</a-popconfirm>
+					</template>
 				</a-space>
 			</template>
 		</a-table>
@@ -51,7 +57,7 @@ import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
 
-const emit = defineEmits(['delete', 'update', 'add', 'pageChange']);
+const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'preview']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
@@ -83,5 +89,9 @@ const pageChange = (current: number) => {
 const pageSizeChange = (size: number) => {
 	page.value.pageSize = size;
 	emit('pageChange', page.value);
+};
+
+const preview = (data) => {
+	emit('preview', data);
 };
 </script>

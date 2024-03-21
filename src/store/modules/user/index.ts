@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia';
 import { login as userLogin, logout as userLogout } from '@/api/manager/auth';
-import { currentUser } from '@/api/manager/user';
+import { currentUser, switchUserRole } from '@/api/manager/user';
 import { setToken, clearToken } from '@/utils/auth';
 import { removeRouteListener } from '@/utils/route-listener';
 import { LoginReq } from '@/api/manager/types/auth';
 import rsa from '@/utils/rsa';
 import { User } from '@/api/manager/types/user';
-import { switchUserRole } from '@/api/manager/user-role';
 import Message from '@arco-design/web-vue/es/message';
 import useAppStore from '../app';
 

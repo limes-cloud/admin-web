@@ -12,21 +12,21 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.label" allow-clear placeholder="请输入字典值关键字" />
+				<a-input v-model="form.label" allow-clear placeholder="请输入标识" />
 			</a-form-item>
 
 			<a-form-item
 				field="value"
-				label="字典值"
+				label="标识"
 				:rules="[
 					{
 						required: true,
-						message: '字典值是必填项'
+						message: '标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.value" allow-clear placeholder="请输入字典值" />
+				<a-input v-model="form.value" allow-clear placeholder="请输入标识" />
 			</a-form-item>
 
 			<a-form-item
@@ -76,18 +76,18 @@
 </template>
 
 <script lang="ts" setup>
+import { DictionaryValue } from '@/api/manager/types/dictionary';
 import { ref, watch } from 'vue';
-import { DictValue } from '@/api/manager/types/dict-value';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: DictValue;
+	data: DictionaryValue;
 }>();
 
-const form = ref({ weight: 0, status: true } as DictValue);
+const form = ref({ weight: 0, status: true } as DictionaryValue);
 const emit = defineEmits(['add', 'update']);
 
 watch(

@@ -1,27 +1,12 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-space>
-				<a-button v-permission="'manager:dict:value:add'" type="primary" @click="emit('add')">
-					<template #icon>
-						<icon-plus />
-					</template>
-					新建字典值
-				</a-button>
-				<a-popconfirm
-					v-if="type === 'trends'"
-					v-permission="'manager:dict:value:refresh'"
-					content="刷新当前的值会进行增量载入，确认要操作么？"
-					@ok="emit('reloadValue')"
-				>
-					<a-button type="primary">
-						<template #icon>
-							<icon-refresh />
-						</template>
-						刷新字典值
-					</a-button>
-				</a-popconfirm>
-			</a-space>
+			<a-button v-permission="'manager:dictionary:add'" type="primary" @click="emit('add')">
+				<template #icon>
+					<icon-plus />
+				</template>
+				新建字典
+			</a-button>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -73,11 +58,10 @@ import { nextTick, ref } from 'vue';
 const props = defineProps<{
 	columns: TableCloumn[];
 	size: TableSize;
-	type: string;
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'reloadValue']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
 const cloneColumns = ref<TableCloumn[]>([]);
 const showColumns = ref<TableCloumn[]>([]);
 

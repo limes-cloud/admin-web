@@ -1,4 +1,5 @@
 import { Department } from './department';
+import { Job } from './job';
 import { Role } from './role';
 
 export interface User {
@@ -22,6 +23,7 @@ export interface User {
 	updated_at: number;
 	role?: Role;
 	roles?: Role[];
+	jobs?: Job[];
 	department?: Department;
 }
 
@@ -57,4 +59,8 @@ export interface ChangePasswordReq {
 export interface ChangePasswordCaptchRes {
 	uuid: string;
 	expire: number;
+}
+
+export interface SwitchUserRole {
+	token: string;
 }

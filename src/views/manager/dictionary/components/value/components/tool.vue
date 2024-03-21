@@ -1,11 +1,11 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'manager:dict:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'manager:dictionary:value:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>
-				新建字典
+				新建字典值
 			</a-button>
 		</a-col>
 
@@ -55,8 +55,7 @@ import Sortable from 'sortablejs';
 import { nextTick, ref } from 'vue';
 
 // 定义属性
-const props = defineProps<{
-	columns: TableCloumn[];
+defineProps<{
 	size: TableSize;
 }>();
 
@@ -69,17 +68,6 @@ const showColumns = ref<TableCloumn[]>([]);
 const handleSelectDensity = (val: string | number | Record<string, any> | undefined) => {
 	emit('update:size', val);
 };
-
-const initColmun = (val: TableCloumn[]) => {
-	cloneColumns.value = cloneDeep(val);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	cloneColumns.value.forEach((item, index) => {
-		item.checked = true;
-	});
-	showColumns.value = cloneDeep(cloneColumns.value);
-};
-
-initColmun(props.columns);
 
 const exchangeArray = <T extends Array<any>>(array: T, beforeIdx: number, newIdx: number, isDeep = false): T => {
 	const newArray = isDeep ? cloneDeep(array) : array;

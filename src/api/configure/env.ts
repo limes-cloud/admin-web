@@ -6,7 +6,7 @@ export function allEnv() {
 }
 
 export function addEnv(data: Env) {
-	return axios.post('/configure/v1/env', data);
+	return axios.post<{ id: number }>('/configure/v1/env', data);
 }
 
 export function updateEnv(data: Env) {

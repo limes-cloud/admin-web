@@ -24,6 +24,7 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
 import { addEnv, deleteEnv, allEnv, updateEnv, resetEnvToken, queryEnvToken } from '@/api/configure/env';
+import { addDepartmentObject, deleteDepartmentObject } from '@/api/manager/department';
 import useLoading from '@/hooks/loading';
 import { Message, Modal } from '@arco-design/web-vue';
 import { Env } from '@/api/configure/types/env';
@@ -89,9 +90,11 @@ const handleGet = async () => {
 handleGet();
 
 // 处理新增
-const handleAdd = async (data: Env) => {
-	await addEnv(data);
+const handleAdd = async (env: Env) => {
+	const { data } = await addEnv(env);
 	handleGet();
+	addDepartmentObject('env', data.id);
+
 	Message.success('创建成功');
 };
 
@@ -106,6 +109,7 @@ const handleUpdate = async (data: Env) => {
 const handleDelete = async (id: number) => {
 	await deleteEnv(id);
 	handleGet();
+	deleteDepartmentObject('env', id);
 	Message.success('删除成功');
 };
 
