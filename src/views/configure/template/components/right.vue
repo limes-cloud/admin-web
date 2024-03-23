@@ -59,7 +59,7 @@
 
 <script lang="ts" setup>
 import { pageBusiness } from '@/api/configure/business';
-import { pageServerResource } from '@/api/configure/resource-server';
+import { pageResource } from '@/api/configure/resource';
 import { Business } from '@/api/configure/types/business';
 import { Resource } from '@/api/configure/types/resource';
 import Message from '@arco-design/web-vue/es/message';
@@ -83,7 +83,7 @@ const variableValue = (val: string) => {
 };
 
 const handleGetResource = async () => {
-	const { data } = await pageServerResource({
+	const { data } = await pageResource({
 		...query.value,
 		server_id: props.serverId
 	});

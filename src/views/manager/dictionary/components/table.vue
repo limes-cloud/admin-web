@@ -51,7 +51,6 @@
 </template>
 
 <script lang="ts" setup>
-import router from '@/router';
 import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';

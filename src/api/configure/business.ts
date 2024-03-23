@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PageBusinessReq, PageBusinessRes, Business } from './types/business';
+import { PageBusinessReq, PageBusinessRes, Business, BusinessValue } from './types/business';
 
 export function pageBusiness(req: PageBusinessReq) {
 	return axios.get<PageBusinessRes>('/configure/v1/business', {
@@ -17,6 +17,19 @@ export function updateBusiness(data: Business) {
 
 export function deleteBusiness(id: number) {
 	return axios.delete('/configure/v1/business', { params: { id } });
+}
+
+export function getBusinessValues(id: number) {
+	return axios.get<{ list: BusinessValue[] }>('/configure/v1/business/values', {
+		params: { business_id: id }
+	});
+}
+
+export function updateBusinessValues(id: number, list: BusinessValue[]) {
+	return axios.put('/configure/v1/business/values', {
+		business_id: id,
+		list
+	});
 }
 
 export default null;

@@ -20,3 +20,11 @@ export interface PageBusinessRes {
 	list: Business[];
 	total: number;
 }
+
+export interface BusinessValue {
+	id?: number;
+	env_id: number;
+	business_id?: number;
+	env_keyword?: string;
+	value: string;
+}

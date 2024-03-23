@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PageResourceReq, PageResourceRes, Resource } from './types/resource';
+import { PageResourceReq, PageResourceRes, Resource, ResourceValue } from './types/resource';
 
 export function pageResource(req: PageResourceReq) {
 	return axios.get<PageResourceRes>('/configure/v1/resources', {
@@ -17,6 +17,19 @@ export function updateResource(data: Resource) {
 
 export function deleteResource(id: number) {
 	return axios.delete('/configure/v1/resource', { params: { id } });
+}
+
+export function getResourceValues(id: number) {
+	return axios.get<{ list: ResourceValue[] }>('/configure/v1/resource/values', {
+		params: { resource_id: id }
+	});
+}
+
+export function updateResourceValue(id: number, list: ResourceValue[]) {
+	return axios.put('/configure/v1/resource/values', {
+		resource_id: id,
+		list
+	});
 }
 
 export default null;

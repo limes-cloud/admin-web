@@ -30,15 +30,13 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
-import { addBusiness, deleteBusiness, pageBusiness, updateBusiness } from '@/api/configure/business';
+import { addBusiness, deleteBusiness, pageBusiness, updateBusiness, getBusinessValues, updateBusinessValues } from '@/api/configure/business';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { PageBusinessReq, Business } from '@/api/configure/types/business';
+import { PageBusinessReq, Business, BusinessValue } from '@/api/configure/types/business';
 import { Server } from '@/api/configure/types/server';
 import { allEnv } from '@/api/configure/env';
 import { Env } from '@/api/configure/types/env';
-import { allBusinessValue, updateBusinessValue } from '@/api/configure/business-value';
-import { BusinessValue } from '@/api/configure/types/business-value';
 
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
@@ -105,7 +103,7 @@ const handleGetBusinessEnvs = async () => {
 
 // handleGet 处理查询指定变量的所有值
 const handleGetBusinessValues = async (id: number) => {
-	const { data } = await allBusinessValue(id);
+	const { data } = await getBusinessValues(id);
 	values.value = data.list;
 };
 
@@ -156,7 +154,7 @@ const handleSearch = async (req: PageBusinessReq) => {
 };
 
 const handleUpdateValue = async (data: BusinessValue[]) => {
-	await updateBusinessValue(current.value?.id, data);
+	await updateBusinessValues(current.value?.id, data);
 	Message.success('配置成功');
 };
 

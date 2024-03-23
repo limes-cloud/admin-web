@@ -85,12 +85,22 @@
 					multiple
 					:max-tag-count="2"
 					:scrollbar="true"
+					:options="servers"
+					allow-search
+					:field-names="{ value: 'id', label: 'name' }"
+				></a-select>
+				<!-- <a-select
+					v-model="form.servers"
+					placeholder="请选择变量所属服务"
+					multiple
+					:max-tag-count="2"
+					:scrollbar="true"
 					:options="innerServers"
 					allow-search
 					:field-names="{ value: 'id', label: 'name' }"
 					@search="search"
-					@focus="search()"
-				></a-select>
+					@focus="search('')"
+				></a-select> -->
 			</a-form-item>
 
 			<a-form-item
@@ -111,7 +121,6 @@
 </template>
 
 <script lang="ts" setup>
-import { pageServer } from '@/api/configure/server';
 import { Resource } from '@/api/configure/types/resource';
 import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import { ref, watch } from 'vue';
@@ -119,7 +128,6 @@ import { ref, watch } from 'vue';
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-const innerServers = ref<SelectOptionData[]>([]);
 
 const props = defineProps<{
 	data: Resource;
@@ -140,12 +148,9 @@ watch(
 watch(
 	() => props.servers,
 	(val) => {
-		innerServers.value = [];
 		val.forEach((item) => {
 			if (!form.value.servers) form.value.servers = [];
-
 			item.name = `${item.name}(${item.keyword})`;
-			innerServers.value.push(item);
 			form.value.servers.push(item.id);
 		});
 	}
@@ -179,33 +184,5 @@ const handleSubmit = async () => {
 		emit('update', { ...form.value });
 	}
 	return true;
-};
-
-const search = async (val: string) => {
-	const { data } = await pageServer({ page: 1, page_size: 10, keyword: val });
-	const { list } = data;
-	if (!list) {
-		return;
-	}
-
-	// 初始化
-	if (!form.value.servers) form.value.servers = [];
-
-	const searchd: SelectOptionData[] = [];
-	list.forEach((item) => {
-		if (!form.value.servers.includes(item.id as number)) {
-			item.name = `${item.name}(${item.keyword})`;
-			searchd.push(item);
-		}
-	});
-
-	const selectd: SelectOptionData[] = [];
-	innerServers.value.forEach((item) => {
-		if (form.value.servers.includes(item.id as number)) {
-			selectd.push(item);
-		}
-	});
-
-	innerServers.value = searchd.concat(selectd);
 };
 </script>

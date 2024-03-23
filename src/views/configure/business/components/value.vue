@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { BusinessValue } from '@/api/configure/types/business-value';
+import { BusinessValue } from '@/api/configure/types/business';
 import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import { ref, watch } from 'vue';
 import CodeEditor from '@/components/code-editor/index.vue';

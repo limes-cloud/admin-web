@@ -14,6 +14,7 @@ export interface Resource {
 export interface PageResourceReq {
 	keyword?: string;
 	tag?: string;
+	server_id?: number;
 	page: number;
 	page_size: number;
 }
@@ -21,4 +22,12 @@ export interface PageResourceReq {
 export interface PageResourceRes {
 	list: Resource[];
 	total: number;
+}
+
+export interface ResourceValue {
+	id?: number;
+	env_id: number;
+	resource_id?: number;
+	env_keyword?: string;
+	value: string;
 }

@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ResourceValue } from '@/api/configure/types/resource-value';
+import { ResourceValue } from '@/api/configure/types/resource';
 import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import { ref, watch } from 'vue';
 import CodeEditor from '@/components/code-editor/index.vue';
@@ -29,7 +29,6 @@ import { Message } from '@arco-design/web-vue';
 
 const formRef = ref();
 const visible = ref(false);
-// const envs = ref<SelectOptionData[]>([]);
 
 const props = defineProps<{
 	values: ResourceValue[];
@@ -37,7 +36,6 @@ const props = defineProps<{
 }>();
 
 const form = ref<Record<string, string>>({});
-// const cloneForm = ref<Record<string, string>>({});
 
 const emit = defineEmits(['update']);
 

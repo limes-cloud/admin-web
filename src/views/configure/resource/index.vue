@@ -30,16 +30,14 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
-import { addResource, deleteResource, pageResource, updateResource } from '@/api/configure/resource';
+import { addResource, deleteResource, pageResource, updateResource, getResourceValues, updateResourceValue } from '@/api/configure/resource';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
-import { PageResourceReq, Resource } from '@/api/configure/types/resource';
-import { allResourceServer } from '@/api/configure/resource-server';
+import { PageResourceReq, Resource, ResourceValue } from '@/api/configure/types/resource';
 import { Server } from '@/api/configure/types/server';
 import { allEnv } from '@/api/configure/env';
 import { Env } from '@/api/configure/types/env';
-import { allResourceValue, updateResourceValue } from '@/api/configure/resource-value';
-import { ResourceValue } from '@/api/configure/types/resource-value';
+import { pageServer } from '@/api/configure/server';
 
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
@@ -102,6 +100,12 @@ const columns = ref<TableCloumn[]>([
 	}
 ]);
 
+// handleGetResourceServers 查询指定资源的所属服务
+const handleGetResourceServers = async () => {
+	const { data } = await pageServer({ page: 1, page_size: 50 });
+	servers.value = data.list;
+};
+
 // handleGetResourceEnvs 查询所有的环境
 const handleGetResourceEnvs = async () => {
 	const { data } = await allEnv();
@@ -110,14 +114,8 @@ const handleGetResourceEnvs = async () => {
 
 // handleGet 处理查询指定资源的所有值
 const handleGetResourceValues = async (id: number) => {
-	const { data } = await allResourceValue(id);
-	values.value = data;
-};
-
-// handleGetResourceServers 查询指定资源的所属服务
-const handleGetResourceServers = async (id: number) => {
-	const { data } = await allResourceServer(id);
-	servers.value = data.list;
+	const { data } = await getResourceValues(id);
+	values.value = data.list;
 };
 
 // handleGet 处理查询
@@ -134,6 +132,7 @@ const handleGet = async () => {
 
 handleGet();
 handleGetResourceEnvs();
+handleGetResourceServers();
 
 // 处理新增
 const handleAdd = async (data: Resource) => {
@@ -182,7 +181,6 @@ const handleToolAdd = () => {
 
 // 处理table点击更新
 const handleTableUpdate = (data: Resource) => {
-	handleGetResourceServers(data.id);
 	form.value = { ...data };
 	form.value.fieldList = form.value.fields.split(',');
 	formRef.value.showUpdateDrawer();
