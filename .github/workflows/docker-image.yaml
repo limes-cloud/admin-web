@@ -42,6 +42,7 @@ jobs:  # workflow中的job
           script: | # 重启更新镜像
             docker stop adminweb
             docker rm adminweb
+            docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/adminweb:latest
             # docker login -u 你的github名称 -p 你的github token https://ghcr.io 
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/adminweb
             docker run -d -p 8080:80 --restart=always  --name adminweb ${{ secrets.DOCKERHUB_USERNAME }}/adminweb
