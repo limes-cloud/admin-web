@@ -44,4 +44,4 @@ jobs:  # workflow中的job
             docker rm adminweb
             # docker login -u 你的github名称 -p 你的github token https://ghcr.io 
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/adminweb
-            docker run -d --p 8080:80 --restart=always  --name adminweb ${{ secrets.DOCKERHUB_USERNAME }}/adminweb
+            docker run -d -p 8080:80 --restart=always  --name adminweb ${{ secrets.DOCKERHUB_USERNAME }}/adminweb
