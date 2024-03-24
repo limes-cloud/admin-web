@@ -1,8 +1,6 @@
 FROM gplane/pnpm:8.9.2-node18 AS builder
 WORKDIR /app/
 
-ARG URL
-ENV VITE_API_BASE_URL=$URL
 ADD package.json /app/
 RUN pnpm config set registry=https://registry.npmmirror.com/
 RUN pnpm install
