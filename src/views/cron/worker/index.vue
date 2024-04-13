@@ -1,0 +1,183 @@
+<template>
+	<div class="container">
+		<Breadcrumb />
+		<a-card class="general-card">
+			<Search :classifys="classifys" @search="handleSearch"></Search>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @show-group="showGroup = true"></Tool>
+			<Table
+				:columns="columns"
+				:loading="loading"
+				:data="tableData"
+				:size="size"
+				:total="total"
+				:pagination="{
+					current: searchForm.page,
+					pageSize: searchForm.page_size
+				}"
+				@page-change="handlePageChange"
+				@add="handleTableAdd"
+				@update="handleTableUpdate"
+				@delete="handleDelete"
+			></Table>
+			<Form ref="formRef" :data="form" :classifys="classifys" @add="handleAdd" @update="handleUpdate"></Form>
+		</a-card>
+		<a-modal v-model:visible="showGroup" title="节点分组" width="780px" :body-style="{ padding: 0 }" :footer="false">
+			<Group />
+		</a-modal>
+	</div>
+</template>
+
+<script lang="ts" setup>
+import { ref } from 'vue';
+import { TableData } from '@arco-design/web-vue/es/table/interface';
+import { Pagination, TableCloumn, TableSize } from '@/types/global';
+import useLoading from '@/hooks/loading';
+import { Message } from '@arco-design/web-vue';
+
+import { NewsClassify, NewsContent, PageNewsContentReq } from '@/api/party-affairs/types/news';
+import { addNewsContent, allNewsClassify, deleteNewsContent, getNewsContent, pageNewsContent, updateNewsContent } from '@/api/party-affairs/news';
+import Tool from './components/tool.vue';
+import Table from './components/table.vue';
+import Form from './components/form.vue';
+import Search from './components/search.vue';
+import Group from './components/group/index.vue';
+
+const formRef = ref();
+const form = ref<NewsContent>({} as NewsContent);
+const { setLoading } = useLoading(true);
+const loading = ref(false);
+const tableData = ref<TableData[]>();
+const size = ref<TableSize>('medium');
+const classifys = ref<NewsClassify[]>([]);
+const total = ref(0);
+const showGroup = ref(false);
+const searchForm = ref<PageNewsContentReq>({
+	page: 1,
+	page_size: 10
+});
+
+const columns = ref<TableCloumn[]>([
+	{
+		title: '新闻标题',
+		dataIndex: 'title'
+	},
+	{
+		title: '发布单位',
+		dataIndex: 'unit'
+	},
+	{
+		title: '新闻封面',
+		dataIndex: 'cover',
+		slotName: 'cover'
+	},
+	{
+		title: '阅读数量',
+		dataIndex: 'read'
+	},
+	{
+		title: '是否置顶',
+		slotName: 'isTop'
+	},
+	{
+		title: '所属分类',
+		dataIndex: 'classify_id',
+		slotName: 'classify'
+	},
+	{
+		title: '创建时间',
+		dataIndex: 'created_at',
+		slotName: 'createdAt'
+	},
+	{
+		title: '更新时间',
+		dataIndex: 'updated_at',
+		slotName: 'updatedAt'
+	},
+	{
+		title: '操作',
+		dataIndex: 'operations',
+		slotName: 'operations',
+		fixed: 'right',
+		width: 100
+	}
+]);
+
+const handleGetClassifys = async () => {
+	const { data } = await allNewsClassify();
+	classifys.value = data.list;
+};
+
+// handleGet 处理查询
+const handleGet = async () => {
+	setLoading(true);
+	try {
+		const { data } = await pageNewsContent(searchForm.value);
+		tableData.value = data.list as unknown as TableData[];
+		total.value = data.total;
+	} finally {
+		setLoading(false);
+	}
+};
+
+handleGet();
+handleGetClassifys();
+
+// 处理查询
+const handleSearch = async (req: PageNewsContentReq) => {
+	const pageSize = searchForm.value.page_size;
+	searchForm.value = {
+		...req,
+		page: 1,
+		page_size: pageSize
+	};
+
+	handleGet();
+};
+
+// 处理页面变更
+const handlePageChange = async (page: Pagination) => {
+	searchForm.value.page = page.current;
+	searchForm.value.page_size = page.pageSize;
+	handleGet();
+};
+
+// 处理新增
+const handleAdd = async (data: NewsContent) => {
+	await addNewsContent(data);
+	handleGet();
+	Message.success('创建成功');
+};
+
+// 处理修改
+const handleUpdate = async (data: NewsContent) => {
+	await updateNewsContent(data);
+	handleGet();
+	Message.success('更新成功');
+};
+
+// 处理数据删除
+const handleDelete = async (id: number) => {
+	await deleteNewsContent(id);
+	handleGet();
+	Message.success('删除成功');
+};
+
+//  处理tool按钮新建
+const handleToolAdd = () => {
+	form.value = {} as NewsContent;
+	formRef.value.showAddDrawer();
+};
+
+// 处理table点击更新
+const handleTableUpdate = async (news: NewsContent) => {
+	const { data } = await getNewsContent(news.id);
+	form.value = { ...data };
+	formRef.value.showUpdateDrawer();
+};
+
+// 处理table点击添加
+const handleTableAdd = (id: number) => {
+	form.value = { id } as NewsContent;
+	formRef.value.showAddDrawer();
+};
+</script>
