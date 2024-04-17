@@ -21,13 +21,6 @@
 					同步配置
 				</a-button>
 			</div>
-
-			<!-- <div class="header-item">
-				<a-button v-permission="'configure:configure:sync'" type="primary" status="warning" :disabled="!props.template" @click="handleClickSyncLog">
-					<template #icon><icon-menu /></template>
-					同步日志
-				</a-button>
-			</div> -->
 		</div>
 		<div class="edit">
 			<CodeEditor

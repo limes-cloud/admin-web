@@ -1,13 +1,13 @@
 <template>
-	<a-row v-permission="'cron:worker:query'">
+	<a-row v-permission="'cron:task:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="8">
-						<a-form-item field="group_id" label="节点分组">
+						<a-form-item field="group_id" label="任务分组">
 							<a-select
 								v-model="form.group_id"
-								placeholder="请选择节点分组"
+								placeholder="请选择任务分组"
 								:scrollbar="true"
 								:options="groups"
 								:field-names="{ value: 'id', label: 'name' }"
@@ -17,8 +17,8 @@
 					</a-col>
 
 					<a-col :span="8">
-						<a-form-item field="name" label="节点名称">
-							<a-input v-model="form.name" allow-clear placeholder="请输入节点名称" />
+						<a-form-item field="name" label="任务名称">
+							<a-input v-model="form.name" allow-clear placeholder="请输入任务名称" />
 						</a-form-item>
 					</a-col>
 				</a-row>
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PageWorkerReq } from '@/api/cron/types/worker';
+import { PageTaskReq } from '@/api/cron/types/task';
 import { CascaderOption } from '@arco-design/web-vue/es/cascader/interface';
 import { ref } from 'vue';
 
@@ -52,7 +52,7 @@ defineProps<{
 	groups: CascaderOption[];
 }>();
 
-const form = ref<PageWorkerReq>({} as PageWorkerReq);
+const form = ref<PageTaskReq>({} as PageTaskReq);
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {
@@ -60,6 +60,6 @@ const handleSearch = () => {
 };
 
 const reset = () => {
-	form.value = {} as PageWorkerReq;
+	form.value = {} as PageTaskReq;
 };
 </script>

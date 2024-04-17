@@ -36,6 +36,7 @@
 		"@vueuse/core": "^9.3.0",
 		"arco-design-pro-vue": "^2.7.2",
 		"axios": "^0.24.0",
+		"cron-parser": "^4.9.0",
 		"crypto-js": "^4.2.0",
 		"dayjs": "^1.11.5",
 		"echarts": "^5.4.0",

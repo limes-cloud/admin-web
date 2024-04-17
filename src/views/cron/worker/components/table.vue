@@ -1,7 +1,7 @@
 <template>
 	<a-space direction="vertical" fill>
 		<a-table
-			v-permission="'party-affairs:news:content:query'"
+			v-permission="'cron:worker:query'"
 			row-key="id"
 			:loading="loading"
 			:columns="columns"
@@ -10,17 +10,17 @@
 			:pagination="false"
 			:size="size"
 		>
-			<template #isTop="{ record }">
-				{{ record.is_top ? '是' : '否' }}
-			</template>
-			<template #classify="{ record }">
-				{{ record.classify.name }}
+			<template #group="{ record }">
+				<template v-if="record.group">{{ record.group.name }}</template>
+				<template v-else>暂无分组</template>
 			</template>
 
-			<template #cover="{ record }">
-				<img alt="avatar" :src="$rurl(record.resource.src, 100, 100)" />
+			<template #status="{ record }">
+				<a-switch v-model="record.status" :disabled="!$hasPermission('cron:worker:status')" type="round" @change="changeStatus(record)">
+					<template #checked>启用</template>
+					<template #unchecked>禁用</template>
+				</a-switch>
 			</template>
-
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}
 			</template>
@@ -30,18 +30,13 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'party-affairs:news:comment:query'" color="arcoblue" @click="nav(record.id)">
-						<template #icon><icon-message /></template>
-						评论
-					</a-tag>
-
-					<a-tag v-permission="'party-affairs:news:content:update'" color="orangered" @click="emit('update', record)">
+					<a-tag v-permission="'cron:worker:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
 
-					<a-popconfirm content="您确认删除此内容？" type="warning" @ok="emit('delete', record.id)">
-						<a-tag v-permission="'party-affairs:news:content:delete'" color="red">
+					<a-popconfirm content="您确认删除此节点？" type="warning" @ok="emit('delete', record.id)">
+						<a-tag v-permission="'cron:worker:delete'" color="red">
 							<template #icon><icon-delete /></template>
 							删除
 						</a-tag>
@@ -63,12 +58,13 @@
 </template>
 
 <script lang="ts" setup>
-import router from '@/router';
 import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
+import { Worker } from '@/api/cron/types/worker';
+import Modal from '@arco-design/web-vue/es/modal';
 
-const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable', 'offline', 'resetPassword']);
+const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
@@ -102,7 +98,23 @@ const pageSizeChange = (size: number) => {
 	emit('pageChange', page.value);
 };
 
-const nav = (id: number) => {
-	router.push({ name: 'PartyAffairsNewsComment', query: { id } });
+const changeStatus = (record: Worker) => {
+	const status = record.status ? '启用' : '禁用';
+	Modal.info({
+		title: '状态变更提示',
+		content: () => `您确认要 '${status}'此用户？`,
+		closable: true,
+		hideCancel: false,
+		onOk: async () => {
+			if (record.status) {
+				emit('enable', record);
+			} else {
+				emit('disable', record);
+			}
+		},
+		onCancel: () => {
+			record.status = !record.status;
+		}
+	});
 };
 </script>

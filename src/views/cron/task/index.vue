@@ -20,11 +20,24 @@
 				@delete="handleDelete"
 				@enable="handleEnable"
 				@disable="handleDisable"
+				@exec="handleExec"
+				@log="handleShowLog"
 			></Table>
 			<Form ref="formRef" :data="form" :groups="groups" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
-		<a-modal v-model:visible="showGroup" title="节点分组" width="780px" :body-style="{ padding: 0 }" :footer="false">
+		<a-modal v-model:visible="showGroup" title="任务分组" width="80%" :body-style="{ padding: 0 }" :footer="false">
 			<Group />
+		</a-modal>
+		<a-modal
+			v-model:visible="showLog"
+			:modal-style="{ height: '80%' }"
+			unmount-on-close
+			title="任务日志"
+			width="80%"
+			:body-style="{ padding: 0, height: 'calc(100% - 48px)' }"
+			:footer="false"
+		>
+			<Log :id="logId" />
 		</a-modal>
 	</div>
 </template>
@@ -36,50 +49,53 @@ import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 
-import { WorkerGroup, Worker, PageWorkerReq } from '@/api/cron/types/worker';
-import { addWorker, allWorkerGroup, deleteWorker, disableWorker, enableWorker, pageWorker, updateWorker } from '@/api/cron/worker';
+import { TaskGroup, Task, PageTaskReq } from '@/api/cron/types/task';
+import { addTask, allTaskGroup, deleteTask, disableTask, enableTask, execTask, pageTask, updateTask } from '@/api/cron/task';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 import Group from './components/group/index.vue';
+import Log from './components/log.vue';
 
 const formRef = ref();
-const form = ref<Worker>({} as Worker);
+const form = ref<Task>({} as Task);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-const groups = ref<WorkerGroup[]>([]);
+const groups = ref<TaskGroup[]>([]);
 const total = ref(0);
 const showGroup = ref(false);
-const searchForm = ref<PageWorkerReq>({
+const showLog = ref(false);
+const logId = ref(0);
+const searchForm = ref<PageTaskReq>({
 	page: 1,
 	page_size: 10
 });
 
 const columns = ref<TableCloumn[]>([
 	{
-		title: '节点名称',
+		title: '任务名称',
 		dataIndex: 'name'
 	},
 	{
-		title: '节点ip',
-		dataIndex: 'ip'
+		title: '任务标签',
+		dataIndex: 'tag'
 	},
 	{
-		title: '节点分组',
+		title: '任务分组',
 		dataIndex: 'group_id',
 		slotName: 'group'
 	},
 	{
-		title: '节点描述',
-		dataIndex: 'description'
-	},
-	{
-		title: '节点状态',
+		title: '任务状态',
 		dataIndex: 'status',
 		slotName: 'status'
+	},
+	{
+		title: '任务描述',
+		dataIndex: 'description'
 	},
 	{
 		title: '创建时间',
@@ -101,7 +117,7 @@ const columns = ref<TableCloumn[]>([
 ]);
 
 const handleGetGroup = async () => {
-	const { data } = await allWorkerGroup();
+	const { data } = await allTaskGroup();
 	groups.value = data.list;
 };
 
@@ -109,7 +125,7 @@ const handleGetGroup = async () => {
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageWorker(searchForm.value);
+		const { data } = await pageTask(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -121,7 +137,7 @@ handleGet();
 handleGetGroup();
 
 // 处理查询
-const handleSearch = async (req: PageWorkerReq) => {
+const handleSearch = async (req: PageTaskReq) => {
 	const pageSize = searchForm.value.page_size;
 	searchForm.value = {
 		...req,
@@ -140,63 +156,69 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 // 处理新增
-const handleAdd = async (data: Worker) => {
-	await addWorker(data);
+const handleAdd = async (data: Task) => {
+	await addTask(data);
 	handleGet();
 	Message.success('创建成功');
 };
 
-// 处理禁用节点
-const handleDisable = (worker: Worker) => {
-	disableWorker(worker.id)
-		.then(() => {
-			Message.success('禁用成功');
-		})
-		.catch(() => {
-			worker.status = !worker.status;
-		});
+// 处理禁用任务
+const handleDisable = (task: Task) => {
+	disableTask(task.id).then(() => {
+		Message.success('禁用成功');
+		handleGet();
+	});
 };
 
-// 处理启用节点
-const handleEnable = (worker: Worker) => {
-	enableWorker(worker.id as number)
-		.then(() => {
-			Message.success('启用成功');
-		})
-		.catch(() => {
-			worker.status = !worker.status;
-		});
+// 处理启用任务
+const handleEnable = (task: Task) => {
+	enableTask(task.id as number).then(() => {
+		Message.success('启用成功');
+		handleGet();
+	});
+};
+
+const handleExec = (task: Task) => {
+	execTask(task.id as number).then(() => {
+		Message.success('执行成功');
+		handleGet();
+	});
+};
+
+const handleShowLog = (task: Task) => {
+	logId.value = task.id;
+	showLog.value = true;
 };
 
 // 处理修改
-const handleUpdate = async (data: Worker) => {
-	await updateWorker(data);
+const handleUpdate = async (data: Task) => {
+	await updateTask(data);
 	handleGet();
 	Message.success('更新成功');
 };
 
 // 处理数据删除
 const handleDelete = async (id: number) => {
-	await deleteWorker(id);
+	await deleteTask(id);
 	handleGet();
 	Message.success('删除成功');
 };
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Worker;
+	form.value = {} as Task;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (worker: Worker) => {
-	form.value = { ...worker };
+const handleTableUpdate = async (task: Task) => {
+	form.value = { ...task };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as Worker;
+	form.value = { id } as Task;
 	formRef.value.showAddDrawer();
 };
 </script>
