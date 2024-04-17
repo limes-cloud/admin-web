@@ -112,7 +112,7 @@ const pageSizeChange = (size: number) => {
 	handlePageLog();
 };
 
-const handleCancel = (val: number) => {
+const handleCancel = (val: string) => {
 	cancelTask(val).then(() => {
 		handlePageLog();
 	});
