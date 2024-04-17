@@ -44,10 +44,7 @@ const props = defineProps<{
 	data: TaskGroup;
 }>();
 
-const form = ref({
-	name: '',
-	weight: 0
-});
+const form = ref<TaskGroup>({} as TaskGroup);
 const emit = defineEmits(['add', 'update']);
 
 watch(
