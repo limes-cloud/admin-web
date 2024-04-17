@@ -44,10 +44,7 @@ const props = defineProps<{
 	data: WorkerGroup;
 }>();
 
-const form = ref({
-	name: '',
-	weight: 0
-});
+const form = ref<WorkerGroup>({} as WorkerGroup);
 const emit = defineEmits(['add', 'update']);
 
 watch(
