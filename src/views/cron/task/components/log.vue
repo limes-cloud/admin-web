@@ -21,6 +21,14 @@
 						</a-space>
 					</div>
 				</div>
+				<div v-if="!list.length" class="empty">
+					<a-empty>
+						<template #image>
+							<icon-exclamation-circle-fill />
+						</template>
+						暂无运行记录
+					</a-empty>
+				</div>
 			</div>
 			<div class="page">
 				<a-pagination
@@ -47,7 +55,7 @@
 import { getLog, pageLog } from '@/api/cron/log';
 import { cancelTask } from '@/api/cron/task';
 import { Log, LogMsg, PageLogReq } from '@/api/cron/types/log';
-import { ref, reactive } from 'vue';
+import { onBeforeUnmount, ref, reactive } from 'vue';
 
 const props = defineProps<{
 	id: number;
@@ -92,11 +100,11 @@ const handlePageLog = async () => {
 	}
 };
 handlePageLog();
-setInterval(() => {
+const pageTimer = setInterval(() => {
 	handlePageLog();
 }, 10000);
 
-setInterval(() => {
+const runTimer = setInterval(() => {
 	if (id.value && isRunning.value) {
 		handleSwitchLog(id.value);
 	}
@@ -117,6 +125,10 @@ const handleCancel = (val: string) => {
 		handlePageLog();
 	});
 };
+onBeforeUnmount(() => {
+	clearInterval(pageTimer);
+	clearInterval(runTimer);
+});
 </script>
 
 <style lang="less" scoped>
@@ -130,8 +142,13 @@ const handleCancel = (val: string) => {
 		padding: 10px;
 
 		.logs {
+			min-width: 200px;
 			height: calc(100% - 40px);
 			overflow: scroll;
+
+			.empty {
+				margin-top: 100px;
+			}
 
 			.item {
 				margin-bottom: 10px;

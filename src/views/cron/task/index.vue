@@ -25,15 +25,20 @@
 			></Table>
 			<Form ref="formRef" :data="form" :groups="groups" @add="handleAdd" @update="handleUpdate"></Form>
 		</a-card>
-		<a-modal v-model:visible="showGroup" title="任务分组" width="80%" :body-style="{ padding: 0 }" :footer="false">
+		<a-modal
+			v-model:visible="showGroup"
+			title="任务分组"
+			:modal-style="{ height: '80%', width: '80%', maxWidth: '800px' }"
+			:body-style="{ padding: 0 }"
+			:footer="false"
+		>
 			<Group />
 		</a-modal>
 		<a-modal
 			v-model:visible="showLog"
-			:modal-style="{ height: '80%' }"
+			:modal-style="{ height: '80%', width: '80%', maxWidth: '900px' }"
 			unmount-on-close
 			title="任务日志"
-			width="80%"
 			:body-style="{ padding: 0, height: 'calc(100% - 48px)' }"
 			:footer="false"
 		>
