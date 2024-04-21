@@ -132,6 +132,7 @@ const handleChange = async (_, info) => {
 		});
 		result.push(temp);
 	});
+	visible.value = false;
 	emit('success', result);
 };
 </script>
