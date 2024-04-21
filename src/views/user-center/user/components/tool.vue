@@ -8,7 +8,7 @@
 					</template>
 					新建用户
 				</a-button>
-				<Xlsx :mapping="xlsxMapping" @success="handleXlsxUploadSuccess" @error="handleXlsxUploadError">
+				<Xlsx :configs="xlsxMapping" @success="handleXlsxUploadSuccess" @error="handleXlsxUploadError">
 					<a-button v-permission="'uc:user:import'" type="primary">
 						<template #icon>
 							<icon-upload />
@@ -71,12 +71,13 @@ const props = defineProps<{
 	size: TableSize;
 }>();
 
-const xlsxMapping = {
-	邮箱: { type: 'string', field: 'email' },
-	手机: { type: 'string', field: 'phone' },
-	姓名: { type: 'string', field: 'real_name' },
-	性别: { type: 'string', field: 'gender' }
-};
+const xlsxMapping = [
+	{ type: 'string', field: 'email', title: '邮箱' },
+	{ type: 'string', field: 'phone', title: '手机' },
+	{ type: 'string', field: 'real_name', title: '姓名' },
+	{ type: 'string', field: 'gender', title: '性别' }
+];
+
 // const xlsxHandlers = {
 // 	// gender: (val: string) => {
 // 	// 	switch(val){
