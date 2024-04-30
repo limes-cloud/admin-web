@@ -35,7 +35,7 @@ import { FormInstance } from '@arco-design/web-vue/es/form';
 import useLoading from '@/hooks/loading';
 import { changePassword, sendChangePasswordEmail } from '@/api/manager/user';
 import { Message } from '@arco-design/web-vue';
-import useUserStore from '@/store/modules/user';
+import useUser from '@/hooks/user';
 
 interface EditProps {
 	info: any;
@@ -77,9 +77,7 @@ const onSave = () => {
 	changePassword({ ...formData }).then(() => {
 		Message.success('密码修改成功，正在跳转中...');
 		setTimeout(async () => {
-			const userStore = useUserStore();
-			await userStore.logout();
-			window.location.reload();
+			useUser().logout();
 		}, 2000);
 	});
 };

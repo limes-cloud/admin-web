@@ -1,6 +1,5 @@
 export interface Menu {
 	id?: number;
-	app: string;
 	parent_id: number;
 	title: string;
 	type: string;

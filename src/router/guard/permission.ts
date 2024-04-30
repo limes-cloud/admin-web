@@ -1,10 +1,11 @@
 import type { Router } from 'vue-router';
 import NProgress from 'nprogress'; // progress bar
 
-import { useAppStore, useTabBarStore } from '@/store';
+import { useAppStore, useTabBarStore, useUserStore } from '@/store';
 import { TagProps } from '@/store/modules/tab-bar/types';
 import { getMenuFromRole } from '@/api/manager/menu';
 import { Modal } from '@arco-design/web-vue';
+import useUser from '@/hooks/user';
 import Parser from '../routes/parser';
 import { NOT_FOUND_ROUTE, REDIRECT_MAIN } from '../routes/base';
 import { Home } from '../types';
@@ -13,9 +14,18 @@ export const WHITE_LIST = ['notFound', 'login'];
 
 export function getHomeByMenu(router: Router): Home | undefined {
 	const appStore = useAppStore();
-	const menus = appStore.appMenu;
 
+	const menus = appStore.appMenu;
+	if (menus.length === 0) {
+		Modal.error({
+			title: '无菜单权限',
+			content: '当前角色暂无任何菜单权限，请联系管理员进行分配菜单'
+		});
+		useUser().logout();
+		return undefined;
+	}
 	const menu = menus[0];
+
 	let { path } = menu;
 	if (menu.redirect) {
 		path = menu.redirect as string;
@@ -54,12 +64,13 @@ export default function setupPermissionGuard(router: Router) {
 		if (!appStore.apps.length) {
 			// 从服务端获取菜单
 			const { data } = await getMenuFromRole();
-			if (!data) {
+			if (!data || !data.list.length) {
 				Modal.error({
 					title: '无菜单权限',
 					content: '当前角色暂无任何菜单权限，请联系管理员进行分配菜单'
 				});
-				return;
+				await useUserStore().logout();
+				next({ name: 'login' });
 			}
 			// 初始化解析器
 			const parser = new Parser(data.list);

@@ -45,13 +45,12 @@ class Parser {
 			// 获取指令/路由/首页
 			const routers: RouteRecordNormalized[] = [];
 			this.apiRouters = [];
-			this.handler([{ ...menu }], routers);
+			this.handler([{ ...menu }], routers, false);
 
 			if (routers.length && routers[0].children.length) {
-				if (this.home) this.homes.set(menu.app, { ...this.home });
+				if (this.home) this.homes.set(menu.keyword, { ...this.home });
 				this.apps.push(Parser.GetApp(menu));
-
-				this.menus.set(menu.app, routers[0].children as RouteRecordNormalized[]);
+				this.menus.set(menu.keyword, routers[0].children as RouteRecordNormalized[]);
 				// 将添加的api追加到children上
 				routers[0].children = routers[0].children.concat(this.apiRouters);
 				this.routers = this.routers.concat(routers);
@@ -62,7 +61,7 @@ class Parser {
 	// GetApp 获取App
 	private static GetApp = (menu: Menu): App => {
 		return {
-			keyword: menu.app,
+			keyword: menu.keyword,
 			title: menu.title,
 			icon: menu.icon as string
 		};
@@ -88,8 +87,9 @@ class Parser {
 	};
 
 	// handler 加载菜单以及指令
-	private handler = (menus: Menu[], routers: RouteRecordNormalized[]) => {
+	private handler = (menus: Menu[], routers: RouteRecordNormalized[], h: boolean) => {
 		menus.forEach((menu) => {
+			let hidden: boolean = h;
 			// 处理菜单
 			let router: any = null;
 
@@ -131,7 +131,8 @@ class Parser {
 				// 如果是api则声称随机keyword
 				const keyword = menu.keyword ? menu.keyword : Math.random().toString(36);
 
-				const isHidden = apiPage ? true : !!menu.is_hidden;
+				const isHidden = (apiPage ? true : !!menu.is_hidden) || hidden;
+				hidden = isHidden;
 
 				router = {
 					path: menu.path,
@@ -141,7 +142,7 @@ class Parser {
 					activeMenu: keyword,
 					children: [],
 					meta: {
-						app: menu.app,
+						keyword: menu.keyword,
 						title: menu.title,
 						icon: `icon-${menu.icon}`,
 						hideInMenu: isHidden,
@@ -162,9 +163,9 @@ class Parser {
 			// 处理子菜单;
 			if (menu.children) {
 				if (router) {
-					this.handler(menu.children, router.children);
+					this.handler(menu.children, router.children, hidden);
 				} else {
-					this.handler(menu.children, routers);
+					this.handler(menu.children, routers, hidden);
 				}
 			}
 		});

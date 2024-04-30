@@ -3,13 +3,13 @@
 		<div class="left-side" :style="{ width: appStore.menuWidth + 'px' }">
 			<a-space>
 				<img alt="logo" :src="$logo" style="width: 50px; height: 50px" />
-				<a-typography-title :style="{ margin: 0, fontSize: '18px' }" :heading="5">
+				<a-typography-title :style="{ margin: 0, fontSize: '18px', width: '100%', minWidth: titleWidth() }" :heading="5" :ellipsis="true">
 					{{ appStore.currentAppinfo.title }}
 				</a-typography-title>
 				<icon-menu-fold v-if="appStore.device === 'mobile'" style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" />
 			</a-space>
 		</div>
-		<div class="center-side">
+		<div v-if="appVisable" class="center-side">
 			<App></App>
 		</div>
 		<ul class="right-side">
@@ -113,12 +113,17 @@ import Userinfo from '../userinfo/index.vue';
 
 const showUserinfoVisible = ref(false);
 const appStore = useAppStore();
+
 const userStore = useUserStore();
 
 const { logout } = useUser();
 const { isFullscreen, toggle: toggleFullScreen } = useFullscreen();
 const avatar = computed(() => {
 	return userStore.avatar;
+});
+
+const appVisable = computed(() => {
+	return appStore.apps.length > 1;
 });
 
 const roles = computed((): Role[] => {
@@ -128,6 +133,13 @@ const roles = computed((): Role[] => {
 const theme = computed(() => {
 	return appStore.theme;
 });
+
+const titleWidth = () => {
+	if (appStore.device === 'mobile') {
+		return `calc( ${appStore.menuWidth}px - 100px)`;
+	}
+	return `calc( ${appStore.menuWidth}px - 80px)`;
+};
 
 const isDark = useDark({
 	selector: 'body',
@@ -175,7 +187,11 @@ const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 .left-side {
 	display: flex;
 	align-items: center;
-	padding-left: 20px;
+	padding-left: 15px;
+
+	.title {
+		min-width: calc();
+	}
 }
 
 .center-side {
