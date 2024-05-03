@@ -103,8 +103,8 @@
 								<icon-edit size="15" />
 							</span>
 
-							<a-popconfirm v-permission="'resource:file:delete'" content="您确认删除此文件" type="warning" @ok="emit('deleteFile', record.id)">
-								<span style="color: #f53f3f">
+							<a-popconfirm content="您确认删除此文件" type="warning" @ok="emit('deleteFile', record.id)">
+								<span v-permission="'resource:file:delete'" style="color: #f53f3f">
 									<icon-delete size="15" />
 								</span>
 							</a-popconfirm>
@@ -197,6 +197,7 @@
 import { File } from '@/api/resource/types/file';
 import Message from '@arco-design/web-vue/es/message';
 import { ref, watch } from 'vue';
+import { getFileSize } from '@/utils';
 import FileIcon from './icon.vue';
 
 const emit = defineEmits(['deleteFile', 'selectFile', 'pageChange', 'updateFile']);
@@ -224,7 +225,7 @@ const submitForm = ref({
 
 const page = ref({
 	current: 1,
-	pageSize: 10
+	pageSize: 20
 });
 
 const columns = [
@@ -292,16 +293,6 @@ const fileType = (file: File): string => {
 	}
 };
 
-function getFileSize(size: number) {
-	if (!size) return '';
-	const num = 1024.0; // byte
-	if (size < num) return `${size}B`;
-	if (size < num ** 2) return `${(size / num).toFixed(2)}K`; // kb
-	if (size < num ** 3) return `${(size / num ** 2).toFixed(2)}M`; // M
-	if (size < num ** 4) return `${(size / num ** 3).toFixed(2)}G`; // G
-	return `${(size / num ** 4).toFixed(2)}T`; // T
-}
-
 const openFile = (file: File) => {
 	curFile.value = file;
 	switch (fileType(file)) {
@@ -364,7 +355,7 @@ watch(
 );
 const handleDownloadFile = (src: string) => {
 	const link = document.createElement('a');
-	link.href = src;
+	link.href = `${src}?download=true`;
 	link.target = '_blank';
 	link.download = src.substring(src.lastIndexOf('/'));
 	link.click();

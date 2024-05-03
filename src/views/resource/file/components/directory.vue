@@ -25,6 +25,17 @@
 				<template #icon>
 					<FileIcon type="dir" :size="18"></FileIcon>
 				</template>
+				<template #title="node">
+					<a-typography-paragraph
+						:style="{ marginBottom: 0, width: 'calc(100% - 20px)' }"
+						:ellipsis="{
+							rows: 1,
+							showTooltip: true
+						}"
+					>
+						{{ node.name }}
+					</a-typography-paragraph>
+				</template>
 				<template #extra="node">
 					<a-dropdown
 						v-if="$hasPermission('resource:directory:add') || $hasPermission('resource:directory:update') || $hasPermission('resource:directory:delete')"

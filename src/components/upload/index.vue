@@ -101,6 +101,9 @@ const props = defineProps({
 	fileSize: {
 		type: Number
 	},
+	rename: {
+		type: String
+	},
 	autoUpload: Boolean
 });
 const uploadRef = ref();
@@ -198,12 +201,18 @@ const readBinary = (file: File) => {
 
 const getPrepareUploadReq = async (data: any, file: File) => {
 	const wordArray = cryptoJs.lib.WordArray.create(data);
-	const hash = cryptoJs.SHA256(wordArray).toString();
+	const hash = cryptoJs.MD5(wordArray).toString();
+	let { name } = file;
+	if (props.rename) {
+		const arr = file.name.split('.');
+		const ext = arr[arr.length - 1];
+		name = props.rename + ext;
+	}
 	return {
 		directory_id: props.directoryId,
 		directory_path: props.directoryPath,
 		app: props.app as string,
-		name: file.name,
+		name,
 		sha: hash,
 		size: file.size
 	};
@@ -302,15 +311,15 @@ const customRequest = (options: RequestOption) => {
 <style lang="less">
 .upload {
 	.arco-upload-list-picture {
-		width: v-bind(domWidth);
-		height: v-bind(domHeight);
-		margin-right: v-bind(domMargin);
-		margin-bottom: v-bind(domMargin);
-		line-height: v-bind(domHeight);
+		width: v-bind(domwidth);
+		height: v-bind(domheight);
+		margin-right: v-bind(dommargin);
+		margin-bottom: v-bind(dommargin);
+		line-height: v-bind(domheight);
 	}
 
 	.arco-upload-list-picture-mask {
-		line-height: v-bind(domHeight);
+		line-height: v-bind(domheight);
 	}
 }
 </style>
@@ -322,8 +331,8 @@ const customRequest = (options: RequestOption) => {
 	align-items: center;
 	justify-content: center;
 	box-sizing: border-box;
-	width: v-bind(domWidth);
-	height: v-bind(domHeight);
+	width: v-bind(domwidth);
+	height: v-bind(domheight);
 	background-color: #f4f5f7;
 	border-radius: 2px;
 

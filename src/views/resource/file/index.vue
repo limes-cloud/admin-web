@@ -26,6 +26,7 @@
            "
 					@delete-file="handleBatchDeleteFile"
 					@search-file="handlerSearchFile"
+					@download="handleDownloadFile"
 				></Header>
 				<Body
 					:total="fileTotal"
@@ -35,6 +36,7 @@
 					@select-file="handleSelectFile"
 					@delete-file="handleDeleteFile"
 					@update-file="handleUpdateFile"
+					@page-change="handlePageChange"
 				></Body>
 			</div>
 		</div>
@@ -48,6 +50,7 @@ import { FileItem } from '@arco-design/web-vue';
 import { File, PageFileReq } from '@/api/resource/types/file';
 import useAppStore from '@/store/modules/app';
 import { deleteFile, pageFile, updateFile } from '@/api/resource/file';
+import { addExport } from '@/api/resource/export';
 import Header from './components/header.vue';
 import Body from './components/body.vue';
 import DirectoryTree from './components/directory.vue';
@@ -104,6 +107,12 @@ const handleUploadFile = (list: FileItem) => {
 	fetchFile();
 };
 
+const handlePageChange = async (val) => {
+	pageFileParams.value.page = val.current;
+	pageFileParams.value.page_size = val.pageSize;
+	fetchFile();
+};
+
 const handleBatchDeleteFile = async (ids: number) => {
 	await deleteFile({
 		ids: selectFile.value,
@@ -133,6 +142,11 @@ const handleUpdateFile = async (id: number, name: string) => {
 	});
 	fetchFile();
 	Message.success('修改成功！');
+};
+
+const handleDownloadFile = async (name: string) => {
+	await addExport({ name, ids: selectFile.value });
+	Message.success('导出任务添加成功！');
 };
 </script>
 

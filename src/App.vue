@@ -104,4 +104,8 @@ const title = computed(() => appStore.loadingTitle);
 .arco-upload-list-type-picture-card {
 	width: 100%;
 }
+
+.arco-tree-node-title-text {
+	width: 100%;
+}
 </style>

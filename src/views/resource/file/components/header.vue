@@ -16,7 +16,7 @@
 			>
 				<div class="icon" :class="selectdLength ? '' : 'disable'">
 					<a-tooltip content="删除" mini :content-style="tipStyle">
-						<span @click="emit('deleteFile')"><icon-delete size="22" :stroke-width="2" /></span>
+						<span @click="handleDelete"><icon-delete size="22" :stroke-width="2" /></span>
 					</a-tooltip>
 				</div>
 			</a-badge>
@@ -38,6 +38,26 @@
 					<span @click="uploadFileVisible = true"><icon-upload size="22" :stroke-width="2" /></span>
 				</a-tooltip>
 			</div>
+
+			<a-badge
+				v-permission="'resource:file:delete'"
+				class="badge"
+				:offset="[-10, 2]"
+				:count="selectdLength"
+				:dot-style="{
+					width: '15px',
+					height: '15px',
+					display: 'flex',
+					justifyContent: 'center',
+					alignItems: 'center'
+				}"
+			>
+				<div v-permission="'resource:export:add'" class="icon" :class="selectdLength ? '' : 'disable'">
+					<a-tooltip content="导出文件" mini :content-style="tipStyle">
+						<span @click="handleDownload"><icon-download size="22" :stroke-width="2" /></span>
+					</a-tooltip>
+				</div>
+			</a-badge>
 
 			<div v-permission="'resource:file:query'" class="search-input">
 				<a-input-search :style="{ width: '180px' }" placeholder="请输入文件名" allow-clear search-button @search="handleSearchFile"></a-input-search>
@@ -70,6 +90,33 @@
 			</a-form-item>
 		</a-form>
 	</a-modal>
+
+	<a-modal
+		v-model:visible="downloadFileVisible"
+		width="380px"
+		title="导出文件名"
+		:on-before-ok="handleDownloadFile"
+		:body-style="{ padding: '15px 15px' }"
+		unmount-on-close
+	>
+		<a-form ref="downloadFileFormRef" :model="downloadFileForm" layout="horizontal">
+			<a-form-item
+				:label-col-props="{ span: 0 }"
+				hide-label
+				field="name"
+				required
+				:rules="[
+					{
+						required: true,
+						message: '导出名称是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="downloadFileForm.name" placeholder="请输入导出文件名称" />
+			</a-form-item>
+		</a-form>
+	</a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -81,9 +128,12 @@ const uploadFileVisible = ref(false);
 const upload = ref();
 const newFileForm = ref({ name: '' });
 const newFileVisible = ref(false);
+const downloadFileFormRef = ref();
+const downloadFileForm = ref({ name: '' });
+const downloadFileVisible = ref(false);
 const showCard = ref(false);
-const emit = defineEmits(['upload', 'createDir', 'changeShowCard', 'deleteFile', 'searchFile']);
-defineProps<{
+const emit = defineEmits(['upload', 'createDir', 'changeShowCard', 'download', 'deleteFile', 'searchFile']);
+const props = defineProps<{
 	selectdLength: number;
 	disable: boolean;
 	app: string;
@@ -105,8 +155,31 @@ const handleUploadFile = async () => {
 	return is;
 };
 
+const handleDelete = () => {
+	if (!props.selectdLength) {
+		return;
+	}
+	emit('deleteFile');
+};
+
+const handleDownload = () => {
+	if (!props.selectdLength) {
+		return;
+	}
+	downloadFileVisible.value = true;
+};
+
 const handleCreateDir = () => {
 	emit('createDir', newFileForm);
+	return true;
+};
+
+const handleDownloadFile = async () => {
+	const isError = await downloadFileFormRef.value.validate();
+	if (isError) {
+		return false;
+	}
+	emit('download', downloadFileForm.value.name);
 	return true;
 };
 
