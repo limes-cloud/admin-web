@@ -14,10 +14,10 @@
 				{{ record.is_update ? '是' : '否' }}
 			</template>
 			<template #start="{ record }">
-				{{ $formatTime(record.start) }}
+				{{ $parseTime(record.start) }}
 			</template>
 			<template #end="{ record }">
-				{{ $formatTime(record.end) }}
+				{{ $parseTime(record.end) }}
 			</template>
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.created_at) }}

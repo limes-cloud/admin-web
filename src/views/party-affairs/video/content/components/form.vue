@@ -43,7 +43,7 @@
 					directory-path="video/content"
 					app="partyaffairs"
 					list-type="text"
-					accept="video/*"
+					accept="video/*,.pdf,.pdfx"
 					@change="handleUploadImage"
 				/>
 			</a-form-item>
@@ -143,7 +143,9 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-
+	if (!form.value.duration) {
+		form.value.duration = 60;
+	}
 	if (isAdd.value) {
 		emit('add', { ...form.value });
 	} else {

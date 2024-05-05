@@ -49,6 +49,10 @@ export function pageTaskValue(data: PageTaskValueReq) {
 	});
 }
 
+export function exportTaskValue(id: number) {
+	return axios.post('/party-affairs/v1/task/values', { task_id: id });
+}
+
 export function deleteTaskValue(id: number) {
 	return axios.delete('/party-affairs/v1/task/value', {
 		params: { id }

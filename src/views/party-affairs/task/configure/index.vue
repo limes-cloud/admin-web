@@ -65,7 +65,7 @@ const columns = ref<TableCloumn[]>([
 		slotName: 'end'
 	},
 	{
-		title: '结束时间',
+		title: '允许更新',
 		dataIndex: 'is_update',
 		slotName: 'isUpdate'
 	},

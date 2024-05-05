@@ -45,7 +45,7 @@ class Parser {
 			// 获取指令/路由/首页
 			const routers: RouteRecordNormalized[] = [];
 			this.apiRouters = [];
-			this.handler([{ ...menu }], routers, false);
+			this.handler([{ ...menu }], routers, false, menu.keyword);
 
 			if (routers.length && routers[0].children.length) {
 				if (this.home) this.homes.set(menu.keyword, { ...this.home });
@@ -87,7 +87,7 @@ class Parser {
 	};
 
 	// handler 加载菜单以及指令
-	private handler = (menus: Menu[], routers: RouteRecordNormalized[], h: boolean) => {
+	private handler = (menus: Menu[], routers: RouteRecordNormalized[], h: boolean, key: string) => {
 		menus.forEach((menu) => {
 			let hidden: boolean = h;
 			// 处理菜单
@@ -142,7 +142,7 @@ class Parser {
 					activeMenu: keyword,
 					children: [],
 					meta: {
-						keyword: menu.keyword,
+						keyword: key,
 						title: menu.title,
 						icon: `icon-${menu.icon}`,
 						hideInMenu: isHidden,
@@ -163,9 +163,9 @@ class Parser {
 			// 处理子菜单;
 			if (menu.children) {
 				if (router) {
-					this.handler(menu.children, router.children, hidden);
+					this.handler(menu.children, router.children, hidden, key);
 				} else {
-					this.handler(menu.children, routers, hidden);
+					this.handler(menu.children, routers, hidden, key);
 				}
 			}
 		});

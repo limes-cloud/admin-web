@@ -6,7 +6,7 @@ export type Component<T = any> = ReturnType<typeof defineComponent> | (() => Pro
 
 declare module 'vue-router' {
 	interface RouteMeta {
-		app?: string;
+		keyword?: string;
 		icon?: string; // The icon show in the side menu
 		title?: string;
 		locale?: string; // The locale name show in side menu and breadcrumb

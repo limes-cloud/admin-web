@@ -94,7 +94,7 @@ const form = ref<Component>({} as Component);
 
 const canDefaultValue = computed(() => {
 	const not = ['upload', 'pcd'];
-	return not.includes(form.value.type);
+	return !not.includes(form.value.type);
 });
 
 const handleDeleteOption = (index: number) => {

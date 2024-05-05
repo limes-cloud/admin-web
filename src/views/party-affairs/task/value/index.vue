@@ -3,7 +3,7 @@
 		<Breadcrumb />
 		<a-card class="general-card">
 			<Search @select="handleSelect"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet"></Tool>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @export="handleExport"></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -30,7 +30,7 @@ import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message } from '@arco-design/web-vue';
 import { PageTaskValueReq, Task, TaskValue } from '@/api/party-affairs/types/task';
-import { pageTaskValue, deleteTaskValue, getTask } from '@/api/party-affairs/task';
+import { pageTaskValue, deleteTaskValue, getTask, exportTaskValue } from '@/api/party-affairs/task';
 import { getFileBySha } from '@/api/resource/file';
 import Table from './components/table.vue';
 import Search from './components/search.vue';
@@ -144,6 +144,15 @@ const handleMore = async (tv: TaskValue) => {
 		taskValueArr.value.push(temp);
 	});
 	moreRef.value.show();
+};
+
+const handleExport = async () => {
+	if (!searchForm.value.task_id) {
+		Message.error('请先选择需要导出的任务');
+		return;
+	}
+	await exportTaskValue(searchForm.value.task_id);
+	Message.success('导出成功，请稍后在资源服务中进行查看');
 };
 </script>
 

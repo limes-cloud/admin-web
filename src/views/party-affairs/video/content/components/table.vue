@@ -15,7 +15,7 @@
 			</template>
 			<template #url="{ record }">
 				<video preload="metadata" :style="{ width: '100px', height: '60px' }" @click="handlePlayVideo(record)">
-					<source :src="$rurl(record.resource.src)" />
+					<source :src="$rurl(record.resource?.src)" />
 				</video>
 			</template>
 

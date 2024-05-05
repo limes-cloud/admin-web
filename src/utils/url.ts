@@ -1,4 +1,5 @@
 export const formatUrl = (url: string, w?: number, h?: number) => {
+	if (!url) return '';
 	let suffix = '';
 	if (w && w > 0 && h && h > 0) {
 		// 腾讯云

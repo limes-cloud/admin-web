@@ -1,5 +1,13 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
+		<a-col :span="12">
+			<a-button v-permission="'party-affairs:task:value:export'" type="primary" @click="emit('export')">
+				<template #icon>
+					<icon-plus />
+				</template>
+				导出数据
+			</a-button>
+		</a-col>
 		<a-col :span="12" class="tool">
 			<a-tooltip content="刷新">
 				<div class="action-icon" @click="emit('refresh')"><icon-refresh size="18" /></div>
@@ -52,7 +60,7 @@ const props = defineProps<{
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'export']);
 const cloneColumns = ref<TableCloumn[]>([]);
 const showColumns = ref<TableCloumn[]>([]);
 

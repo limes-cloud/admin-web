@@ -108,22 +108,22 @@ const props = defineProps({
 });
 const uploadRef = ref();
 const uploadedFileList = ref<FileItem[]>([]);
-const domWidth = ref(`${props.size}px`);
-const domHeight = ref(`${props.size}px`);
-const domMargin = ref('8px');
+const domwidth = ref(`${props.size}px`);
+const domheight = ref(`${props.size}px`);
+const dommargin = ref('8px');
 
 if (props.width) {
 	// eslint-disable-next-line vue/no-setup-props-destructure
-	domWidth.value = props.width;
+	domwidth.value = props.width;
 }
 
 if (props.height) {
 	// eslint-disable-next-line vue/no-setup-props-destructure
-	domHeight.value = props.height;
+	domheight.value = props.height;
 }
 
 if (props.limit === 1) {
-	domMargin.value = '0px !important';
+	dommargin.value = '0px !important';
 }
 
 const GetUploadList = (): FileItem[] => {

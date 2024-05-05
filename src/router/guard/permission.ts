@@ -98,7 +98,7 @@ export default function setupPermissionGuard(router: Router) {
 
 			// 设置默认的应用
 			const curRouter = router.getRoutes().find((route) => route.path === to.path);
-			appStore.setCurrentApp(curRouter?.meta.app);
+			appStore.setCurrentApp(curRouter?.meta.keyword);
 
 			// 设置默认首页
 			let home = appStore.appHome;
@@ -107,7 +107,6 @@ export default function setupPermissionGuard(router: Router) {
 				appStore.setAppHome(appStore.currentAppKey, home as Home);
 			}
 			tabStore.setHomeTag(homeTransTag(home as Home));
-
 			// 默认跳转到首页
 			if (to.path === '/') {
 				next({ path: appStore.appHomePath, replace: true });

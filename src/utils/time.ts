@@ -67,8 +67,5 @@ export function formatTime(time: any, option?: any) {
 		return `1天前`;
 	}
 
-	if (option) {
-		return parseTime(time, option);
-	}
-	return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日${d.getHours()}时${d.getMinutes()}分`;
+	return parseTime(time, option);
 }
