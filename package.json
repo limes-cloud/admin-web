@@ -14,7 +14,7 @@
 		"lint-staged": "npx lint-staged",
 		"prepare": "husky install",
 		"fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit",
-		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,md,json}\""
+		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,md,json,vue}\""
 	},
 	"lint-staged": {
 		"*.{js,ts,jsx,tsx}": [
