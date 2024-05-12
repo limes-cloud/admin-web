@@ -1,6 +1,6 @@
 {
-	"name": "arco-design-pro-vue",
-	"description": "Arco Design Pro for Vue",
+	"name": "go-platform",
+	"description": "开箱即用的企业级微服务开发脚手架，良好的兼容单机、多实例、k8s",
 	"version": "1.0.0",
 	"private": true,
 	"author": "ArcoDesign Team",
