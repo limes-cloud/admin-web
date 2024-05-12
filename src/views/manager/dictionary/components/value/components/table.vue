@@ -53,7 +53,7 @@
 
 <script lang="ts" setup>
 import { TableSize, TableCloumn, Pagination } from '@/types/global';
-import { TableData } from '@arco-design/web-vue/es/table/interface';
+import type { TableData } from '@arco-design/web-vue';
 import { watch, ref } from 'vue';
 
 const emit = defineEmits(['delete', 'update', 'add', 'pageChange']);

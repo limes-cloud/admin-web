@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import { PageUserReq } from '@/api/manager/types/user';
 import { PageResourceContentReq } from '@/api/party-affairs/types/resource';
-import { CascaderOption } from '@arco-design/web-vue/es/cascader/interface';
+import type { CascaderOption } from '@arco-design/web-vue';
 import { ref } from 'vue';
 
 defineProps<{

@@ -149,8 +149,7 @@
 
 <script lang="ts" setup>
 import { App } from '@/api/user-center/types/app';
-import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
-import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
+import type { SelectOptionData, FileItem } from '@arco-design/web-vue';
 import { ref, watch, getCurrentInstance } from 'vue';
 
 const formRef = ref();

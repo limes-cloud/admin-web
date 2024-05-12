@@ -276,7 +276,7 @@
 import { Menu } from '@/api/manager/types/menu';
 import { computed, ref, watch } from 'vue';
 import icons from '@/utils/icon';
-import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
+import type { SelectOptionData } from '@arco-design/web-vue';
 import { TableData, Message } from '@arco-design/web-vue';
 import Icon from '@/components/icon/index.vue';
 import { ObjectDef, ObjectRule } from '@/api/manager/types/object';

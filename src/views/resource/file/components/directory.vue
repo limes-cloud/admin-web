@@ -92,7 +92,7 @@ import { Server } from '@/api/configure/types/server';
 import { getDirectory, addDirectory, updateDirectory, deleteDirectory } from '@/api/resource/directory';
 import { Directory } from '@/api/resource/types/directory';
 import { Message } from '@arco-design/web-vue';
-import { TreeNodeData } from '@arco-design/web-vue/es/tree/interface';
+import type { TreeNodeData } from '@arco-design/web-vue';
 import { onMounted, ref } from 'vue';
 import { findNode } from '@/utils/index';
 import FileIcon from './icon.vue';
