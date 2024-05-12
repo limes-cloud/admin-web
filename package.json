@@ -13,7 +13,8 @@
 		"type:check": "vue-tsc --noEmit --skipLibCheck",
 		"lint-staged": "npx lint-staged",
 		"prepare": "husky install",
-		"fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit"
+		"fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit",
+		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,md,json}\""
 	},
 	"lint-staged": {
 		"*.{js,ts,jsx,tsx}": [
