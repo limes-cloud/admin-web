@@ -4,7 +4,6 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import svgLoader from 'vite-svg-loader';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
-import configArcoStyleImportPlugin from './plugin/arcoStyleImport';
 import jsonEditorPlugin from './plugin/jsonEditor';
 
 export default defineConfig({
@@ -12,7 +11,6 @@ export default defineConfig({
 		vue(),
 		vueJsx(),
 		svgLoader({ svgoConfig: {} }),
-		configArcoStyleImportPlugin(),
 		jsonEditorPlugin(),
 		createSvgIconsPlugin({
 			// 指定需要缓存的图标文件夹
