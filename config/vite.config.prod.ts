@@ -4,11 +4,12 @@ import configCompressPlugin from './plugin/compress';
 import configVisualizerPlugin from './plugin/visualizer';
 import configArcoResolverPlugin from './plugin/arcoResolver';
 import configImageminPlugin from './plugin/imagemin';
+import configArcoAutoImportPlugin from './plugin/arcoAutoImport';
 
 export default mergeConfig(
 	{
 		mode: 'production',
-		plugins: [configCompressPlugin('gzip'), configVisualizerPlugin(), configArcoResolverPlugin(), configImageminPlugin()],
+		plugins: [configCompressPlugin('gzip'), configVisualizerPlugin(), configArcoResolverPlugin(), configImageminPlugin(), configArcoAutoImportPlugin()],
 		build: {
 			rollupOptions: {
 				output: {
