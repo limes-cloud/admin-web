@@ -11,7 +11,7 @@
 	"menuWidth": 220,
 	"globalSettings": false,
 	"device": "desktop",
-	"tabBar": false,
+	"tabBar": true,
 	"logo": "logo.png",
 	"title": "快速开发框架",
 	"desc": "开放协作，拥抱未来"

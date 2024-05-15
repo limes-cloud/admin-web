@@ -18,7 +18,9 @@ import { setting } from './api/manager/setting';
 import 'virtual:svg-icons-register';
 
 const app = createApp(App);
-app.use(ArcoVue, {});
+if (import.meta.env?.MODE === 'development') {
+	app.use(ArcoVue, {});
+}
 app.use(ArcoVueIcon);
 app.use(router);
 app.use(store);
