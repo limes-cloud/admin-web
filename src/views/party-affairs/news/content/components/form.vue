@@ -136,7 +136,7 @@ const props = defineProps<{
 	classifys: NewsClassify[];
 }>();
 
-const form = ref({} as NewsContent);
+const form = ref({ is_top: false } as NewsContent);
 const emit = defineEmits(['add', 'update']);
 const files = () => {
 	return form.value.resource
@@ -153,7 +153,7 @@ const files = () => {
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
+		if (val) form.value = val;
 	}
 );
 
