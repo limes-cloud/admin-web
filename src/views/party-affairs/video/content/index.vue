@@ -56,11 +56,6 @@ const columns = ref<TableCloumn[]>([
 		dataIndex: 'title'
 	},
 	{
-		title: '视频内容',
-		dataIndex: 'url',
-		slotName: 'url'
-	},
-	{
 		title: '视频描述',
 		dataIndex: 'desc'
 	},

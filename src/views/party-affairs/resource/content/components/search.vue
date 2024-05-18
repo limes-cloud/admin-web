@@ -4,10 +4,10 @@
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="8">
-						<a-form-item field="classify_id" label="新闻分类">
+						<a-form-item field="classify_id" label="资料分类">
 							<a-select
 								v-model="form.classify_id"
-								placeholder="请选择新闻分类"
+								placeholder="请选择资料分类"
 								:scrollbar="true"
 								:options="classifys"
 								:field-names="{ value: 'id', label: 'name' }"
@@ -17,8 +17,8 @@
 					</a-col>
 
 					<a-col :span="8">
-						<a-form-item field="title" label="新闻标题">
-							<a-input v-model="form.title" allow-clear placeholder="请输入新闻标题" />
+						<a-form-item field="title" label="资料标题">
+							<a-input v-model="form.title" allow-clear placeholder="请输入资料标题" />
 						</a-form-item>
 					</a-col>
 				</a-row>
