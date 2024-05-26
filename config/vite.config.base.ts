@@ -4,12 +4,19 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import svgLoader from 'vite-svg-loader';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+import AutoImport from 'unplugin-auto-import/vite';
 import jsonEditorPlugin from './plugin/jsonEditor';
 
 export default defineConfig({
 	plugins: [
 		vue(),
 		vueJsx(),
+		AutoImport({
+			imports: ['vue', 'vue-router'],
+			eslintrc: {
+				enabled: true
+			}
+		}),
 		svgLoader({ svgoConfig: {} }),
 		jsonEditorPlugin(),
 		createSvgIconsPlugin({

@@ -1,20 +1,27 @@
 <script lang="tsx">
-import { defineComponent, ref, h, compile, computed } from 'vue';
+import { defineComponent, ref, h, compile, computed, PropType } from 'vue';
 // import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter, RouteRecordRaw } from 'vue-router';
 import type { RouteMeta } from 'vue-router';
 import { useAppStore } from '@/store';
 import { listenerRouteChange } from '@/utils/route-listener';
 import { openWindow, regexUrl } from '@/utils';
-import useMenuTree from './use-menu-tree';
+import useMenuTree from '@/hooks/use-menu-tree';
 
 export default defineComponent({
+	props: {
+		menu: {
+			type: Array as PropType<RouteRecordRaw[]>
+		}
+	},
 	emit: ['collapse'],
-	setup() {
+	setup(props, { attrs }) {
 		const appStore = useAppStore();
 		const router = useRouter();
 		const route = useRoute();
-		const { menuTree } = useMenuTree();
+		const { menuTree: menu } = useMenuTree();
+		const menuTree = computed(() => (props?.menu ? props.menu : unref(menu)));
+
 		const collapsed = computed({
 			get() {
 				if (appStore.device === 'desktop') return appStore.menuCollapse;
@@ -25,7 +32,12 @@ export default defineComponent({
 			}
 		});
 
-		const topMenu = computed(() => appStore.topMenu);
+		const topMenu = computed(() => {
+			if (appStore.device === 'mobile') {
+				return false;
+			}
+			return appStore.layout === 'topMenu';
+		});
 		const openKeys = ref<string[]>([]);
 		const selectedKey = ref<string[]>([]);
 
@@ -128,6 +140,7 @@ export default defineComponent({
 				level-indent={34}
 				style="height: 100%;width:100%;"
 				onCollapse={setCollapse}
+				{...attrs}
 			>
 				{renderSubMenu()}
 			</a-menu>

@@ -3,7 +3,6 @@
 	"colorWeak": false,
 	"navbar": true,
 	"menu": true,
-	"topMenu": false,
 	"hideMenu": false,
 	"menuCollapse": false,
 	"footer": true,
@@ -14,5 +13,9 @@
 	"tabBar": true,
 	"logo": "logo.png",
 	"title": "快速开发框架",
-	"desc": "开放协作，拥抱未来"
+	"desc": "开放协作，拥抱未来",
+	"layout": "default",
+	"skin": "default",
+	"language": "zh_CN",
+	"animation": "gp-slide-down"
 }

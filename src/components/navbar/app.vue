@@ -4,6 +4,8 @@ import { useAppStore, useTabBarStore } from '@/store';
 import { App, Home } from '@/router/types';
 import { getHomeByMenu, homeTransTag } from '@/router/guard/permission';
 import router from '@/router';
+import { Button, Col, Doption, Dropdown, Row, TypographyText } from '@arco-design/web-vue';
+import Menu from '@/components/menu/index.vue';
 
 export default defineComponent({
 	emit: ['collapse'],
@@ -44,17 +46,74 @@ export default defineComponent({
 			return travel(appStore.apps);
 		};
 
-		return () => (
+		const renderMenu = () => (
 			<a-menu mode="horizontal" selected-keys={[appStore.currentAppKey]}>
 				{renderSubMenu()}
 			</a-menu>
 		);
+
+		const dropdownText = computed(() => appStore.apps?.find((item) => item?.keyword === appStore.currentAppKey)?.title);
+
+		const renderDropdown = () => (
+			<div class="navbar-dropdown">
+				{appStore.device !== 'mobile' && <Menu class="top-menu" />}
+				<div
+					class={{
+						'dropdown-ml-10': appStore.device === 'mobile',
+						'navbar-dropdown-item': true
+					}}
+				>
+					<Dropdown onSelect={switchApp}>
+						{{
+							default: () => (
+								<Button>
+									<TypographyText class="top-navbar-dropdown-text">{dropdownText.value}</TypographyText>
+									<icon-down />
+								</Button>
+							),
+							content: () =>
+								appStore.apps.map((item) => (
+									<Doption value={item} key={item?.keyword}>
+										{h(compile(`<icon-${item.icon}/>`))} {item?.title}
+									</Doption>
+								))
+						}}
+					</Dropdown>
+				</div>
+			</div>
+		);
+
+		return () => (appStore.layout === 'topMenu' ? renderDropdown() : renderMenu());
 	}
 });
 </script>
 
 <style lang="less">
-.arco-menu-icon {
-	margin-right: 0;
+.navbar-dropdown {
+	display: flex;
+	flex: 1;
+	align-items: center;
+
+	.navbar-dropdown-item {
+		width: 110px;
+	}
+
+	.top-menu {
+		flex: 1;
+
+		.arco-menu-icon {
+			position: relative;
+			top: 2px;
+			margin-right: 0;
+		}
+	}
+
+	.dropdown-ml-10 {
+		margin-left: 10px;
+	}
+
+	.top-navbar-dropdown-text {
+		margin-right: 6px;
+	}
 }
 </style>

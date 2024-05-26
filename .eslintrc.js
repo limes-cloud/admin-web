@@ -26,7 +26,8 @@ module.exports = {
 		'plugin:import/recommended',
 		'plugin:import/typescript',
 		'plugin:vue/vue3-recommended',
-		'plugin:prettier/recommended'
+		'plugin:prettier/recommended',
+		'./.eslintrc-auto-import.json'
 	],
 	settings: {
 		'import/resolver': {
@@ -36,7 +37,7 @@ module.exports = {
 		}
 	},
 	rules: {
-		'prettier/prettier': 1,
+		'prettier/prettier': 0,
 		// Vue: Recommended rules to be closed or modify
 		'vue/require-default-prop': 0,
 		'vue/singleline-html-element-content-newline': 0,
