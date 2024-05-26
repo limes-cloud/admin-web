@@ -1,21 +1,28 @@
 import { App, Home } from '@/router/types';
 import type { RouteRecordNormalized } from 'vue-router';
 
-export interface AppState {
-	name: string;
+export type LayoutMenu = 'defalut' | 'twoColumns' | 'topMenu';
+
+export interface AppThem {
 	theme: string;
+	skin: string;
+	language: string;
+	layout: LayoutMenu;
+	animation: string;
+	menuWidth: number;
+	tabBar: boolean;
+	themeColor: string;
+}
+export interface AppState extends AppThem {
+	name: string;
 	colorWeak: boolean;
 	navbar: boolean;
 	menu: boolean;
-	topMenu: boolean;
 	hideMenu: boolean;
 	menuCollapse: boolean;
 	footer: boolean;
-	themeColor: string;
-	menuWidth: number;
 	globalSettings: boolean;
 	device: string;
-	tabBar: boolean;
 	menus: Map<string, RouteRecordNormalized[]>;
 	permissions: Map<string, string>;
 	apps: App[];

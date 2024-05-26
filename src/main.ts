@@ -16,6 +16,8 @@ import { hasPermission } from './utils/permission';
 import { setting } from './api/manager/setting';
 // eslint-disable-next-line import/no-unresolved
 import 'virtual:svg-icons-register';
+import '@/assets/style/them/gray.less';
+import '@/assets/style/animation.less';
 
 const app = createApp(App);
 if (import.meta.env?.MODE === 'development') {
@@ -36,7 +38,9 @@ setting()
 		app.config.globalProperties.$densityList = densityList;
 		app.config.globalProperties.$genderList = genderList;
 		app.config.globalProperties.$hasPermission = hasPermission;
-		useAppStore().setSetting(res.data);
+		const appStore = useAppStore();
+		appStore.setSetting(res.data);
+		appStore.initThemConfig();
 		if (res.data.logo) {
 			app.config.globalProperties.$logo = res.data.logo;
 		}

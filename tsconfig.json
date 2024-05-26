@@ -11,11 +11,23 @@
 		"esModuleInterop": true,
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": [
+				"src/*"
+			]
 		},
-		"lib": ["es2020", "dom"],
+		"lib": [
+			"es2020",
+			"dom"
+		],
 		"skipLibCheck": true
 	},
-	"include": ["src/**/*", "src/**/*.vue", "src/type.d.ts"],
-	"exclude": ["node_modules"]
+	"include": [
+		"src/**/*",
+		"src/**/*.vue",
+		"src/type.d.ts",
+		"auto-imports.d.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }

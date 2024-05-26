@@ -8,7 +8,7 @@ export default function useMenuTree() {
 	const appRoute = computed(() => {
 		return appStore.appMenu;
 	});
-	const menuTree = computed(() => {
+	const menuTree = computed<RouteRecordRaw[]>(() => {
 		const copyRouter = cloneDeep(appRoute.value) as RouteRecordNormalized[];
 		copyRouter.sort((a: RouteRecordNormalized, b: RouteRecordNormalized) => {
 			return (a.meta.weight || 0) - (b.meta.weight || 0);

@@ -61,6 +61,15 @@
 				</a-tooltip>
 			</li>
 			<li>
+				<settings>
+					<a-button class="nav-btn" type="outline" :shape="'circle'">
+						<template #icon>
+							<icon-settings />
+						</template>
+					</a-button>
+				</settings>
+			</li>
+			<li>
 				<a-dropdown trigger="click">
 					<a-avatar :size="32" :style="{ marginRight: '8px', cursor: 'pointer' }">
 						<img v-if="avatar" alt="avatar" :src="avatar" />
@@ -102,14 +111,15 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, ref, inject } from 'vue';
-import { useDark, useToggle, useFullscreen } from '@vueuse/core';
-import { useAppStore, useUserStore } from '@/store';
-import useUser from '@/hooks/user';
 import { Role } from '@/api/manager/types/role';
-import App from './app.vue';
+import useUser from '@/hooks/user';
+import { useAppStore, useUserStore } from '@/store';
+import { useDark, useFullscreen, useToggle } from '@vueuse/core';
+import { computed, inject, ref } from 'vue';
 import Userinfo from '../userinfo/index.vue';
+import App from './app.vue';
 // import MessageBox from '../message-box/index.vue';
+import settings from './components/settings/index.vue';
 
 const showUserinfoVisible = ref(false);
 const appStore = useAppStore();
@@ -195,11 +205,14 @@ const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 }
 
 .center-side {
+	display: flex;
 	flex: 1;
+	align-items: center;
 }
 
 .right-side {
 	display: flex;
+	width: 276px;
 	padding-right: 20px;
 	list-style: none;
 

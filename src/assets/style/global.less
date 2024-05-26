@@ -3,13 +3,15 @@
 }
 
 html,
-body {
+body,
+#app {
 	width: 100%;
 	height: 100%;
 	margin: 0;
 	padding: 0;
 	font-size: 14px;
 	background-color: var(--color-bg-1);
+	overflow: hidden;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
 }
@@ -21,6 +23,7 @@ body {
 	/* Note: backdrop-filter has minimal browser support */
 
 	border-radius: 6px !important;
+
 	.content-panel {
 		display: flex;
 		justify-content: space-between;
@@ -33,12 +36,15 @@ body {
 		border-radius: 4px;
 		margin-bottom: 4px;
 	}
+
 	.tooltip-title {
 		margin: 0 0 10px 0;
 	}
+
 	p {
 		margin: 0;
 	}
+
 	.tooltip-title,
 	.tooltip-value {
 		font-size: 13px;
@@ -49,6 +55,7 @@ body {
 		color: #1d2129;
 		font-weight: bold;
 	}
+
 	.tooltip-item-icon {
 		display: inline-block;
 		margin-right: 8px;
@@ -61,6 +68,7 @@ body {
 .container {
 	padding: 0 20px 20px 20px;
 }
+
 :deep(.arco-table-th) {
 	&:last-child {
 		.arco-table-th-item-title {
@@ -68,18 +76,22 @@ body {
 		}
 	}
 }
+
 .action-icon {
 	margin-left: 12px;
 	cursor: pointer;
 }
+
 .active {
 	color: #0960bd;
 	background-color: #e3f4fc;
 }
+
 .setting {
 	display: flex;
 	align-items: center;
 	width: 200px;
+
 	.title {
 		margin-left: 12px;
 		cursor: pointer;
@@ -89,11 +101,13 @@ body {
 .general-card {
 	border-radius: 4px;
 	border: none;
+
 	& > .arco-card-header {
 		height: auto;
 		padding: 20px;
 		border: none;
 	}
+
 	& > .arco-card-body {
 		padding: 20px;
 	}
@@ -111,10 +125,16 @@ body {
 		height: 6px;
 		border-radius: 50%;
 		background-color: rgb(var(--blue-6));
+
 		&.pass {
 			background-color: rgb(var(--green-6));
 		}
 	}
+}
+
+.arco-layout {
+	width: 100%;
+	height: 100%;
 }
 
 .cursor-pointer {

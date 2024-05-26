@@ -1,14 +1,16 @@
-import { defineStore } from 'pinia';
-import type { RouteRecordNormalized } from 'vue-router';
+import { Setting } from '@/api/manager/types/setting';
 import defaultSettings from '@/config/settings.json';
 import { App, Home } from '@/router/types';
-import { Setting } from '@/api/manager/types/setting';
-import { AppState } from './types';
+import { generate, getRgbStr } from '@arco-design/color';
+import { defineStore } from 'pinia';
+import type { RouteRecordNormalized } from 'vue-router';
+import { AppState, AppThem, LayoutMenu } from './types';
 
 const useAppStore = defineStore('app', {
 	state: (): AppState => {
 		const setting: AppState = {
 			...defaultSettings,
+			layout: defaultSettings.layout as LayoutMenu,
 			menus: new Map(),
 			permissions: new Map(),
 			apps: [],
@@ -129,6 +131,54 @@ const useAppStore = defineStore('app', {
 			this.logo = setting.logo;
 			this.desc = setting.desc;
 			this.copyright = setting.copyright;
+		},
+		setColor(color: string) {
+			if (!/^#[0-9A-Za-z]{6}/.test(color)) return;
+			this.themeColor = color;
+			const list = generate(this.themeColor, { list: true, dark: this.theme === 'dark' });
+			list.forEach((item, index) => {
+				const rgbStr = getRgbStr(item);
+				document.body.style.setProperty(`--primary-${index + 1}`, rgbStr);
+				document.body.style.setProperty(`--arcoblue-${index + 1}`, rgbStr);
+			});
+			defaultSettings.themeColor = this.themeColor;
+		},
+		setThemConfig(them: Partial<AppThem>) {
+			if (them) {
+				Object.keys(them)?.forEach((key) => {
+					const value = them[key];
+					switch (key) {
+						case 'themeColor':
+							this.setColor(value);
+							break;
+						case 'skin':
+							this[key] = value;
+							document.body.setAttribute('them-skin', this.skin);
+							break;
+						default:
+							this[key] = value;
+							break;
+					}
+				});
+			}
+		},
+		initThemConfig() {
+			const config = window.localStorage.getItem('them');
+			if (config) {
+				try {
+					const configObj = JSON.parse(config);
+					Object.keys(configObj)?.forEach((key) => {
+						const value = configObj[key];
+						if (key === 'themeColor') {
+							this.setColor(value);
+						} else {
+							this[key] = value;
+						}
+					});
+				} catch (error) {
+					// console.warn(error);
+				}
+			}
 		}
 	}
 });
