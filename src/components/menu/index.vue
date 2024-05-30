@@ -1,5 +1,5 @@
 <script lang="tsx">
-import { defineComponent, ref, h, compile, computed, PropType } from 'vue';
+import { compile } from 'vue';
 // import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter, RouteRecordRaw } from 'vue-router';
 import type { RouteMeta } from 'vue-router';
@@ -9,18 +9,12 @@ import { openWindow, regexUrl } from '@/utils';
 import useMenuTree from '@/hooks/use-menu-tree';
 
 export default defineComponent({
-	props: {
-		menu: {
-			type: Array as PropType<RouteRecordRaw[]>
-		}
-	},
 	emit: ['collapse'],
-	setup(props, { attrs }) {
+	setup(_, { attrs }) {
 		const appStore = useAppStore();
 		const router = useRouter();
 		const route = useRoute();
-		const { menuTree: menu } = useMenuTree();
-		const menuTree = computed(() => (props?.menu ? props.menu : unref(menu)));
+		const { menuTree } = useMenuTree();
 
 		const collapsed = computed({
 			get() {
@@ -137,7 +131,6 @@ export default defineComponent({
 				auto-open={false}
 				selected-keys={selectedKey.value}
 				auto-open-selected={true}
-				level-indent={34}
 				style="height: 100%;width:100%;"
 				onCollapse={setCollapse}
 				{...attrs}
