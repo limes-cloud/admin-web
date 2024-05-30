@@ -4,12 +4,12 @@ import { useAppStore, useTabBarStore } from '@/store';
 import { App, Home } from '@/router/types';
 import { getHomeByMenu, homeTransTag } from '@/router/guard/permission';
 import router from '@/router';
-import { Button, Col, Doption, Dropdown, Row, TypographyText } from '@arco-design/web-vue';
+import { Button, Doption, Dropdown, TypographyText } from '@arco-design/web-vue';
 import Menu from '@/components/menu/index.vue';
 
 export default defineComponent({
 	emit: ['collapse'],
-	setup() {
+	setup(_, { attrs }) {
 		const appStore = useAppStore();
 		const tabStore = useTabBarStore();
 
@@ -47,7 +47,7 @@ export default defineComponent({
 		};
 
 		const renderMenu = () => (
-			<a-menu mode="horizontal" selected-keys={[appStore.currentAppKey]}>
+			<a-menu {...attrs} mode={appStore.layout === 'twoColumns' ? 'vertical' : 'horizontal'} selected-keys={[appStore.currentAppKey]}>
 				{renderSubMenu()}
 			</a-menu>
 		);

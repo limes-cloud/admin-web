@@ -10,7 +10,7 @@
 			</a-space>
 		</div>
 		<div v-if="appVisable" class="center-side">
-			<App></App>
+			<App />
 		</div>
 		<ul class="right-side">
 			<li>
@@ -133,7 +133,7 @@ const avatar = computed(() => {
 });
 
 const appVisable = computed(() => {
-	return appStore.apps.length > 1;
+	return appStore.apps.length > 1 && appStore.layout !== 'twoColumns';
 });
 
 const roles = computed((): Role[] => {
