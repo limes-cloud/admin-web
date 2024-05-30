@@ -97,9 +97,8 @@ handleGetObject();
 // 处理新增
 const handleAdd = async (data: Menu) => {
 	if (data.type === 'R') {
-		data.app = data.keyword;
 		data.component = 'Layout';
-		data.path = `/${data.app.toLocaleLowerCase()}`;
+		data.path = `/${data.keyword.toLocaleLowerCase()}`;
 	}
 	await addMenu(data);
 	handleGet();
@@ -133,7 +132,7 @@ const handleTableUpdate = (data: Menu) => {
 };
 
 const handleTableAdd = (data: Menu) => {
-	form.value = { parent_id: data.id, app: data.app } as Menu;
+	form.value = { parent_id: data.id } as Menu;
 	formRef.value.showAddDrawer();
 };
 
