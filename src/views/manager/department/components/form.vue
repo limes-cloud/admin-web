@@ -2,7 +2,7 @@
 	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="parent_id"
+				field="parentId"
 				label="上级部门"
 				:rules="[
 					{
@@ -13,7 +13,7 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-cascader
-					v-model="form.parent_id"
+					v-model="form.parentId"
 					check-strictly
 					:field-names="{ value: 'id', label: 'name' }"
 					:options="departments"
@@ -68,9 +68,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Department } from '@/api/manager/types/department';
 import { ref, watch } from 'vue';
-import { TableData } from '@arco-design/web-vue';
+import { Message, TableData } from '@arco-design/web-vue';
+import { CreateDepartment, UpdateDepartment } from '@/api/manager/department/api';
+import { Department } from '@/api/manager/department/type';
 
 const formRef = ref();
 const visible = ref(false);
@@ -82,7 +83,7 @@ const props = defineProps<{
 }>();
 
 const form = ref({} as Department);
-const emit = defineEmits(['add', 'update']);
+const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
@@ -113,11 +114,15 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateDepartment(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateDepartment(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
 };
 </script>

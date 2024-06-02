@@ -6,7 +6,7 @@
 				<a-typography-title :style="{ margin: 0, fontSize: '18px', width: '100%', minWidth: titleWidth() }" :heading="5" :ellipsis="true">
 					{{ appStore.currentAppinfo.title }}
 				</a-typography-title>
-				<icon-menu-fold v-if="appStore.device === 'mobile'" style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" />
+				<!-- <icon-menu-fold v-if="appStore.device === 'mobile'" style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" /> -->
 			</a-space>
 		</div>
 		<div v-if="appVisable" class="center-side">
@@ -85,7 +85,7 @@
 							</template>
 							<template #content>
 								<template v-for="item in roles" :key="item.keyword">
-									<a-doption :disabled="userStore.role_id == item.id" @click="switchRoles(item.id)">{{ item.name }}</a-doption>
+									<a-doption :disabled="userStore.roleId == item.id" @click="switchRoles(item.id)">{{ item.name }}</a-doption>
 								</template>
 							</template>
 						</a-dsubmenu>
@@ -111,7 +111,7 @@
 </template>
 
 <script lang="tsx" setup>
-import { Role } from '@/api/manager/types/role';
+import { Role } from '@/api/manager/role/type';
 import useUser from '@/hooks/user';
 import { useAppStore, useUserStore } from '@/store';
 import { useDark, useFullscreen, useToggle } from '@vueuse/core';

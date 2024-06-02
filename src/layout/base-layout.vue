@@ -3,27 +3,36 @@
 		<div v-if="navbar" class="layout-navbar">
 			<NavBar />
 		</div>
-		<a-layout>
-			<a-layout style="flex-direction: row">
-				<component :is="view" :key="appStore.layout" />
-				<a-drawer v-if="hideMenu" :visible="drawerVisible" placement="left" :footer="false" mask-closable :closable="false" @cancel="drawerCancel">
-					<Menu />
-				</a-drawer>
-				<a-layout class="layout-content" :style="paddingStyle">
-					<TabBar v-if="appStore.tabBar" />
-					<a-layout-content>
-						<Content />
-					</a-layout-content>
-					<Footer v-if="footer" />
+		<a-watermark
+			:content="watermark"
+			:z-index="99999999"
+			:font="{
+				fontSize: 14
+			}"
+		>
+			<a-layout>
+				<a-layout style="flex-direction: row">
+					<component :is="view" :key="appStore.layout" />
+					<a-drawer v-if="hideMenu" :visible="drawerVisible" placement="left" :footer="false" mask-closable :closable="false" @cancel="drawerCancel">
+						<Menu />
+					</a-drawer>
+
+					<a-layout class="layout-content" :style="paddingStyle">
+						<TabBar v-if="appStore.tabBar" />
+						<a-layout-content>
+							<Content />
+						</a-layout-content>
+						<Footer v-if="footer" />
+					</a-layout>
 				</a-layout>
 			</a-layout>
-		</a-layout>
+		</a-watermark>
 	</a-layout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import useResponsive from '@/hooks/responsive';
-import { useAppStore } from '@/store';
+import { useAppStore, useUserStore } from '@/store';
 import NavBar from '@/components/navbar/index.vue';
 import Menu from '@/components/menu/index.vue';
 import Footer from '@/components/footer/index.vue';
@@ -34,8 +43,16 @@ import TwoColumnsLayout from './components/two-columns-layout.vue';
 
 const view = shallowRef(DefaultLayout);
 const appStore = useAppStore();
-const drawerVisible = ref(false);
+const userStore = useUserStore();
 
+const watermark = computed(() => {
+	if (appStore.watermark) {
+		return `${appStore.watermark}-${userStore.name}`;
+	}
+	return '';
+});
+
+const drawerVisible = ref(false);
 const navbarHeight = `60px`;
 
 const navbar = computed(() => appStore.navbar);
@@ -58,7 +75,7 @@ watchEffect(() => {
 			view.value = TwoColumnsLayout;
 			break;
 		case 'topMenu':
-			view.value = undefined;
+			view.value = null;
 			break;
 		default:
 			view.value = DefaultLayout;

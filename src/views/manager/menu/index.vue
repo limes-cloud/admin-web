@@ -10,9 +10,9 @@
 				:size="size"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
-				@delete="handleDelete"
+				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :menus="tableData" :objects="objects" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :menus="tableData" :data="form" @refresh="handleGet"></Form>
 		</a-card>
 	</div>
 </template>
@@ -21,12 +21,9 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
-import { addMenu, deleteMenu, getMenuTree, updateMenu } from '@/api/manager/menu';
 import useLoading from '@/hooks/loading';
-import { Menu } from '@/api/manager/types/menu';
-import { Message } from '@arco-design/web-vue';
-import { pageObject } from '@/api/manager/object';
-import { ObjectDef } from '@/api/manager/types/object';
+import { Menu } from '@/api/manager/menu/type';
+import { ListMenu } from '@/api/manager/menu/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -37,7 +34,6 @@ const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-const objects = ref<ObjectDef[]>([]);
 const columns = ref<TableCloumn[]>([
 	{
 		title: '菜单标题',
@@ -80,44 +76,14 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await getMenuTree();
+		const { data } = await ListMenu({ orderBy: 'weight' });
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
 };
 
-const handleGetObject = async (val?: string) => {
-	const { data } = await pageObject({ page: 1, page_size: 50 });
-	objects.value = data.list;
-};
-
 handleGet();
-handleGetObject();
-// 处理新增
-const handleAdd = async (data: Menu) => {
-	if (data.type === 'R') {
-		data.component = 'Layout';
-		data.path = `/${data.keyword.toLocaleLowerCase()}`;
-	}
-	await addMenu(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Menu) => {
-	await updateMenu(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteMenu(id);
-	handleGet();
-	Message.success('删除成功');
-};
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
@@ -132,7 +98,7 @@ const handleTableUpdate = (data: Menu) => {
 };
 
 const handleTableAdd = (data: Menu) => {
-	form.value = { parent_id: data.id } as Menu;
+	form.value = { parentId: data.id } as Menu;
 	formRef.value.showAddDrawer();
 };
 

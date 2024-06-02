@@ -2,13 +2,20 @@
 	<a-tooltip content="主题设置">
 		<element />
 	</a-tooltip>
-	<a-drawer v-model:visible="visible" ok-text="保存到后台" :width="340" unmount-on-close>
+	<a-drawer
+		v-model:visible="visible"
+		ok-text="保存到后台"
+		:width="340"
+		unmount-on-close
+		@before-ok="handleUpdateSetting"
+		@cancel="handleCancelSetting"
+	>
 		<a-form :model="form" :auto-label-width="true">
 			<template #title>主题设置</template>
 			<a-row justify="center">
 				<a-col>
 					<a-divider orientation="center">个性化设置</a-divider>
-					<a-form-item label="系统主色调">
+					<a-form-item label="主题设置">
 						<a-color-picker v-model="form.themeColor" show-preset show-text :preset-colors="defaultColorList" />
 					</a-form-item>
 				</a-col>
@@ -16,20 +23,20 @@
 			<a-form-item label="当前皮肤">
 				<skin v-model="form.skin" />
 			</a-form-item>
-			<a-form-item label="语言">
+			<a-form-item label="系统语言">
 				<a-select v-model="form.language">
 					<a-option value="zh_CN">简体中文</a-option>
 					<a-option value="en">English</a-option>
 				</a-select>
 			</a-form-item>
-			<a-form-item label="开启多标签">
+			<a-form-item label="开启标签">
 				<a-switch v-model="form.tabBar" />
 			</a-form-item>
 			<a-form-item label="菜单宽度">
 				<a-input-number v-model="form.menuWidth" mode="button" />
 			</a-form-item>
 			<a-form-item label="菜单布局">
-				<a-select v-model="form.layout">
+				<a-select v-model="form.layout" @change="handleSelectLayout">
 					<a-option value="default">默认</a-option>
 					<a-option value="twoColumns">两栏</a-option>
 					<a-option value="topMenu">顶栏</a-option>
@@ -49,7 +56,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/store';
+import { useAppStore, useUserStore } from '@/store';
+import config from '@/config/settings.json';
+import { AppThem } from '@/store/modules/app/types';
 import Skin from '../skin';
 
 const visible = ref(false);
@@ -91,9 +100,45 @@ const defaultColorList = [
 ];
 
 watchEffect(() => {
-	window.localStorage.setItem('them', JSON.stringify(form));
 	appStore.setThemConfig(form);
 });
+
+const handleUpdateSetting = async () => {
+	useUserStore().updateSetting(form);
+};
+
+const handleSelectLayout = () => {
+	if (form.layout === 'twoColumns') {
+		form.menuWidth = 300;
+	} else {
+		form.menuWidth = 200;
+	}
+};
+
+const reset = (them: AppThem) => {
+	form.theme = them.theme;
+	form.themeColor = them.themeColor;
+	form.skin = them.skin;
+	form.tabBar = them.tabBar;
+	form.menuWidth = them.menuWidth;
+	form.layout = them.layout;
+	form.language = them.language;
+	form.animation = them.animation;
+};
+
+const handleCancelSetting = () => {
+	const oldSetting = useUserStore().$state.setting;
+	if (oldSetting) {
+		try {
+			const setting = JSON.parse(oldSetting);
+			reset(setting as AppThem);
+		} catch (error) {
+			reset(config as AppThem);
+		}
+	} else {
+		reset(config as AppThem);
+	}
+};
 </script>
 
 <style scoped></style>

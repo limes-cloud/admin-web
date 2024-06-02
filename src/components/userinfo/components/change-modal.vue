@@ -1,23 +1,40 @@
 <template>
 	<a-modal v-model:visible="visible" :width="350" draggable :loading="loading" :footer="false" @cancel="onClose">
 		<template #title>修改{{ info.name }}</template>
+
 		<a-form ref="formRef" :model="formData" auto-label-width autocomplete="off">
-			<a-form-item field="captcha" label="验证码" :rules="[{ required: true, message: '验证码不能为空' }]" :validate-trigger="['change', 'blur']">
+			<a-form-item
+				v-if="appStore.changePasswordType === 'captcha'"
+				field="captcha"
+				label="验证码"
+				:rules="[{ required: true, message: '验证码不能为空' }]"
+				:validate-trigger="['change', 'blur']"
+			>
 				<a-input v-model="formData.captcha" placeholder="请输入验证码" allow-clear autocomplete="off"></a-input>
 				<a-button :style="{ marginLeft: '10px', width: '90px' }" type="primary" :disabled="!isSend" @click="onSendCode">发送验证码</a-button>
 			</a-form-item>
 
 			<a-form-item
+				v-if="appStore.changePasswordType === 'password'"
+				label="原密码"
+				field="oldPassword"
+				:rules="[{ required: true, message: '原密码不能为空' }]"
+				:validate-trigger="['change', 'blur']"
+			>
+				<a-input-password v-model="formData.oldPassword" placeholder="请输入新密码" allow-clear />
+			</a-form-item>
+
+			<a-form-item
 				v-if="visible"
 				:label="'新' + info.name"
-				:field="info.key"
+				field="password"
 				:rules="[{ required: true, message: '新' + info.name + '不能为空' }]"
 				:validate-trigger="['change', 'blur']"
 			>
-				<a-input-password v-if="info.key == 'password'" v-model="formData.password" placeholder="请输入新密码" allow-clear />
-				<a-input v-if="info.key == 'phone'" v-model="formData.phone" placeholder="请输入新手机号" allow-clear autocomplete="off" />
+				<a-input-password v-model="formData.password" placeholder="请输入新密码" allow-clear />
+				<!-- <a-input v-if="info.key == 'phone'" v-model="formData.phone" placeholder="请输入新手机号" allow-clear autocomplete="off" />
 
-				<a-input v-if="info.key == 'email'" v-model="formData.email" placeholder="请输入新邮箱" allow-clear autocomplete="off" />
+				<a-input v-if="info.key == 'email'" v-model="formData.email" placeholder="请输入新邮箱" allow-clear autocomplete="off" /> -->
 			</a-form-item>
 			<a-form-item>
 				<a-space :size="15" class="mb-4">
@@ -33,15 +50,18 @@
 import { ref, watch, onMounted, reactive } from 'vue';
 import { FormInstance } from '@arco-design/web-vue/es/form';
 import useLoading from '@/hooks/loading';
-import { changePassword, sendChangePasswordEmail } from '@/api/manager/user';
+import { UpdateCurrentUserPassword, SendCurrentUserCaptcha } from '@/api/manager/user/api';
 import { Message } from '@arco-design/web-vue';
 import useUser from '@/hooks/user';
+import { UpdateCurrentUserPasswordRequest } from '@/api/manager/user/type';
+import { useAppStore } from '@/store';
 
 interface EditProps {
 	info: any;
 	editVisible: boolean;
 	setEditVisible: any;
 }
+const appStore = useAppStore();
 
 const isSend = ref(true);
 const props = withDefaults(defineProps<EditProps>(), {
@@ -57,12 +77,8 @@ const formRef = ref<FormInstance>();
 const { loading, setLoading } = useLoading(true);
 const visible = ref(false);
 
-const formData = reactive({
-	captcha_id: '',
-	password: '',
-	captcha: '',
-	email: '',
-	phone: ''
+const formData = reactive<UpdateCurrentUserPasswordRequest>({
+	password: ''
 });
 
 watch(
@@ -74,7 +90,7 @@ watch(
 
 // 发布
 const onSave = () => {
-	changePassword({ ...formData }).then(() => {
+	UpdateCurrentUserPassword({ ...formData }).then(() => {
 		Message.success('密码修改成功，正在跳转中...');
 		setTimeout(async () => {
 			useUser().logout();
@@ -89,8 +105,8 @@ const onClose = () => {
 
 // 发送验证码
 const onSendCode = async () => {
-	const { data } = await sendChangePasswordEmail();
-	formData.captcha_id = data.uuid;
+	const { data } = await SendCurrentUserCaptcha({ type: 'changePassword' });
+	formData.captchaId = data.uuid;
 	Message.success('验证码发送成功');
 	isSend.value = false;
 	const timer = setTimeout(() => {

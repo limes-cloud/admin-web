@@ -59,8 +59,8 @@ import { ValidatedError } from '@arco-design/web-vue/es/form/interface';
 import { useStorage } from '@vueuse/core';
 import { useUserStore, useAppStore } from '@/store';
 import useLoading from '@/hooks/loading';
-import { captcha } from '@/api/manager/auth';
-import { LoginReq } from '@/api/manager/types/auth';
+import { GetUserLoginCaptcha } from '@/api/manager/user/api';
+import { UserLoginRequest } from '@/api/manager/user/type';
 // import logo from '@/assets/logo.png';
 
 const timeInter: any = ref(null);
@@ -81,21 +81,21 @@ onUnmounted(() => {
 	timeInter.value = null;
 });
 
-const captchaBase64 = ref(null);
+const captchaBase64 = ref('');
 
-const loginForm = reactive({
+const loginForm = reactive<UserLoginRequest>({
 	username: loginConfig.value.username,
 	password: loginConfig.value.password,
 	captcha: '',
-	captcha_id: ''
+	captchaId: ''
 });
 
 const fetchCaptcha = async () => {
 	// 清除定时器
 	clearInterval(timeInter.value);
 	// 请求验证码
-	const { data } = await captcha();
-	loginForm.captcha_id = data.uuid;
+	const { data } = await GetUserLoginCaptcha();
+	loginForm.captchaId = data.uuid;
 	captchaBase64.value = data.captcha;
 	// 定时刷新
 	timeInter.value = setInterval(() => {
@@ -110,7 +110,7 @@ const handleSubmit = async ({ errors, values }: { errors: Record<string, Validat
 	if (!errors) {
 		setLoading(true);
 		try {
-			await userStore.login(values as LoginReq);
+			await userStore.login(values as UserLoginRequest);
 			// 不引用导致不回跳转
 			const { redirect, ...othersQuery } = router.currentRoute.value.query;
 			if (redirect && router.hasRoute(redirect as string)) {

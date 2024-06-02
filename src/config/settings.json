@@ -16,6 +16,8 @@
 	"desc": "开放协作，拥抱未来",
 	"layout": "default",
 	"skin": "default",
+	"watermark":"",
+	"copyright":"",
 	"language": "zh_CN",
 	"animation": "gp-slide-down"
 }

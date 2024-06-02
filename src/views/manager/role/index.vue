@@ -10,10 +10,10 @@
 				:size="size"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
-				@delete="handleDelete"
+				@refresh="handleGet"
 				@update-menu="handleTableUpdateMenu"
 			></Table>
-			<Form ref="formRef" :roles="tableData" :departments="departments" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :roles="tableData" :departments="departments" :data="form" @refresh="handleGet"></Form>
 			<SelectMenu ref="menuRef" :menus="(menus as TreeNodeData[])" :keys="menuKeys" @update="handleUpdateMenu"></SelectMenu>
 		</a-card>
 	</div>
@@ -23,16 +23,14 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
-import { addRole, deleteRole, getRoleMenuIds, getRoleTree, updateRole, updateRoleMenu } from '@/api/manager/role';
-import { getDepartmentTree } from '@/api/manager/department';
 import useLoading from '@/hooks/loading';
-import { Role, UpdateRoleMenuReq } from '@/api/manager/types/role';
 import { Message, TreeNodeData } from '@arco-design/web-vue';
-import { Department } from '@/api/manager/types/department';
-
-import { getMenuFromRole } from '@/api/manager/menu';
-
-import { Menu } from '@/api/manager/types/menu';
+import { ListDepartment } from '@/api/manager/department/api';
+import { ListMenuByCurRole } from '@/api/manager/menu/api';
+import { Menu } from '@/api/manager/menu/type';
+import { Role, UpdateRoleMenuRequest } from '@/api/manager/role/type';
+import { GetRoleMenuIds, ListRole, UpdateRoleMenu } from '@/api/manager/role/api';
+import { Department } from '@/api/manager/department/type';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -66,12 +64,12 @@ const columns = ref<TableCloumn[]>([
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
+		dataIndex: 'createdAt',
 		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updated_at',
+		dataIndex: 'updatedAt',
 		slotName: 'updatedAt'
 	},
 	{
@@ -86,12 +84,12 @@ const columns = ref<TableCloumn[]>([
 ]);
 
 const handleGetDepartment = async () => {
-	const { data } = await getDepartmentTree();
-	departments.value = data;
+	const { data } = await ListDepartment();
+	departments.value = data.list;
 };
 
 const handleGetMenu = async () => {
-	const { data } = await getMenuFromRole();
+	const { data } = await ListMenuByCurRole();
 	menus.value = data.list;
 };
 
@@ -99,8 +97,8 @@ const handleGetMenu = async () => {
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await getRoleTree();
-		tableData.value = [data];
+		const { data } = await ListRole();
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
@@ -110,35 +108,14 @@ handleGet();
 handleGetDepartment();
 handleGetMenu();
 
-// 处理新增
-const handleAdd = async (data: Role) => {
-	await addRole(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Role) => {
-	await updateRole(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteRole(id);
-	handleGet();
-	Message.success('删除成功');
-};
-
 // 处理更新菜单
 const handleUpdateMenu = async (keys: number[]) => {
-	const data: UpdateRoleMenuReq = {
-		role_id: form.value.id as number,
-		menu_ids: keys
+	const data: UpdateRoleMenuRequest = {
+		roleId: form.value.id,
+		menuIds: keys
 	};
 
-	await updateRoleMenu(data);
+	await UpdateRoleMenu(data);
 	Message.success('菜单更新成功');
 };
 
@@ -155,14 +132,14 @@ const handleTableUpdate = (data: Role) => {
 };
 
 const handleTableAdd = (id: number) => {
-	form.value = { parent_id: id, status: true } as Role;
+	form.value = { parentId: id, status: true } as Role;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新菜单
 const handleTableUpdateMenu = async (role: Role) => {
-	const { data } = await getRoleMenuIds(role.id as number);
-	menuKeys.value = data;
+	const { data } = await GetRoleMenuIds({ roleId: role.id });
+	menuKeys.value = data.list;
 	form.value.id = role.id;
 	menuRef.value.showUpdateDrawer();
 };

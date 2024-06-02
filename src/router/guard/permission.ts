@@ -3,7 +3,7 @@ import NProgress from 'nprogress'; // progress bar
 
 import { useAppStore, useTabBarStore, useUserStore } from '@/store';
 import { TagProps } from '@/store/modules/tab-bar/types';
-import { getMenuFromRole } from '@/api/manager/menu';
+import { ListMenuByCurRole } from '@/api/manager/menu/api';
 import { Modal } from '@arco-design/web-vue';
 import useUser from '@/hooks/user';
 import Parser from '../routes/parser';
@@ -63,7 +63,7 @@ export default function setupPermissionGuard(router: Router) {
 
 		if (!appStore.apps.length) {
 			// 从服务端获取菜单
-			const { data } = await getMenuFromRole();
+			const { data } = await ListMenuByCurRole();
 			if (!data || !data.list.length) {
 				Modal.error({
 					title: '无菜单权限',

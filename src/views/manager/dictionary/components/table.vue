@@ -11,11 +11,11 @@
 			:size="size"
 		>
 			<template #createdAt="{ record }">
-				{{ $formatTime(record.created_at) }}
+				{{ $formatTime(record.createdAt) }}
 			</template>
 
 			<template #updatedAt="{ record }">
-				{{ $formatTime(record.updated_at) }}
+				{{ $formatTime(record.updatedAt) }}
 			</template>
 
 			<template #operations="{ record }">
@@ -28,7 +28,7 @@
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
-					<a-popconfirm content="您确认删除此字典" type="warning" @ok="emit('delete', record.id)">
+					<a-popconfirm content="您确认删除此字典" type="warning" @ok="handleDelete(record.id)">
 						<a-tag v-permission="'manager:dictionary:delete'" color="red">
 							<template #icon><icon-delete /></template>
 							删除
@@ -51,11 +51,13 @@
 </template>
 
 <script lang="ts" setup>
+import { DeleteDictionary } from '@/api/manager/dictionary/api';
 import { TableSize, TableCloumn, Pagination } from '@/types/global';
+import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
 
-const emit = defineEmits(['delete', 'update', 'add', 'value', 'pageChange']);
+const emit = defineEmits(['refresh', 'update', 'add', 'value', 'pageChange']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
@@ -87,5 +89,11 @@ const pageChange = (current: number) => {
 const pageSizeChange = (size: number) => {
 	page.value.pageSize = size;
 	emit('pageChange', page.value);
+};
+
+const handleDelete = async (id: number) => {
+	await DeleteDictionary({ ids: [id] });
+	Message.success('删除成功');
+	emit('refresh');
 };
 </script>

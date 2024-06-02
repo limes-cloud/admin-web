@@ -1,5 +1,5 @@
 import type { RouteRecordNormalized } from 'vue-router';
-import { Menu } from '@/api/manager/types/menu';
+import { Menu } from '@/api/manager/menu/type';
 import { DEFAULT_LAYOUT } from './base';
 import { App, Component, Home } from '../types';
 
@@ -45,12 +45,12 @@ class Parser {
 			// 获取指令/路由/首页
 			const routers: RouteRecordNormalized[] = [];
 			this.apiRouters = [];
-			this.handler([{ ...menu }], routers, false, menu.keyword);
+			this.handler([{ ...menu }], routers, false, menu.keyword as string);
 
 			if (routers.length && routers[0].children.length) {
-				if (this.home) this.homes.set(menu.keyword, { ...this.home });
+				if (this.home) this.homes.set(menu.keyword as string, { ...this.home });
 				this.apps.push(Parser.GetApp(menu));
-				this.menus.set(menu.keyword, routers[0].children as RouteRecordNormalized[]);
+				this.menus.set(menu.keyword as string, routers[0].children as RouteRecordNormalized[]);
 				// 将添加的api追加到children上
 				routers[0].children = routers[0].children.concat(this.apiRouters);
 				this.routers = this.routers.concat(routers);
@@ -61,7 +61,7 @@ class Parser {
 	// GetApp 获取App
 	private static GetApp = (menu: Menu): App => {
 		return {
-			keyword: menu.keyword,
+			keyword: menu.keyword as string,
 			title: menu.title,
 			icon: menu.icon as string
 		};
@@ -95,7 +95,7 @@ class Parser {
 
 			if (menu.path) {
 				// 获取首页
-				if (menu.is_home) {
+				if (menu.isHome) {
 					this.home = {
 						path: menu.path,
 						keyword: menu.keyword as string,
@@ -131,7 +131,7 @@ class Parser {
 				// 如果是api则声称随机keyword
 				const keyword = menu.keyword ? menu.keyword : Math.random().toString(36);
 
-				const isHidden = (apiPage ? true : !!menu.is_hidden) || hidden;
+				const isHidden = (apiPage ? true : !!menu.isHidden) || hidden;
 				hidden = isHidden;
 
 				router = {
@@ -146,9 +146,9 @@ class Parser {
 						title: menu.title,
 						icon: `icon-${menu.icon}`,
 						hideInMenu: isHidden,
-						order: -menu.weight,
-						ignoreCache: !menu.is_cache,
-						noAffix: !menu.is_affix
+						order: -Number(menu.weight),
+						ignoreCache: !menu.isCache,
+						noAffix: !menu.isAffix
 					}
 				};
 				if (!apiPage) routers.push(router);
@@ -157,7 +157,7 @@ class Parser {
 
 			// 处理指令
 			if (menu.permission) {
-				this.permissions.set(menu.permission, menu.path);
+				this.permissions.set(menu.permission, menu.path as string);
 			}
 
 			// 处理子菜单;

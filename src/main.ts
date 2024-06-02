@@ -13,7 +13,6 @@ import { formatUrl } from './utils/url';
 import { formatTime, parseTime } from './utils/time';
 import { densityList, genderList } from './utils/consts';
 import { hasPermission } from './utils/permission';
-import { setting } from './api/manager/setting';
 // eslint-disable-next-line import/no-unresolved
 import 'virtual:svg-icons-register';
 import '@/assets/style/them/gray.less';
@@ -29,7 +28,8 @@ app.use(store);
 app.use(globalComponents);
 app.use(directive);
 
-setting()
+useAppStore()
+	.loadSystemSetting()
 	.then((res) => {
 		app.config.globalProperties.$rurl = formatUrl;
 		app.config.globalProperties.$logo = logo;
@@ -38,13 +38,10 @@ setting()
 		app.config.globalProperties.$densityList = densityList;
 		app.config.globalProperties.$genderList = genderList;
 		app.config.globalProperties.$hasPermission = hasPermission;
-		const appStore = useAppStore();
-		appStore.setSetting(res.data);
-		appStore.initThemConfig();
-		if (res.data.logo) {
-			app.config.globalProperties.$logo = res.data.logo;
+		document.title = res.title;
+		if (res.logo) {
+			app.config.globalProperties.$logo = res.logo;
 		}
-		document.title = res.data.title;
 		app.mount('#app');
 	})
 	.catch((data) => {

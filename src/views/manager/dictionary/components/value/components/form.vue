@@ -29,7 +29,7 @@
 				<a-input v-model="form.value" allow-clear placeholder="请输入标识" />
 			</a-form-item>
 
-			<a-form-item
+			<!-- <a-form-item
 				field="status"
 				label="状态"
 				:rules="[
@@ -44,7 +44,7 @@
 					<a-radio :value="true">启用</a-radio>
 					<a-radio :value="false">禁用</a-radio>
 				</a-radio-group>
-			</a-form-item>
+			</a-form-item> -->
 
 			<a-form-item
 				field="weight"
@@ -76,24 +76,28 @@
 </template>
 
 <script lang="ts" setup>
-import { DictionaryValue } from '@/api/manager/types/dictionary';
+import { CreateDictionaryValue, UpdateDictionaryValue } from '@/api/manager/dictionary/api';
 import { ref, watch } from 'vue';
+import { Message } from '@arco-design/web-vue';
+import { UpdateDictionaryValueRequest } from '@/api/manager/dictionary/type';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: DictionaryValue;
+	data: UpdateDictionaryValueRequest;
+	dictionaryId: number;
 }>();
 
-const form = ref({ weight: 0, status: true } as DictionaryValue);
-const emit = defineEmits(['add', 'update']);
+const form = ref({} as UpdateDictionaryValueRequest);
+const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
+		if (!val) return;
+		form.value = { weight: 0, ...val };
 	}
 );
 
@@ -118,12 +122,15 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-
+	const data = { ...form.value, dictionaryId: props.dictionaryId };
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateDictionaryValue(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateDictionaryValue(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
 };
 </script>

@@ -48,7 +48,9 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { Dictionary } from '@/api/manager/types/dictionary';
+import { CreateDictionary, UpdateDictionary } from '@/api/manager/dictionary/api';
+import { Message } from '@arco-design/web-vue';
+import { Dictionary } from '@/api/manager/dictionary/type';
 
 const formRef = ref();
 const visible = ref(false);
@@ -59,7 +61,7 @@ const props = defineProps<{
 }>();
 
 const form = ref({} as Dictionary);
-const emit = defineEmits(['add', 'update']);
+const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
@@ -90,11 +92,15 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateDictionary(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateDictionary(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
 };
 </script>

@@ -29,10 +29,10 @@
 		</template>
 
 		<template #createdAt="{ record }">
-			{{ $formatTime(record.created_at) }}
+			{{ $formatTime(record.createdAt) }}
 		</template>
 		<template #updatedAt="{ record }">
-			{{ $formatTime(record.updated_at) }}
+			{{ $formatTime(record.updatedAt) }}
 		</template>
 
 		<template #operations="{ record }">
@@ -48,7 +48,7 @@
 				</a-tag>
 
 				<template v-if="$hasPermission('manager:menu:delete')">
-					<a-popconfirm content="您确认删除此菜单" type="warning" @ok="emit('delete', record.id)">
+					<a-popconfirm content="您确认删除此菜单" type="warning" @ok="handleDelete(record.id)">
 						<a-tag color="red">
 							<template #icon><icon-delete /></template>
 							删除
@@ -64,8 +64,10 @@
 import { TableSize, TableCloumn } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import Icon from '@/components/icon/index.vue';
+import { DeleteMenu } from '@/api/manager/menu/api';
+import { Message } from '@arco-design/web-vue';
 
-const emit = defineEmits(['delete', 'update', 'add']);
+const emit = defineEmits(['update', 'add', 'refresh']);
 
 defineProps<{
 	columns: TableCloumn[];
@@ -73,4 +75,10 @@ defineProps<{
 	data?: TableData[];
 	size: TableSize;
 }>();
+
+const handleDelete = async (id: number) => {
+	await DeleteMenu({ ids: [id] });
+	Message.success('删除成功');
+	emit('refresh');
+};
 </script>

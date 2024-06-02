@@ -10,14 +10,14 @@
 			:total="total"
 			:pagination="{
 				current: searchForm.page,
-				pageSize: searchForm.page_size
+				pageSize: searchForm.pageSize
 			}"
 			@page-change="handlePageChange"
 			@add="handleTableAdd"
 			@update="handleTableUpdate"
-			@delete="handleDelete"
+			@refresh="handleGet"
 		></Table>
-		<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+		<Form ref="formRef" :dictionary-id="id" :data="form" @refresh="handleGet"></Form>
 	</div>
 </template>
 
@@ -26,18 +26,14 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { Message } from '@arco-design/web-vue';
-
-import router from '@/router';
-import { addDictionaryValue, deleteDictionaryValue, pageDictionaryValue, updateDictionaryValue } from '@/api/manager/dictionary';
-import { DictionaryValue, PageDictionaryValueReq } from '@/api/manager/types/dictionary';
+import { ListDictionaryValue } from '@/api/manager/dictionary/api';
+import { DictionaryValue, ListDictionaryValueRequest } from '@/api/manager/dictionary/type';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const props = defineProps<{ id: number }>();
-const params = router.currentRoute.value.query;
 const formRef = ref();
 const form = ref<DictionaryValue>({} as DictionaryValue);
 const { setLoading } = useLoading(true);
@@ -45,10 +41,11 @@ const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<PageDictionaryValueReq>({
+const searchForm = ref<ListDictionaryValueRequest>({
 	page: 1,
-	page_size: 10,
-	dictionary_id: props.id
+	pageSize: 10,
+	orderBy: 'weight',
+	dictionaryId: props.id
 });
 
 const columns = ref<TableCloumn[]>([
@@ -101,7 +98,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageDictionaryValue(searchForm.value);
+		const { data } = await ListDictionaryValue(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -112,7 +109,7 @@ const handleGet = async () => {
 handleGet();
 
 // 处理查询
-const handleSearch = async (req: PageDictionaryValueReq) => {
+const handleSearch = async (req: ListDictionaryValueRequest) => {
 	searchForm.value = {
 		...searchForm.value,
 		...req
@@ -124,30 +121,8 @@ const handleSearch = async (req: PageDictionaryValueReq) => {
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page = page.current;
-	searchForm.value.page_size = page.pageSize;
+	searchForm.value.pageSize = page.pageSize;
 	handleGet();
-};
-
-// 处理新增
-const handleAdd = async (data: DictionaryValue) => {
-	data.dictionary_id = params.dictionary_id as unknown as number;
-	await addDictionaryValue(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: DictionaryValue) => {
-	await updateDictionaryValue(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteDictionaryValue(id);
-	handleGet();
-	Message.success('删除成功');
 };
 
 //  处理tool按钮新建

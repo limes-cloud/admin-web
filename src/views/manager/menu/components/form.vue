@@ -10,7 +10,7 @@
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				v-if="form.type != 'R'"
-				field="parent_id"
+				field="parentId"
 				label="父菜单"
 				:rules="[
 					{
@@ -21,7 +21,7 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-cascader
-					v-model="form.parent_id"
+					v-model="form.parentId"
 					check-strictly
 					:options="menus"
 					:field-names="{ value: 'id', label: 'title' }"
@@ -162,50 +162,6 @@
 				<a-input v-model="form.api" placeholder="请输入接口路径" allow-clear />
 			</a-form-item>
 
-			<template v-if="form.type === 'A'">
-				<a-form-item field="check_object" label="资源鉴权">
-					<a-radio-group v-model="form.check_object" :default-value="false">
-						<a-radio :value="false">否</a-radio>
-						<a-radio :value="true">是</a-radio>
-					</a-radio-group>
-				</a-form-item>
-				<a-form-item v-if="form.check_object" field="object_rule" label="鉴权规则" :content-flex="false">
-					<template v-for="(item, index) in objectRule" :key="index">
-						<view class="check-box" :class="index != objectRule.length - 1 ? 'mgb' : ''">
-							<a-row :gutter="12">
-								<a-col :span="7"><a-input v-model="item.field" placeholder="字段" allow-clear /></a-col>
-								<a-col :span="6">
-									<a-select
-										v-model="item.operate"
-										placeholder="规则"
-										:options="[
-											{ label: 'add', value: 'add' },
-											{ label: 'in', value: 'in' }
-										]"
-									></a-select>
-								</a-col>
-								<a-col :span="7">
-									<a-select
-										v-model="item.object"
-										placeholder="请选择资源对象"
-										:scrollbar="true"
-										:options="objects"
-										allow-search
-										:field-names="{ value: 'id', label: 'name' }"
-									></a-select>
-								</a-col>
-								<a-col :span="4">
-									<view class="operate check-item">
-										<icon-plus-circle :size="24" :style="{ color: 'rgb(var(--primary-6))' }" @click="handleAddCheckRule(index)" />
-										<icon-minus-circle v-if="index != 0" :size="24" :style="{ color: 'rgb(var(--danger-6))' }" @click="handleDelCheckRule(index)" />
-									</view>
-								</a-col>
-							</a-row>
-						</view>
-					</template>
-				</a-form-item>
-			</template>
-
 			<!-- api 可选菜单路径 -->
 			<template v-if="form.type === 'A' || form.type === 'G'">
 				<a-form-item field="path" label="菜单路径">
@@ -241,29 +197,29 @@
 				<a-input v-model="form.redirect" placeholder="请输入跳转路由" allow-clear />
 			</a-form-item>
 
-			<a-form-item v-if="form.type === 'M'" field="is_hidden" label="是否隐藏" :validate-trigger="['change', 'input']">
-				<a-radio-group v-model="form.is_hidden" :default-value="false">
+			<a-form-item v-if="form.type === 'M'" field="isHidden" label="是否隐藏" :validate-trigger="['change', 'input']">
+				<a-radio-group v-model="form.isHidden" :default-value="false">
 					<a-radio :value="false">否</a-radio>
 					<a-radio :value="true">是</a-radio>
 				</a-radio-group>
 			</a-form-item>
 
-			<a-form-item v-if="form.type === 'M'" field="is_cache" label="是否缓存" :validate-trigger="['change', 'input']">
-				<a-radio-group v-model="form.is_cache" :default-value="false">
+			<a-form-item v-if="form.type === 'M'" field="isCache" label="是否缓存" :validate-trigger="['change', 'input']">
+				<a-radio-group v-model="form.isCache" :default-value="false">
 					<a-radio :value="false">否</a-radio>
 					<a-radio :value="true">是</a-radio>
 				</a-radio-group>
 			</a-form-item>
 
-			<a-form-item v-if="form.type === 'M'" field="is_affix" label="是否为tag" :validate-trigger="['change', 'input']">
-				<a-radio-group v-model="form.is_affix" :default-value="false">
+			<a-form-item v-if="form.type === 'M'" field="isAffix" label="是否为tag" :validate-trigger="['change', 'input']">
+				<a-radio-group v-model="form.isAffix" :default-value="false">
 					<a-radio :value="false">否</a-radio>
 					<a-radio :value="true">是</a-radio>
 				</a-radio-group>
 			</a-form-item>
 
-			<a-form-item v-if="form.type === 'M'" field="is_home" label="设为首页" :validate-trigger="['change', 'input']">
-				<a-radio-group v-model="form.is_home" :default-value="false">
+			<a-form-item v-if="form.type === 'M'" field="isHome" label="设为首页" :validate-trigger="['change', 'input']">
+				<a-radio-group v-model="form.isHome" :default-value="false">
 					<a-radio :value="false">否</a-radio>
 					<a-radio :value="true">是</a-radio>
 				</a-radio-group>
@@ -273,15 +229,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Menu } from '@/api/manager/types/menu';
+import { Menu } from '@/api/manager/menu/type';
 import { computed, ref, watch } from 'vue';
 import icons from '@/utils/icon';
 import { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import { TableData, Message } from '@arco-design/web-vue';
 import Icon from '@/components/icon/index.vue';
-import { ObjectDef, ObjectRule } from '@/api/manager/types/object';
+import { CreateMenu, UpdateMenu } from '@/api/manager/menu/api';
 
-const objectRule = ref<ObjectRule[]>([]);
 const formRef = ref();
 const iconOptions = computed(() => icons);
 const visible = ref(false);
@@ -312,24 +267,16 @@ const menuTypes = computed<SelectOptionData[]>(() => [
 const props = defineProps<{
 	menus?: TableData[];
 	data: Menu;
-	objects: ObjectDef[];
 }>();
 
 const form = ref({} as Menu);
-const emit = defineEmits(['add', 'update']);
+const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
-		if (props.data.weight === undefined) {
-			form.value.weight = 0;
-		}
-		if (form.value.check_object_rule) {
-			objectRule.value = JSON.parse(form.value.check_object_rule);
-		} else {
-			objectRule.value.push({} as ObjectRule);
-		}
+		if (!val) return;
+		form.value = { weight: 0, ...val };
 	}
 );
 
@@ -354,45 +301,20 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-	if (form.value.check_object) {
-		try {
-			let isAllow = true;
-			objectRule.value.forEach((item) => {
-				const keys = Object.keys(item);
-				if (keys.length !== 3) {
-					isAllow = false;
-					return;
-				}
-				Object.keys(item).forEach((key) => {
-					if (!item[key]) {
-						isAllow = false;
-					}
-				});
-			});
-			if (!isAllow) {
-				Message.error('资源对象数据填写不完整');
-				return false;
-			}
-			form.value.check_object_rule = JSON.stringify(objectRule.value);
-		} catch (error) {
-			Message.error('资源对象数据填写不完整');
-			return false;
-		}
-	}
-
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		if (data.type === 'R' && data.keyword) {
+			data.component = 'Layout';
+			data.path = `/${data.keyword.toLocaleLowerCase()}`;
+		}
+		await CreateMenu(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateMenu(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
-};
-
-const handleAddCheckRule = (index) => {
-	objectRule.value.splice(index + 1, 0, {} as ObjectRule);
-};
-const handleDelCheckRule = (index) => {
-	objectRule.value.splice(index, 1);
 };
 </script>
 

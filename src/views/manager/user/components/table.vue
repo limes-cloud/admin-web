@@ -41,31 +41,36 @@
 			</template>
 
 			<template #status="{ record }">
-				<a-switch v-model="record.status" :disabled="!$hasPermission('manager:user:status')" type="round" @change="changeStatus(record)">
+				<a-switch
+					v-model="record.status"
+					:disabled="!$hasPermission('manager:user:status') || record.id == 1"
+					type="round"
+					@change="updateStatus(record)"
+				>
 					<template #checked>启用</template>
 					<template #unchecked>禁用</template>
 				</a-switch>
 			</template>
 
-			<template #lastLogin="{ record }">
-				{{ $formatTime(record.last_login) }}
+			<template #loggedAt="{ record }">
+				{{ $formatTime(record.loggedAt) }}
 			</template>
 			<template #createdAt="{ record }">
-				{{ $formatTime(record.created_at) }}
+				{{ $formatTime(record.createdAt) }}
 			</template>
 			<template #updatedAt="{ record }">
-				{{ $formatTime(record.updated_at) }}
+				{{ $formatTime(record.updatedAt) }}
 			</template>
 
 			<template #operations="{ record }">
-				<a-space class="cursor-pointer">
-					<a-tag v-if="record.id != 1" v-permission="'manager:user:update'" color="orangered" @click="emit('update', record)">
+				<a-space v-if="record.id != 1" class="cursor-pointer">
+					<a-tag v-permission="'manager:user:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
 
 					<template v-if="$hasPermission('manager:user:reset:password')">
-						<a-popconfirm v-if="record.id != 1" content="您确认重置此用户密码？" type="warning" @ok="emit('resetPassword', record.id)">
+						<a-popconfirm content="您确认重置此用户密码？" type="warning" @ok="handleResetPassword(record.id)">
 							<a-tag color="red">
 								<template #icon><icon-refresh /></template>
 								重置密码
@@ -73,17 +78,8 @@
 						</a-popconfirm>
 					</template>
 
-					<template v-if="$hasPermission('manager:user:offline')">
-						<a-popconfirm v-if="record.id != 1" content="您确认要下线此用户" type="warning" @ok="emit('offline', record.id)">
-							<a-tag color="red">
-								<template #icon><icon-poweroff /></template>
-								下线
-							</a-tag>
-						</a-popconfirm>
-					</template>
-
 					<template v-if="$hasPermission('manager:user:delete')">
-						<a-popconfirm v-if="record.id != 1" content="您确认删除此用户" type="warning" @ok="emit('delete', record.id)">
+						<a-popconfirm content="您确认删除此用户" type="warning" @ok="handleDelete(record.id)">
 							<a-tag color="red">
 								<template #icon><icon-delete /></template>
 								删除
@@ -111,9 +107,11 @@ import { TableSize, TableCloumn, Pagination } from '@/types/global';
 import Modal from '@arco-design/web-vue/es/modal';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
-import { User } from '@/api/manager/types/user';
+import { User } from '@/api/manager/user/type';
+import { DeleteUser, ResetUserPassword, UpdateUserStatus } from '@/api/manager/user/api';
+import { Message } from '@arco-design/web-vue';
 
-const emit = defineEmits(['delete', 'update', 'add', 'pageChange', 'disable', 'enable', 'offline', 'resetPassword']);
+const emit = defineEmits(['refresh', 'update', 'add', 'pageChange']);
 
 const props = defineProps<{
 	columns: TableCloumn[];
@@ -147,7 +145,18 @@ const pageSizeChange = (size: number) => {
 	emit('pageChange', page.value);
 };
 
-const changeStatus = (record: User) => {
+const handleResetPassword = async (id: number) => {
+	await ResetUserPassword({ id });
+	Message.success('重置成功');
+};
+
+const handleDelete = async (id: number) => {
+	await DeleteUser({ ids: [id] });
+	Message.success('删除成功');
+	emit('refresh');
+};
+
+const updateStatus = (record: User) => {
 	const status = record.status ? '启用' : '禁用';
 	Modal.info({
 		title: '状态变更提示',
@@ -155,13 +164,8 @@ const changeStatus = (record: User) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			if (record.status) {
-				emit('enable', record);
-			} else {
-				// todo 后期优化
-				record.disabled = '用户违规';
-				emit('disable', record);
-			}
+			await UpdateUserStatus({ id: record.id, status: record.status as boolean });
+			Message.success(`${status}成功`);
 		},
 		onCancel: () => {
 			record.status = !record.status;

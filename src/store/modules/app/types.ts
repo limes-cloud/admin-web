@@ -13,6 +13,18 @@ export interface AppThem {
 	tabBar: boolean;
 	themeColor: string;
 }
+
+export interface DictionaryItems {
+	label: string;
+	value: string;
+	type?: string;
+	extra?: string;
+}
+
+export interface Dictionary {
+	list: DictionaryItems[];
+}
+
 export interface AppState extends AppThem {
 	name: string;
 	colorWeak: boolean;
@@ -33,5 +45,9 @@ export interface AppState extends AppThem {
 	logo: string;
 	isLoading: boolean;
 	loadTitle: string;
+	userSetting?: string;
+	changePasswordType: string;
+	watermark?: string;
+	dictionaries?: Record<string, Dictionary>;
 	[key: string]: unknown;
 }

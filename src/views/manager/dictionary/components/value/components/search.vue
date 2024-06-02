@@ -4,13 +4,14 @@
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="8">
-						<a-form-item field="label" label="标签">
-							<a-input v-model="form.label" allow-clear placeholder="请输入标签" />
-						</a-form-item>
-					</a-col>
-					<a-col :span="8">
 						<a-form-item field="value" label="标识">
 							<a-input v-model="form.value" allow-clear placeholder="请输入标识" />
+						</a-form-item>
+					</a-col>
+
+					<a-col :span="8">
+						<a-form-item field="label" label="标签">
+							<a-input v-model="form.label" allow-clear placeholder="请输入标签" />
 						</a-form-item>
 					</a-col>
 				</a-row>

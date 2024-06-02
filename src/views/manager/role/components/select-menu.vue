@@ -9,7 +9,7 @@
 			:field-names="{
 				key: 'id',
 				icon: '_icon', // 这里必须改一下名字，不然会加载icon失败
-				disabled: 'is_hidden'
+				disabled: 'isHidden'
 			}"
 		/>
 	</a-drawer>
@@ -30,8 +30,8 @@ const props = defineProps<{
 const emit = defineEmits(['update']);
 
 const handleSubmit = async () => {
-	const res = ids.value.concat(halfIds.value);
-	emit('update', res);
+	const arr = ids.value.concat(halfIds.value);
+	emit('update', Array.from(new Set(arr)));
 	return true;
 };
 

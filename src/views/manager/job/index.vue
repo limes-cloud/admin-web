@@ -12,14 +12,14 @@
 				:total="total"
 				:pagination="{
 					current: searchForm.page,
-					pageSize: searchForm.page_size
+					pageSize: searchForm.pageSize
 				}"
 				@page-change="handlePageChange"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
-				@delete="handleDelete"
+				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
 		</a-card>
 	</div>
 </template>
@@ -29,9 +29,8 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { Message } from '@arco-design/web-vue';
-import { pageJob, addJob, deleteJob, updateJob } from '@/api/manager/job';
-import { PageJobReq, Job } from '@/api/manager/types/job';
+import { Job, ListJobRequest } from '@/api/manager/job/type';
+import { ListJob } from '@/api/manager/job/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -45,9 +44,11 @@ const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 
 const total = ref(0);
-const searchForm = ref<PageJobReq>({
+const searchForm = ref<ListJobRequest>({
 	page: 1,
-	page_size: 10
+	pageSize: 10,
+	order: 'desc',
+	orderBy: 'weight'
 });
 
 const columns = ref<TableCloumn[]>([
@@ -69,13 +70,11 @@ const columns = ref<TableCloumn[]>([
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
 		slotName: 'createdAt',
 		width: 170
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updated_at',
 		slotName: 'updatedAt',
 		width: 170
 	},
@@ -92,7 +91,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageJob(searchForm.value);
+		const { data } = await ListJob(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -103,12 +102,10 @@ const handleGet = async () => {
 handleGet();
 
 // 处理查询
-const handleSearch = async (req: PageJobReq) => {
-	const pageSize = searchForm.value.page_size;
+const handleSearch = async (req: ListJobRequest) => {
 	searchForm.value = {
-		...req,
-		page: 1,
-		page_size: pageSize
+		...searchForm.value,
+		...req
 	};
 
 	handleGet();
@@ -117,29 +114,8 @@ const handleSearch = async (req: PageJobReq) => {
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page = page.current;
-	searchForm.value.page_size = page.pageSize;
+	searchForm.value.pageSize = page.pageSize;
 	handleGet();
-};
-
-// 处理新增
-const handleAdd = async (data: Job) => {
-	await addJob(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Job) => {
-	await updateJob(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteJob(id);
-	handleGet();
-	Message.success('删除成功');
 };
 
 //  处理tool按钮新建

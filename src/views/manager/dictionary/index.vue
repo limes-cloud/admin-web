@@ -12,14 +12,14 @@
 				:total="total"
 				:pagination="{
 					current: searchForm.page,
-					pageSize: searchForm.page_size
+					pageSize: searchForm.pageSize
 				}"
 				@page-change="handlePageChange"
 				@update="handleTableUpdate"
-				@delete="handleDelete"
 				@value="handleTableValue"
+				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
+			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
 			<Value ref="valueRef"></Value>
 		</a-card>
 	</div>
@@ -30,10 +30,9 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableCloumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { Message } from '@arco-design/web-vue';
 
-import { pageDictionary, addDictionary, deleteDictionary, updateDictionary } from '@/api/manager/dictionary';
-import { PageDictionaryReq, Dictionary } from '@/api/manager/types/dictionary';
+import { Dictionary, ListDictionaryRequest } from '@/api/manager/dictionary/type';
+import { ListDictionary } from '@/api/manager/dictionary/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -48,9 +47,9 @@ const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<PageDictionaryReq>({
+const searchForm = ref<ListDictionaryRequest>({
 	page: 1,
-	page_size: 10
+	pageSize: 10
 });
 
 const columns = ref<TableCloumn[]>([
@@ -91,7 +90,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await pageDictionary(searchForm.value);
+		const { data } = await ListDictionary(searchForm.value);
 		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
@@ -102,12 +101,12 @@ const handleGet = async () => {
 handleGet();
 
 // 处理查询
-const handleSearch = async (req: PageDictionaryReq) => {
-	const pageSize = searchForm.value.page_size;
+const handleSearch = async (req: ListDictionaryRequest) => {
+	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
 		page: 1,
-		page_size: pageSize
+		pageSize
 	};
 
 	handleGet();
@@ -116,29 +115,8 @@ const handleSearch = async (req: PageDictionaryReq) => {
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page = page.current;
-	searchForm.value.page_size = page.pageSize;
+	searchForm.value.pageSize = page.pageSize;
 	handleGet();
-};
-
-// 处理新增
-const handleAdd = async (data: Dictionary) => {
-	await addDictionary(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Dictionary) => {
-	await updateDictionary(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteDictionary(id);
-	handleGet();
-	Message.success('删除成功');
 };
 
 //  处理tool按钮新建

@@ -10,11 +10,9 @@
 				:size="size"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
-				@delete="handleDelete"
-				@object="handleObject"
+				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :departments="tableData" :data="form" @add="handleAdd" @update="handleUpdate"></Form>
-			<ObjectElem ref="objectRef"></ObjectElem>
+			<Form ref="formRef" :departments="tableData" :data="form" @refresh="handleGet"></Form>
 		</a-card>
 	</div>
 </template>
@@ -23,17 +21,14 @@
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableCloumn, TableSize } from '@/types/global';
-import { addDepartment, deleteDepartment, getDepartmentTree, updateDepartment } from '@/api/manager/department';
-
 import useLoading from '@/hooks/loading';
-import { Department } from '@/api/manager/types/department';
-import { Message } from '@arco-design/web-vue';
+import { Department } from '@/api/manager/department/type';
+import { ListDepartment } from '@/api/manager/department/api';
+
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
-import ObjectElem from './components/object.vue';
 
-const objectRef = ref();
 const formRef = ref();
 const form = ref<Department>({} as Department);
 const { setLoading } = useLoading(true);
@@ -77,39 +72,14 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await getDepartmentTree();
-		tableData.value = data;
+		const { data } = await ListDepartment();
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
 };
 
 handleGet();
-
-// 处理新增
-const handleAdd = async (data: Department) => {
-	await addDepartment(data);
-	handleGet();
-	Message.success('创建成功');
-};
-
-// 处理修改
-const handleUpdate = async (data: Department) => {
-	await updateDepartment(data);
-	handleGet();
-	Message.success('更新成功');
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await deleteDepartment(id);
-	handleGet();
-	Message.success('删除成功');
-};
-
-const handleObject = async (id: number) => {
-	objectRef.value.show(id);
-};
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
@@ -125,7 +95,7 @@ const handleTableUpdate = (data: Department) => {
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { parent_id: id } as Department;
+	form.value = { parentId: id } as Department;
 	formRef.value.showAddDrawer();
 };
 </script>

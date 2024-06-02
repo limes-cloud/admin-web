@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Message, Modal } from '@arco-design/web-vue';
 import { useUserStore } from '@/store';
 import { getToken, isLogin, setToken } from '@/utils/auth';
-import { refreshToken } from '@/api/manager/auth';
+import { UserRefreshToken } from '@/api/manager/user/api';
 
 export interface HttpResponse<T = unknown> {
 	code: number;
@@ -13,6 +13,7 @@ export interface HttpResponse<T = unknown> {
 }
 
 if (import.meta.env.VITE_API_BASE_URL) {
+	axios.defaults.headers.common['Content-Type'] = 'application/json;charset=utf8';
 	axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 	axios.defaults.withCredentials = false;
 	axios.defaults.timeout = 10000;
@@ -33,7 +34,9 @@ axios.interceptors.request.use(
 		if (config.url === '/resource/v1/upload') {
 			config.timeout = 60000;
 		}
-		config.headers['Content-Type'] = 'application/json';
+		if (!config.data) {
+			config.data = {};
+		}
 		return config;
 	},
 	(error) => {
@@ -49,8 +52,7 @@ let requests: any = [];
 axios.interceptors.response.use(
 	(response: AxiosResponse<HttpResponse>) => {
 		const res = response.data;
-
-		if (res.code === 200 && res.reason === 'SUCCESS') {
+		if (response.status === 200) {
 			return res;
 		}
 
@@ -69,7 +71,7 @@ axios.interceptors.response.use(
 		if (res.status === 401 && res.data.reason === 'UNAUTHORIZED') {
 			if (!isRefresh) {
 				isRefresh = true;
-				return refreshToken()
+				return UserRefreshToken()
 					.then((resToken) => {
 						// 处理刷新成功
 						setToken(resToken.data.token);

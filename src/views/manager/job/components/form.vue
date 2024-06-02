@@ -62,7 +62,9 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { Job } from '@/api/manager/types/job';
+import { CreateJob, UpdateJob } from '@/api/manager/job/api';
+import { Message } from '@arco-design/web-vue';
+import { Job } from '@/api/manager/job/type';
 
 const formRef = ref();
 const visible = ref(false);
@@ -73,13 +75,13 @@ const props = defineProps<{
 }>();
 
 const form = ref({} as Job);
-const emit = defineEmits(['add', 'update']);
+const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
-		if (!form.value.weight) form.value.weight = 0;
+		if (!val) return;
+		form.value = { weight: 0, ...val };
 	}
 );
 
@@ -105,11 +107,15 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateJob(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateJob(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
 };
 </script>

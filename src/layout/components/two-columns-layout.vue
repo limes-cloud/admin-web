@@ -73,7 +73,7 @@ const menuWidth = computed(() => {
 	.layout-menu {
 		flex: 1;
 		overflow: hidden;
-		box-shadow: 0 2px 5px 0 rgb(0 0 0 / 8%);
+		box-shadow: 0 2px 5px 0 rgb(0 0 0 / 10%);
 
 		:deep(.arco-menu) {
 			transition: none;

@@ -29,6 +29,9 @@
 					{
 						required: true,
 						message: '用户电话是必填项'
+					},
+					{
+						validator: phoneValidate
 					}
 				]"
 				:validate-trigger="['change', 'input']"
@@ -43,6 +46,10 @@
 					{
 						required: true,
 						message: '用户邮箱是必填项'
+					},
+					{
+						type: 'email',
+						message: '邮箱格式不正确'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
@@ -69,7 +76,7 @@
 			</a-form-item>
 
 			<a-form-item
-				field="role_ids"
+				field="roleIds"
 				label="用户角色"
 				:rules="[
 					{
@@ -80,18 +87,19 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-cascader
-					v-model="form.role_ids"
+					v-model="form.roleIds"
 					multiple
 					check-strictly
-					:options="[roles]"
+					:options="roles"
 					placeholder="请选择用户角色"
 					:field-names="{ value: 'id', label: 'name' }"
 					allow-search
+					@focus="searchRole"
 				/>
 			</a-form-item>
 
 			<a-form-item
-				field="department_id"
+				field="departmentId"
 				label="用户部门"
 				:rules="[
 					{
@@ -102,17 +110,18 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-cascader
-					v-model="form.department_id"
+					v-model="form.departmentId"
 					check-strictly
 					:options="departments"
 					:field-names="{ value: 'id', label: 'name' }"
 					placeholder="请选择用户部门"
 					allow-search
+					@focus="searchDepartment"
 				/>
 			</a-form-item>
 
 			<a-form-item
-				field="job_ids"
+				field="jobIds"
 				label="用户职位"
 				:rules="[
 					{
@@ -123,13 +132,13 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-select
-					v-model="form.job_ids"
-					placeholder="请选择服务"
+					v-model="form.jobIds"
+					placeholder="请选择职位"
 					:scrollbar="true"
 					:options="jobs"
-					:field-names="{ value: 'id', label: 'name' }"
 					multiple
-					@search="searchJob"
+					@search="searchFactory.Search"
+					@dropdown-reach-bottom="searchFactory.NextSearch"
 				></a-select>
 			</a-form-item>
 		</a-form>
@@ -138,23 +147,70 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { CascaderOption } from '@arco-design/web-vue';
-import { User } from '@/api/manager/types/user';
-import { Job } from '@/api/manager/types/job';
-import { pageJob } from '@/api/manager/job';
+import { Message } from '@arco-design/web-vue';
+import { CreateUser, UpdateUser } from '@/api/manager/user/api';
+import { CreateUserRequest, Department, Role, Job, UpdateUserRequest } from '@/api/manager/user/type';
+import { ListJob } from '@/api/manager/job/api';
+import { ListDepartment } from '@/api/manager/department/api';
+import { ListRole } from '@/api/manager/role/api';
+import { Search, Result } from '@/utils/search';
+import test from '@/utils/test';
+
+type Data = UpdateUserRequest & CreateUserRequest & { jobIds: number[]; roleIds: number[]; roles: Role[]; jobs: Job[] };
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-
 const props = defineProps<{
-	departments: CascaderOption[];
-	roles: CascaderOption;
-	data: User;
+	data: Data;
 }>();
 
-const form = ref({} as User);
-const emit = defineEmits(['add', 'update']);
+const jobs = ref<Result[]>([]);
+const roles = ref<Role[]>([]);
+const departments = ref<Department[]>([]);
+const form = ref({} as Data);
+const emit = defineEmits(['refresh']);
+
+const phoneValidate = (value, cb) => {
+	if (!value) {
+		cb();
+		return;
+	}
+	if (test.mobile(value)) {
+		cb();
+	} else {
+		cb('电话格式不正确');
+	}
+};
+
+const searchFactory = new Search(
+	jobs.value,
+	async (req): Promise<Result[]> => {
+		const res: Result[] = [];
+		const { data } = await ListJob({ ...req, name: req.query as string | undefined });
+		data.list.forEach((item) => {
+			res.push({ label: item.name, value: item.id });
+		});
+		return res;
+	},
+	(val): boolean => {
+		return form.value.jobIds.includes(val as number);
+	}
+);
+
+searchFactory.Search();
+
+const searchRole = async () => {
+	const { data } = await ListRole();
+	roles.value = data.list;
+};
+searchRole();
+
+const searchDepartment = async () => {
+	const { data } = await ListDepartment();
+	departments.value = data.list;
+};
+searchDepartment();
 
 const showAddDrawer = () => {
 	visible.value = true;
@@ -178,54 +234,39 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateUser(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		await UpdateUser(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
-};
-
-const jobs = ref<Job[]>([]);
-// const current = ref<Job>();
-
-const searchJob = async () => {
-	const { data } = await pageJob({ page: 1, page_size: 50 });
-	jobs.value = data.list;
-};
-
-const handleGetUserRoleIds = async (user: User) => {
-	const ids: number[] = [];
-	user.roles?.forEach((item) => {
-		ids.push(item.id);
-	});
-	return ids;
-};
-
-const handleGetUserJobIds = async (user: User) => {
-	const ids: number[] = [];
-	user.jobs?.forEach((item) => {
-		ids.push(item.id);
-	});
-	return ids;
-};
-
-const handlePreData = async () => {
-	searchJob();
-	if (isAdd.value) {
-		return;
-	}
-	const roleIds = await handleGetUserRoleIds(props.data);
-	const jobIds = await handleGetUserJobIds(props.data);
-	form.value.role_ids = roleIds;
-	form.value.job_ids = jobIds;
 };
 
 watch(
 	() => props.data,
 	async (val) => {
-		form.value = val;
-		await handlePreData();
+		form.value = { ...val };
+		if (val.roles) {
+			const ids: number[] = [];
+			val.roles.forEach((item) => {
+				ids.push(item.id);
+			});
+			form.value.roleIds = ids;
+		}
+		if (val.jobs) {
+			const ids: number[] = [];
+			val.jobs.forEach((item) => {
+				ids.push(item.id);
+				if (!searchFactory.IsExist(item.id)) {
+					jobs.value.push({ label: item.name, value: item.id });
+				}
+			});
+			form.value.jobIds = ids;
+		}
 	}
 );
 </script>

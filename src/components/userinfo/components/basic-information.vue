@@ -43,12 +43,13 @@ import { ref } from 'vue';
 import { FormInstance } from '@arco-design/web-vue/es/form';
 import { useUserStore } from '@/store';
 import Message from '@arco-design/web-vue/es/message';
-import { updateCurrentUser } from '@/api/manager/user';
+import { UpdateCurrentUser } from '@/api/manager/user/api';
+import { UpdateCurrentUserRequest } from '@/api/manager/user/type';
 
 const userInfo = useUserStore();
 
 const formRef = ref<FormInstance>();
-const formData = ref<any>({
+const formData = ref<UpdateCurrentUserRequest>({
 	nickname: userInfo.nickname,
 	gender: userInfo.gender
 });
@@ -56,7 +57,7 @@ const formData = ref<any>({
 const validate = async () => {
 	const res = await formRef.value?.validate();
 	if (!res) {
-		await updateCurrentUser({ ...formData.value });
+		await UpdateCurrentUser({ ...formData.value });
 		Message.success('基础信息更新成功');
 		userInfo.info();
 	}

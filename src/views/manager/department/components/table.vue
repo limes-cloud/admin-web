@@ -1,14 +1,5 @@
 <template>
-	<a-table
-		v-permission="'manager:department:query'"
-		row-key="id"
-		:loading="loading"
-		:columns="columns"
-		:pagination="false"
-		:data="data"
-		:bordered="false"
-		:size="size"
-	>
+	<a-table row-key="id" :loading="loading" :columns="columns" :pagination="false" :data="data" :bordered="false" :size="size">
 		<template #title="{ record }">
 			<a-space>
 				{{ record.title }}
@@ -16,19 +7,14 @@
 		</template>
 
 		<template #createdAt="{ record }">
-			{{ $formatTime(record.created_at) }}
+			{{ $formatTime(record.createdAt) }}
 		</template>
 		<template #updatedAt="{ record }">
-			{{ $formatTime(record.updated_at) }}
+			{{ $formatTime(record.updatedAt) }}
 		</template>
 
 		<template #operations="{ record }">
 			<a-space class="cursor-pointer">
-				<a-tag v-permission="'manager:department:object:query'" color="arcoblue" @click="emit('object', record.id)">
-					<template #icon><icon-list /></template>
-					资源
-				</a-tag>
-
 				<a-tag v-permission="'manager:department:add'" color="arcoblue" @click="emit('add', record.id)">
 					<template #icon><icon-plus /></template>
 					新建
@@ -40,7 +26,7 @@
 				</a-tag>
 
 				<template v-if="$hasPermission('manager:department:delete')">
-					<a-popconfirm v-if="record.id != 1" content="您确认删除此部门" type="warning" @ok="emit('delete', record.id)">
+					<a-popconfirm v-if="record.id != 1" content="您确认删除此部门" type="warning" @ok="handleDelete(record.id)">
 						<a-tag color="red">
 							<template #icon><icon-delete /></template>
 							删除
@@ -53,10 +39,12 @@
 </template>
 
 <script lang="ts" setup>
+import { DeleteDepartment } from '@/api/manager/department/api';
 import { TableSize, TableCloumn } from '@/types/global';
+import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
-const emit = defineEmits(['delete', 'update', 'add', 'object']);
+const emit = defineEmits(['update', 'add', 'refresh']);
 
 defineProps<{
 	columns: TableCloumn[];
@@ -64,4 +52,10 @@ defineProps<{
 	data?: TableData[];
 	size: TableSize;
 }>();
+
+const handleDelete = async (id: number) => {
+	await DeleteDepartment({ ids: [id] });
+	Message.success('删除成功');
+	emit('refresh');
+};
 </script>

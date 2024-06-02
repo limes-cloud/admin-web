@@ -1,21 +1,18 @@
 import { defineStore } from 'pinia';
-import { login as userLogin, logout as userLogout } from '@/api/manager/auth';
-import { currentUser, switchUserRole } from '@/api/manager/user';
 import { setToken, clearToken } from '@/utils/auth';
 import { removeRouteListener } from '@/utils/route-listener';
-import { LoginReq } from '@/api/manager/types/auth';
 import rsa from '@/utils/rsa';
-import { User } from '@/api/manager/types/user';
 import Message from '@arco-design/web-vue/es/message';
+import { UserLogin, UserLogout, GetCurrentUser, UpdateCurrentUserRole, UpdateCurrentUserSetting } from '@/api/manager/user/api';
+import { UpdateCurrentUserRoleRequest, GetUserReply, UserLoginRequest } from '@/api/manager/user/type';
+
 import useAppStore from '../app';
 
 const useUserStore = defineStore('user', {
-	state: (): User => ({
+	state: (): GetUserReply => ({
 		id: 0,
-		job_ids: [],
-		department_id: 0,
-		role_id: 0,
-		role_ids: [],
+		departmentId: 0,
+		roleId: 0,
 		name: '',
 		nickname: '',
 		gender: '',
@@ -23,24 +20,25 @@ const useUserStore = defineStore('user', {
 		avatar: '',
 		email: '',
 		status: false,
-		disabled: '',
-		last_login: 0,
-		created_at: 0,
-		updated_at: 0,
+		loggedAt: 0,
+		createdAt: 0,
+		updatedAt: 0,
 		role: undefined,
-		roles: undefined,
+		roles: [],
+		jobs: [],
 		department: undefined
 	}),
 
 	getters: {
-		userInfo(state: User): User {
+		userInfo(state: GetUserReply): GetUserReply {
 			return { ...state };
 		}
 	},
 
 	actions: {
 		async switchRoles(id: number) {
-			const { data } = await switchUserRole(id);
+			const req: UpdateCurrentUserRoleRequest = { roleId: id };
+			const { data } = await UpdateCurrentUserRole(req);
 			Message.success('切换成功');
 			// 清楚数据
 			this.clear();
@@ -50,7 +48,7 @@ const useUserStore = defineStore('user', {
 			window.location.reload();
 		},
 		// Set user's information
-		setInfo(partial: Partial<User>) {
+		setInfo(partial: Partial<GetUserReply>) {
 			this.$patch(partial);
 		},
 
@@ -59,14 +57,36 @@ const useUserStore = defineStore('user', {
 			this.$reset();
 		},
 
+		// Reset user's information
+		updateSetting(setting: Record<string, any>) {
+			let currentSetting = {};
+			if (this.setting) {
+				try {
+					currentSetting = JSON.parse(this.setting);
+				} catch (error) {
+					// ingore
+				}
+			}
+			const data = {
+				...currentSetting,
+				...setting
+			};
+
+			UpdateCurrentUserSetting({ setting: JSON.stringify(data) }).then(() => {
+				Message.success('保存成功');
+			});
+		},
+
 		// Get user's information
 		async info() {
-			const { data } = await currentUser();
+			const { data } = await GetCurrentUser();
+			const appStore = useAppStore();
+			appStore.initThemConfig(data.setting);
 			this.setInfo(data);
 		},
 
 		// Login
-		async login(req: LoginReq) {
+		async login(req: UserLoginRequest) {
 			const info = {
 				...req,
 				password: rsa.encrypt({
@@ -75,7 +95,7 @@ const useUserStore = defineStore('user', {
 				})
 			};
 			try {
-				const { data } = await userLogin(info as LoginReq);
+				const { data } = await UserLogin(info as UserLoginRequest);
 				setToken(data.token);
 			} catch (err) {
 				clearToken();
@@ -92,7 +112,7 @@ const useUserStore = defineStore('user', {
 		// Logout
 		async logout() {
 			try {
-				await userLogout();
+				await UserLogout();
 			} finally {
 				this.clear();
 			}

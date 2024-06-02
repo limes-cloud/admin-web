@@ -1,8 +1,8 @@
 <template>
 	<a-drawer v-model:visible="visible" :title="isAdd ? '创建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
-		<a-form ref="formRef" :model="formData" label-align="left" layout="horizontal" auto-label-width>
+		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="parent_id"
+				field="parentId"
 				label="父角色"
 				:rules="[
 					{
@@ -13,7 +13,7 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-cascader
-					v-model="formData.parent_id"
+					v-model="form.parentId"
 					check-strictly
 					:options="roles"
 					:field-names="{ value: 'id', label: 'name' }"
@@ -32,7 +32,7 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="formData.name" allow-clear placeholder="请输入角色名称" />
+				<a-input v-model="form.name" allow-clear placeholder="请输入角色名称" />
 			</a-form-item>
 			<a-form-item
 				field="keyword"
@@ -45,7 +45,7 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="formData.keyword" allow-clear placeholder="请输入角色标识" />
+				<a-input v-model="form.keyword" allow-clear placeholder="请输入角色标识" />
 			</a-form-item>
 			<a-form-item
 				field="status"
@@ -58,13 +58,13 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-radio-group v-model="formData.status" :default-value="true">
+				<a-radio-group v-model="form.status" :default-value="true">
 					<a-radio :value="true">启用</a-radio>
 					<a-radio :value="false">禁用</a-radio>
 				</a-radio-group>
 			</a-form-item>
 			<a-form-item
-				field="data_scope"
+				field="dataScope"
 				label="数据权限"
 				:rules="[
 					{
@@ -74,7 +74,7 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-select v-model="formData.data_scope" allow-search placeholder="数据权限">
+				<a-select v-model="form.dataScope" allow-search placeholder="数据权限">
 					<template v-for="(item, index) in dataScopeTypes" :key="index">
 						<a-option :value="item.value">{{ item.label }}</a-option>
 					</template>
@@ -82,8 +82,8 @@
 			</a-form-item>
 
 			<a-form-item
-				v-if="formData.data_scope === 'CUSTOM'"
-				field="department_ids"
+				v-if="form.dataScope === 'CUSTOM'"
+				field="depIds"
 				label="选择部门"
 				:rules="[
 					{
@@ -94,7 +94,7 @@
 				:validate-trigger="['change']"
 			>
 				<a-cascader
-					v-model="formData.department_ids"
+					v-model="form.depIds"
 					:options="departments"
 					:style="{ width: '320px' }"
 					check-strictly
@@ -116,31 +116,31 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-textarea v-model="formData.description" allow-clear placeholder="请输入角色描述" />
+				<a-textarea v-model="form.description" allow-clear placeholder="请输入角色描述" />
 			</a-form-item>
 		</a-form>
 	</a-drawer>
 </template>
 
 <script lang="ts" setup>
-import { Role } from '@/api/manager/types/role';
 import { computed, ref, watch } from 'vue';
-import { SelectOptionData, TableData } from '@arco-design/web-vue';
-import { Department } from '@/api/manager/types/department';
+import { Message, SelectOptionData, TableData } from '@arco-design/web-vue';
 import { join, split } from 'lodash';
+import { CreateRole, UpdateRole } from '@/api/manager/role/api';
+import { Role } from '@/api/manager/role/type';
+import { Department } from '@/api/manager/department/type';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-
+const emit = defineEmits(['refresh']);
 const props = defineProps<{
 	departments: Department[];
 	roles?: TableData[];
 	data: Role;
 }>();
 
-const formData = ref({ ...props.data });
-const emit = defineEmits(['add', 'update']);
+const form = ref({} as Role & { depIds: number[] });
 const dataScopeTypes = computed<SelectOptionData[]>(() => [
 	{
 		label: '所有部门',
@@ -167,15 +167,15 @@ const dataScopeTypes = computed<SelectOptionData[]>(() => [
 watch(
 	() => props.data,
 	(val) => {
-		formData.value = { ...val };
+		form.value = { ...val, depIds: [] };
 		const ids: number[] = [];
-		if (val.department_ids) {
-			const arr = split(val.department_ids as string, ',');
+		if (val.departmentIds) {
+			const arr = split(val.departmentIds as string, ',');
 			arr.forEach((id) => {
 				ids.push(Number(id));
 			});
 		}
-		formData.value.department_ids = ids;
+		form.value.depIds = ids;
 	}
 );
 
@@ -201,15 +201,19 @@ const handleSubmit = async () => {
 		return false;
 	}
 
-	if (formData.value.department_ids) {
-		formData.value.department_ids = join(formData.value.department_ids, ',');
+	if (form.value.depIds.length) {
+		form.value.departmentIds = join(form.value.depIds, ',');
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...formData.value });
+		await CreateRole(data);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...formData.value });
+		await UpdateRole(data);
+		Message.success('更新成功');
 	}
+	emit('refresh');
 	return true;
 };
 </script>

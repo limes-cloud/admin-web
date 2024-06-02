@@ -1,10 +1,14 @@
-import { Setting } from '@/api/manager/types/setting';
 import defaultSettings from '@/config/settings.json';
 import { App, Home } from '@/router/types';
 import { generate, getRgbStr } from '@arco-design/color';
 import { defineStore } from 'pinia';
 import type { RouteRecordNormalized } from 'vue-router';
+import { GetSystemSettingReply } from '@/api/manager/system/type';
+import { GetSystemSetting } from '@/api/manager/system/api';
 import { AppState, AppThem, LayoutMenu } from './types';
+
+// 这里是系统初始化需要加载的全部字典标识集合
+const dictKeywords = ['gender'];
 
 const useAppStore = defineStore('app', {
 	state: (): AppState => {
@@ -18,7 +22,8 @@ const useAppStore = defineStore('app', {
 			homes: new Map(),
 			isLoading: false,
 			loadTitle: '',
-			name: ''
+			name: '',
+			changePasswordType: 'password'
 		};
 		return setting;
 	},
@@ -70,6 +75,12 @@ const useAppStore = defineStore('app', {
 	},
 
 	actions: {
+		// 加载系统设置
+		async loadSystemSetting() {
+			const { data } = await GetSystemSetting({ dictionaryKeywords: dictKeywords });
+			this.setSetting(data);
+			return data;
+		},
 		// Update app settings
 		updateSettings(partial: Partial<AppState>) {
 			// @ts-ignore-next-line
@@ -125,12 +136,20 @@ const useAppStore = defineStore('app', {
 			this.isLoading = false;
 			this.loadingTitle = '';
 		},
-		setSetting(setting: Setting) {
-			this.title = setting.title;
-			this.name = setting.name;
-			this.logo = setting.logo;
-			this.desc = setting.desc;
-			this.copyright = setting.copyright;
+		setSetting(setting: GetSystemSettingReply) {
+			this.$state = {
+				...this.$state,
+				...setting,
+				footer: !!setting.copyright
+			};
+			// this.title = setting.title;
+			// this.name = setting.name;
+			// this.logo = setting.logo;
+			// this.desc = setting.desc;
+			// this.copyright = setting.copyright;
+		},
+		setUserSetting(setting?: string) {
+			this.userSetting = setting;
 		},
 		setColor(color: string) {
 			if (!/^#[0-9A-Za-z]{6}/.test(color)) return;
@@ -162,8 +181,7 @@ const useAppStore = defineStore('app', {
 				});
 			}
 		},
-		initThemConfig() {
-			const config = window.localStorage.getItem('them');
+		initThemConfig(config?: string) {
 			if (config) {
 				try {
 					const configObj = JSON.parse(config);
@@ -176,7 +194,8 @@ const useAppStore = defineStore('app', {
 						}
 					});
 				} catch (error) {
-					// console.warn(error);
+					// eslint-disable-next-line no-console
+					console.warn('用户自定义设置，数据格式异常');
 				}
 			}
 		}
