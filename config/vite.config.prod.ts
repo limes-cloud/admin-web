@@ -6,22 +6,19 @@ import configArcoResolverPlugin from './plugin/arcoResolver';
 import configImageminPlugin from './plugin/imagemin';
 import configArcoAutoImportPlugin from './plugin/arcoAutoImport';
 
-export default mergeConfig(
-	{
-		mode: 'production',
-		plugins: [configCompressPlugin('gzip'), configVisualizerPlugin(), configArcoResolverPlugin(), configImageminPlugin(), configArcoAutoImportPlugin()],
-		build: {
-			rollupOptions: {
-				output: {
-					manualChunks: {
-						arco: ['@arco-design/web-vue'],
-						chart: ['echarts', 'vue-echarts'],
-						vue: ['vue', 'vue-router', 'pinia', '@vueuse/core', 'vue-i18n']
-					}
+export default mergeConfig(baseConfig, {
+	mode: 'production',
+	plugins: [configArcoAutoImportPlugin(), configCompressPlugin('gzip'), configVisualizerPlugin(), configArcoResolverPlugin(), configImageminPlugin()],
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					arco: ['@arco-design/web-vue'],
+					chart: ['echarts', 'vue-echarts'],
+					vue: ['vue', 'vue-router', 'pinia', '@vueuse/core', 'vue-i18n']
 				}
-			},
-			chunkSizeWarningLimit: 2000
-		}
-	},
-	baseConfig
-);
+			}
+		},
+		chunkSizeWarningLimit: 2000
+	}
+});

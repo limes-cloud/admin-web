@@ -182,7 +182,7 @@ const handleLogout = () => {
 const switchRoles = async (role: number) => {
 	userStore.switchRoles(role);
 };
-const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
+// const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 </script>
 
 <style scoped lang="less">

@@ -1,7 +1,8 @@
 <template>
 	<a-tooltip content="主题设置">
-		<!-- <element /> -->
-		{{ element }}
+		<span @click="open">
+			<slot />
+		</span>
 	</a-tooltip>
 	<a-drawer
 		v-model:visible="visible"
@@ -56,7 +57,7 @@
 	</a-drawer>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useAppStore, useUserStore } from '@/store';
 import config from '@/config/settings.json';
 import { AppThem } from '@/store/modules/app/types';
@@ -77,7 +78,7 @@ const form = reactive({
 const open = () => {
 	visible.value = true;
 };
-const element = h('span', { onClick: open }, useSlots());
+
 const defaultColorList = [
 	'#165DFF',
 	'#F53F3F',

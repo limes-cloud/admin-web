@@ -14,10 +14,7 @@ export default defineComponent({
 			required: true
 		}
 	},
-	emits: {
-		'update:modelValue': (value: string) => true,
-		change: (value: string) => true
-	},
+	emits: ['update:modelValue', 'change'],
 	setup(props, { emit }) {
 		const visible = ref(false);
 		const skinList = reactive([
