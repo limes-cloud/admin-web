@@ -1,6 +1,7 @@
 <template>
 	<a-tooltip content="主题设置">
-		<element />
+		<!-- <element /> -->
+		{{ element }}
 	</a-tooltip>
 	<a-drawer
 		v-model:visible="visible"

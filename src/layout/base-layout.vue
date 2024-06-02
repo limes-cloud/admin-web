@@ -30,7 +30,7 @@
 	</a-layout>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import useResponsive from '@/hooks/responsive';
 import { useAppStore, useUserStore } from '@/store';
 import NavBar from '@/components/navbar/index.vue';
@@ -41,7 +41,7 @@ import Content from './components/content.vue';
 import DefaultLayout from './components/default-layout.vue';
 import TwoColumnsLayout from './components/two-columns-layout.vue';
 
-const view = shallowRef(DefaultLayout);
+const view = shallowRef();
 const appStore = useAppStore();
 const userStore = useUserStore();
 
@@ -75,7 +75,7 @@ watchEffect(() => {
 			view.value = TwoColumnsLayout;
 			break;
 		case 'topMenu':
-			view.value = null;
+			view.value = undefined;
 			break;
 		default:
 			view.value = DefaultLayout;
