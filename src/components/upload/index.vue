@@ -31,12 +31,11 @@
 import { ref } from 'vue';
 import { ListType, type FileItem, type RequestOption } from '@arco-design/web-vue/es/upload/interfaces';
 import { useAppStore } from '@/store';
-import { prepareUpload, upload } from '@/api/resource/file';
-import { PrepareUploadRes } from '@/api/resource/types/file';
+import { PrepareUploadFile, UploadFile } from '@/api/resource/file/api';
 import cryptoJs from 'crypto-js';
 import { AxiosResponse } from 'axios';
-import { formatUrl } from '@/utils/url';
 import { Message } from '@arco-design/web-vue';
+import { PrepareUploadFileReply } from '@/api/resource/file/type';
 
 const emit = defineEmits(['change']);
 const appStore = useAppStore();
@@ -85,10 +84,6 @@ const props = defineProps({
 		require: true
 	},
 	directoryPath: {
-		type: String,
-		require: true
-	},
-	app: {
 		type: String,
 		require: true
 	},
@@ -209,31 +204,30 @@ const getPrepareUploadReq = async (data: any, file: File) => {
 		name = props.rename + ext;
 	}
 	return {
-		directory_id: props.directoryId,
-		directory_path: props.directoryPath,
-		app: props.app as string,
+		directoryId: props.directoryId,
+		directoryPath: props.directoryPath,
 		name,
 		sha: hash,
-		size: file.size
+		size: Math.ceil(file.size / 1024)
 	};
 };
 
-const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options: RequestOption) => {
+const handleUpload = async (info: PrepareUploadFileReply, binary: ArrayBuffer, options: RequestOption) => {
 	const { onProgress, onSuccess, onError, fileItem } = options;
-	const count = info.chunk_count as number;
-	const size = info.chunk_size as number;
+	const count = info.chunkCount as number;
+	const size = (info.chunkSize as number) * 1024;
 	const pArrr: Promise<AxiosResponse<any, any>>[] = [];
-	const uploaed = info.upload_chunks;
+	const uploaed = info.uploadChunks;
 	if (count <= 1) {
 		const formData = new FormData();
 		formData.append('data', new Blob([binary]));
-		formData.append('upload_id', info.upload_id as string);
+		formData.append('uploadId', info.uploadId as string);
 		formData.append('index', String(1));
-		pArrr.push(upload(formData));
+		pArrr.push(UploadFile(formData));
 	} else {
 		for (let i = 0; i < count; i += 1) {
 			// eslint-disable-next-line no-continue
-			if (uploaed.includes(i + 1)) continue;
+			if (uploaed && uploaed.includes(i + 1)) continue;
 			let data: ArrayBuffer = new ArrayBuffer(0);
 			if ((i + 1) * size > binary.byteLength) {
 				data = binary.slice(i * size, binary.byteLength);
@@ -243,9 +237,9 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 
 			const formData = new FormData();
 			formData.append('data', new Blob([data]));
-			formData.append('upload_id', info.upload_id as string);
+			formData.append('uploadId', info.uploadId as string);
 			formData.append('index', String(i + 1));
-			pArrr.push(upload(formData));
+			pArrr.push(UploadFile(formData));
 		}
 	}
 	pArrr.forEach((fn: Promise<AxiosResponse<any, any>>, index: number) => {
@@ -253,7 +247,7 @@ const handleUpload = async (info: PrepareUploadRes, binary: ArrayBuffer, options
 			.then((res) => {
 				onProgress(Math.ceil((index + 1) / pArrr.length));
 				if ((index + 1) / pArrr.length) {
-					fileItem.url = formatUrl(res.data.src as string);
+					fileItem.url = res.data.url;
 					onSuccess(res.data);
 				}
 			})
@@ -282,10 +276,10 @@ const customRequest = (options: RequestOption) => {
 
 			// 进行预上传
 			const params = await getPrepareUploadReq(binary, file);
-			const { data } = await prepareUpload(params);
+			const { data } = await PrepareUploadFile(params);
 			// 触发秒传
 			if (data.uploaded) {
-				fileItem.url = formatUrl(data.src as string);
+				fileItem.url = data.url;
 				onProgress(100);
 				onSuccess(data);
 			} else {

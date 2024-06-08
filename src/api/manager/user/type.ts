@@ -117,8 +117,8 @@ export interface DeleteUserReply {
 
 export interface UpdateCurrentUserRequest {
 	avatar?: string;
-	nickname: string;
-	gender: string;
+	nickname?: string;
+	gender?: string;
 }
 
 export interface ResetUserPasswordRequest {

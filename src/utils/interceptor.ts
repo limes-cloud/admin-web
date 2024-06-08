@@ -31,7 +31,7 @@ axios.interceptors.request.use(
 		if (!config.headers) {
 			config.headers = {};
 		}
-		if (config.url === '/resource/v1/upload') {
+		if (config.url === '/resource/api/v1/upload') {
 			config.timeout = 60000;
 		}
 		if (!config.data) {

@@ -5,17 +5,17 @@ const appStore = useAppStore();
 
 export const getDictionayList = (keyword: string): DictionaryItems[] => {
 	const dict = appStore.$state.dictionaries;
-	if (!dict || dict[keyword]) {
+	if (!dict || !dict[keyword]) {
 		return [];
 	}
 	return dict[keyword].list;
 };
 
-export const getDictionayLabel = (keyword: string, value: string): string => {
+export const getDictionaySet = (keyword: string): Record<string, DictionaryItems> => {
 	const list = getDictionayList(keyword);
-	const set: Record<string, string> = {};
+	const set: Record<string, DictionaryItems> = {};
 	list.forEach((item) => {
-		set[item.value] = item.label;
+		set[item.value] = item;
 	});
-	return set[value];
+	return set;
 };

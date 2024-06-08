@@ -1,10 +1,17 @@
 <template>
 	<div>
 		<div class="header">
-			<a-space :size="12" direction="vertical" align="center">
-				<a-avatar :size="100">
+			<a-space :size="12" direction="vertical" align="center" style="z-index: 99">
+				<Upload
+					:files="[{ url: userInfo.avatar ? userInfo.avatar : $logo }]"
+					:limit="1"
+					:auto-upload="true"
+					directory-path="manager/avatar"
+					@change="handleUploadAvatar"
+				></Upload>
+				<!-- <a-avatar :size="100">
 					<img alt="avatar" :src="userInfo.avatar ? userInfo.avatar : $logo" />
-				</a-avatar>
+				</a-avatar> -->
 				<a-typography-title :heading="6" :style="{ margin: 0, color: '#fff' }">
 					{{ userInfo.name }}
 				</a-typography-title>
@@ -55,10 +62,18 @@
 </template>
 
 <script lang="ts" setup>
+import { UpdateCurrentUser } from '@/api/manager/user/api';
 import { useUserStore } from '@/store';
+import { FileItem, Message } from '@arco-design/web-vue';
 
 const userInfo = useUserStore();
 
+const handleUploadAvatar = (list: FileItem[]) => {
+	if (!list.length) return;
+	UpdateCurrentUser({ avatar: list[0].response.sha }).then(() => {
+		Message.success('头像更换成功');
+	});
+};
 // const uploadCallback = async (files: any[]) => {
 //   // todo更新用户信息
 //   if (files.length) {
@@ -90,7 +105,7 @@ const userInfo = useUserStore();
 		}
 	}
 
-	&::after {
+	&::before {
 		position: absolute;
 		bottom: -1px;
 		left: 0;
@@ -115,6 +130,7 @@ const userInfo = useUserStore();
 }
 
 .user-msg {
+	z-index: 100;
 	padding: 15px;
 
 	.arco-icon {

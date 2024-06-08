@@ -76,7 +76,7 @@ const columns = ref<TableCloumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListMenu({ orderBy: 'weight' });
+		const { data } = await ListMenu({ orderBy: 'weight', order: 'desc' });
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);

@@ -97,6 +97,10 @@ const fetchCaptcha = async () => {
 	const { data } = await GetUserLoginCaptcha();
 	loginForm.captchaId = data.uuid;
 	captchaBase64.value = data.captcha;
+	if (!data.expire) {
+		Message.error('验证吗配置错误');
+		return;
+	}
 	// 定时刷新
 	timeInter.value = setInterval(() => {
 		fetchCaptcha();
