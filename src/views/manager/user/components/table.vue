@@ -103,7 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import { TableSize, TableCloumn, Pagination } from '@/types/global';
+import { TableSize, TableColumn, Pagination } from '@/types/global';
 import Modal from '@arco-design/web-vue/es/modal';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
@@ -114,7 +114,7 @@ import { Message } from '@arco-design/web-vue';
 const emit = defineEmits(['refresh', 'update', 'add', 'pageChange']);
 
 const props = defineProps<{
-	columns: TableCloumn[];
+	columns: TableColumn[];
 	loading: boolean;
 	data?: TableData[];
 	size: TableSize;

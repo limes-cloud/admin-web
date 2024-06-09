@@ -17,7 +17,7 @@
 		</template>
 
 		<template #isHidden="{ record }">
-			<a-tag v-if="record.is_hidden" color="red">隐藏</a-tag>
+			<a-tag v-if="record.isHidden" color="red">隐藏</a-tag>
 			<a-tag v-else color="green">显示</a-tag>
 		</template>
 
@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import { TableSize, TableCloumn } from '@/types/global';
+import { TableSize, TableColumn } from '@/types/global';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import Icon from '@/components/icon/index.vue';
 import { DeleteMenu } from '@/api/manager/menu/api';
@@ -70,7 +70,7 @@ import { Message } from '@arco-design/web-vue';
 const emit = defineEmits(['update', 'add', 'refresh']);
 
 defineProps<{
-	columns: TableCloumn[];
+	columns: TableColumn[];
 	loading: boolean;
 	data?: TableData[];
 	size: TableSize;

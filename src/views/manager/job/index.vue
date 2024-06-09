@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Pagination, TableCloumn, TableSize } from '@/types/global';
+import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Job, ListJobRequest } from '@/api/manager/job/type';
 import { ListJob } from '@/api/manager/job/api';
@@ -51,7 +51,7 @@ const searchForm = ref<ListJobRequest>({
 	orderBy: 'weight'
 });
 
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '职位名称',
 		dataIndex: 'name'

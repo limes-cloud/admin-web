@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { TableCloumn, TableSize } from '@/types/global';
+import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Department } from '@/api/manager/department/type';
 import { ListDepartment } from '@/api/manager/department/api';
@@ -35,7 +35,7 @@ const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '部门标志',
 		dataIndex: 'keyword',

@@ -1,7 +1,7 @@
 import { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 
 export type TableSize = 'mini' | 'small' | 'medium' | 'large';
-export type TableCloumn = TableColumnData & { checked?: true };
+export type TableColumn = TableColumnData & { checked?: true };
 
 export interface AnyObject {
 	[key: string]: unknown;

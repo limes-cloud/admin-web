@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { TableCloumn, TableSize } from '@/types/global';
+import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Menu } from '@/api/manager/menu/type';
 import { ListMenu } from '@/api/manager/menu/api';
@@ -34,7 +34,7 @@ const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '菜单标题',
 		dataIndex: 'locale',

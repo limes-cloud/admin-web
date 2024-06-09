@@ -40,14 +40,14 @@
 
 <script lang="ts" setup>
 import { DeleteDepartment } from '@/api/manager/department/api';
-import { TableSize, TableCloumn } from '@/types/global';
+import { TableSize, TableColumn } from '@/types/global';
 import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
 const emit = defineEmits(['update', 'add', 'refresh']);
 
 defineProps<{
-	columns: TableCloumn[];
+	columns: TableColumn[];
 	loading: boolean;
 	data?: TableData[];
 	size: TableSize;

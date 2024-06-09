@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { TableCloumn, TableSize } from '@/types/global';
+import { TableColumn, TableSize } from '@/types/global';
 import { TableColumnData } from '@arco-design/web-vue';
 import { cloneDeep } from 'lodash';
 import Sortable from 'sortablejs';
@@ -61,8 +61,8 @@ defineProps<{
 
 // 定义事件
 const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
-const cloneColumns = ref<TableCloumn[]>([]);
-const showColumns = ref<TableCloumn[]>([]);
+const cloneColumns = ref<TableColumn[]>([]);
+const showColumns = ref<TableColumn[]>([]);
 
 // 修改表格字体大小
 const handleSelectDensity = (val: string | number | Record<string, any> | undefined) => {
@@ -95,7 +95,7 @@ const popupVisibleChange = (val: boolean) => {
 	}
 };
 
-const handleChange = (checked: boolean | (string | boolean | number)[], column: TableCloumn, index: number) => {
+const handleChange = (checked: boolean | (string | boolean | number)[], column: TableColumn, index: number) => {
 	if (!checked) {
 		cloneColumns.value = showColumns.value.filter((item) => item.checked);
 	} else {

@@ -55,14 +55,14 @@
 <script lang="ts" setup>
 import { DeleteRole, UpdateRoleStatus } from '@/api/manager/role/api';
 import { Role } from '@/api/manager/role/type';
-import { TableSize, TableCloumn } from '@/types/global';
+import { TableSize, TableColumn } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
 const emit = defineEmits(['refresh', 'update', 'add', 'updateMenu']);
 
 defineProps<{
-	columns: TableCloumn[];
+	columns: TableColumn[];
 	loading: boolean;
 	data?: TableData[];
 	size: TableSize;

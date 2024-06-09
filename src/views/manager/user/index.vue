@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Pagination, TableCloumn, TableSize } from '@/types/global';
+import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
 import { ListUserRequest, User } from '@/api/manager/user/type';
@@ -51,7 +51,7 @@ const searchForm = ref<ListUserRequest>({
 	loggedAts: []
 });
 
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '用户昵称',
 		dataIndex: 'nickname'

@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Pagination, TableCloumn, TableSize } from '@/types/global';
+import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { ListDictionaryValue } from '@/api/manager/dictionary/api';
 import { DictionaryValue, ListDictionaryValueRequest } from '@/api/manager/dictionary/type';
@@ -48,7 +48,7 @@ const searchForm = ref<ListDictionaryValueRequest>({
 	dictionaryId: props.id
 });
 
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '标签',
 		dataIndex: 'label'

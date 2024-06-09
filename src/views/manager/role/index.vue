@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { TableCloumn, TableSize } from '@/types/global';
+import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Message, TreeNodeData } from '@arco-design/web-vue';
 import { ListDepartment } from '@/api/manager/department/api';
@@ -47,7 +47,7 @@ const menus = ref<Menu[]>([]);
 const menuKeys = ref<number[]>([]);
 
 const size = ref<TableSize>('medium');
-const columns = ref<TableCloumn[]>([
+const columns = ref<TableColumn[]>([
 	{
 		title: '角色名称',
 		dataIndex: 'name',
