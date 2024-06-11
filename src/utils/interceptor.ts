@@ -5,6 +5,13 @@ import { useUserStore } from '@/store';
 import { getToken, isLogin, setToken } from '@/utils/auth';
 import { UserRefreshToken } from '@/api/manager/user/api';
 
+declare global {
+	interface Window {
+		serverPort: number;
+		serverHost: string;
+	}
+}
+
 export interface HttpResponse<T = unknown> {
 	code: number;
 	message: string;
