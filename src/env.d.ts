@@ -11,3 +11,10 @@ interface ImportMetaEnv {
 	readonly VITE_PUBLICK_KEY: string;
 	readonly VITE_PRIVATE_KEY: string;
 }
+
+export declare global {
+	interface Window {
+		serverPort: number;
+		serverHost: string;
+	}
+}

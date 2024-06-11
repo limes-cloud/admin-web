@@ -6,7 +6,6 @@ export interface GetDirectoryReply {
 	id: number;
 	parentId: number;
 	name: string;
-	scope: string;
 	accept: string;
 	maxSize: number;
 	createdAt: number;
@@ -22,7 +21,6 @@ export interface Directory {
 	id: number;
 	parentId: number;
 	name: string;
-	scope: string;
 	accept: string;
 	maxSize: number;
 	createdAt: number;
@@ -38,7 +36,6 @@ export interface ListDirectoryReply {
 export interface CreateDirectoryRequest {
 	parentId: number;
 	name: string;
-	scope: string;
 	accept: string;
 	maxSize: number;
 }
@@ -51,7 +48,6 @@ export interface UpdateDirectoryRequest {
 	id: number;
 	parentId: number;
 	name: string;
-	scope: string;
 	accept: string;
 	maxSize: number;
 }

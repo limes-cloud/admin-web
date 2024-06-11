@@ -49,16 +49,18 @@ export interface ListExportReply {
 	list: Export[];
 }
 
-export interface CreateExportRequest {
+export interface ExportFileRequest {
 	userId: number;
 	departmentId: number;
 	scene: string;
 	name: string;
-	reason?: string;
+	ids: number[];
 }
 
-export interface CreateExportReply {
+export interface ExportFileReply {
 	id: number;
+	sha: string;
+	src: string;
 }
 
 export interface UpdateExportRequest {

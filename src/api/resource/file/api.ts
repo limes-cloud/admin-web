@@ -29,10 +29,12 @@ export function CreateFile(data: CreateFileRequest) {
 	return axios.post<CreateFileReply>('/resource/api/v1/file', data);
 }
 
+// PrepareUploadFile 预上传文件信息
 export function PrepareUploadFile(data: PrepareUploadFileRequest) {
 	return axios.post<PrepareUploadFileReply>('/resource/api/v1/file/prepare_upload', data);
 }
 
+// UploadFile 上传文件切片
 export function UploadFile(req: FormData) {
 	return axios.post<UploadFileReply>(`/resource/api/v1/upload`, req, {
 		headers: {

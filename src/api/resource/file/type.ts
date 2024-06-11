@@ -24,6 +24,8 @@ export interface ListFileRequest {
 	order?: string;
 	orderBy?: string;
 	directoryId?: number;
+	status?: string;
+	name?: string;
 }
 
 export interface File {
@@ -33,7 +35,8 @@ export interface File {
 	type: string;
 	size: number;
 	sha: string;
-	src?: string;
+	src: string;
+	url: string;
 	status: string;
 	uploadId: string;
 	chunkCount: number;

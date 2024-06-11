@@ -4,11 +4,11 @@ import {
 	GetExportRequest,
 	ListExportReply,
 	ListExportRequest,
-	CreateExportReply,
-	CreateExportRequest,
 	UpdateExportRequest,
 	DeleteExportReply,
-	DeleteExportRequest
+	DeleteExportRequest,
+	ExportFileRequest,
+	ExportFileReply
 } from './type';
 
 // GetExport 获取指定的导出信息
@@ -21,9 +21,9 @@ export function ListExport(params: ListExportRequest) {
 	return axios.get<ListExportReply>('/resource/api/v1/exports', { params });
 }
 
-// CreateExport 创建导出信息
-export function CreateExport(data: CreateExportRequest) {
-	return axios.post<CreateExportReply>('/resource/api/v1/export', data);
+// ExportFile 创建导出文件信息
+export function ExportFile(data: ExportFileRequest) {
+	return axios.post<ExportFileReply>('/resource/api/v1/export/file', data);
 }
 
 // UpdateExport 更新导出信息
