@@ -35,7 +35,7 @@
 		</a-table>
 		<a-pagination
 			:total="total"
-			:current="page.current"
+			:current="page.page"
 			:page-size="page.pageSize"
 			show-total
 			show-jumper
@@ -64,8 +64,8 @@ const props = defineProps<{
 	total: number;
 }>();
 
-const page = ref({
-	current: 1,
+const page = ref<Pagination>({
+	page: 1,
 	pageSize: 10
 });
 
@@ -77,8 +77,8 @@ watch(
 	{ deep: true, immediate: true }
 );
 
-const pageChange = (current: number) => {
-	page.value.current = current;
+const pageChange = (value: number) => {
+	page.value.page = value;
 	emit('pageChange', page.value);
 };
 

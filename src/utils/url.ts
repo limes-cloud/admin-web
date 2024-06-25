@@ -19,4 +19,17 @@ export const formatUrl = (url: string, w?: number, h?: number) => {
 	return url + suffix;
 };
 
+export const getKeyByUrl = (url: string) => {
+	if (!url) return url;
+	const arr = url.split('/');
+	return arr[arr.length - 1];
+};
+
+export const getShaByUrl = (url: string) => {
+	if (!url) return url;
+	const key = getKeyByUrl(url);
+	const arr = key.split('.');
+	return arr[0];
+};
+
 export default null;

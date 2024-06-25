@@ -1,7 +1,7 @@
 import { DirectiveBinding } from 'vue';
 import { Message } from '@arco-design/web-vue';
 
-function checkPermission(el: HTMLElement, binding: DirectiveBinding) {
+function copy(el: HTMLElement, binding: DirectiveBinding) {
 	const { value } = binding;
 	el.onclick = () => {
 		if (value.length > 0) {
@@ -28,9 +28,9 @@ function checkPermission(el: HTMLElement, binding: DirectiveBinding) {
 
 export default {
 	mounted(el: HTMLElement, binding: DirectiveBinding) {
-		checkPermission(el, binding);
+		copy(el, binding);
 	},
 	updated(el: HTMLElement, binding: DirectiveBinding) {
-		checkPermission(el, binding);
+		copy(el, binding);
 	}
 };

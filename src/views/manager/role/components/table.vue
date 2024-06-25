@@ -3,7 +3,7 @@
 		<template #status="{ record }">
 			<a-switch
 				v-model="record.status"
-				:disabled="!$hasPermission('manager:role:status') || record.id === 1"
+				:disabled="!$hasPermission('manager:role:update:status') || record.id === 1"
 				type="round"
 				@change="updateStatus(record)"
 			>

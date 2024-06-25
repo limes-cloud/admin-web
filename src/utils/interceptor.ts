@@ -92,9 +92,14 @@ axios.interceptors.response.use(
 		return Promise.reject(new Error(res.message || 'Error'));
 	},
 	(error) => {
-		const res = error.response;
-		const { config } = res;
+		if (error.message === 'Network Error') {
+			Message.error('网络请求错误');
+			return Promise.reject(error.message);
+		}
 
+		const res = error.response;
+
+		const { config } = res;
 		// 重新登陆过期处理
 		if (res.status === 401 && res.data.reason === 'UNAUTHORIZED') {
 			if (!isRefresh) {

@@ -10,10 +10,7 @@
 				:data="tableData"
 				:size="size"
 				:total="total"
-				:pagination="{
-					current: searchForm.page,
-					pageSize: searchForm.pageSize
-				}"
+				:pagination="searchForm"
 				@page-change="handlePageChange"
 				@update="handleTableUpdate"
 				@value="handleTableValue"
@@ -114,7 +111,7 @@ const handleSearch = async (req: ListDictionaryRequest) => {
 
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
-	searchForm.value.page = page.current;
+	searchForm.value.page = page.page;
 	searchForm.value.pageSize = page.pageSize;
 	handleGet();
 };

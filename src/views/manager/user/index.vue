@@ -10,12 +10,8 @@
 				:data="tableData"
 				:size="size"
 				:total="total"
-				:pagination="{
-					current: searchForm.page,
-					pageSize: searchForm.pageSize
-				}"
+				:pagination="searchForm"
 				@page-change="handlePageChange"
-				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
@@ -149,7 +145,7 @@ const handleSearch = async (req: ListUserRequest) => {
 
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
-	searchForm.value.page = page.current;
+	searchForm.value.page = page.page;
 	searchForm.value.pageSize = page.pageSize;
 	handleGet();
 };
@@ -165,12 +161,6 @@ const handleTableUpdate = async (user: User) => {
 	const { data } = await GetUser({ id: user.id });
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
-};
-
-// 处理table点击添加
-const handleTableAdd = (id: number) => {
-	form.value = { id } as User;
-	formRef.value.showAddDrawer();
 };
 </script>
 
