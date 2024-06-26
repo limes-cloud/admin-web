@@ -101,9 +101,13 @@ const defaultColorList = [
 	'#6d4c41'
 ];
 
-watchEffect(() => {
-	appStore.setThemConfig(form);
-});
+watch(
+	() => form,
+	() => {
+		appStore.setThemConfig(form);
+	},
+	{ deep: true }
+);
 
 const handleUpdateSetting = async () => {
 	useUserStore().updateSetting(form);
@@ -118,7 +122,7 @@ const handleSelectLayout = () => {
 };
 
 const reset = (them: AppThem) => {
-	form.theme = them.theme;
+	form.theme = appStore.theme;
 	form.themeColor = them.themeColor;
 	form.skin = them.skin;
 	form.tabBar = them.tabBar;

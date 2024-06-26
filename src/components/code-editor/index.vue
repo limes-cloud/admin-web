@@ -178,8 +178,9 @@ const setEditTheme = (val: string) => {
 const setEditValue = (val: string) => {
 	content.value = val;
 	setVal(val);
-
-	monacoEditor.value?.getAction('editor.action.formatDocument')?.run();
+	setTimeout(() => {
+		monacoEditor.value?.getAction('editor.action.formatDocument')?.run();
+	}, 100);
 };
 
 // json <-> yaml
@@ -228,10 +229,33 @@ watch(
 );
 
 watch(
-	() => appStore.theme,
+	() => props.value,
 	(val) => {
-		setEditTheme(val);
-	}
+		if (val === getVal()) {
+			return;
+		}
+		if (!val) {
+			val = '';
+		}
+		setEditValue(val as string);
+	},
+	{ deep: true }
+);
+
+watch(
+	() => props.lang,
+	(val) => {
+		setEditLang(val);
+	},
+	{ deep: true }
+);
+
+watch(
+	() => appStore.theme,
+	() => {
+		setEditTheme(appStore.theme);
+	},
+	{ deep: true, immediate: true }
 );
 
 onMounted(() => {

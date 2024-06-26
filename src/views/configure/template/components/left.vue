@@ -38,7 +38,7 @@
 				<span class="value">
 					{{ template?.version.substring(0, 12) }}
 					<a-tooltip content="切换模板版本" position="top">
-						<span v-permission="'configure:template:history'" class="swap" @click="handleClickSwapTemplate"><icon-swap /></span>
+						<span v-permission="'configure:template:history'" class="swap" @click="handleShowTemplates"><icon-swap /></span>
 					</a-tooltip>
 				</span>
 			</div>
@@ -71,16 +71,7 @@
 			@cancel="templateVisible = false"
 			@before-ok="handleSwitchTemplate"
 		>
-			<a-tabs
-				:default-active-key="template?.id"
-				direction="vertical"
-				destroy-on-hide
-				@change="
-					(key) => {
-						curTempId = key as number;
-					}
-				"
-			>
+			<a-tabs :default-active-key="template?.id" direction="vertical" destroy-on-hide @change="handleTabChange">
 				<a-tab-pane v-for="item in templateList" :key="item.id">
 					<template #title>
 						<div class="pane-title">
@@ -102,8 +93,8 @@
 						</div>
 					</template>
 					<CodeEditor
-						:value="item?.content"
-						:lang="item?.format"
+						:value="currentTemplate.content"
+						:lang="currentTemplate.format"
 						:show-line="false"
 						:read-only="true"
 						:style="{
@@ -135,7 +126,7 @@ import { Message } from '@arco-design/web-vue';
 import { Result, Search } from '@/utils/search';
 import { ListServer } from '@/api/configure/server/api';
 import { Template } from '@/api/configure/template/type';
-import { ListTemplate, SwitchTemplate } from '@/api/configure/template/api';
+import { GetTemplate, ListTemplate, SwitchTemplate } from '@/api/configure/template/api';
 import Compare from './compare.vue';
 
 const props = defineProps<{
@@ -154,6 +145,7 @@ const templateList = ref<Template[]>([]);
 const curTempId = ref(props.template?.id);
 const compareVisible = ref(false);
 const compareData = ref([]);
+const currentTemplate = ref<Template>({} as Template);
 
 const change = (val: any) => {
 	servers.value.forEach((item) => {
@@ -180,11 +172,21 @@ const searchFieldFactory = new Search(
 );
 searchFieldFactory.Search();
 
-const handleClickSwapTemplate = async () => {
+const handleGetTemplate = async (id: number) => {
+	const { data } = await GetTemplate(id);
+	currentTemplate.value = data;
+};
+
+const handleShowTemplates = async () => {
 	const { data } = await ListTemplate({ page: 1, pageSize: 15, serverId: form.value.serverId as number });
 	templateList.value = data.list;
-
+	if (!data.list.length) {
+		Message.error('暂无历史模板');
+		return;
+	}
 	templateVisible.value = true;
+
+	handleGetTemplate(data.list[0].id);
 };
 
 const handleSwitchTemplate = async () => {
@@ -201,6 +203,11 @@ const showCompareInfo = (item: Template) => {
 	}
 	compareData.value = JSON.parse(item.compare);
 	compareVisible.value = true;
+};
+
+const handleTabChange = (key) => {
+	curTempId.value = key as number;
+	handleGetTemplate(curTempId.value);
 };
 </script>
 

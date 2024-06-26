@@ -7,27 +7,20 @@ import { GetSystemSettingReply } from '@/api/manager/system/type';
 import { GetSystemSetting } from '@/api/manager/system/api';
 import { AppState, AppThem, LayoutMenu } from './types';
 
-// 这里是系统初始化需要加载的全部字典标识集合
-const dictKeywords = ['gender'];
-
 const useAppStore = defineStore('app', {
-	state: (): AppState => {
-		const setting: AppState = {
-			...defaultSettings,
-			layout: defaultSettings.layout as LayoutMenu,
-			menus: new Map(),
-			permissions: new Map(),
-			apps: [],
-			app: '',
-			homes: new Map(),
-			isLoading: false,
-			loadTitle: '',
-			name: '',
-			changePasswordType: 'password'
-		};
-		return setting;
-	},
-
+	state: (): AppState => ({
+		...defaultSettings,
+		layout: defaultSettings.layout as LayoutMenu,
+		menus: new Map(),
+		permissions: new Map(),
+		apps: [],
+		app: '',
+		homes: new Map(),
+		isLoading: false,
+		loadTitle: '',
+		name: '',
+		changePasswordType: 'password'
+	}),
 	getters: {
 		appCurrentSetting(state: AppState): AppState {
 			return { ...state };
@@ -77,7 +70,7 @@ const useAppStore = defineStore('app', {
 	actions: {
 		// 加载系统设置
 		async loadSystemSetting() {
-			const { data } = await GetSystemSetting({ dictionaryKeywords: dictKeywords });
+			const { data } = await GetSystemSetting();
 			this.setSetting(data);
 			return data;
 		},
@@ -88,7 +81,7 @@ const useAppStore = defineStore('app', {
 		},
 
 		// Change theme color
-		toggleTheme(dark: boolean) {
+		async toggleTheme(dark: boolean) {
 			if (dark) {
 				this.theme = 'dark';
 				document.body.setAttribute('arco-theme', 'dark');
@@ -142,11 +135,6 @@ const useAppStore = defineStore('app', {
 				...setting,
 				footer: !!setting.copyright
 			};
-			// this.title = setting.title;
-			// this.name = setting.name;
-			// this.logo = setting.logo;
-			// this.desc = setting.desc;
-			// this.copyright = setting.copyright;
 		},
 		setUserSetting(setting?: string) {
 			this.userSetting = setting;

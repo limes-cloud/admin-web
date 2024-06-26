@@ -29,6 +29,12 @@ export function ParseTemplate(req: ParseTemplateRequest) {
 	return axios.post<ParseTemplateReply>(`/configure/api/v1/template/preview`, req);
 }
 
+export function GetTemplate(id: number) {
+	return axios.get<Template>('/configure/api/v1/template', {
+		params: { id }
+	});
+}
+
 export function ListTemplate(req: ListTemplateRequest) {
 	return axios.get<ListTemplateReply>('/configure/api/v1/templates', {
 		params: { ...req }
