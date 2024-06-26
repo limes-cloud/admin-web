@@ -147,8 +147,6 @@ export interface UpdateCurrentUserSettingRequest {
 export interface UserLoginRequest {
 	username: string;
 	password: string;
-	captchaId: string;
-	captcha: string;
 }
 
 export interface UserLoginReply {

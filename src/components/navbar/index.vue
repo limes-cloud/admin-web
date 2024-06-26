@@ -6,7 +6,6 @@
 				<a-typography-title :style="{ margin: 0, fontSize: '18px', width: '100%', minWidth: titleWidth() }" :heading="5" :ellipsis="true">
 					{{ appStore.currentAppinfo.title }}
 				</a-typography-title>
-				<!-- <icon-menu-fold v-if="appStore.device === 'mobile'" style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" /> -->
 			</a-space>
 		</div>
 		<div v-if="appVisable" class="center-side">
@@ -23,33 +22,7 @@
 					</a-button>
 				</a-tooltip>
 			</li>
-			<!-- <li>
-        <a-tooltip content="消息通知">
-          <div class="message-box-trigger">
-            <a-badge :count="9" dot>
-              <a-button
-                class="nav-btn"
-                type="outline"
-                :shape="'circle'"
-                @click="setPopoverVisible"
-              >
-                <icon-notification />
-              </a-button>
-            </a-badge>
-          </div>
-        </a-tooltip>
-        <a-popover
-          trigger="click"
-          :arrow-style="{ display: 'none' }"
-          :content-style="{ padding: 0, minWidth: '400px' }"
-          content-class="message-popover"
-        >
-          <div ref="refBtn" class="ref-btn"></div>
-          <template #content>
-            <message-box />
-          </template>
-        </a-popover>
-      </li> -->
+
 			<li>
 				<a-tooltip :content="isFullscreen ? '点击退出全屏模式' : '点击切换全屏模式'">
 					<a-button class="nav-btn" type="outline" :shape="'circle'" @click="toggleFullScreen">
@@ -61,41 +34,12 @@
 				</a-tooltip>
 			</li>
 			<li>
-				<settings>
-					<a-button class="nav-btn" type="outline" :shape="'circle'">
-						<template #icon>
-							<icon-settings />
-						</template>
-					</a-button>
-				</settings>
-			</li>
-			<li>
 				<a-dropdown trigger="click">
 					<a-avatar :size="32" :style="{ marginRight: '8px', cursor: 'pointer' }">
 						<img v-if="avatar" alt="avatar" :src="avatar" />
 						<img v-else alt="avatar" :src="$logo" />
 					</a-avatar>
 					<template #content>
-						<a-dsubmenu v-if="roles.length > 1" trigger="hover">
-							<template #default>
-								<a-space>
-									<icon-tag />
-									<span>切换角色</span>
-								</a-space>
-							</template>
-							<template #content>
-								<template v-for="item in roles" :key="item.keyword">
-									<a-doption :disabled="userStore.roleId == item.id" @click="switchRoles(item.id)">{{ item.name }}</a-doption>
-								</template>
-							</template>
-						</a-dsubmenu>
-
-						<a-doption>
-							<a-space @click="showUserinfoVisible = true">
-								<icon-user />
-								<span>个人中心</span>
-							</a-space>
-						</a-doption>
 						<a-doption>
 							<a-space @click="handleLogout">
 								<icon-export />
@@ -111,14 +55,10 @@
 </template>
 
 <script lang="tsx" setup>
-import { Role } from '@/api/manager/role/type';
 import useUser from '@/hooks/user';
 import { useAppStore, useUserStore } from '@/store';
 import { useDark, useFullscreen, useToggle } from '@vueuse/core';
-import Userinfo from '../userinfo/index.vue';
 import App from './app.vue';
-// import MessageBox from '../message-box/index.vue';
-import settings from './components/settings/index.vue';
 
 const showUserinfoVisible = ref(false);
 const appStore = useAppStore();
@@ -133,10 +73,6 @@ const avatar = computed(() => {
 
 const appVisable = computed(() => {
 	return appStore.apps.length > 1 && appStore.layout !== 'twoColumns';
-});
-
-const roles = computed((): Role[] => {
-	return userStore.roles as Role[];
 });
 
 const theme = computed(() => {
@@ -166,22 +102,9 @@ const handleToggleTheme = () => {
 	toggleTheme();
 };
 
-// const refBtn = ref();
-// const setPopoverVisible = () => {
-// 	const event = new MouseEvent('click', {
-// 		view: window,
-// 		bubbles: true,
-// 		cancelable: true
-// 	});
-// 	refBtn.value.dispatchEvent(event);
-// };
 const handleLogout = () => {
 	logout();
 };
-const switchRoles = async (role: number) => {
-	userStore.switchRoles(role);
-};
-// const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 </script>
 
 <style scoped lang="less">
@@ -211,7 +134,6 @@ const switchRoles = async (role: number) => {
 
 .right-side {
 	display: flex;
-	width: 276px;
 	padding-right: 20px;
 	list-style: none;
 

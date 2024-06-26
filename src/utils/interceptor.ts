@@ -81,7 +81,7 @@ axios.interceptors.response.use(
 	(response: AxiosResponse<HttpResponse>) => {
 		const res = response.data;
 		if (response.status === 200) {
-			return res;
+			return { data: res };
 		}
 
 		// 通用错误处理逻辑

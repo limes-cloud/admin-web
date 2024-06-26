@@ -33,6 +33,8 @@ export interface ListMenuReply {
 	list: Menu[];
 }
 
+export interface ListMenuByCurRoleRequest {}
+
 export interface ListMenuByCurRoleReply {
 	total: number;
 	list: Menu[];
@@ -80,6 +82,8 @@ export interface UpdateMenuRequest {
 	isHome?: boolean;
 	isAffix?: boolean;
 }
+
+export interface UpdateMenuReply {}
 
 export interface DeleteMenuRequest {
 	ids: number[];

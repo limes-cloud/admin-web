@@ -12,7 +12,7 @@
 	"device": "desktop",
 	"tabBar": true,
 	"logo": "logo.png",
-	"title": "快速开发框架",
+	"title": "统一配置中心",
 	"desc": "开放协作，拥抱未来",
 	"layout": "default",
 	"skin": "default",

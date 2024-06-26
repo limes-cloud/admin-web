@@ -3,8 +3,6 @@ import { App, Home } from '@/router/types';
 import { generate, getRgbStr } from '@arco-design/color';
 import { defineStore } from 'pinia';
 import type { RouteRecordNormalized } from 'vue-router';
-import { GetSystemSettingReply } from '@/api/manager/system/type';
-import { GetSystemSetting } from '@/api/manager/system/api';
 import { AppState, AppThem, LayoutMenu } from './types';
 
 const useAppStore = defineStore('app', {
@@ -68,12 +66,6 @@ const useAppStore = defineStore('app', {
 	},
 
 	actions: {
-		// 加载系统设置
-		async loadSystemSetting() {
-			const { data } = await GetSystemSetting();
-			this.setSetting(data);
-			return data;
-		},
 		// Update app settings
 		updateSettings(partial: Partial<AppState>) {
 			// @ts-ignore-next-line
@@ -128,13 +120,6 @@ const useAppStore = defineStore('app', {
 		stopLoading() {
 			this.isLoading = false;
 			this.loadingTitle = '';
-		},
-		setSetting(setting: GetSystemSettingReply) {
-			this.$state = {
-				...this.$state,
-				...setting,
-				footer: !!setting.copyright
-			};
 		},
 		setUserSetting(setting?: string) {
 			this.userSetting = setting;

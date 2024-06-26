@@ -2,7 +2,6 @@
 	<div class="container">
 		<div class="logo">
 			<img alt="logo" style="width: 100px" :src="$logo" />
-			<!-- <div class="logo-text">{{ appStore.title }}</div>   -->
 		</div>
 		<div class="content">
 			<div class="content-inner">
@@ -22,16 +21,6 @@
 									<icon-lock />
 								</template>
 							</a-input-password>
-						</a-form-item>
-						<a-form-item field="captcha" :rules="[{ required: true, message: '验证码不能为空' }]" :validate-trigger="['change', 'blur']" hide-label>
-							<a-input v-model="loginForm.captcha" size="large" placeholder="请输入验证码" allow-clear autocomplete>
-								<template #prefix>
-									<icon-lock />
-								</template>
-								<template #append>
-									<img v-if="captchaBase64" width="100" height="34" :src="captchaBase64" @click="fetchCaptcha()" />
-								</template>
-							</a-input>
 						</a-form-item>
 						<a-space :size="16" direction="vertical">
 							<div class="login-form-password-actions">
@@ -61,7 +50,6 @@ import { useUserStore, useAppStore } from '@/store';
 import useLoading from '@/hooks/loading';
 import { GetUserLoginCaptcha } from '@/api/manager/user/api';
 import { UserLoginRequest } from '@/api/manager/user/type';
-// import logo from '@/assets/logo.png';
 
 const timeInter: any = ref(null);
 const router = useRouter();
@@ -81,33 +69,10 @@ onUnmounted(() => {
 	timeInter.value = null;
 });
 
-const captchaBase64 = ref('');
-
 const loginForm = reactive<UserLoginRequest>({
 	username: loginConfig.value.username,
-	password: loginConfig.value.password,
-	captcha: '',
-	captchaId: ''
+	password: loginConfig.value.password
 });
-
-const fetchCaptcha = async () => {
-	// 清除定时器
-	clearInterval(timeInter.value);
-	// 请求验证码
-	const { data } = await GetUserLoginCaptcha();
-	loginForm.captchaId = data.uuid;
-	captchaBase64.value = data.captcha;
-	if (!data.expire) {
-		Message.error('验证吗配置错误');
-		return;
-	}
-	// 定时刷新
-	timeInter.value = setInterval(() => {
-		fetchCaptcha();
-	}, data.expire * 1000);
-};
-
-fetchCaptcha();
 
 const handleSubmit = async ({ errors, values }: { errors: Record<string, ValidatedError> | undefined; values: Record<string, any> }) => {
 	if (loading.value) return;
@@ -129,7 +94,6 @@ const handleSubmit = async ({ errors, values }: { errors: Record<string, Validat
 			loginConfig.value.username = rememberPassword ? username : '';
 			loginConfig.value.password = rememberPassword ? password : '';
 		} catch (err) {
-			fetchCaptcha();
 			errorMessage.value = (err as Error).message;
 		} finally {
 			setLoading(false);
