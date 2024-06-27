@@ -47,7 +47,7 @@
 			>
 				<a-input v-model="form.keyword" allow-clear placeholder="请输入角色标识" />
 			</a-form-item>
-			<a-form-item
+			<!-- <a-form-item
 				field="status"
 				label="角色状态"
 				:rules="[
@@ -62,7 +62,7 @@
 					<a-radio :value="true">启用</a-radio>
 					<a-radio :value="false">禁用</a-radio>
 				</a-radio-group>
-			</a-form-item>
+			</a-form-item> -->
 			<a-form-item
 				field="dataScope"
 				label="数据权限"

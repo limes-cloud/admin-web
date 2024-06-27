@@ -83,6 +83,7 @@ const updateStatus = (record: Role) => {
 		hideCancel: false,
 		onOk: async () => {
 			await UpdateRoleStatus({ id: record.id, status: record.status as boolean });
+			Message.success(`${status}成功`);
 		},
 		onCancel: () => {
 			record.status = !record.status;
