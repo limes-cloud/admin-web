@@ -25,7 +25,7 @@ export interface Menu {
 	isAffix?: boolean;
 	createdAt: number;
 	updatedAt: number;
-	children: Menu[];
+	children?: Menu[];
 }
 
 export interface ListMenuReply {

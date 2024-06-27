@@ -48,7 +48,6 @@ import { ValidatedError } from '@arco-design/web-vue/es/form/interface';
 import { useStorage } from '@vueuse/core';
 import { useUserStore, useAppStore } from '@/store';
 import useLoading from '@/hooks/loading';
-import { GetUserLoginCaptcha } from '@/api/manager/user/api';
 import { UserLoginRequest } from '@/api/manager/user/type';
 
 const timeInter: any = ref(null);
