@@ -20,7 +20,13 @@
 					]"
 					:validate-trigger="['change', 'input']"
 				>
-					<CodeEditor v-model="form[String(item.id)]" :style="{ width: '100%', height: '150px' }" :show-folding="false" :show-line="false"></CodeEditor>
+					<CodeEditor
+						v-model="form[String(item.id)]"
+						:style="{ width: '100%', height: '150px' }"
+						:show-folding="false"
+						:show-line="false"
+						:show-fullscreen="true"
+					></CodeEditor>
 				</a-form-item>
 			</template>
 		</a-form>

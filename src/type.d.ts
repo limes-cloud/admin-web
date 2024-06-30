@@ -13,6 +13,7 @@ declare module 'vue' {
 		$densityList: Record<string, string>;
 		$genderList: Record<string, string>;
 		$hasPermission: DetermineFunc;
+		$debounce: any;
 	}
 }
 

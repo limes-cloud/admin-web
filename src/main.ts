@@ -17,6 +17,7 @@ import { hasPermission } from './utils/permission';
 import 'virtual:svg-icons-register';
 import '@/assets/style/them/gray.less';
 import '@/assets/style/animation.less';
+import { debounce } from './utils/global';
 
 const app = createApp(App);
 if (import.meta.env?.MODE === 'development') {
@@ -38,6 +39,7 @@ useAppStore()
 		app.config.globalProperties.$densityList = densityList;
 		app.config.globalProperties.$genderList = genderList;
 		app.config.globalProperties.$hasPermission = hasPermission;
+		app.config.globalProperties.$debounce = debounce;
 		document.title = res.title;
 		if (res.logo) {
 			app.config.globalProperties.$logo = res.logo;

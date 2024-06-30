@@ -24,11 +24,11 @@
 		</div>
 		<div class="edit">
 			<CodeEditor
-				ref="coder"
 				v-model="submitTemplateForm.content"
 				:lang="submitTemplateForm.format"
 				:show-line="false"
-				:switch-lang="true"
+				:show-switch-lang="true"
+				:show-fullscreen="true"
 				:style="{
 					width: '100%',
 					height: '100%'
@@ -136,7 +136,6 @@ const SYNC_CONFIGURE = 'sync';
 const PREVIEW_CONFIGURE = 'preview';
 
 const emit = defineEmits(['submit', 'sync']);
-const coder = ref();
 
 const compareVisible = ref(false);
 const operator = ref('');
@@ -282,7 +281,6 @@ watch(
 		if (!val) return;
 		submitTemplateForm.content = val.content;
 		submitTemplateForm.format = val.format;
-		coder.value.setEditLang(val.format);
 	},
 	{ deep: true }
 );
