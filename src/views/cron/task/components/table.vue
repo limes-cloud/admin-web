@@ -129,7 +129,7 @@ const updateStatus = (record: Task) => {
 	const status = record.status ? '启用' : '禁用';
 	Modal.info({
 		title: '状态变更提示',
-		content: () => `您确认要 '${status}'此节点？`,
+		content: () => `您确认要 '${status}'此任务？`,
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
