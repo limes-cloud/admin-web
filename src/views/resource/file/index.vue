@@ -107,9 +107,9 @@ const handlePageChange = async (val) => {
 	fetchFile();
 };
 
-const handleBatchDeleteFile = async (ids: number[]) => {
+const handleBatchDeleteFile = async () => {
 	await DeleteFile({
-		ids
+		ids: selectFile.value
 	});
 	fetchFile();
 	selectFile.value = [];
