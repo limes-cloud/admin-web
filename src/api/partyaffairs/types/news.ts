@@ -1,4 +1,4 @@
-import { Resource, SimpleUser } from '@/types/global';
+import { Resource, User } from '@/types/global';
 
 export interface NewsClassify {
 	id: number;
@@ -68,8 +68,8 @@ export interface UpdateNewsContentReq {
 }
 
 export interface NewsComment {
-	form: SimpleUser;
-	reply?: SimpleUser;
+	form: User;
+	reply?: User;
 	text: string;
 	created_at: number;
 }

@@ -1,4 +1,4 @@
-import { User } from '@/api/manager/user/type';
+import { User } from '@/types/global';
 
 export interface Task {
 	id: number;

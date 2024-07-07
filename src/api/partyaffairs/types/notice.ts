@@ -1,4 +1,4 @@
-import { SimpleUser } from '@/types/global';
+import { User } from '@/types/global';
 
 export interface Notice {
 	id: number;
@@ -27,7 +27,7 @@ export interface PageNoticeUserReq {
 
 export interface PageNoticeUserRes {
 	total: number;
-	list: SimpleUser[];
+	list: User[];
 }
 
 export interface PageNoticeRes {
