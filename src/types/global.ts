@@ -9,20 +9,20 @@ export interface AnyObject {
 
 export interface Resource {
 	name: string;
-	type: string;
-	size: number;
 	sha: string;
-	src: string;
+	url: string;
 }
 
-export interface SimpleUser {
+export interface User {
 	id: number;
-	username: string;
-	nick_name: string;
-	real_name: string;
+	username?: string;
+	nickName: string;
+	realName?: string;
 	avatar: string;
 	gender: string;
-	resource: Resource;
+	avatarUrl?: string;
+	phone?: string;
+	email?: string;
 }
 
 export interface Options {

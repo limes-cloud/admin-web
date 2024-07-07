@@ -2,7 +2,7 @@ name: Publish Docker Image # workflow名称，可以在Github项目主页的【A
 # 触发规则
 on:
  push:
-  tags: ['v*.*.*']
+  branches: ['*']
 
 jobs: # workflow中的job
  push_to_registry: # job的名字
