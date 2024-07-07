@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { SimpleUser } from '@/types/global';
 import { UpdateNoticeReq, AddNoticeReq, PageNoticeReq, PageNoticeRes, Notice, PageNoticeUserReq, PageNoticeUserRes } from './types/notice';
 
 export function pageNotice(req: PageNoticeReq) {
