@@ -50,10 +50,10 @@
 
 <script lang="ts" setup>
 import { pageNoticeUser } from '@/api/partyaffairs/notice';
-import { SimpleUser, TableColumn } from '@/types/global';
+import { User, TableColumn } from '@/types/global';
 import { reactive, ref } from 'vue';
 
-const list = ref<SimpleUser[]>([]);
+const list = ref<User[]>([]);
 const visible = ref(false);
 const total = ref(0);
 
