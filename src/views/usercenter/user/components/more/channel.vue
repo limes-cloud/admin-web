@@ -25,7 +25,7 @@
 				{{ $formatTime(record.loggedAt) }}
 			</template>
 			<template #expiredAt="{ record }">
-				{{ $formatTime(record.expiredAt) }}
+				{{ $parseTime(record.expiredAt) }}
 			</template>
 			<template #operations="{ record }">
 				<a-popconfirm content="您确认取消绑定此渠道" type="warning" @ok="deleteUserChannel(record.channelId)">
