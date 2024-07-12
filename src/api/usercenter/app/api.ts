@@ -8,7 +8,6 @@ import {
 	CreateAppRequest,
 	UpdateAppRequest,
 	UpdateAppStatusRequest,
-	DeleteAppReply,
 	DeleteAppRequest
 } from './type';
 
@@ -39,5 +38,5 @@ export function UpdateAppStatus(data: UpdateAppStatusRequest) {
 
 // DeleteApp 删除应用信息
 export function DeleteApp(params: DeleteAppRequest) {
-	return axios.delete<DeleteAppReply>('/usercenter/api/v1/app', { params });
+	return axios.delete('/usercenter/api/v1/app', { params });
 }

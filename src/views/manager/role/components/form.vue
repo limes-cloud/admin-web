@@ -47,22 +47,7 @@
 			>
 				<a-input v-model="form.keyword" allow-clear placeholder="请输入角色标识" />
 			</a-form-item>
-			<!-- <a-form-item
-				field="status"
-				label="角色状态"
-				:rules="[
-					{
-						required: true,
-						message: '角色状态是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-radio-group v-model="form.status" :default-value="true">
-					<a-radio :value="true">启用</a-radio>
-					<a-radio :value="false">禁用</a-radio>
-				</a-radio-group>
-			</a-form-item> -->
+
 			<a-form-item
 				field="dataScope"
 				label="数据权限"

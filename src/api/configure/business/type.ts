@@ -55,11 +55,7 @@ export interface UpdateBusinessRequest {
 }
 
 export interface DeleteBusinessRequest {
-	ids: number[];
-}
-
-export interface DeleteBusinessReply {
-	total: number;
+	id: number;
 }
 
 export interface ListBusinessValueRequest {

@@ -92,7 +92,7 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteBusiness({ ids: [id] });
+	await DeleteBusiness({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };
