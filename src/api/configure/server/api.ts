@@ -1,21 +1,13 @@
 import axios from 'axios';
 import {
-	GetServerReply,
-	GetServerRequest,
 	ListServerReply,
 	ListServerRequest,
 	CreateServerReply,
 	CreateServerRequest,
 	UpdateServerRequest,
-	DeleteServerReply,
 	DeleteServerRequest,
 	UpdateServerStatusRequest
 } from './type';
-
-// GetServer 获取指定的服务信息
-export function GetServer(params?: GetServerRequest) {
-	return axios.get<GetServerReply>('/configure/api/v1/server', { params });
-}
 
 // ListServer 获取服务信息列表
 export function ListServer(params: ListServerRequest) {
@@ -34,7 +26,7 @@ export function UpdateServer(data: UpdateServerRequest) {
 
 // DeleteServer 删除服务信息
 export function DeleteServer(params: DeleteServerRequest) {
-	return axios.delete<DeleteServerReply>('/configure/api/v1/server', { params });
+	return axios.delete('/configure/api/v1/server', { params });
 }
 
 // UpdateServerStatus 更新服务信息状态

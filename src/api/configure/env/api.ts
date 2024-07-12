@@ -1,21 +1,5 @@
 import axios from 'axios';
-import {
-	GetEnvReply,
-	GetEnvRequest,
-	ListEnvReply,
-	ListEnvRequest,
-	CreateEnvReply,
-	CreateEnvRequest,
-	UpdateEnvRequest,
-	DeleteEnvReply,
-	DeleteEnvRequest,
-	UpdateEnvStatusRequest
-} from './type';
-
-// GetEnv 获取指定的环境信息
-export function GetEnv(params?: GetEnvRequest) {
-	return axios.get<GetEnvReply>('/configure/api/v1/env', { params });
-}
+import { ListEnvReply, ListEnvRequest, CreateEnvReply, CreateEnvRequest, UpdateEnvRequest, DeleteEnvRequest, UpdateEnvStatusRequest } from './type';
 
 // ListEnv 获取环境信息列表
 export function ListEnv(params?: ListEnvRequest) {
@@ -34,7 +18,7 @@ export function UpdateEnv(data: UpdateEnvRequest) {
 
 // DeleteEnv 删除环境信息
 export function DeleteEnv(params: DeleteEnvRequest) {
-	return axios.delete<DeleteEnvReply>('/configure/api/v1/env', { params });
+	return axios.delete('/configure/api/v1/env', { params });
 }
 
 // UpdateEnvStatus 更新环境信息状态

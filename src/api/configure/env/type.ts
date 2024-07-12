@@ -1,18 +1,3 @@
-export interface GetEnvRequest {
-	id?: number;
-	keyword?: string;
-}
-
-export interface GetEnvReply {
-	id: number;
-	keyword: string;
-	name: string;
-	status?: boolean;
-	description?: string;
-	createdAt: number;
-	updatedAt: number;
-}
-
 export interface ListEnvRequest {
 	keyword?: string;
 	name?: string;
@@ -53,11 +38,7 @@ export interface UpdateEnvRequest {
 }
 
 export interface DeleteEnvRequest {
-	ids: number[];
-}
-
-export interface DeleteEnvReply {
-	total: number;
+	id: number;
 }
 
 export interface GetEnvTokenRequest {
