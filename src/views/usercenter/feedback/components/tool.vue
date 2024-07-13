@@ -2,7 +2,7 @@
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
 			<a-space>
-				<a-button v-permission="'uc:feedback:group:query'" type="primary" status="success" @click="emit('showGroup')">
+				<a-button v-permission="'uc:feedback:category:query'" type="primary" status="success" @click="emit('showGroup')">
 					<template #icon>
 						<icon-ordered-list />
 					</template>
