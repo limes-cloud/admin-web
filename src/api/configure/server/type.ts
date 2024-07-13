@@ -1,18 +1,3 @@
-export interface GetServerRequest {
-	id?: number;
-	keyword?: string;
-}
-
-export interface GetServerReply {
-	id: number;
-	keyword: string;
-	name: string;
-	description?: string;
-	status?: boolean;
-	createdAt: number;
-	updatedAt: number;
-}
-
 export interface ListServerRequest {
 	page: number;
 	pageSize: number;
@@ -57,11 +42,7 @@ export interface UpdateServerRequest {
 }
 
 export interface DeleteServerRequest {
-	ids: number[];
-}
-
-export interface DeleteServerReply {
-	total: number;
+	id: number;
 }
 
 export interface UpdateServerStatusRequest {

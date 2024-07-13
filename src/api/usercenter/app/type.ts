@@ -106,9 +106,5 @@ export interface UpdateAppStatusRequest {
 }
 
 export interface DeleteAppRequest {
-	ids: number[];
-}
-
-export interface DeleteAppReply {
-	total: number;
+	id: number;
 }

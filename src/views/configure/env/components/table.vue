@@ -1,5 +1,5 @@
 <template>
-	<a-space>
+	<div>
 		<a-table
 			v-permission="'configure:env:query'"
 			row-key="id"
@@ -26,15 +26,32 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'configure:env:token:query'" color="arcoblue" @click="handleGetToken(record.id)">
-						<template #icon><icon-edit /></template>
-						获取token
-					</a-tag>
-
-					<a-tag v-permission="'configure:env:token:reset'" color="orangered" @click="handleResetToken(record.id)">
-						<template #icon><icon-edit /></template>
-						重置token
-					</a-tag>
+					<a-dropdown trigger="hover">
+						<a-tag color="arcoblue">
+							<template #icon><icon-edit /></template>
+							更多
+						</a-tag>
+						<template #content>
+							<a-doption>
+								<a-tag v-permission="'configure:env:token:query'" color="arcoblue" @click="handleGetToken(record.id)">
+									<template #icon><icon-menu /></template>
+									获取密钥
+								</a-tag>
+							</a-doption>
+							<a-doption>
+								<a-tag v-permission="'configure:env:token:reset'" color="orangered" @click="handleResetToken(record.id)">
+									<template #icon><icon-refresh /></template>
+									重置密钥
+								</a-tag>
+							</a-doption>
+							<a-doption>
+								<a-tag v-permission="'configure:env:resource:permission'" color="purple" @click="handleResourcePermission(record.id)">
+									<template #icon><icon-safe /></template>
+									资源权限
+								</a-tag>
+							</a-doption>
+						</template>
+					</a-dropdown>
 
 					<a-tag v-permission="'configure:env:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
@@ -52,7 +69,8 @@
 				</a-space>
 			</template>
 		</a-table>
-	</a-space>
+		<ResourcePermission ref="rp"></ResourcePermission>
+	</div>
 </template>
 
 <script lang="ts" setup>
@@ -62,6 +80,7 @@ import { TableSize, TableColumn } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 
+const rp = ref();
 const emit = defineEmits(['refresh', 'update', 'pageChange']);
 
 defineProps<{
@@ -89,7 +108,7 @@ const updateStatus = (record: Env) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteEnv({ ids: [id] });
+	await DeleteEnv({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };
@@ -108,5 +127,9 @@ const handleResetToken = async (id: number) => {
 		title: '重置Toekn成功',
 		content: `当前环境的token为${data.token}`
 	});
+};
+
+const handleResourcePermission = (id: number) => {
+	rp.value.show('cfg_env', id);
 };
 </script>
