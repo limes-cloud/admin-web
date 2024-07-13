@@ -11,7 +11,7 @@
 			:size="size"
 		>
 			<template #name="{ record }">
-				{{ record.user.real_name }}
+				{{ record.user.realName }}
 			</template>
 			<template #email="{ record }">
 				{{ record.user.email }}
