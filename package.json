@@ -33,7 +33,7 @@
 	"dependencies": {
 		"@arco-design/color": "^0.4.0",
 		"@arco-design/web-vue": "^2.55.2",
-		"@tinymce/tinymce-vue": "^5.1.1",
+		"@tinymce/tinymce-vue": "^6.0.1",
 		"@vueuse/core": "^9.3.0",
 		"arco-design-pro-vue": "^2.7.2",
 		"axios": "^0.24.0",
@@ -53,7 +53,7 @@
 		"query-string": "^8.0.3",
 		"sortablejs": "^1.15.0",
 		"stylelint-config-recommended-less": "^2.0.0",
-		"tinymce": "^6.8.2",
+		"tinymce": "6",
 		"vue": "^3.4.27",
 		"vue-echarts": "^6.2.3",
 		"vue-i18n": "^9.2.2",

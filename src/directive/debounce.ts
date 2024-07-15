@@ -3,6 +3,7 @@ import { DirectiveBinding } from 'vue';
 function debounce<F extends (...args: any[]) => any>(func: F, wait: number, immediate = false): (...args: Parameters<F>) => void {
 	let timeoutId: number | null = null;
 
+	// eslint-disable-next-line func-names
 	return function (this: ThisParameterType<F>, ...args: Parameters<F>): void {
 		const later = () => {
 			timeoutId = null;
@@ -26,6 +27,7 @@ function debounce<F extends (...args: any[]) => any>(func: F, wait: number, imme
 export default {
 	mounted(el: HTMLElement, binding: DirectiveBinding) {
 		if (typeof binding.value !== 'function') {
+			// eslint-disable-next-line no-console
 			console.warn('v-debounce expects a function as the value');
 			return;
 		}

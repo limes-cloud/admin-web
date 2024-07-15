@@ -122,10 +122,17 @@ const initOptions = {
 	// 如需ajax上传可参考https://www.luweipai.cn/html/1670332196/
 	images_file_types: 'jpeg,jpg,png,gif,bmp',
 	// , failure: any
-	images_upload_handler: (blobInfo: any, success: any) => {
-		const img = `data:image/jpeg;base64,${blobInfo.base64()}`;
-		success(img);
-	},
+	// images_upload_handler: (blobInfo: any, success: any) => {
+
+	// 	const img = `data:image/jpeg;base64,${blobInfo.base64()}`;
+	// 	success(img);
+	// },
+	images_upload_handler: (blobInfo, progress) =>
+		new Promise((resolve, reject) => {
+			const img = `data:image/jpeg;base64,${blobInfo.base64()}`;
+			resolve(img);
+		}),
+
 	placeholder: '在这里输入文字',
 	branding: false, // tiny技术支持信息是否显示
 	statusbar: false, // 最下方的元素路径和字数统计那一栏是否显示

@@ -17,8 +17,8 @@ dependencies:
     specifier: ^2.55.2
     version: 2.55.2(vue@3.4.27)
   '@tinymce/tinymce-vue':
-    specifier: ^5.1.1
-    version: 5.1.1(vue@3.4.27)
+    specifier: ^6.0.1
+    version: 6.0.1(vue@3.4.27)
   '@vueuse/core':
     specifier: ^9.3.0
     version: 9.13.0(vue@3.4.27)
@@ -77,8 +77,8 @@ dependencies:
     specifier: ^2.0.0
     version: 2.0.0(postcss@8.4.38)(stylelint@15.11.0)
   tinymce:
-    specifier: ^6.8.2
-    version: 6.8.2
+    specifier: '6'
+    version: 6.8.4
   vue:
     specifier: ^3.4.27
     version: 3.4.27(typescript@4.9.5)
@@ -1283,12 +1283,12 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /@tinymce/tinymce-vue@5.1.1(vue@3.4.27):
-    resolution: {integrity: sha512-iO57HOWesFOhsaqjA5Ea6sDvQBmJJH3/dq00Uvg7metlct2kLF+ctRgoDsetLt6gmeZ7COPftr814/XzqnJ/dg==}
+  /@tinymce/tinymce-vue@6.0.1(vue@3.4.27):
+    resolution: {integrity: sha512-VzjI8AKlNrrsosIk3WuBez6kubqPsPMeaButkRLuts77uo4e2EwPRFX+VyB6fHbMGHwUPK22zNjOUGMvJFZFCw==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
-      tinymce: 6.8.2
+      tinymce: 6.8.4
       vue: 3.4.27(typescript@4.9.5)
     dev: false
 
@@ -6226,7 +6226,7 @@ packages:
     requiresBuild: true
     dependencies:
       pify: 4.0.1
-      semver: 5.7.1
+      semver: 5.7.2
     dev: true
     optional: true
 
@@ -8863,8 +8863,8 @@ packages:
       globrex: 0.1.2
     dev: true
 
-  /tinymce@6.8.2:
-    resolution: {integrity: sha512-Lho79o2Y1Yn+XdlTEkHTEkEmzwYWTXz7IUsvPwxJF3VTtgHUIAAuBab29kik+f2KED3rZvQavr9D7sHVMJ9x4A==}
+  /tinymce@6.8.4:
+    resolution: {integrity: sha512-okoJyxuPv1gzASxQDNgQbnUXOdAIyoOSXcXcZZu7tiW0PSKEdf3SdASxPBupRj+64/E3elHwVRnzSdo82Emqbg==}
     dev: false
 
   /to-buffer@1.1.1:
