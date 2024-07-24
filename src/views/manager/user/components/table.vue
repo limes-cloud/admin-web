@@ -151,7 +151,7 @@ const handleResetPassword = async (id: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteUser({ ids: [id] });
+	await DeleteUser({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

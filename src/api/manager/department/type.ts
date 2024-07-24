@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface ListDepartmentRequest {
-	order?: string;
-	orderBy?: string;
 	name?: string;
 	keyword?: string;
 }
@@ -41,7 +39,7 @@ export interface UpdateDepartmentRequest {
 }
 
 export interface DeleteDepartmentRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteDepartmentReply {

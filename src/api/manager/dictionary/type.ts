@@ -1,8 +1,6 @@
 export interface ListDictionaryRequest {
 	page: number;
 	pageSize: number;
-	order?: string;
-	orderBy?: string;
 	keyword?: string;
 	name?: string;
 }
@@ -39,7 +37,7 @@ export interface UpdateDictionaryRequest {
 }
 
 export interface DeleteDictionaryRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteDictionaryReply {
@@ -63,8 +61,6 @@ export interface GetDictionaryReply {
 export interface ListDictionaryValueRequest {
 	page: number;
 	pageSize: number;
-	order?: string;
-	orderBy?: string;
 	dictionaryId?: number;
 	label?: string;
 	value?: string;
@@ -121,7 +117,7 @@ export interface UpdateDictionaryValueStatusRequest {
 }
 
 export interface DeleteDictionaryValueRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteDictionaryValueReply {

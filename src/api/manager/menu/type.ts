@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface ListMenuRequest {
-	order?: string;
-	orderBy?: string;
 	title?: string;
 }
 
@@ -82,7 +80,7 @@ export interface UpdateMenuRequest {
 }
 
 export interface DeleteMenuRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteMenuReply {

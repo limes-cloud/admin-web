@@ -37,6 +37,7 @@
 			<a-form-item
 				field="keyword"
 				:label="'角色标识'"
+				:disabled="!isAdd"
 				:rules="[
 					{
 						required: true,

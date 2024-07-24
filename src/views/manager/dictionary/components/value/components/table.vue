@@ -96,7 +96,7 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteDictionaryValue({ ids: [id] });
+	await DeleteDictionaryValue({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

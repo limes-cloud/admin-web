@@ -41,7 +41,6 @@ const total = ref(0);
 const searchForm = ref<ListDictionaryValueRequest>({
 	page: 1,
 	pageSize: 10,
-	orderBy: 'weight',
 	dictionaryId: props.id
 });
 

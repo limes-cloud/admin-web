@@ -11,7 +11,7 @@ import {
 } from './type';
 
 // ListMenu 获取菜单信息列表
-export function ListMenu(params: ListMenuRequest) {
+export function ListMenu(params?: ListMenuRequest) {
 	return axios.get<ListMenuReply>('/manager/api/v1/menus', { params });
 }
 

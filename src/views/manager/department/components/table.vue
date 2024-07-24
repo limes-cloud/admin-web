@@ -54,7 +54,7 @@ defineProps<{
 }>();
 
 const handleDelete = async (id: number) => {
-	await DeleteDepartment({ ids: [id] });
+	await DeleteDepartment({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

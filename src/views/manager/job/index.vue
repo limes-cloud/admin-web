@@ -43,9 +43,7 @@ const size = ref<TableSize>('medium');
 const total = ref(0);
 const searchForm = ref<ListJobRequest>({
 	page: 1,
-	pageSize: 10,
-	order: 'desc',
-	orderBy: 'weight'
+	pageSize: 10
 });
 
 const columns = ref<TableColumn[]>([

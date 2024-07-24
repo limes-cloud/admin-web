@@ -46,8 +46,6 @@ export interface GetUserReply {
 export interface ListUserRequest {
 	page: number;
 	pageSize: number;
-	order?: string;
-	orderBy?: string;
 	departmentId?: number;
 	roleId?: number;
 	name?: string;
@@ -108,7 +106,7 @@ export interface UpdateUserStatusRequest {
 }
 
 export interface DeleteUserRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteUserReply {

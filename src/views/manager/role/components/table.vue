@@ -69,7 +69,7 @@ defineProps<{
 }>();
 
 const handleDelete = async (id: number) => {
-	await DeleteRole({ ids: [id] });
+	await DeleteRole({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };
