@@ -38,32 +38,26 @@ const size = ref<TableSize>('medium');
 const columns = ref<TableColumn[]>([
 	{
 		title: '部门标志',
-		dataIndex: 'keyword',
-		slotName: 'keyword'
+		dataIndex: 'keyword'
 	},
 	{
 		title: '部门名称',
-		dataIndex: 'name',
-		slotName: 'name'
+		dataIndex: 'name'
 	},
 	{
 		title: '部门描述',
-		dataIndex: 'description',
-		slotName: 'description'
+		dataIndex: 'description'
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
 		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updated_at',
 		slotName: 'updatedAt'
 	},
 	{
 		title: '操作',
-		dataIndex: 'operations',
 		slotName: 'operations'
 	}
 ]);

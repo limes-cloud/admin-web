@@ -37,32 +37,26 @@ const size = ref<TableSize>('medium');
 const columns = ref<TableColumn[]>([
 	{
 		title: '菜单标题',
-		dataIndex: 'locale',
 		slotName: 'title'
 	},
 	{
 		title: '菜单路由',
-		dataIndex: 'path',
-		slotName: 'path'
+		dataIndex: 'path'
 	},
 	{
 		title: '菜单类型',
-		dataIndex: 'type',
 		slotName: 'type'
 	},
 	{
 		title: '是否隐藏',
-		dataIndex: 'is_hidden',
 		slotName: 'isHidden'
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
 		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updated_at',
 		slotName: 'updatedAt'
 	},
 	{
