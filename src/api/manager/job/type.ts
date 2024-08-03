@@ -1,8 +1,6 @@
 export interface ListJobRequest {
 	page: number;
 	pageSize: number;
-	order?: string;
-	orderBy?: string;
 	keyword?: string;
 	name?: string;
 }
@@ -42,7 +40,7 @@ export interface UpdateJobRequest {
 }
 
 export interface DeleteJobRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteJobReply {

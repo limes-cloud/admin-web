@@ -62,7 +62,6 @@ const columns = ref<TableColumn[]>([
 	},
 	{
 		title: '用户头像',
-		dataIndex: 'avatar',
 		slotName: 'avatar'
 	},
 	{
@@ -71,46 +70,38 @@ const columns = ref<TableColumn[]>([
 	},
 	{
 		title: '用户性别',
-		dataIndex: 'gender',
 		slotName: 'gender'
 	},
 	{
 		title: '当前角色',
-		dataIndex: 'role',
 		slotName: 'role'
 	},
 
 	{
 		title: '用户部门',
-		dataIndex: 'team',
 		slotName: 'team'
 	},
 	{
 		title: '用户状态',
-		dataIndex: 'status',
 		slotName: 'status'
 	},
 	{
 		title: '最后登录时间',
-		dataIndex: 'loggedAt',
 		slotName: 'loggedAt',
 		width: 170
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'createdAt',
 		slotName: 'createdAt',
 		width: 170
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updatedAt',
 		slotName: 'updatedAt',
 		width: 170
 	},
 	{
 		title: '操作',
-		dataIndex: 'operations',
 		slotName: 'operations',
 		fixed: 'right',
 		width: 240

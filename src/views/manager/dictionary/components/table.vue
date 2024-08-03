@@ -92,7 +92,7 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteDictionary({ ids: [id] });
+	await DeleteDictionary({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

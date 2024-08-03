@@ -8,8 +8,6 @@ export interface GetRoleMenuIdsReply {
 }
 
 export interface ListRoleRequest {
-	order?: string;
-	orderBy?: string;
 	name?: string;
 	keyword?: string;
 }
@@ -62,7 +60,7 @@ export interface UpdateRoleStatusRequest {
 }
 
 export interface DeleteRoleRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteRoleReply {

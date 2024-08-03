@@ -16,6 +16,7 @@
 </template>
 
 <script lang="ts" setup>
+import { Message } from '@arco-design/web-vue';
 import { TreeNodeData } from '@arco-design/web-vue/es/tree/interface';
 import { ref, watch } from 'vue';
 
@@ -31,7 +32,12 @@ const emit = defineEmits(['update']);
 
 const handleSubmit = async () => {
 	const arr = ids.value.concat(halfIds.value);
-	emit('update', Array.from(new Set(arr)));
+	const selects = Array.from(new Set(arr));
+	if (selects.length < 1) {
+		Message.error('至少选择一个菜单权限');
+		return false;
+	}
+	emit('update', selects);
 	return true;
 };
 

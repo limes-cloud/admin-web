@@ -77,7 +77,7 @@ defineProps<{
 }>();
 
 const handleDelete = async (id: number) => {
-	await DeleteMenu({ ids: [id] });
+	await DeleteMenu({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

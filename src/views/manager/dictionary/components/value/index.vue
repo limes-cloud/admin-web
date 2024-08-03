@@ -41,7 +41,6 @@ const total = ref(0);
 const searchForm = ref<ListDictionaryValueRequest>({
 	page: 1,
 	pageSize: 10,
-	orderBy: 'weight',
 	dictionaryId: props.id
 });
 
@@ -72,19 +71,16 @@ const columns = ref<TableColumn[]>([
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
 		slotName: 'createdAt',
 		width: 170
 	},
 	{
 		title: '更新时间',
-		dataIndex: 'updated_at',
 		slotName: 'updatedAt',
 		width: 170
 	},
 	{
 		title: '操作',
-		dataIndex: 'operations',
 		slotName: 'operations',
 		fixed: 'right',
 		width: 200

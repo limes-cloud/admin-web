@@ -63,6 +63,10 @@ const columns = ref<TableColumn[]>([
 		slotName: 'status'
 	},
 	{
+		title: '角色描述',
+		dataIndex: 'description'
+	},
+	{
 		title: '创建时间',
 		dataIndex: 'createdAt',
 		slotName: 'createdAt'
@@ -73,7 +77,7 @@ const columns = ref<TableColumn[]>([
 		slotName: 'updatedAt'
 	},
 	{
-		title: '菜单管理',
+		title: '角色菜单',
 		slotName: 'menu'
 	},
 	{
