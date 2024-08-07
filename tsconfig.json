@@ -11,6 +11,7 @@
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"baseUrl": ".",
+		"outDir": "dist",
 		"paths": {
 			"@/*": [
 				"src/*"
@@ -29,6 +30,7 @@
 		"auto-imports.d.ts"
 	],
 	"exclude": [
-		"node_modules"
+		"node_modules",
+		"dist"
 	]
 }

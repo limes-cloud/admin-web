@@ -1,4 +1,4 @@
-FROM gplane/pnpm:8.9.2-node18 AS builder
+FROM gplane/pnpm:8.9.2-node22 AS builder
 WORKDIR /app/
 
 ADD package.json /app/
