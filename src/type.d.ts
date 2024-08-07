@@ -5,7 +5,7 @@ type FormatUrlFunc = (i: string, w?: number, h?: number) => string;
 type FormatFunc = (string) => string;
 type DetermineFunc = (string) => boolean;
 declare module 'vue' {
-	export interface ComponentCustomProperties {
+	interface ComponentCustomProperties {
 		$rurl: FormatUrlFunc;
 		$logo: string;
 		$parseTime: FormatFunc;
