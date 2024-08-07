@@ -4,7 +4,7 @@ import Vue from 'vue';
 type FormatUrlFunc = (i: string, w?: number, h?: number) => string;
 type FormatFunc = (string) => string;
 type DetermineFunc = (string) => boolean;
-declare module 'vue' {
+declare module '@vue/runtime-core' {
 	interface ComponentCustomProperties {
 		$rurl: FormatUrlFunc;
 		$logo: string;
