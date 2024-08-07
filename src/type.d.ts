@@ -17,4 +17,4 @@ declare module 'vue' {
 	}
 }
 
-declare module 'js-yaml';
+// declare module 'js-yaml';
