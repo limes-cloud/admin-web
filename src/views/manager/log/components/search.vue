@@ -1,16 +1,16 @@
 <template>
-	<a-row v-permission="'manager:job:query'">
+	<a-row v-permission="'manager:login:log:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="6">
-						<a-form-item field="name" label="职位标识">
-							<a-input v-model="form.keyword" allow-clear placeholder="请输入职位名称" />
+						<a-form-item field="name" label="登陆账户">
+							<a-input v-model="form.username" allow-clear placeholder="请输入登陆账户" />
 						</a-form-item>
 					</a-col>
 					<a-col :span="6">
-						<a-form-item field="name" label="职位名称">
-							<a-input v-model="form.name" allow-clear placeholder="请输入职位名称" />
+						<a-form-item field="createdTime" label="登陆时间">
+							<a-range-picker v-model="form.createdAts" value-format="timestamp" style="width: 100%" allow-clear />
 						</a-form-item>
 					</a-col>
 				</a-row>
@@ -36,16 +36,26 @@
 </template>
 
 <script lang="ts" setup>
+import { ListLoginLogRequest } from '@/api/manager/user/type';
 import { ref } from 'vue';
 
-const form = ref<{ name?: string; keyword?: string }>({});
+const form = ref({} as ListLoginLogRequest);
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {
+	const params = { ...form.value };
+	if (params.createdAts) {
+		if (params.createdAts[0]) {
+			params.createdAts[0] /= 1000;
+		}
+		if (params.createdAts[1]) {
+			params.createdAts[1] /= 1000;
+		}
+	}
 	emit('search', form.value);
 };
 
 const reset = () => {
-	form.value = {};
+	form.value = {} as ListLoginLogRequest;
 };
 </script>

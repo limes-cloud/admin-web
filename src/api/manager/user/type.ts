@@ -172,3 +172,26 @@ export interface GetUserLoginCaptchaReply {
 	captcha: string;
 	expire: number;
 }
+
+export interface ListLoginLogRequest {
+	page: number;
+	pageSize: number;
+	username?: string;
+	createdAts?: number[];
+}
+
+export interface LoginLog {
+	username: string;
+	type: string;
+	ip: string;
+	address: string;
+	browser: string;
+	device: string;
+	code: number;
+	description: string;
+}
+
+export interface ListLoginLogReply {
+	total: number;
+	list: LoginLog[];
+}
