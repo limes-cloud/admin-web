@@ -332,7 +332,6 @@ const searchWorkerGroupFactory = new Search(
 		data.list.forEach((item) => {
 			res.push({ label: item.name, value: item.id });
 		});
-		console.log(res);
 		return res;
 	},
 	(val): boolean => {
