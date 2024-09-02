@@ -332,6 +332,7 @@ const searchWorkerGroupFactory = new Search(
 		data.list.forEach((item) => {
 			res.push({ label: item.name, value: item.id });
 		});
+		console.log(res);
 		return res;
 	},
 	(val): boolean => {
@@ -388,6 +389,11 @@ const validateCron = (value, cb) => {
 };
 
 const showAddDrawer = () => {
+	searchFactory.Search();
+	searchWorkerFactory.Search();
+	searchWorkerGroupFactory.Search();
+
+	form.value = {} as Type;
 	visible.value = true;
 	isAdd.value = true;
 };
