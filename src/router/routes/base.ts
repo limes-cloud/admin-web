@@ -29,12 +29,3 @@ export const NOT_FOUND_ROUTE: RouteRecordRaw = {
 	name: 'notFound',
 	component: () => import('@/views/not-found/index.vue')
 };
-
-export const LOGIN_ROUTE: RouteRecordRaw = {
-	path: '/login',
-	name: 'login',
-	component: () => import('@/views/login/index.vue'),
-	meta: {
-		requiresAuth: false
-	}
-};
