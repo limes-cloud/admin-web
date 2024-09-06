@@ -36,16 +36,12 @@ export interface CreateServerReply {
 
 export interface UpdateServerRequest {
 	id: number;
-	keyword: string;
-	name: string;
+	keyword?: string;
+	name?: string;
 	description?: string;
+	status?: boolean;
 }
 
 export interface DeleteServerRequest {
 	id: number;
-}
-
-export interface UpdateServerStatusRequest {
-	id: number;
-	status: boolean;
 }

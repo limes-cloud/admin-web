@@ -32,8 +32,9 @@ export interface CreateEnvReply {
 
 export interface UpdateEnvRequest {
 	id: number;
-	keyword: string;
-	name: string;
+	keyword?: string;
+	name?: string;
+	status?: boolean;
 	description?: string;
 }
 
@@ -55,9 +56,4 @@ export interface ResetEnvTokenRequest {
 
 export interface ResetEnvTokenReply {
 	token: string;
-}
-
-export interface UpdateEnvStatusRequest {
-	id: number;
-	status: boolean;
 }

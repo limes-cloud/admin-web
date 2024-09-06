@@ -26,6 +26,10 @@
 
 				<template #operations="{ record }">
 					<a-space class="cursor-pointer">
+						<a-tag v-permission="'configure:server:resource:permission'" color="purple" @click="handleResourcePermission(record.id)">
+							<template #icon><icon-safe /></template>
+							资源权限
+						</a-tag>
 						<a-tag v-permission="'configure:server:update'" color="orangered" @click="emit('update', record)">
 							<template #icon><icon-edit /></template>
 							修改
@@ -53,11 +57,12 @@
 				@page-size-change="pageSizeChange"
 			/>
 		</a-space>
+		<ResourcePermission ref="rp"></ResourcePermission>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { DeleteServer, UpdateServerStatus } from '@/api/configure/server/api';
+import { DeleteServer, UpdateServer } from '@/api/configure/server/api';
 import { Server } from '@/api/configure/server/type';
 import { TableSize, TableColumn, Pagination } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -105,7 +110,7 @@ const updateStatus = (record: Server) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateServerStatus({ id: record.id, status: record.status as boolean });
+			await UpdateServer({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

@@ -44,6 +44,12 @@
 									重置密钥
 								</a-tag>
 							</a-doption>
+							<a-doption>
+								<a-tag v-permission="'configure:env:resource:permission'" color="purple" @click="handleResourcePermission(record.id)">
+									<template #icon><icon-safe /></template>
+									资源权限
+								</a-tag>
+							</a-doption>
 						</template>
 					</a-dropdown>
 
@@ -63,11 +69,12 @@
 				</a-space>
 			</template>
 		</a-table>
+		<ResourcePermission ref="rp"></ResourcePermission>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { DeleteEnv, GetEnvToken, ResetEnvToken, UpdateEnvStatus } from '@/api/configure/env/api';
+import { DeleteEnv, GetEnvToken, ResetEnvToken, UpdateEnv } from '@/api/configure/env/api';
 import { Env } from '@/api/configure/env/type';
 import { TableSize, TableColumn } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -91,7 +98,7 @@ const updateStatus = (record: Env) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateEnvStatus({ id: record.id, status: record.status as boolean });
+			await UpdateEnv({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

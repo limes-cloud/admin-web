@@ -74,7 +74,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListEnv();
+		const { data } = await ListEnv(searchForm.value);
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);

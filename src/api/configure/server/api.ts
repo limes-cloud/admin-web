@@ -1,13 +1,5 @@
 import axios from 'axios';
-import {
-	ListServerReply,
-	ListServerRequest,
-	CreateServerReply,
-	CreateServerRequest,
-	UpdateServerRequest,
-	DeleteServerRequest,
-	UpdateServerStatusRequest
-} from './type';
+import { ListServerReply, ListServerRequest, CreateServerReply, CreateServerRequest, UpdateServerRequest, DeleteServerRequest } from './type';
 
 // ListServer 获取服务信息列表
 export function ListServer(params: ListServerRequest) {
@@ -27,9 +19,4 @@ export function UpdateServer(data: UpdateServerRequest) {
 // DeleteServer 删除服务信息
 export function DeleteServer(params: DeleteServerRequest) {
 	return axios.delete('/configure/api/v1/server', { params });
-}
-
-// UpdateServerStatus 更新服务信息状态
-export function UpdateServerStatus(data: UpdateServerStatusRequest) {
-	return axios.put('/configure/api/v1/server/status', data);
 }
