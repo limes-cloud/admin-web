@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DeleteEnv, GetEnvToken, ResetEnvToken, UpdateEnvStatus } from '@/api/configure/env/api';
+import { DeleteEnv, GetEnvToken, ResetEnvToken, UpdateEnv } from '@/api/configure/env/api';
 import { Env } from '@/api/configure/env/type';
 import { TableSize, TableColumn } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -98,7 +98,7 @@ const updateStatus = (record: Env) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateEnvStatus({ id: record.id, status: record.status as boolean });
+			await UpdateEnv({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

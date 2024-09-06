@@ -71,7 +71,7 @@ export interface UpdateResourceRequest {
 }
 
 export interface DeleteResourceRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteResourceReply {

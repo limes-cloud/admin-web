@@ -28,8 +28,3 @@ export function UpdateServer(data: UpdateServerRequest) {
 export function DeleteServer(params: DeleteServerRequest) {
 	return axios.delete('/configure/api/v1/server', { params });
 }
-
-// UpdateServerStatus 更新服务信息状态
-export function UpdateServerStatus(data: UpdateServerStatusRequest) {
-	return axios.put('/configure/api/v1/server/status', data);
-}
