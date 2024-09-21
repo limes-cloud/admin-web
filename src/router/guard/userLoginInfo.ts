@@ -9,11 +9,11 @@ export default function setupUserLoginInfoGuard(router: Router) {
 		NProgress.start();
 		const userStore = useUserStore();
 		if (isLogin()) {
+			if (to.name === 'login') {
+				next({ path: '/' });
+				return;
+			}
 			if (userStore.role) {
-				if (to.name === 'login') {
-					next({ path: '/' });
-					return;
-				}
 				next();
 			} else {
 				try {
