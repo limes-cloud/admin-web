@@ -60,6 +60,14 @@ const columns = ref<TableColumn[]>([
 		dataIndex: 'ip'
 	},
 	{
+		title: '节点ak',
+		dataIndex: 'ak'
+	},
+	{
+		title: '节点sk',
+		dataIndex: 'sk'
+	},
+	{
 		title: '节点分组',
 		slotName: 'group'
 	},

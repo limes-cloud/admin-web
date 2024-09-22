@@ -28,7 +28,7 @@
 					:multiple="false"
 					:auto-upload="true"
 					:files="files()"
-					directory-path="usercenter/channel/logo"
+					directory-path="application	/channel/logo"
 					accept="image/*"
 					@change="handleUploadImage"
 				></Upload>

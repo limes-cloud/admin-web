@@ -28,7 +28,7 @@
 					:multiple="false"
 					:auto-upload="true"
 					:files="files()"
-					directory-path="usercenter/app/logo"
+					directory-path="application/app/logo"
 					accept="image/*"
 					@change="handleUploadImage"
 				></Upload>

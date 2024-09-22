@@ -63,6 +63,8 @@ export interface GetWorkerReply {
 	id: number;
 	name: string;
 	ip: string;
+	ak: string;
+	sk: string;
 	groupId: number;
 	status?: boolean;
 	description?: string;
@@ -85,6 +87,8 @@ export interface Worker {
 	id: number;
 	name: string;
 	ip: string;
+	ak: string;
+	sk: string;
 	groupId: number;
 	group?: WorkerGroup;
 	status?: boolean;
@@ -102,6 +106,8 @@ export interface CreateWorkerRequest {
 	name: string;
 	ip: string;
 	groupId: number;
+	ak: string;
+	sk: string;
 	status?: boolean;
 	description?: string;
 }
@@ -114,6 +120,8 @@ export interface UpdateWorkerRequest {
 	id: number;
 	name: string;
 	ip: string;
+	ak: string;
+	sk: string;
 	groupId: number;
 	description?: string;
 }
