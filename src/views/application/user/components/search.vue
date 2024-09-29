@@ -1,7 +1,7 @@
 <template>
 	<a-row v-permission="'application:user:query'">
 		<a-col :flex="1">
-			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
+			<a-form ref="formRef" :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="6">
 						<a-form-item field="name" label="所属应用">

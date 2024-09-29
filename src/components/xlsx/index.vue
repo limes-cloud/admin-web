@@ -1,20 +1,26 @@
 <template>
 	<div @click="visible = true"><slot></slot></div>
 
-	<a-modal v-model:visible="visible" :title="title" width="300px" :footer="false" @cancel="visible = false">
+	<a-modal v-model:visible="visible" :title="title" width="400px" :footer="false" @cancel="visible = false">
 		<div class="btn">
-			<a-upload action="/" accept=".xls,.xlsx" :disabled="disabled" :auto-upload="false" :show-file-list="false" @change="handleChange">
-				<template #upload-button>
-					<div class="upload-card">
-						<icon-plus class="icon"></icon-plus>
-						<span class="text">点击上传</span>
-					</div>
-				</template>
-			</a-upload>
-			<div class="tip">
-				<span class="desc">导入文件格式必须是xls/xlsx格式，在导入之前可以先下载下方模板进行填写数据。</span>
-				<span class="href" @click="exportTable">下载导入模板</span>
+			<div class="upload-box">
+				<a-upload
+					action="/"
+					accept=".xls,.xlsx"
+					:disabled="disabled"
+					:show-upload-button="true"
+					:draggable="true"
+					:auto-upload="false"
+					:show-file-list="false"
+					@change="handleChange"
+				></a-upload>
 			</div>
+			<a-alert>
+				<div class="tip">
+					<span class="desc">导入文件格式必须是xls/xlsx格式，在导入之前可以先下载下方模板进行填写数据。</span>
+					<span class="href" @click="exportTable">下载导入模板</span>
+				</div>
+			</a-alert>
 		</div>
 	</a-modal>
 </template>
@@ -140,7 +146,12 @@ const handleChange = async (_, info) => {
 <style lang="less" scoped>
 .btn {
 	display: flex;
+	flex-direction: column;
 	justify-content: space-between;
+
+	.upload-box {
+		margin-bottom: 20px;
+	}
 
 	.upload-card {
 		display: flex;
@@ -174,10 +185,6 @@ const handleChange = async (_, info) => {
 	}
 
 	.tip {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		justify-content: space-between;
 		font-size: 12px;
 
 		.desc {

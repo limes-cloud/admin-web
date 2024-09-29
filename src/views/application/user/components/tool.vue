@@ -8,7 +8,7 @@
 					</template>
 					新建用户
 				</a-button>
-				<Xlsx :configs="xlsxMapping" @success="handleXlsxUploadSuccess" @error="handleXlsxUploadError">
+				<Xlsx :configs="xlsxMapping" :handlers="xlsxHandlers" @success="handleXlsxUploadSuccess" @error="handleXlsxUploadError">
 					<a-button v-permission="'application:user:import'" type="primary">
 						<template #icon>
 							<icon-upload />
@@ -74,18 +74,16 @@ const props = defineProps<{
 const xlsxMapping = [
 	{ type: 'string', field: 'email', title: '邮箱' },
 	{ type: 'string', field: 'phone', title: '手机' },
-	{ type: 'string', field: 'real_name', title: '姓名' },
+	{ type: 'string', field: 'realName', title: '姓名' },
 	{ type: 'string', field: 'gender', title: '性别' }
 ];
 
-// const xlsxHandlers = {
-// 	// gender: (val: string) => {
-// 	// 	switch(val){
-// 	// 		case "男":
-// 	// 	}
-// 	// 	return val.split(',');
-// 	// }
-// };
+const xlsxHandlers = {
+	gender: (val: string): string => {
+		return val.trim() === '男' ? 'M' : 'F';
+	}
+};
+
 // 定义事件
 const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'extra']);
 const cloneColumns = ref<TableColumn[]>([]);
@@ -143,7 +141,7 @@ const handleChange = (checked: boolean | (string | boolean | number)[], column: 
 };
 
 const handleXlsxUploadSuccess = async (list) => {
-	await ImportUser(list);
+	await ImportUser({ list });
 	Message.success('导入成功');
 	emit('refresh');
 };

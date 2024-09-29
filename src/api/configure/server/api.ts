@@ -1,13 +1,5 @@
 import axios from 'axios';
-import {
-	ListServerReply,
-	ListServerRequest,
-	CreateServerReply,
-	CreateServerRequest,
-	UpdateServerRequest,
-	DeleteServerRequest,
-	UpdateServerStatusRequest
-} from './type';
+import { ListServerReply, ListServerRequest, CreateServerReply, CreateServerRequest, UpdateServerRequest, DeleteServerRequest } from './type';
 
 // ListServer 获取服务信息列表
 export function ListServer(params: ListServerRequest) {
