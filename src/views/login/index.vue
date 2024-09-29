@@ -62,7 +62,6 @@ import useLoading from '@/hooks/loading';
 import { GetUserLoginCaptcha } from '@/api/manager/user/api';
 import { UserLoginRequest } from '@/api/manager/user/type';
 // import logo from '@/assets/logo.png';
-
 const timeInter: any = ref(null);
 const router = useRouter();
 const errorMessage = ref('');

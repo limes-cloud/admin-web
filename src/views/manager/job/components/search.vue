@@ -3,12 +3,12 @@
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
-					<a-col :span="8">
+					<a-col :span="6">
 						<a-form-item field="name" label="职位标识">
 							<a-input v-model="form.keyword" allow-clear placeholder="请输入职位名称" />
 						</a-form-item>
 					</a-col>
-					<a-col :span="8">
+					<a-col :span="6">
 						<a-form-item field="name" label="职位名称">
 							<a-input v-model="form.name" allow-clear placeholder="请输入职位名称" />
 						</a-form-item>

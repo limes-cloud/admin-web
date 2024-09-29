@@ -36,6 +36,34 @@
 				<a-input v-model="form.ip" :disabled="data.status" allow-clear placeholder="请输入节点ip" />
 			</a-form-item>
 
+			<a-form-item
+				field="ak"
+				label="节点ak"
+				:rules="[
+					{
+						required: true,
+						message: '节点ak是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="form.ak" :disabled="data.status" allow-clear placeholder="请输入节点ak" />
+			</a-form-item>
+
+			<a-form-item
+				field="sk"
+				label="节点sk"
+				:rules="[
+					{
+						required: true,
+						message: '节点sk是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="form.sk" :disabled="data.status" allow-clear placeholder="请输入节点sk" />
+			</a-form-item>
+
 			<a-form-item field="groupId" label="节点分组">
 				<a-select
 					v-model="form.groupId"

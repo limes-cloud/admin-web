@@ -95,7 +95,7 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteResource({ ids: [id] });
+	await DeleteResource({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

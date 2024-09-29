@@ -388,6 +388,11 @@ const validateCron = (value, cb) => {
 };
 
 const showAddDrawer = () => {
+	searchFactory.Search();
+	searchWorkerFactory.Search();
+	searchWorkerGroupFactory.Search();
+
+	form.value = {} as Type;
 	visible.value = true;
 	isAdd.value = true;
 };

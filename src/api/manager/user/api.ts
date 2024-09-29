@@ -21,7 +21,9 @@ import {
 	GetUserLoginCaptchaReply,
 	UserLoginReply,
 	UserLoginRequest,
-	UserRefreshTokenReply
+	UserRefreshTokenReply,
+	ListLoginLogRequest,
+	ListLoginLogReply
 } from './type';
 
 // GetUser 获取指定的用户信息
@@ -107,4 +109,9 @@ export function UserLogout() {
 // UserRefreshToken 用户刷新token
 export function UserRefreshToken() {
 	return axios.post<UserRefreshTokenReply>('/manager/api/v1/user/token/refresh');
+}
+
+// ListLoginLog 获取登陆日志
+export function ListLoginLog(params: ListLoginLogRequest) {
+	return axios.get<ListLoginLogReply>('/manager/api/v1/user/login/logs', { params });
 }
