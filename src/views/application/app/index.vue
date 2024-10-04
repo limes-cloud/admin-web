@@ -46,6 +46,10 @@ const searchForm = ref<ListAppRequest>({
 
 const columns = ref<TableColumn[]>([
 	{
+		title: '应用ID',
+		dataIndex: 'id'
+	},
+	{
 		title: '应用图标',
 		slotName: 'logo'
 	},

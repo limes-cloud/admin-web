@@ -75,7 +75,8 @@ const xlsxMapping = [
 	{ type: 'string', field: 'email', title: '邮箱' },
 	{ type: 'string', field: 'phone', title: '手机' },
 	{ type: 'string', field: 'realName', title: '姓名' },
-	{ type: 'string', field: 'gender', title: '性别' }
+	{ type: 'string', field: 'gender', title: '性别' },
+	{ type: 'number', field: 'appId', title: '应用ID' }
 ];
 
 const xlsxHandlers = {

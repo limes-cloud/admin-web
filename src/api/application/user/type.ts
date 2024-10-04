@@ -93,12 +93,20 @@ export interface CreateUserRequest {
 	gender?: string;
 }
 
+export interface ImportUserData {
+	phone?: string;
+	email?: string;
+	gender?: string;
+	realName?: string;
+	app?: string;
+}
+
 export interface CreateUserReply {
 	id: number;
 }
 
 export interface ImportUserRequest {
-	list: CreateUserRequest[];
+	list: ImportUserData[];
 }
 
 export interface ImportUserReply {
