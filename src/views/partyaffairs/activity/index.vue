@@ -26,45 +26,49 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
-import { Banner, ListBannerRequest } from '@/api/partyaffairs/banner/type';
-import { ListBanner } from '@/api/partyaffairs/banner/api';
+import { Activity, ListActivityRequest } from '@/api/partyaffairs/activity/type';
+import { ListActivity, GetActivity } from '@/api/partyaffairs/activity/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref<Banner>({} as Banner);
+const form = ref<Activity>({} as Activity);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<ListBannerRequest>({
+const searchForm = ref<ListActivityRequest>({
 	page: 1,
 	pageSize: 10
 });
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '轮播标题',
+		title: '活动标题',
 		dataIndex: 'title'
 	},
 	{
-		title: '轮播封面',
-		slotName: 'src'
+		title: '活动封面',
+		slotName: 'cover'
 	},
 	{
-		title: '跳转路径',
-		dataIndex: 'path'
+		title: '发布单位',
+		dataIndex: 'unit'
 	},
 	{
-		title: '轮播权重',
-		dataIndex: 'weight'
+		title: '是否置顶',
+		slotName: 'isTop'
 	},
 	{
-		title: '轮播状态',
+		title: '活动状态',
 		slotName: 'status'
+	},
+	{
+		title: '阅读人数',
+		dataIndex: 'read'
 	},
 	{
 		title: '创建时间',
@@ -88,7 +92,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListBanner(searchForm.value);
+		const { data } = await ListActivity(searchForm.value);
 		tableData.value = data.list;
 		total.value = data.total;
 	} finally {
@@ -100,18 +104,19 @@ handleGet();
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = { weight: 0 } as Banner;
+	form.value = { isTop: false, status: false } as Activity;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (banner: Banner) => {
-	form.value = { ...banner };
+const handleTableUpdate = async (activity: Activity) => {
+	const { data } = await GetActivity({ id: activity.id });
+	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理查询
-const handleSearch = async (req: ListBannerRequest) => {
+const handleSearch = async (req: ListActivityRequest) => {
 	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
@@ -132,6 +137,6 @@ const handlePageChange = async (page: Pagination) => {
 
 <script lang="ts">
 export default {
-	name: 'PartyaffairsBanner'
+	name: 'PartyaffairsActivity'
 };
 </script>

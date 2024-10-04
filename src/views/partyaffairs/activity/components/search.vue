@@ -1,16 +1,16 @@
 <template>
-	<a-row v-permission="'partyaffairs:notice:query'">
+	<a-row v-permission="'partyaffairs:activity:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="6">
-						<a-form-item field="name" label="通知标题">
-							<a-input v-model="form.title" allow-clear placeholder="请输入通知标题" />
+						<a-form-item field="name" label="活动标题">
+							<a-input v-model="form.title" allow-clear placeholder="请输入活动标题" />
 						</a-form-item>
 					</a-col>
 					<a-col :span="6">
-						<a-form-item field="status" label="通知状态">
-							<a-select v-model="form.status" allow-search allow-clear placeholder="请选择通知状态">
+						<a-form-item field="status" label="活动状态">
+							<a-select v-model="form.status" allow-search allow-clear placeholder="请选择活动状态">
 								<a-option :value="true">启用</a-option>
 								<a-option :value="false">禁用</a-option>
 							</a-select>
@@ -18,7 +18,7 @@
 					</a-col>
 					<a-col :span="6">
 						<a-form-item field="isTop" label="是否置顶">
-							<a-select v-model="form.isTop" allow-search allow-clear placeholder="请选择通知状态">
+							<a-select v-model="form.isTop" allow-search allow-clear placeholder="请选择活动状态">
 								<a-option :value="true">是</a-option>
 								<a-option :value="false">否</a-option>
 							</a-select>
@@ -47,10 +47,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ListNoticeRequest } from '@/api/partyaffairs/notice/type';
+import { ListActivityRequest } from '@/api/partyaffairs/activity/type';
 import { ref } from 'vue';
 
-const form = ref<ListNoticeRequest>({} as ListNoticeRequest);
+const form = ref<ListActivityRequest>({} as ListActivityRequest);
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {
@@ -58,6 +58,6 @@ const handleSearch = () => {
 };
 
 const reset = () => {
-	form.value = {} as ListNoticeRequest;
+	form.value = {} as ListActivityRequest;
 };
 </script>

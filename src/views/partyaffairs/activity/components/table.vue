@@ -1,7 +1,7 @@
 <template>
 	<a-space direction="vertical" fill>
 		<a-table
-			v-permission="'partyaffairs:notice:query'"
+			v-permission="'partyaffairs:activity:query'"
 			row-key="id"
 			:loading="loading"
 			:columns="columns"
@@ -9,13 +9,22 @@
 			:bordered="false"
 			:pagination="false"
 		>
+			<template #cover="{ record }">
+				<a-image
+					width="200"
+					:src="$rurl(record.cover, 200, 100)"
+					:preview-props="{
+						src: record.cover
+					}"
+				/>
+			</template>
 			<template #isTop="{ record }">
 				<a-tag v-if="record.isTop" color="arcoblue">是</a-tag>
 				<a-tag v-else color="red">否</a-tag>
 			</template>
 
 			<template #status="{ record }">
-				<a-switch v-model="record.status" :disabled="!$hasPermission('partyaffairs:notice:update')" type="round" @change="updateStatus(record)">
+				<a-switch v-model="record.status" :disabled="!$hasPermission('partyaffairs:activity:update')" type="round" @change="updateStatus(record)">
 					<template #checked>启用</template>
 					<template #unchecked>禁用</template>
 				</a-switch>
@@ -30,18 +39,13 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-tag v-permission="'partyaffairs:notice:push'" :visible="record.status" color="arcoblue" @click="handlePush(record.id)">
-						<template #icon><icon-send /></template>
-						推送
-					</a-tag>
-
-					<a-tag v-permission="'partyaffairs:notice:update'" color="orangered" @click="emit('update', record)">
+					<a-tag v-permission="'partyaffairs:activity:update'" color="orangered" @click="emit('update', record)">
 						<template #icon><icon-edit /></template>
 						修改
 					</a-tag>
 
-					<a-popconfirm type="warning" content="您确认删除此通知？" @ok="handleDelete(record.id)">
-						<a-tag v-permission="'partyaffairs:notice:delete'" color="red">
+					<a-popconfirm content="您确认删除此活动？" type="warning" @ok="handleDelete(record.id)">
+						<a-tag v-permission="'partyaffairs:activity:delete'" color="red">
 							<template #icon><icon-delete /></template>
 							删除
 						</a-tag>
@@ -63,11 +67,11 @@
 </template>
 
 <script lang="ts" setup>
-import { DeleteNotice, PushNotice, UpdateNotice } from '@/api/partyaffairs/notice/api';
+import { DeleteActivity, UpdateActivity } from '@/api/partyaffairs/activity/api';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Notice } from '@/api/partyaffairs/notice/type';
+import { Activity } from '@/api/partyaffairs/activity/type';
 
 const emit = defineEmits(['refresh', 'update', 'pageChange']);
 defineProps<{
@@ -95,33 +99,20 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteNotice({ id });
+	await DeleteActivity({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };
 
-const handlePush = async (id: number) => {
-	Modal.info({
-		title: '推送提示',
-		content: () => `您确认要推送此通知？确认后将向所有用户发送邮件通知，请谨慎操作！`,
-		closable: true,
-		hideCancel: false,
-		onOk: async () => {
-			await PushNotice({ id });
-			Message.success('推送成功');
-		}
-	});
-};
-
-const updateStatus = (record: Notice) => {
+const updateStatus = (record: Activity) => {
 	const status = record.status ? '启用' : '禁用';
 	Modal.info({
 		title: '状态变更提示',
-		content: () => `您确认要 '${status}'此通知？`,
+		content: () => `您确认要 '${status}'此活动？`,
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateNotice({ id: record.id, status: record.status as boolean });
+			await UpdateActivity({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

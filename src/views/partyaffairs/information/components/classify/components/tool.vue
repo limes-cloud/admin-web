@@ -1,11 +1,11 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'partyaffairs:notice:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'partyaffairs:information:classify:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>
-				新建通知
+				新建分组
 			</a-button>
 		</a-col>
 

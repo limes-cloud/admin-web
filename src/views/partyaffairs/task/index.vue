@@ -10,12 +10,19 @@
 				:data="tableData"
 				:size="size"
 				:total="total"
-				:pagination="searchForm"
+				:pagination="{
+					page: searchForm.page,
+					pageSize: searchForm.pageSize
+				}"
 				@page-change="handlePageChange"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
+				@value="taskId = $event"
 			></Table>
 			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
+			<a-modal :visible="taskId != 0" :body-style="{ padding: 0 }" fullscreen unmount-on-close title="填写详情" :footer="false" @cancel="taskId = 0">
+				<Value :task-id="taskId"></Value>
+			</a-modal>
 		</a-card>
 	</div>
 </template>
@@ -25,62 +32,63 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-
-import { Banner, ListBannerRequest } from '@/api/partyaffairs/banner/type';
-import { ListBanner } from '@/api/partyaffairs/banner/api';
+import { ListTaskRequest, Task } from '@/api/partyaffairs/task/type';
+import { ListTask, GetTask } from '@/api/partyaffairs/task/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import Value from './components/value/index.vue';
 
 const formRef = ref();
-const form = ref<Banner>({} as Banner);
+const form = ref<Task>({} as Task);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<ListBannerRequest>({
+const searchForm = ref<ListTaskRequest>({
 	page: 1,
 	pageSize: 10
 });
+const taskId = ref(0);
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '轮播标题',
+		title: '任务标题',
 		dataIndex: 'title'
 	},
 	{
-		title: '轮播封面',
-		slotName: 'src'
+		title: '开始时间',
+		dataIndex: 'start',
+		slotName: 'start'
 	},
 	{
-		title: '跳转路径',
-		dataIndex: 'path'
+		title: '结束时间',
+		dataIndex: 'end',
+		slotName: 'end'
 	},
 	{
-		title: '轮播权重',
-		dataIndex: 'weight'
-	},
-	{
-		title: '轮播状态',
-		slotName: 'status'
+		title: '允许更新',
+		dataIndex: 'isUpdate',
+		slotName: 'isUpdate'
 	},
 	{
 		title: '创建时间',
-		slotName: 'createdAt',
-		width: 170
+		dataIndex: 'createdAt',
+		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		slotName: 'updatedAt',
-		width: 170
+		dataIndex: 'updatedAt',
+		slotName: 'updatedAt'
 	},
 	{
 		title: '操作',
+		dataIndex: 'operations',
 		slotName: 'operations',
 		fixed: 'right',
-		width: 150
+		width: 100
 	}
 ]);
 
@@ -88,8 +96,8 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListBanner(searchForm.value);
-		tableData.value = data.list;
+		const { data } = await ListTask(searchForm.value);
+		tableData.value = data.list as unknown as TableData[];
 		total.value = data.total;
 	} finally {
 		setLoading(false);
@@ -98,20 +106,8 @@ const handleGet = async () => {
 
 handleGet();
 
-//  处理tool按钮新建
-const handleToolAdd = () => {
-	form.value = { weight: 0 } as Banner;
-	formRef.value.showAddDrawer();
-};
-
-// 处理table点击更新
-const handleTableUpdate = async (banner: Banner) => {
-	form.value = { ...banner };
-	formRef.value.showUpdateDrawer();
-};
-
 // 处理查询
-const handleSearch = async (req: ListBannerRequest) => {
+const handleSearch = async (req: ListTaskRequest) => {
 	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
@@ -128,10 +124,23 @@ const handlePageChange = async (page: Pagination) => {
 	searchForm.value.pageSize = page.pageSize;
 	handleGet();
 };
+
+//  处理tool按钮新建
+const handleToolAdd = () => {
+	form.value = { isUpdate: false } as Task;
+	formRef.value.showAddDrawer();
+};
+
+// 处理table点击更新
+const handleTableUpdate = async (task: Task) => {
+	const { data } = await GetTask(task.id);
+	form.value = { ...data };
+	formRef.value.showUpdateDrawer();
+};
 </script>
 
 <script lang="ts">
 export default {
-	name: 'PartyaffairsBanner'
+	name: 'ManagerTask'
 };
 </script>

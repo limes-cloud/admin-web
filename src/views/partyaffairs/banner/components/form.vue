@@ -36,22 +36,22 @@
 				<Upload
 					ref="upload"
 					width="100%"
-					height="180px"
+					height="140px"
 					:limit="1"
 					:draggable="true"
 					:multiple="false"
 					:auto-upload="true"
 					:files="files()"
-					directory-path="resource/banner"
-					app="PartyAffairs"
+					directory-path="partyaffairs/banner"
 					accept="image/*"
 					@change="handleUploadImage"
 				></Upload>
 			</a-form-item>
 
 			<a-form-item field="path" label="跳转路径">
-				<a-input v-model="form.path" allow-clear placeholder="请输入应用标志" />
+				<a-input v-model="form.path" allow-clear placeholder="请输入跳转路径" />
 			</a-form-item>
+
 			<a-form-item
 				field="weight"
 				label="轮播权重"
@@ -71,8 +71,10 @@
 
 <script lang="ts" setup>
 import { ref, watch, getCurrentInstance } from 'vue';
-import { Banner } from '@/api/partyaffairs/types/banner';
 import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
+import { CreateBanner, UpdateBanner } from '@/api/partyaffairs/banner/api';
+import { CreateBannerRequest, UpdateBannerRequest, Banner } from '@/api/partyaffairs/banner/type';
+import { Message } from '@arco-design/web-vue';
 
 const { proxy } = getCurrentInstance() as any;
 const formRef = ref();
@@ -82,16 +84,14 @@ const isAdd = ref(false);
 const props = defineProps<{
 	data: Banner;
 }>();
-
-const form = ref<Banner>({} as Banner);
-const emit = defineEmits(['add', 'update']);
+type Type = CreateBannerRequest | UpdateBannerRequest;
+const form = ref<Type>({} as Type);
+const emit = defineEmits(['refresh']);
 const files = () => {
-	if (props.data.resource) {
+	if (props.data.src) {
 		return [
 			{
-				url: proxy.$rurl(props.data.resource?.url, 300, 180),
-				sha: props.data.resource.sha,
-				name: props.data.resource.name
+				url: proxy.$rurl(props.data.src, 300, 140)
 			}
 		];
 	}
@@ -133,11 +133,19 @@ const handleSubmit = async () => {
 		return false;
 	}
 
+	const data = form.value;
 	if (isAdd.value) {
-		emit('add', { ...form.value });
+		await CreateBanner(data as CreateBannerRequest);
+		Message.success('创建成功');
 	} else {
-		emit('update', { ...form.value });
+		if (form.value.src === props.data.src) {
+			data.src = undefined;
+		}
+		await UpdateBanner(data as UpdateBannerRequest);
+		Message.success('更新成功');
 	}
+	emit('refresh');
+
 	return true;
 };
 </script>
