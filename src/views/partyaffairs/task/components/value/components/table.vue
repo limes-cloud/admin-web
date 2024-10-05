@@ -23,14 +23,14 @@
 				{{ record.user.phone ?? '未绑定' }}
 			</template>
 			<template #createdAt="{ record }">
-				{{ record.Id ? $formatTime(record.createdAt) : '未填写' }}
+				{{ record.id ? $formatTime(record.createdAt) : '未填写' }}
 			</template>
 			<template #updatedAt="{ record }">
-				{{ record.Id ? $formatTime(record.updatedAt) : '未填写' }}
+				{{ record.id ? $formatTime(record.updatedAt) : '未填写' }}
 			</template>
 
 			<template #operations="{ record }">
-				<a-space v-if="record.Id" class="cursor-pointer">
+				<a-space v-if="record.id" class="cursor-pointer">
 					<a-tag v-permission="'partyaffairs:task:value:query'" color="arcoblue" @click="emit('more', record)">
 						<template #icon><icon-more /></template>
 						详情
