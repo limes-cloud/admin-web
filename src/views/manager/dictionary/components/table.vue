@@ -10,6 +10,10 @@
 			:pagination="false"
 			:size="size"
 		>
+			<template #type="{ record }">
+				{{ $dataType[record.type] }}
+			</template>
+
 			<template #createdAt="{ record }">
 				{{ $formatTime(record.createdAt) }}
 			</template>

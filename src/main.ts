@@ -11,7 +11,7 @@ import '@/assets/style/global.less';
 import '@/utils/interceptor';
 import { formatUrl } from './utils/url';
 import { formatTime, parseTime } from './utils/time';
-import { densityList, genderList } from './utils/consts';
+import { dataType, densityList, genderList } from './utils/consts';
 import { hasPermission } from './utils/permission';
 // eslint-disable-next-line import/no-unresolved
 import 'virtual:svg-icons-register';
@@ -32,6 +32,7 @@ app.use(directive);
 useAppStore()
 	.loadSystemSetting()
 	.then((res) => {
+		app.config.globalProperties.$dataType = dataType;
 		app.config.globalProperties.$rurl = formatUrl;
 		app.config.globalProperties.$logo = logo;
 		app.config.globalProperties.$formatTime = formatTime;

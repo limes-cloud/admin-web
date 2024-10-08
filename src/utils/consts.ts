@@ -10,4 +10,9 @@ export const genderList = {
 	F: '女'
 };
 
+export const dataType = {
+	list: '列表结构',
+	tree: '树状结构'
+};
+
 export default null;

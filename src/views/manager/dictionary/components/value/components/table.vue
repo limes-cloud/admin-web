@@ -41,6 +41,7 @@
 			</template>
 		</a-table>
 		<a-pagination
+			v-if="dataType == 'list'"
 			:total="total"
 			:current="page.page"
 			:page-size="page.pageSize"
@@ -70,6 +71,7 @@ const props = defineProps<{
 	size: TableSize;
 	pagination: Pagination;
 	total: number;
+	dataType: string;
 }>();
 
 const page = ref<Pagination>({

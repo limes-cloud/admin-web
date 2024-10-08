@@ -2,6 +2,28 @@
 	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
+				v-if="dataType != 'list'"
+				field="parentId"
+				label="父节点值"
+				:rules="[
+					{
+						required: true,
+						message: '父节点值是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-cascader
+					v-model="form.parentId"
+					check-strictly
+					:options="dvs"
+					:field-names="{ value: 'id', label: 'label' }"
+					placeholder="请选择父菜单"
+					allow-search
+				/>
+			</a-form-item>
+
+			<a-form-item
 				field="label"
 				label="标签"
 				:rules="[
@@ -79,15 +101,18 @@
 import { CreateDictionaryValue, UpdateDictionaryValue } from '@/api/manager/dictionary/api';
 import { ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
-import { UpdateDictionaryValueRequest } from '@/api/manager/dictionary/type';
+import { DictionaryValue, UpdateDictionaryValueRequest } from '@/api/manager/dictionary/type';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
+const dvs = ref<UpdateDictionaryValueRequest[]>();
 
 const props = defineProps<{
 	data: UpdateDictionaryValueRequest;
 	dictionaryId: number;
+	dataType: string;
+	values?: DictionaryValue[];
 }>();
 
 const form = ref({} as UpdateDictionaryValueRequest);
@@ -98,6 +123,16 @@ watch(
 	(val) => {
 		if (!val) return;
 		form.value = { weight: 0, ...val };
+	}
+);
+
+watch(
+	() => props.values,
+	(val) => {
+		if (!val) return;
+		const temp = { id: 0, label: '顶级节点', children: [] } as any as DictionaryValue;
+		temp.children = props.values;
+		dvs.value = [temp];
 	}
 );
 

@@ -8,19 +8,19 @@
 			:data="tableData"
 			:size="size"
 			:total="total"
+			:data-type="type"
 			:pagination="searchForm"
 			@page-change="handlePageChange"
 			@add="handleTableAdd"
 			@update="handleTableUpdate"
 			@refresh="handleGet"
 		></Table>
-		<Form ref="formRef" :dictionary-id="id" :data="form" @refresh="handleGet"></Form>
+		<Form ref="formRef" :dictionary-id="id" :values="tableData" :data="form" :data-type="type" @refresh="handleGet"></Form>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { ListDictionaryValue } from '@/api/manager/dictionary/api';
@@ -30,12 +30,12 @@ import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
-const props = defineProps<{ id: number }>();
+const props = defineProps<{ id: number; type: string }>();
 const formRef = ref();
 const form = ref<DictionaryValue>({} as DictionaryValue);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
-const tableData = ref<TableData[]>();
+const tableData = ref<DictionaryValue[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
 const searchForm = ref<ListDictionaryValueRequest>({
@@ -92,7 +92,7 @@ const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await ListDictionaryValue(searchForm.value);
-		tableData.value = data.list as unknown as TableData[];
+		tableData.value = data.list;
 		total.value = data.total;
 	} finally {
 		setLoading(false);
