@@ -50,7 +50,7 @@ export function ListTaskValue(data: ListTaskValueRequest) {
 }
 
 export function ExportTaskValue(id: number) {
-	return axios.post('/partyaffairs/api/v1/task/values', { task_id: id });
+	return axios.post('/partyaffairs/api/v1/task/values', { taskId: id });
 }
 
 export function DeleteTaskValue(id: number) {
