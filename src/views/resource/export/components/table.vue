@@ -35,7 +35,7 @@
 			</template>
 
 			<template #size="{ record }">
-				{{ getFileSize(record.size) }}
+				{{ getFileSize(record.size * 1024) }}
 			</template>
 
 			<template #expiredAt="{ record }">

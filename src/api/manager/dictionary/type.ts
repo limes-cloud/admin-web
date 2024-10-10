@@ -8,6 +8,7 @@ export interface ListDictionaryRequest {
 export interface Dictionary {
 	id: number;
 	keyword: string;
+	type: string;
 	name: string;
 	description?: string;
 	createdAt: number;
@@ -69,6 +70,7 @@ export interface ListDictionaryValueRequest {
 
 export interface DictionaryValue {
 	id: number;
+	parentId: number;
 	dictionaryId: number;
 	label: string;
 	value: string;
@@ -78,6 +80,7 @@ export interface DictionaryValue {
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
+	children?: DictionaryValue[];
 }
 
 export interface ListDictionaryValueReply {
@@ -103,6 +106,7 @@ export interface CreateDictionaryValueReply {
 export interface UpdateDictionaryValueRequest {
 	id: number;
 	dictionaryId: number;
+	parentId: number;
 	label: string;
 	value: string;
 	weight?: number;

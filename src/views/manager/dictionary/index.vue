@@ -59,6 +59,10 @@ const columns = ref<TableColumn[]>([
 		dataIndex: 'keyword'
 	},
 	{
+		title: '字典类型',
+		slotName: 'type'
+	},
+	{
 		title: '字典描述',
 		dataIndex: 'description'
 	},
@@ -120,7 +124,7 @@ const handleToolAdd = () => {
 };
 
 const handleTableValue = (data: Dictionary) => {
-	valueRef.value.show(data.id, data.name);
+	valueRef.value.show(data.id, data.name, data.type);
 };
 
 // 处理table点击更新
