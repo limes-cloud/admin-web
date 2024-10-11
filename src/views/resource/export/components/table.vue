@@ -53,7 +53,7 @@
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
 					<a-popconfirm content="您确认要下载此文件？" @ok="handleDownloadFile(record.url, record.name)">
-						<a-tag color="arcoblue">
+						<a-tag v-if="record.status === 'COMPLETED'" color="arcoblue">
 							<template #icon><icon-download /></template>
 							下载
 						</a-tag>
