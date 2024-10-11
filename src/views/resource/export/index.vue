@@ -1,7 +1,9 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card" title="导出文件列表" :body-style="{ paddingTop: '0px' }">
+		<a-card class="general-card">
+			<Search @search="handleSearch"></Search>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet"></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -26,6 +28,8 @@ import { Message } from '@arco-design/web-vue';
 import { ListExport, DeleteExport } from '@/api/resource/export/api';
 import { ListExportRequest } from '@/api/resource/export/type';
 import Table from './components/table.vue';
+import Tool from './components/tool.vue';
+import Search from './components/search.vue';
 
 const { setLoading } = useLoading(true);
 const loading = ref(false);
@@ -101,6 +105,18 @@ handleGet();
 const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page = page.page;
 	searchForm.value.pageSize = page.pageSize;
+	handleGet();
+};
+
+// 处理查询
+const handleSearch = async (req: ListExportRequest) => {
+	const { pageSize } = searchForm.value;
+	searchForm.value = {
+		...req,
+		page: 1,
+		pageSize
+	};
+
 	handleGet();
 };
 

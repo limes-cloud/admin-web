@@ -13,6 +13,7 @@ import FormEditor from './form-editor/index.vue';
 import CodeEditor from './code-editor/index.vue';
 import Xlsx from './xlsx/index.vue';
 import ResourcePermission from './resource-permission/index.vue';
+import Download from './download/index.vue';
 
 // Manually introduce ECharts modules to reduce packing size
 
@@ -40,6 +41,7 @@ export default {
 		Vue.component('Icon', Icon);
 		Vue.component('CodeEditor', CodeEditor);
 		Vue.component('Xlsx', Xlsx);
+		Vue.component('Download', Download);
 		Vue.component('ResourcePermission', ResourcePermission);
 	}
 };

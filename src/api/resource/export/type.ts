@@ -12,6 +12,7 @@ export interface GetExportReply {
 	size: number;
 	sha?: string;
 	src?: string;
+	url?: string;
 	status: string;
 	reason?: string;
 	expiredAt: number;
@@ -24,6 +25,7 @@ export interface ListExportRequest {
 	pageSize: number;
 	order?: string;
 	orderBy?: string;
+	name?: string;
 	userId?: number;
 	departmentId?: number;
 }
