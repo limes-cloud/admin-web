@@ -33,7 +33,7 @@
 									<icon-drag-arrow />
 								</div>
 								<div>
-									<a-checkbox v-model="item.checked" @change="handleChange($event, item as TableColumnData, index)"></a-checkbox>
+									<a-checkbox v-model="item.checked" @change="handleChange($event, item, index)"></a-checkbox>
 								</div>
 								<div class="title">
 									{{ item.title === '#' ? 'index' : item.title }}
@@ -49,7 +49,6 @@
 
 <script lang="ts" setup>
 import { TableColumn, TableSize } from '@/types/global';
-import { TableColumnData } from '@arco-design/web-vue';
 import { cloneDeep } from 'lodash';
 import Sortable from 'sortablejs';
 import { nextTick, ref } from 'vue';

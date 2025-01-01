@@ -137,6 +137,7 @@ const searchFieldFactory = new Search(
 searchFieldFactory.Search();
 
 const showAddDrawer = () => {
+	form.value = {} as Type;
 	visible.value = true;
 	isAdd.value = true;
 };
