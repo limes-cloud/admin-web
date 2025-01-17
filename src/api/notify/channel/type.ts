@@ -1,3 +1,9 @@
+export interface EmailExtra {
+	name: string;
+	host: string;
+	port: number;
+}
+
 export interface ChannelType {
 	keyword: string;
 	name: string;
@@ -8,14 +14,14 @@ export interface ListChannelRequest {
 	pageSize: number;
 	order?: string;
 	orderBy?: string;
-	keyword?: string;
+	type?: string;
 	name?: string;
 	status?: boolean;
 }
 
 export interface Channel {
 	id: number;
-	keyword: string;
+	type: string;
 	name: string;
 	status?: boolean;
 	ak?: string;
@@ -31,12 +37,13 @@ export interface ListChannelReply {
 }
 
 export interface CreateChannelRequest {
-	keyword: string;
+	type: string;
 	name: string;
 	status?: boolean;
 	ak?: string;
 	sk?: string;
 	extra?: string;
+	extraObject: EmailExtra;
 }
 
 export interface CreateChannelReply {
@@ -45,12 +52,13 @@ export interface CreateChannelReply {
 
 export interface UpdateChannelRequest {
 	id: number;
-	keyword?: string;
+	type?: string;
 	name?: string;
 	ak?: string;
 	sk?: string;
 	extra?: string;
 	status?: boolean;
+	extraObject: EmailExtra;
 }
 
 export interface DeleteChannelRequest {
@@ -59,4 +67,36 @@ export interface DeleteChannelRequest {
 
 export interface DeleteChannelReply {
 	total: number;
+}
+
+export interface OfficialTemplateField {
+	keyword: string;
+	name: string;
+	value: string;
+	color: string;
+}
+
+export interface OfficialTemplateMiniProgram {
+	appId: string;
+	pagePath: string;
+}
+
+export interface OfficialTemplate {
+	templateId: string;
+	title: string;
+	fields: OfficialTemplateField[];
+	jumpType: string;
+	url: string;
+	miniProgram: OfficialTemplateMiniProgram;
+	// primaryIndustry: string;
+	// deputyIndustry: string;
+	// content: string;
+	// example: string;
+}
+
+export interface ListOfficialTemplateRequest {
+	id: number;
+}
+export interface ListOfficialTemplateReply {
+	list: OfficialTemplate[];
 }

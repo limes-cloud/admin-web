@@ -5,7 +5,7 @@
 				<a-row :gutter="16">
 					<a-col :span="6">
 						<a-form-item field="keyword" label="渠道标识">
-							<a-input v-model="form.keyword" allow-clear placeholder="请输入渠道标识" />
+							<a-input v-model="form.type" allow-clear placeholder="请输入渠道标识" />
 						</a-form-item>
 					</a-col>
 

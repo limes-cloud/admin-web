@@ -103,7 +103,7 @@ const updateStatus = (record: Channel) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateChannel({ id: record.id, status: record.status as boolean });
+			await UpdateChannel({ id: record.id, status: record.status as boolean, extraObject: {} as any });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

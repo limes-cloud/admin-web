@@ -9,7 +9,7 @@
 	>
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="keyword"
+				field="type"
 				label="渠道类型"
 				:rules="[
 					{
@@ -20,7 +20,7 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-select
-					v-model="form.keyword"
+					v-model="form.type"
 					placeholder="请选择渠道类型"
 					:scrollbar="true"
 					:options="types"
@@ -29,17 +29,108 @@
 				></a-select>
 			</a-form-item>
 
-			<a-form-item field="ak" label="渠道AK">
-				<a-input v-model="form.ak" placeholder="请输入渠道AK" allow-clear />
+			<a-form-item
+				field="name"
+				label="渠道名称"
+				:rules="[
+					{
+						required: true,
+						message: '渠道名称是必填项'
+					}
+				]"
+			>
+				<a-input v-model="form.name" placeholder="请输入渠道名称" allow-clear />
 			</a-form-item>
 
-			<a-form-item field="sk" label="渠道SK">
-				<a-input v-model="form.sk" placeholder="请输入渠道SK" allow-clear />
-			</a-form-item>
+			<template v-if="form.type === 'email'">
+				<a-form-item
+					field="ak"
+					label="邮箱账户"
+					:rules="[
+						{
+							required: true,
+							message: '邮箱账户是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.ak" placeholder="请输入邮箱账户" allow-clear />
+				</a-form-item>
+				<a-form-item
+					field="sk"
+					label="邮箱密码"
+					:rules="[
+						{
+							required: true,
+							message: '邮箱密码是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.sk" placeholder="请输入邮箱密码" allow-clear />
+				</a-form-item>
+				<a-form-item
+					field="extraObject.name"
+					label="邮箱名称"
+					:rules="[
+						{
+							required: true,
+							message: '邮箱名称是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.extraObject.name" placeholder="请输入邮箱名称" allow-clear />
+				</a-form-item>
+				<a-form-item
+					field="extraObject.host"
+					label="邮箱host"
+					:rules="[
+						{
+							required: true,
+							message: '邮箱host是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.extraObject.host" placeholder="请输入邮箱host" allow-clear />
+				</a-form-item>
+				<a-form-item
+					field="extraObject.port"
+					label="邮箱port"
+					:rules="[
+						{
+							required: true,
+							message: '邮箱port是必填项'
+						}
+					]"
+				>
+					<a-input-number v-model="form.extraObject.port" placeholder="请输入邮箱port" allow-clear />
+				</a-form-item>
+			</template>
 
-			<a-form-item field="extra" label="扩展信息">
-				<a-input v-model="form.extra" placeholder="请输入扩展信息" allow-clear />
-			</a-form-item>
+			<template v-if="form.type === 'official_account'">
+				<a-form-item
+					field="ak"
+					label="APPID"
+					:rules="[
+						{
+							required: true,
+							message: 'APPID是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.ak" placeholder="请输入APPID" allow-clear />
+				</a-form-item>
+				<a-form-item
+					field="sk"
+					label="APPSK"
+					:rules="[
+						{
+							required: true,
+							message: 'APPSK是必填项'
+						}
+					]"
+				>
+					<a-input v-model="form.sk" placeholder="请输入APPSK" allow-clear />
+				</a-form-item>
+			</template>
 		</a-form>
 	</a-drawer>
 </template>
@@ -60,13 +151,14 @@ const props = defineProps<{
 }>();
 
 type Type = CreateChannelRequest | UpdateChannelRequest;
-const form = ref<Type>({ ...props.data });
+const form = ref<Type>({ ...props.data, extraObject: {} as any });
 const emit = defineEmits(['refresh']);
 
 watch(
 	() => props.data,
 	(val) => {
-		form.value = val;
+		form.value = { ...val, extraObject: {} as any };
+		form.value.extraObject = JSON.parse(val.extra || '{}');
 	}
 );
 
@@ -93,8 +185,8 @@ const closeDrawer = () => {
 
 const handleSelectType = () => {
 	types.value.forEach((item) => {
-		if (item.keyword === form.value.keyword) {
-			form.value.name = item.name;
+		if (item.keyword === form.value.type) {
+			form.value.name = `${item.name}-`;
 		}
 	});
 };
@@ -106,7 +198,9 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-	const data = form.value;
+	const data = { ...form.value };
+	data.extra = JSON.stringify(data.extraObject);
+	data.extraObject = {} as any;
 	if (isAdd.value) {
 		await CreateChannel(data as CreateChannelRequest);
 		Message.success('创建成功');

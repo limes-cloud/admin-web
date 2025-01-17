@@ -7,7 +7,9 @@ import {
 	UpdateChannelRequest,
 	DeleteChannelReply,
 	DeleteChannelRequest,
-	ChannelType
+	ChannelType,
+	ListOfficialTemplateReply,
+	ListOfficialTemplateRequest
 } from './type';
 
 // ListChannel 获取可用的发送渠道列表
@@ -33,4 +35,9 @@ export function UpdateChannel(data: UpdateChannelRequest) {
 // DeleteChannel 删除发送渠道
 export function DeleteChannel(params: DeleteChannelRequest) {
 	return axios.delete<DeleteChannelReply>('/notify/api/v1/channel', { params });
+}
+
+// ListChannel 获取可用的发送渠道列表
+export function ListOfficialTemplate(params: ListOfficialTemplateRequest) {
+	return axios.get<ListOfficialTemplateReply>('/notify/api/v1/channel/official_template', { params });
 }

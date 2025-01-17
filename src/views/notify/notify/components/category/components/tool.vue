@@ -1,7 +1,7 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'cron:task:group:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'notify:category:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>

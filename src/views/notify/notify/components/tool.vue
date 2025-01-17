@@ -1,12 +1,21 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'cron:task:group:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建分组
-			</a-button>
+			<a-space>
+				<a-button v-permission="'notify:notify:add'" type="primary" @click="emit('add')">
+					<template #icon>
+						<icon-plus />
+					</template>
+					添加通知
+				</a-button>
+
+				<a-button v-permission="'notify:category:query'" type="primary" status="success" @click="emit('showCategory')">
+					<template #icon>
+						<icon-ordered-list />
+					</template>
+					通知分组
+				</a-button>
+			</a-space>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -60,7 +69,7 @@ const props = defineProps<{
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'showCategory', 'refresh']);
 const cloneColumns = ref<TableColumn[]>([]);
 const showColumns = ref<TableColumn[]>([]);
 

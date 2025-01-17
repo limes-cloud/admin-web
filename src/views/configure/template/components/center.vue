@@ -34,7 +34,7 @@
 					height: '100%'
 				}"
 				@change-lang="
-					(val:string) => {
+					(val) => {
 						submitTemplateForm.format = val;
 					}
 				"

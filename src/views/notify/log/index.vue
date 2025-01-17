@@ -3,7 +3,7 @@
 		<Breadcrumb />
 		<a-card class="general-card">
 			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet"></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -12,10 +12,8 @@
 				:total="total"
 				:pagination="searchForm"
 				@page-change="handlePageChange"
-				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
 		</a-card>
 	</div>
 </template>
@@ -25,19 +23,16 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { ListChannel } from '@/api/notify/channel/api';
-import { Channel, ListChannelRequest } from '@/api/notify/channel/type';
+import { ListLog } from '@/api/notify/log/api';
+import { ListLogRequest } from '@/api/notify/log/type';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
-import Form from './components/form.vue';
 import Search from './components/search.vue';
 
-const formRef = ref();
-const form = ref<Channel>({} as Channel);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
-const searchForm = ref<ListChannelRequest>({
+const searchForm = ref<ListLogRequest>({
 	page: 1,
 	pageSize: 10
 });
@@ -50,28 +45,37 @@ const columns = ref<TableColumn[]>([
 		slotName: 'id'
 	},
 	{
-		title: '渠道名称',
-		dataIndex: 'name',
-		slotName: 'name'
+		title: '通知名称',
+		dataIndex: 'notify.name'
 	},
 	{
-		title: '渠道状态',
+		title: '渠道名称',
+		dataIndex: 'channel.name'
+	},
+	{
+		title: '发送用户',
+		dataIndex: 'user'
+	},
+	{
+		title: '发送内容',
+		dataIndex: 'content'
+	},
+	{
+		title: '来源',
+		dataIndex: 'fromServer'
+	},
+	{
+		title: '来源ip',
+		dataIndex: 'fromServer'
+	},
+	{
+		title: '发送状态',
+		dataIndex: 'status',
 		slotName: 'status'
 	},
 	{
-		title: '创建时间',
-		dataIndex: 'created_at',
+		title: '发送时间',
 		slotName: 'createdAt'
-	},
-	{
-		title: '更新时间',
-		dataIndex: 'updated_at',
-		slotName: 'updatedAt'
-	},
-	{
-		title: '操作',
-		dataIndex: 'operations',
-		slotName: 'operations'
 	}
 ]);
 
@@ -79,7 +83,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListChannel(searchForm.value);
+		const { data } = await ListLog(searchForm.value);
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
@@ -89,7 +93,7 @@ const handleGet = async () => {
 handleGet();
 
 // 处理查询
-const handleSearch = async (req: ListChannelRequest) => {
+const handleSearch = async (req: ListLogRequest) => {
 	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
@@ -106,22 +110,10 @@ const handlePageChange = async (page: Pagination) => {
 	searchForm.value.pageSize = page.pageSize;
 	handleGet();
 };
-
-//  处理tool按钮新建
-const handleToolAdd = () => {
-	form.value = {} as Channel;
-	formRef.value.showAddDrawer();
-};
-
-// 处理table点击更新
-const handleTableUpdate = (data: Channel) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
-};
 </script>
 
 <script lang="ts">
 export default {
-	name: 'ManagerChannel'
+	name: 'ManagerLog'
 };
 </script>

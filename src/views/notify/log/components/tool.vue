@@ -1,14 +1,5 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
-		<a-col :span="12">
-			<a-button v-permission="'cron:task:group:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建分组
-			</a-button>
-		</a-col>
-
 		<a-col :span="12" class="tool">
 			<a-tooltip content="刷新">
 				<div class="action-icon" @click="emit('refresh')"><icon-refresh size="18" /></div>

@@ -1,8 +1,6 @@
 <template>
-	<div class="container">
-		<Breadcrumb />
+	<div class="container" :style="{ padding: 0 }">
 		<a-card class="general-card">
-			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
 				:columns="columns"
@@ -25,53 +23,45 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { ListChannel } from '@/api/notify/channel/api';
-import { Channel, ListChannelRequest } from '@/api/notify/channel/type';
+import { ListNotifyCategoryRequest, NotifyCategory } from '@/api/notify/notify/type';
+
+import { ListNotifyCategory } from '@/api/notify/notify/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
-import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref<Channel>({} as Channel);
+const form = ref<NotifyCategory>({} as NotifyCategory);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
-const searchForm = ref<ListChannelRequest>({
+const size = ref<TableSize>('medium');
+const total = ref(0);
+const searchForm = ref<ListNotifyCategoryRequest>({
 	page: 1,
 	pageSize: 10
 });
-const total = ref(0);
-const size = ref<TableSize>('medium');
+
 const columns = ref<TableColumn[]>([
 	{
-		title: '渠道ID',
-		dataIndex: 'id',
-		slotName: 'id'
+		title: '分组名称',
+		dataIndex: 'name'
 	},
 	{
-		title: '渠道名称',
-		dataIndex: 'name',
-		slotName: 'name'
-	},
-	{
-		title: '渠道状态',
-		slotName: 'status'
+		title: '分组描述',
+		dataIndex: 'description'
 	},
 	{
 		title: '创建时间',
-		dataIndex: 'created_at',
-		slotName: 'createdAt'
-	},
-	{
-		title: '更新时间',
-		dataIndex: 'updated_at',
-		slotName: 'updatedAt'
+		slotName: 'createdAt',
+		width: 170
 	},
 	{
 		title: '操作',
 		dataIndex: 'operations',
-		slotName: 'operations'
+		slotName: 'operations',
+		fixed: 'right',
+		width: 150
 	}
 ]);
 
@@ -79,26 +69,15 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListChannel(searchForm.value);
-		tableData.value = data.list;
+		const { data } = await ListNotifyCategory(searchForm.value);
+		tableData.value = data.list as unknown as TableData[];
+		total.value = data.total;
 	} finally {
 		setLoading(false);
 	}
 };
 
 handleGet();
-
-// 处理查询
-const handleSearch = async (req: ListChannelRequest) => {
-	const { pageSize } = searchForm.value;
-	searchForm.value = {
-		...req,
-		page: 1,
-		pageSize
-	};
-
-	handleGet();
-};
 
 // 处理页面变更
 const handlePageChange = async (page: Pagination) => {
@@ -109,19 +88,13 @@ const handlePageChange = async (page: Pagination) => {
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Channel;
+	form.value = {} as NotifyCategory;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = (data: Channel) => {
+const handleTableUpdate = async (data: NotifyCategory) => {
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
-};
-</script>
-
-<script lang="ts">
-export default {
-	name: 'ManagerChannel'
 };
 </script>
