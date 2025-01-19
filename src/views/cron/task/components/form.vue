@@ -269,9 +269,50 @@
 						]"
 						:validate-trigger="['change', 'input']"
 					>
-						<a-input-number v-model="form.maxExecTime" placeholder="请输入执行市场"></a-input-number>
+						<a-input-number v-model="form.maxExecTime" placeholder="请输入时长市场"></a-input-number>
 					</a-form-item>
 				</a-col>
+			</a-row>
+
+			<a-row :gutter="8">
+				<a-form-item
+					field="execCycle"
+					label="周期执行"
+					tooltip="开启之后任务将在指定的时间范围内才能被调度执行"
+					:rules="[
+						{
+							required: true,
+							message: '周期执行是必填项'
+						}
+					]"
+					:validate-trigger="['change', 'input']"
+				>
+					<a-select
+						v-model="form.execCycle"
+						placeholder="请选择是否开启周期执行"
+						:scrollbar="true"
+						:options="[
+							{ label: '开启', value: true },
+							{ label: '关闭', value: false }
+						]"
+					/>
+				</a-form-item>
+			</a-row>
+
+			<a-row v-if="form.execCycle" :gutter="8">
+				<a-form-item
+					field="startAndEnd"
+					label="开始/结束"
+					:rules="[
+						{
+							required: true,
+							message: '开始/结束是必填项'
+						}
+					]"
+					:validate-trigger="['change', 'input']"
+				>
+					<a-range-picker v-model="form.startAndEnd" value-format="timestamp" />
+				</a-form-item>
 			</a-row>
 
 			<a-form-item
@@ -413,7 +454,10 @@ const showUpdateDrawer = async (id: number) => {
 	searchWorkerFactory.Search();
 	searchWorkerGroupFactory.Search();
 
-	form.value = { ...data };
+	form.value = { ...data, startAndEnd: [], execCycle: false };
+	if (data.start) {
+		form.value.execCycle = true;
+	}
 	visible.value = true;
 	isAdd.value = false;
 };
@@ -430,7 +474,15 @@ const handleSubmit = async () => {
 		return false;
 	}
 
-	const data = form.value;
+	const data = { ...form.value };
+	if (data.startAndEnd) {
+		if (data.startAndEnd[0]) {
+			data.start = data.startAndEnd[0] / 1000;
+		}
+		if (data.startAndEnd[1]) {
+			data.end = data.startAndEnd[1] / 1000;
+		}
+	}
 	if (isAdd.value) {
 		await CreateTask(data as CreateTaskRequest);
 		Message.success('创建成功');
