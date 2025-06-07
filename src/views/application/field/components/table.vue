@@ -18,7 +18,7 @@
 			</template>
 
 			<template #type="{ record }">
-				{{ types[record.type] ? types[record.type] : record.type }}
+				{{ itypes[record.type] ? itypes[record.type] : record.type }}
 			</template>
 
 			<template #createdAt="{ record }">
@@ -83,14 +83,14 @@ const props = defineProps<{
 	types: FieldType[];
 }>();
 
-const types = ref({});
+const itypes = ref({});
 
 const handleTypes = () => {
 	const data = {};
 	props.types.forEach((item) => {
 		data[item.type] = item.name;
 	});
-	types.value = data;
+	itypes.value = data;
 };
 
 watch(

@@ -79,6 +79,7 @@ export interface DeleteFileReply {
 export interface PrepareUploadFileRequest {
 	directoryId?: number;
 	directoryPath?: string;
+	store?: string;
 	name: string;
 	size: number;
 	sha: string;

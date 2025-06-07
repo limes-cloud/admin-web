@@ -8,8 +8,34 @@ import {
 	DeleteDepartmentReply,
 	DeleteDepartmentRequest,
 	GetDepartmentReply,
-	GetDepartmentRequest
+	GetDepartmentRequest,
+	DeleteDepartmentClassifyRequest,
+	CreateDepartmentClassifyReply,
+	CreateDepartmentClassifyRequest,
+	ListDepartmentClassifyReply,
+	ListDepartmentClassifyRequest,
+	UpdateDepartmentClassifyRequest
 } from './type';
+
+// ListDepartmentClassify 获取任务分组列表
+export function ListDepartmentClassify(params: ListDepartmentClassifyRequest) {
+	return axios.get<ListDepartmentClassifyReply>('/manager/api/v1/department_classifies', { params });
+}
+
+// CreateDepartmentClassify 创建任务分组
+export function CreateDepartmentClassify(data: CreateDepartmentClassifyRequest) {
+	return axios.post<CreateDepartmentClassifyReply>('/manager/api/v1/department_classify', data);
+}
+
+// UpdateDepartmentClassify 更新任务分组
+export function UpdateDepartmentClassify(data: UpdateDepartmentClassifyRequest) {
+	return axios.put('/manager/api/v1/department_classify', data);
+}
+
+// DeleteDepartmentClassify 删除任务分组
+export function DeleteDepartmentClassify(params: DeleteDepartmentClassifyRequest) {
+	return axios.delete('/manager/api/v1/department_classify', { params });
+}
 
 // ListDepartment 获取部门信息列表
 export function ListDepartment(params?: ListDepartmentRequest) {

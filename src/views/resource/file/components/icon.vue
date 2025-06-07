@@ -1,15 +1,19 @@
 <template>
-	<svgIcon :name="name(type as string)" :size="size"></svgIcon>
+	<svgIcon :name="name(getFileType())" :size="size"></svgIcon>
 </template>
 
 <script lang="ts" setup>
-defineProps({
+const props = defineProps({
 	type: String,
 	size: {
 		type: Number,
 		default: 100
 	}
 });
+
+const getFileType = () => {
+	return props.type as string;
+};
 
 const name = (tp: string) => {
 	let typeName = '';
@@ -73,14 +77,3 @@ const name = (tp: string) => {
 	return `file-${typeName}`;
 };
 </script>
-
-<style lang="less" scoped>
-.footer {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 40px;
-	color: var(--color-text-2);
-	text-align: center;
-}
-</style>

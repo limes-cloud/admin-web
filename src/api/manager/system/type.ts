@@ -9,4 +9,5 @@ export interface GetSystemSettingReply {
 	desc: string;
 	copyright: string;
 	logo: string;
+	popupType: string;
 }

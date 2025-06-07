@@ -1,4 +1,47 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
+export interface ListDepartmentClassifyRequest {
+	page: number;
+	pageSize: number;
+	order?: string;
+	orderBy?: string;
+	name?: string;
+}
+
+export interface DepartmentClassify {
+	id: number;
+	name: string;
+	description?: string;
+	createdAt: number;
+	updatedAt: number;
+}
+
+export interface ListDepartmentClassifyReply {
+	total: number;
+	list: DepartmentClassify[];
+}
+
+export interface CreateDepartmentClassifyRequest {
+	name: string;
+	description?: string;
+}
+
+export interface CreateDepartmentClassifyReply {
+	id: number;
+}
+
+export interface UpdateDepartmentClassifyRequest {
+	id: number;
+	name: string;
+	description?: string;
+}
+
+export interface DeleteDepartmentClassifyRequest {
+	id: number;
+}
+
+export interface DeleteDepartmentClassifyReply {
+	total: number;
+}
+
 export interface ListDepartmentRequest {
 	name?: string;
 	keyword?: string;
@@ -7,11 +50,13 @@ export interface ListDepartmentRequest {
 export interface Department {
 	id: number;
 	parentId: number;
+	classifyId: number;
 	name: string;
 	keyword: string;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
+	classify: DepartmentClassify;
 	children: Department[];
 }
 

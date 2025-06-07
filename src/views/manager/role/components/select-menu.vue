@@ -1,5 +1,5 @@
 <template>
-	<a-drawer v-model:visible="visible" title="设置角色菜单权限" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<Popup v-model:visible="visible" title="设置角色菜单权限" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-tree
 			v-model:checked-keys="ids"
 			v-model:half-checked-keys="halfIds"
@@ -12,7 +12,7 @@
 				disabled: 'isHidden'
 			}"
 		/>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

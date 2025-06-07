@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="loadingBox">
-		<a-spin dot :tip="(title as string)" />
+		<a-spin dot :tip="title" />
 	</div>
 	<router-view />
 </template>
@@ -11,7 +11,7 @@ import { computed } from 'vue';
 
 const appStore = useAppStore();
 const loading = computed(() => appStore.isLoading);
-const title = computed(() => appStore.loadingTitle);
+const title = computed(() => appStore.loadingTitle as string);
 </script>
 
 <style lang="less" scoped>
@@ -107,5 +107,23 @@ const title = computed(() => appStore.loadingTitle);
 
 .arco-tree-node-title-text {
 	width: 100%;
+}
+
+.line-1 {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.scrollbar {
+	.arco-scrollbar-track-direction-vertical {
+		width: 6px;
+	}
+
+	.arco-scrollbar-thumb-bar {
+		width: 3px;
+	}
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-	<a-drawer
+	<Popup
 		v-model:visible="visible"
 		title="资源值配置"
 		width="380px"
@@ -55,7 +55,7 @@
 				</a-form-item>
 			</template>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

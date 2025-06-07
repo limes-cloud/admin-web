@@ -3,6 +3,18 @@ import { Menu } from '@/api/manager/menu/type';
 import { DEFAULT_LAYOUT } from './base';
 import { App, Component, Home } from '../types';
 
+function paramsToObject(query: string) {
+	if (query === '') {
+		return {};
+	}
+	const params = new URLSearchParams(query);
+	const obj: Record<string, string> = {};
+	params.forEach((value, key) => {
+		obj[key] = value;
+	});
+	return obj;
+}
+
 class Parser {
 	// 应用名称集合
 	apps: App[] = [];
@@ -134,14 +146,18 @@ class Parser {
 				const isHidden = (apiPage ? true : !!menu.isHidden) || hidden;
 				hidden = isHidden;
 
+				// 格式化path, /a/1?id=2 分割出path和params
+				const [pathStr, paramsStr] = menu.path.split('?');
+
 				router = {
-					path: menu.path,
+					path: pathStr,
 					name: keyword,
 					component,
 					redirect: menu.redirect,
 					activeMenu: keyword,
 					children: [],
 					meta: {
+						params: paramsToObject(paramsStr),
 						keyword: key,
 						title: menu.title,
 						icon: `icon-${menu.icon}`,

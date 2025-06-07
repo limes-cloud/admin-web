@@ -168,7 +168,7 @@ const handleClickExport = () => {
 };
 
 const handleCreateDir = () => {
-	emit('createDir', newFileForm);
+	emit('createDir', newFileForm.value);
 	return true;
 };
 

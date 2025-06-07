@@ -43,11 +43,10 @@
 
 			<div v-else class="list content">
 				<a-table
-					v-model:selectedKeys="selectd"
+					v-model:selected-keys="selectd"
 					row-key="id"
 					:columns="columns"
 					:data="fileList"
-					:sticky-header="400"
 					:scroll="{
 						x: '100%',
 						y: '100%'

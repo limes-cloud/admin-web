@@ -1,12 +1,5 @@
 <template>
-	<a-drawer
-		v-model:visible="visible"
-		unmount-on-close
-		:title="isAdd ? '新建' : '修改'"
-		width="380px"
-		@cancel="visible = false"
-		@before-ok="handleSubmit"
-	>
+	<Popup v-model:visible="visible" unmount-on-close :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="logo"
@@ -67,7 +60,7 @@
 				<a-input v-model="form.extra" placeholder="请输入扩展信息" allow-clear />
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

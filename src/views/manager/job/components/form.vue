@@ -1,5 +1,5 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="keyword"
@@ -57,7 +57,7 @@
 				<a-input-number v-model="form.weight" placeholder="请输入职位权重" :default-value="0" mode="button" />
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

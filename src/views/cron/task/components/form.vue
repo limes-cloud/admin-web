@@ -1,12 +1,5 @@
 <template>
-	<a-drawer
-		v-model:visible="visible"
-		:title="isAdd ? '新建' : '修改'"
-		width="380px"
-		unmount-on-close
-		@cancel="visible = false"
-		@before-ok="handleSubmit"
-	>
+	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" unmount-on-close @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="vertical" auto-label-width>
 			<a-row :gutter="8">
 				<a-col :span="12">
@@ -329,7 +322,7 @@
 				<a-textarea v-model="form.description" allow-clear placeholder="请输入任务描述" />
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

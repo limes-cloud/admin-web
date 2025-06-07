@@ -53,6 +53,13 @@
 					<a-option value="gp-slide-up">页面向上渐出</a-option>
 				</a-select>
 			</a-form-item>
+
+			<a-form-item label="弹窗模式">
+				<a-select v-model="form.popupType">
+					<a-option value="drawer">右侧弹窗</a-option>
+					<a-option value="modal">中间弹窗</a-option>
+				</a-select>
+			</a-form-item>
 		</a-form>
 	</a-drawer>
 </template>
@@ -73,7 +80,8 @@ const form = reactive({
 	menuWidth: appStore.menuWidth,
 	layout: appStore.layout,
 	language: appStore.language,
-	animation: appStore.animation
+	animation: appStore.animation,
+	popupType: appStore.popupType
 });
 const open = () => {
 	visible.value = true;

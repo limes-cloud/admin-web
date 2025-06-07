@@ -1,5 +1,5 @@
 <template>
-	<a-drawer v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
+	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="parentId"
@@ -19,6 +19,27 @@
 					:options="departments"
 					placeholder="请选择上级部门"
 					allow-search
+				/>
+			</a-form-item>
+
+			<a-form-item
+				field="classifyId"
+				label="部门分类"
+				:rules="[
+					{
+						required: true,
+						message: '部门分类是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-select
+					v-model="form.classifyId"
+					placeholder="请选择部门分类"
+					:scrollbar="true"
+					:options="classifies"
+					@search="search.Search"
+					@dropdown-reach-bottom="search.NextSearch"
 				/>
 			</a-form-item>
 
@@ -64,40 +85,57 @@
 				<a-textarea v-model="form.description" placeholder="请输入部门描述" allow-clear />
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { Message, TableData } from '@arco-design/web-vue';
-import { CreateDepartment, UpdateDepartment } from '@/api/manager/department/api';
+import { CreateDepartment, ListDepartmentClassify, UpdateDepartment } from '@/api/manager/department/api';
 import { Department } from '@/api/manager/department/type';
+import { Result, Search } from '@/utils/search';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
-const props = defineProps<{
+const classifies = ref<Result[]>([]);
+
+defineProps<{
 	departments?: TableData[];
-	data: Department;
 }>();
 
 const form = ref({} as Department);
 const emit = defineEmits(['refresh']);
 
-watch(
-	() => props.data,
-	(val) => {
-		form.value = val;
+const search = new Search(
+	classifies.value,
+	async (req): Promise<Result[]> => {
+		const res: Result[] = [];
+		const { data } = await ListDepartmentClassify({ ...req, name: req.query as string | undefined });
+
+		data.list.forEach((item) => {
+			res.push({ label: item.name, value: item.id });
+		});
+		return res;
+	},
+	(val: any): boolean => {
+		return form.value.classifyId === val;
 	}
 );
 
-const showAddDrawer = () => {
+const showAddDrawer = (data: Department) => {
+	form.value = { ...data };
+
+	search.Search();
 	visible.value = true;
 	isAdd.value = true;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: Department) => {
+	classifies.value.push({ label: data.classify.name, value: data.classify.id } as Result);
+	form.value = { ...data };
+	search.Search();
 	visible.value = true;
 	isAdd.value = false;
 };

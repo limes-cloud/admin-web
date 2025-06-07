@@ -2,7 +2,7 @@ import { Result } from '@arco-design/web-vue';
 
 type Value = number | string;
 export type Params = { page: number; pageSize: number; query?: string | boolean | number };
-export type Result = { value: Value; label: string };
+export type Result = { value: Value; label: string; data?: any };
 export type QueryHandleFunc = (req: Params) => Promise<Result[]>;
 export type IsSelectHandleFunc = (req: Value) => boolean;
 

@@ -1,12 +1,20 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'manager:department:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建部门
-			</a-button>
+			<a-space>
+				<a-button type="primary" status="success" @click="emit('classify')">
+					<template #icon>
+						<icon-ordered-list />
+					</template>
+					部门分类
+				</a-button>
+				<a-button v-permission="'manager:department:add'" type="primary" @click="emit('add')">
+					<template #icon>
+						<icon-plus />
+					</template>
+					新建部门
+				</a-button>
+			</a-space>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -60,7 +68,7 @@ const props = defineProps<{
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'classify', 'refresh']);
 const cloneColumns = ref<TableColumn[]>([]);
 const showColumns = ref<TableColumn[]>([]);
 

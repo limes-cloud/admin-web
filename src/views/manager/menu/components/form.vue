@@ -1,12 +1,5 @@
 <template>
-	<a-drawer
-		v-model:visible="visible"
-		:title="isAdd ? '新建' : '修改'"
-		width="480px"
-		unmount-on-close
-		@cancel="visible = false"
-		@before-ok="handleSubmit"
-	>
+	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="480px" unmount-on-close @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
 				v-if="form.type != 'R'"
@@ -225,7 +218,7 @@
 				</a-radio-group>
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

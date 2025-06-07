@@ -1,5 +1,5 @@
 <template>
-	<a-drawer
+	<Popup
 		v-model:visible="visible"
 		:title="getTypeName(ctype) + '发送测试'"
 		width="380px"
@@ -44,7 +44,7 @@
 				</a-form-item>
 			</template>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>

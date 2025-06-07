@@ -20,7 +20,7 @@
 					新建
 				</a-tag>
 
-				<a-tag v-if="record.id != 1" v-permission="'manager:department:update'" color="orangered" @click="emit('update', record)">
+				<a-tag v-if="record.id != 1" v-permission="'manager:department:update'" color="orangered" @click="emit('update', { ...record })">
 					<template #icon><icon-edit /></template>
 					修改
 				</a-tag>
