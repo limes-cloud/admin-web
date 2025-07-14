@@ -1,91 +1,57 @@
 <template>
-	<a-space direction="vertical" fill>
-		<a-table
-			v-permission="'manager:job:query'"
-			row-key="id"
-			:loading="loading"
-			:columns="columns"
-			:data="data"
-			:bordered="false"
-			:pagination="false"
-			:size="size"
-		>
-			<template #createdAt="{ record }">
-				{{ $formatTime(record.createdAt) }}
-			</template>
-			<template #updatedAt="{ record }">
-				{{ $formatTime(record.updatedAt) }}
-			</template>
+	<a-table row-key="id" :loading="loading" :columns="columns" :pagination="false" :data="data" :bordered="false" :size="size">
+		<template #title="{ record }">
+			<a-space>
+				{{ record.title }}
+			</a-space>
+		</template>
 
-			<template #operations="{ record }">
-				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:job:update'" color="orangered" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						修改
-					</a-tag>
+		<template #createdAt="{ record }">
+			{{ $formatTime(record.createdAt) }}
+		</template>
+		<template #updatedAt="{ record }">
+			{{ $formatTime(record.updatedAt) }}
+		</template>
 
-					<a-popconfirm content="您确认删除此职位" type="warning" @ok="handleDelete(record.id)">
-						<a-tag v-permission="'manager:job:delete'" color="red">
+		<template #operations="{ record }">
+			<a-space class="cursor-pointer">
+				<a-tag v-permission="'manager:job:add'" color="arcoblue" @click="emit('add', record.id)">
+					<template #icon><icon-plus /></template>
+					新建
+				</a-tag>
+
+				<a-tag v-if="record.id != 1" v-permission="'manager:job:update'" color="orangered" @click="emit('update', { ...record })">
+					<template #icon><icon-edit /></template>
+					修改
+				</a-tag>
+
+				<template v-if="$hasPermission('manager:job:delete')">
+					<a-popconfirm v-if="record.id != 1" content="您确认删除此职位" type="warning" @ok="handleDelete(record.id)">
+						<a-tag color="red">
 							<template #icon><icon-delete /></template>
 							删除
 						</a-tag>
 					</a-popconfirm>
-				</a-space>
-			</template>
-		</a-table>
-		<a-pagination
-			:total="total"
-			:current="page.page"
-			:page-size="page.pageSize"
-			show-total
-			show-jumper
-			show-page-size
-			@change="pageChange"
-			@page-size-change="pageSizeChange"
-		/>
-	</a-space>
+				</template>
+			</a-space>
+		</template>
+	</a-table>
 </template>
 
 <script lang="ts" setup>
 import { DeleteJob } from '@/api/manager/job/api';
-import { TableSize, TableColumn, Pagination } from '@/types/global';
+import { TableSize, TableColumn } from '@/types/global';
 import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { watch, ref } from 'vue';
 
-const emit = defineEmits(['refresh', 'update', 'add', 'pageChange']);
+const emit = defineEmits(['update', 'add', 'refresh']);
 
-const props = defineProps<{
+defineProps<{
 	columns: TableColumn[];
 	loading: boolean;
 	data?: TableData[];
 	size: TableSize;
-	pagination: Pagination;
-	total: number;
 }>();
-
-const page = ref<Pagination>({
-	page: 1,
-	pageSize: 10
-});
-
-watch(
-	() => props.pagination,
-	(val) => {
-		page.value = { ...val };
-	},
-	{ deep: true, immediate: true }
-);
-
-const pageChange = (value: number) => {
-	page.value.page = value;
-	emit('pageChange', page.value);
-};
-
-const pageSizeChange = (size: number) => {
-	page.value.pageSize = size;
-	emit('pageChange', page.value);
-};
 
 const handleDelete = async (id: number) => {
 	await DeleteJob({ id });

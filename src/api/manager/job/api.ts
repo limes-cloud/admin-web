@@ -16,6 +16,11 @@ export function ListJob(params: ListJobRequest) {
 	return axios.get<ListJobReply>('/manager/api/v1/jobs', { params });
 }
 
+// ListJob 获取当前用户可见的部门信息列表
+export function ListCurrentJob(params?: ListJobRequest) {
+	return axios.get<ListJobReply>('/manager/api/v1/current/jobs', { params });
+}
+
 // CreateJob 创建职位信息
 export function CreateJob(data: CreateJobRequest) {
 	return axios.post<CreateJobReply>('/manager/api/v1/job', data);

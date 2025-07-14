@@ -125,8 +125,7 @@ const handleShowLog = (assessment: Assessment) => {
 
 //  处理assessment按钮执行
 const handleExec = (assessment: Assessment) => {
-	const { path } = router.currentRoute.value;
-	router.push({ path: `${path}/operator`, params: { id: assessment.id } });
+	router.push({ name: 'AssessmentOperator', query: { id: assessment.id } });
 };
 
 //  处理assessment按钮新建

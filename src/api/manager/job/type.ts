@@ -1,12 +1,12 @@
 export interface ListJobRequest {
-	page: number;
-	pageSize: number;
 	keyword?: string;
 	name?: string;
+	rootId?: number;
 }
 
 export interface Job {
 	id: number;
+	parentId: number;
 	keyword: string;
 	name: string;
 	weight?: number;
@@ -21,6 +21,7 @@ export interface ListJobReply {
 }
 
 export interface CreateJobRequest {
+	parentId: number;
 	keyword: string;
 	name: string;
 	weight?: number;
@@ -33,6 +34,7 @@ export interface CreateJobReply {
 
 export interface UpdateJobRequest {
 	id: number;
+	parentId: number;
 	keyword: string;
 	name: string;
 	weight?: number;
@@ -54,6 +56,7 @@ export interface GetJobRequest {
 
 export interface GetJobReply {
 	id: number;
+	parentId: number;
 	keyword: string;
 	name: string;
 	weight?: number;

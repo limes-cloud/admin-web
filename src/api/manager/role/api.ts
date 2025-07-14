@@ -22,7 +22,12 @@ export function GetRoleMenuIds(params: GetRoleMenuIdsRequest) {
 
 // ListRole 获取角色信息列表
 export function ListRole(params?: ListRoleRequest) {
-	return axios.get<ListRoleReply>('/manager/api/v1/roles', { params });
+	return axios.get<ListRoleReply>('/manager/api/v1/current/roles', { params });
+}
+
+// ListRole 获取角色信息列表
+export function ListCurrentRole(params?: ListRoleRequest) {
+	return axios.get<ListRoleReply>('/manager/api/v1/current/roles', { params });
 }
 
 // CreateRole 创建角色信息

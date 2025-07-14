@@ -9,7 +9,9 @@ import {
 	DeleteSysChatRequest,
 	ConversationSysChatRequest,
 	ConversationSysChatReply,
-	ConversationSysChatReplyFunc
+	ConversationSysChatReplyFunc,
+	ListSysChatMessageReply,
+	ListSysChatMessageRequest
 } from './type';
 
 export const ConversationSysChat = async (data: ConversationSysChatRequest, reply: ConversationSysChatReplyFunc) => {
@@ -50,7 +52,7 @@ export const ConversationSysChat = async (data: ConversationSysChatRequest, repl
 						continue;
 					}
 					const parsed = JSON.parse(str);
-					reply.handler({ content: parsed.content } as ConversationSysChatReply);
+					reply.handler({ ...parsed });
 					// if (data.reason && func.error) {
 					// 	func.error(data.message);
 					// 	break;
@@ -100,6 +102,11 @@ export const ConversationSysChat = async (data: ConversationSysChatRequest, repl
 	// 	}
 	// }
 };
+
+// ListSysChat 获取会话列表
+export function ListSysChatMessage(params: ListSysChatMessageRequest) {
+	return axios.get<{ list: ListSysChatMessageReply[]; total: number }>('/ai-agent/api/v1/sys-chat/messages', { params });
+}
 
 // ListSysChat 获取会话列表
 export function ListSysChat(params: ListSysChatRequest) {

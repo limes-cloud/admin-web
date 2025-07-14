@@ -15,6 +15,7 @@ import Xlsx from './xlsx/index.vue';
 import ResourcePermission from './resource-permission/index.vue';
 import Download from './download/index.vue';
 import Popup from './popup/index.vue';
+import QRCode from './qrcode/qrcode.vue';
 
 // Manually introduce ECharts modules to reduce packing size
 
@@ -45,5 +46,6 @@ export default {
 		Vue.component('Download', Download);
 		Vue.component('ResourcePermission', ResourcePermission);
 		Vue.component('Popup', Popup);
+		Vue.component('QRCode', QRCode);
 	}
 };

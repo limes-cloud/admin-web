@@ -24,8 +24,6 @@ export interface Department {
 
 export interface GetUserReply {
 	id: number;
-	departmentId: number;
-	roleId: number;
 	name: string;
 	nickname: string;
 	gender: string;
@@ -39,8 +37,10 @@ export interface GetUserReply {
 	updatedAt: number;
 	roles: Role[];
 	jobs: Job[];
-	department?: Department;
-	role?: Role;
+	jobIds: number[];
+	roleIds: number[];
+	departments?: Department[];
+	departmentIds: number[];
 }
 
 export interface ListUserRequest {
@@ -76,13 +76,13 @@ export interface ListUserReply {
 }
 
 export interface CreateUserRequest {
-	departmentId: number;
 	name: string;
 	gender: string;
 	phone: string;
 	email: string;
 	jobIds: number[];
 	roleIds: number[];
+	departmentIds: number[];
 }
 
 export interface CreateUserReply {
@@ -91,13 +91,13 @@ export interface CreateUserReply {
 
 export interface UpdateUserRequest {
 	id: number;
-	departmentId: number;
 	name: string;
 	gender: string;
 	phone: string;
 	email: string;
 	jobIds: number[];
 	roleIds: number[];
+	departmentIds: number[];
 }
 
 export interface UpdateUserStatusRequest {

@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ListDepartment } from '@/api/manager/department/api';
+import { ListCurrentDepartment } from '@/api/manager/department/api';
 import { GetResource, UpdateResource } from '@/api/manager/resource/api';
 import { UpdateResourceRequest } from '@/api/manager/resource/type';
 import { Message, TreeNodeData } from '@arco-design/web-vue';
@@ -47,7 +47,7 @@ const show = async (key: string, id: number) => {
 		resourceId: id,
 		departmentIds: []
 	};
-	const depReply = await ListDepartment();
+	const depReply = await ListCurrentDepartment();
 	departments.value = depReply.data.list;
 
 	const resReply = await GetResource({ keyword: key, resourceId: id });

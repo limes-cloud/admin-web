@@ -20,6 +20,8 @@ export interface Role {
 	status?: boolean;
 	dataScope: string;
 	departmentIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
@@ -38,6 +40,8 @@ export interface CreateRoleRequest {
 	status?: boolean;
 	dataScope: string;
 	departmentIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 }
 
@@ -51,6 +55,8 @@ export interface UpdateRoleRequest {
 	name: string;
 	dataScope: string;
 	departmentIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 }
 
@@ -80,6 +86,8 @@ export interface GetRoleReply {
 	status?: boolean;
 	dataScope: string;
 	departmentIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;

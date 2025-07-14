@@ -4,9 +4,8 @@
 			<img class="chat-background-img" :src="background" />
 		</div>
 		<div v-else class="chat-background"></div>
-
 		<div v-if="!hideTitle" class="chat-header">{{ title }}</div>
-		<div v-if="!message?.length" class="chat-welcome">
+		<div v-if="!msgList?.length" class="chat-welcome">
 			<a-space direction="vertical" align="center">
 				<a-avatar :image-url="system.logo" :size="90"></a-avatar>
 				<div>{{ title }}</div>
@@ -22,8 +21,15 @@
 					<div class="chat-content-system-box">
 						<div class="chat-content-system-box-nick">{{ system.name }}</div>
 						<div class="chat-content-system-box-text">
-							<img v-show="item.content.length == 0" class="chat-content-system-box-text-loading" :src="loadding" />
+							<div
+								v-show="item.reason && item.reason?.length > 0"
+								ref="contentRef"
+								class="chat-content-system-box-text-reason-html"
+								v-html="marked.parse(item.reason || '')"
+							></div>
+							<a-divider v-show="item.reason && item.reason?.length > 0" :size="2" style="border-bottom-style: dotted" />
 							<div v-show="item.content.length > 0" ref="contentRef" class="chat-content-system-box-text-html" v-html="marked.parse(item.content)"></div>
+							<img v-show="item.content.length == 0" class="chat-content-system-box-text-loading" :src="loadding" />
 
 							<div v-if="showMessageTool" class="chat-content-system-box-text-tool">
 								<a-space>
@@ -151,8 +157,18 @@ const typing = ref<{
 	isStart: boolean;
 }>({ ...defaultTyping });
 
+const reasonTyping = ref<{
+	text: string;
+	speed: number;
+	index: number;
+	typingTimer?: any;
+	msgIndex: number;
+	isStart: boolean;
+}>({ ...defaultTyping });
+
 interface MessageType {
 	role: 'system' | 'user';
+	reason?: string;
 	content: string;
 	extra?: string;
 	cost?: number;
@@ -173,7 +189,7 @@ const props = withDefaults(
 		system?: Info;
 		user?: Info;
 		background?: string;
-		messages?: MessageType[];
+		messages: MessageType[];
 		disableInput?: boolean;
 		disableText?: string;
 		showMessageTool?: boolean;
@@ -182,7 +198,7 @@ const props = withDefaults(
 		hideFooter: false,
 		hideTitle: false,
 		title: 'AI BOT',
-		description: 'AI BOT的聊天界面，你可以在这里与AI进行对话。',
+		description: '立刻开始与AI BOT对话吧～',
 		system: () => ({ logo, name: 'AI BOT' }),
 		user: () => ({ logo, name: '体验用户' }),
 		disableInput: false,
@@ -201,7 +217,16 @@ const getLastHeight = () => {
 	return `100% - ${lastHeight}px`;
 };
 
-const message = reactive<MessageType[]>(props.messages || []);
+const msgList = ref<MessageType[]>(props.messages || []);
+const { messages } = toRefs(props);
+
+watch(
+	messages,
+	(val) => {
+		msgList.value = val;
+	},
+	{ immediate: true, deep: true }
+);
 
 const form = reactive<{
 	input: string;
@@ -212,13 +237,13 @@ const form = reactive<{
 });
 
 const getMessage = () => {
-	return [...message].reverse();
+	return [...msgList.value].reverse();
 };
 
 const send = async (input: string) => {
 	if (form.outputing || input.trim() === '' || input.length < 1) return;
 	typing.value = { ...defaultTyping };
-	message.push({
+	msgList.value.push({
 		role: 'user',
 		content: input
 	});
@@ -236,7 +261,7 @@ const typeEffect = () => {
 	}
 	if (typing.value.index < typing.value.text?.length) {
 		// 添加下一个字符
-		message[typing.value.msgIndex].content += typing.value.text.charAt(typing.value.index);
+		msgList.value[typing.value.msgIndex].content += typing.value.text.charAt(typing.value.index);
 		// 移动到下一个字符
 		typing.value.index += 1;
 		// 设置延迟后继续打字
@@ -244,16 +269,48 @@ const typeEffect = () => {
 	typing.value.typingTimer = setTimeout(typeEffect, typing.value.speed);
 };
 
-const reply = (msg: string) => {
+// 思考部分打字效果的函数
+const reasonTypeEffect = () => {
+	reasonTyping.value.isStart = true;
+	if (!form.outputing && reasonTyping.value.index >= reasonTyping.value.text?.length) {
+		addCopyButtons();
+
+		return;
+	}
+	if (reasonTyping.value.index < reasonTyping.value.text?.length) {
+		// 添加下一个字符
+		msgList.value[reasonTyping.value.msgIndex].reason += reasonTyping.value.text.charAt(reasonTyping.value.index);
+		// 移动到下一个字符
+		reasonTyping.value.index += 1;
+		// 设置延迟后继续打字
+	}
+	reasonTyping.value.typingTimer = setTimeout(reasonTypeEffect, reasonTyping.value.speed);
+};
+
+const reply = (type: string, msg: string) => {
+	if (type !== 'message' && type !== 'reason') {
+		return;
+	}
+
 	if (!form.outputing) {
 		form.outputing = true;
-		message.push({ role: 'system', content: '' });
-		// 调用打字
-		typeEffect();
+		msgList.value.push({ role: 'system', content: '', reason: '' });
 	}
-	const index = message.length - 1;
-	typing.value.msgIndex = index;
-	typing.value.text += msg;
+
+	const index = msgList.value.length - 1;
+	if (type === 'reason') {
+		reasonTyping.value.msgIndex = index;
+		reasonTyping.value.text += msg;
+		if (!reasonTyping.value.isStart) {
+			reasonTypeEffect();
+		}
+	} else {
+		typing.value.msgIndex = index;
+		typing.value.text += msg;
+		if (!typing.value.isStart) {
+			typeEffect();
+		}
+	}
 };
 
 // end 结束输出
@@ -263,7 +320,7 @@ const outputEnd = () => {
 
 // clear 清除对话
 const clear = () => {
-	message.splice(0, message.length);
+	msgList.value.splice(0, msgList.value.length);
 };
 
 const handleKeydown = async (event: KeyboardEvent) => {
@@ -370,7 +427,7 @@ pre {
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		height: calc(v-bind(getlastheight()));
+		height: calc(v-bind(getLastHeight()));
 		padding: 20px;
 	}
 
@@ -378,7 +435,7 @@ pre {
 		position: sticky;
 		display: flex;
 		flex-direction: column-reverse;
-		height: calc(v-bind(getlastheight()));
+		height: calc(v-bind(getLastHeight()));
 		padding: 20px 20px 0;
 		overflow: scroll;
 
@@ -434,6 +491,10 @@ pre {
 					&-loading {
 						width: 20px;
 						height: 20px;
+					}
+
+					&-reason-html {
+						color: #777;
 					}
 				}
 			}

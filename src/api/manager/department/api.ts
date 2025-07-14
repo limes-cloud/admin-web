@@ -37,9 +37,14 @@ export function DeleteDepartmentClassify(params: DeleteDepartmentClassifyRequest
 	return axios.delete('/manager/api/v1/department_classify', { params });
 }
 
-// ListDepartment 获取部门信息列表
+// ListDepartment 获取全部部门信息列表
 export function ListDepartment(params?: ListDepartmentRequest) {
 	return axios.get<ListDepartmentReply>('/manager/api/v1/departments', { params });
+}
+
+// ListDepartment 获取当前用户可见的部门信息列表
+export function ListCurrentDepartment(params?: ListDepartmentRequest) {
+	return axios.get<ListDepartmentReply>('/manager/api/v1/current/departments', { params });
 }
 
 // CreateDepartment 创建部门信息

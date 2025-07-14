@@ -1,3 +1,18 @@
+export interface ListSysChatMessageRequest {
+	page: number;
+	pageSize: number;
+	chatId: number;
+}
+
+export interface ListSysChatMessageReply {
+	question: string;
+	content: string;
+	reason?: string;
+	createdAt: number;
+	token: number;
+	cost: number;
+}
+
 export interface ListSysChatRequest {
 	page: number;
 	pageSize: number;
@@ -76,7 +91,7 @@ export interface ConversationSysChatRequest {
 }
 
 export interface ConversationSysChatReply {
-	think: string;
+	type: string;
 	content: string;
 }
 

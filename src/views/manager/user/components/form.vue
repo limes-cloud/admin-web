@@ -69,16 +69,29 @@
 			</a-form-item>
 
 			<a-form-item
-				field="roleIds"
-				label="用户角色"
+				field="departmentIds"
+				label="用户部门"
 				:rules="[
 					{
 						required: true,
-						message: '用户角色是必填项'
+						message: '用户部门是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
+				<a-cascader
+					v-model="form.departmentIds"
+					check-strictly
+					multiple
+					:options="departments"
+					:field-names="{ value: 'id', label: 'name' }"
+					placeholder="请选择用户部门"
+					allow-search
+					@focus="searchDepartment"
+				/>
+			</a-form-item>
+
+			<a-form-item field="roleIds" label="用户角色" tooltip="此用户角色是为用户单独添加的特殊权限能力角色，默认不要设置">
 				<a-cascader
 					v-model="form.roleIds"
 					multiple
@@ -91,29 +104,7 @@
 				/>
 			</a-form-item>
 
-			<a-form-item
-				field="departmentId"
-				label="用户部门"
-				:rules="[
-					{
-						required: true,
-						message: '用户部门是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-cascader
-					v-model="form.departmentId"
-					check-strictly
-					:options="departments"
-					:field-names="{ value: 'id', label: 'name' }"
-					placeholder="请选择用户部门"
-					allow-search
-					@focus="searchDepartment"
-				/>
-			</a-form-item>
-
-			<a-form-item
+			<!-- <a-form-item
 				field="jobIds"
 				label="用户职位"
 				:rules="[
@@ -124,16 +115,16 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-select
+				<a-cascader
 					v-model="form.jobIds"
-					placeholder="请选择职位"
-					:scrollbar="true"
+					check-strictly
+					:field-names="{ value: 'id', label: 'name' }"
 					:options="jobs"
-					multiple
-					@search="searchFactory.Search"
-					@dropdown-reach-bottom="searchFactory.NextSearch"
-				></a-select>
-			</a-form-item>
+					placeholder="请选择职位"
+					allow-search
+					@focus="searchJob"
+				/>
+			</a-form-item> -->
 		</a-form>
 	</Popup>
 </template>
@@ -142,26 +133,24 @@
 import { ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
 import { CreateUser, UpdateUser } from '@/api/manager/user/api';
-import { CreateUserRequest, Department, Role, Job, UpdateUserRequest } from '@/api/manager/user/type';
-import { ListJob } from '@/api/manager/job/api';
-import { ListDepartment } from '@/api/manager/department/api';
-import { ListRole } from '@/api/manager/role/api';
-import { Search, Result } from '@/utils/search';
+import { CreateUserRequest, Department, Role, UpdateUserRequest, GetUserReply } from '@/api/manager/user/type';
+import { ListCurrentJob, ListJob } from '@/api/manager/job/api';
+import { ListCurrentDepartment } from '@/api/manager/department/api';
+import { ListCurrentRole } from '@/api/manager/role/api';
 import test from '@/utils/test';
-
-type Data = UpdateUserRequest & CreateUserRequest & { jobIds: number[]; roleIds: number[]; roles: Role[]; jobs: Job[] };
+import { Job } from '@/api/manager/job/type';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 const props = defineProps<{
-	data: Data;
+	data: GetUserReply;
 }>();
 
-const jobs = ref<Result[]>([]);
+const jobs = ref<Job[]>([]);
 const roles = ref<Role[]>([]);
 const departments = ref<Department[]>([]);
-const form = ref({} as Data);
+const form = ref({} as GetUserReply);
 const emit = defineEmits(['refresh']);
 
 const phoneValidate = (value, cb) => {
@@ -176,31 +165,21 @@ const phoneValidate = (value, cb) => {
 	}
 };
 
-const searchFactory = new Search(
-	jobs.value,
-	async (req): Promise<Result[]> => {
-		const res: Result[] = [];
-		const { data } = await ListJob({ ...req, name: req.query as string | undefined });
-		data.list.forEach((item) => {
-			res.push({ label: item.name, value: item.id });
-		});
-		return res;
-	},
-	(val): boolean => {
-		return form.value.jobIds.includes(val as number);
-	}
-);
+// const searchJob = async () => {
+// 	const { data } = await ListCurrentJob();
+// 	jobs.value = data.list;
+// };
 
-searchFactory.Search();
+// searchJob();
 
 const searchRole = async () => {
-	const { data } = await ListRole();
+	const { data } = await ListCurrentRole();
 	roles.value = data.list;
 };
 searchRole();
 
 const searchDepartment = async () => {
-	const { data } = await ListDepartment();
+	const { data } = await ListCurrentDepartment();
 	departments.value = data.list;
 };
 searchDepartment();
@@ -229,10 +208,10 @@ const handleSubmit = async () => {
 
 	const data = form.value;
 	if (isAdd.value) {
-		await CreateUser(data);
+		await CreateUser(data as CreateUserRequest);
 		Message.success('创建成功');
 	} else {
-		await UpdateUser(data);
+		await UpdateUser(data as UpdateUserRequest);
 		Message.success('更新成功');
 	}
 	emit('refresh');
@@ -254,11 +233,15 @@ watch(
 			const ids: number[] = [];
 			val.jobs.forEach((item) => {
 				ids.push(item.id);
-				if (!searchFactory.IsExist(item.id)) {
-					jobs.value.push({ label: item.name, value: item.id });
-				}
 			});
 			form.value.jobIds = ids;
+		}
+		if (val.departments) {
+			const ids: number[] = [];
+			val.departments.forEach((item) => {
+				ids.push(item.id);
+			});
+			form.value.departmentIds = ids;
 		}
 	}
 );

@@ -2,6 +2,7 @@
 	<div class="container">
 		<Breadcrumb />
 		<a-card class="general-card">
+			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @classify="handleShowClassify"></Tool>
 			<Table
 				:columns="columns"
@@ -31,12 +32,14 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { Department } from '@/api/manager/department/type';
-import { ListDepartment } from '@/api/manager/department/api';
+import { Department, ListDepartmentRequest } from '@/api/manager/department/type';
+import { ListCurrentDepartment } from '@/api/manager/department/api';
 
+import Search from './components/search.vue';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
+
 import Classify from './classify/index.vue';
 
 const formRef = ref();
@@ -44,8 +47,8 @@ const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-
 const showGroup = ref(false);
+const searchForm = ref<ListDepartmentRequest>({});
 
 const columns = ref<TableColumn[]>([
 	{
@@ -82,7 +85,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListDepartment();
+		const { data } = await ListCurrentDepartment(searchForm.value);
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
@@ -90,6 +93,15 @@ const handleGet = async () => {
 };
 
 handleGet();
+
+const handleSearch = async (req: ListDepartmentRequest) => {
+	searchForm.value = {
+		...searchForm.value,
+		...req
+	};
+
+	handleGet();
+};
 
 //  处理tool按钮新建
 const handleToolAdd = () => {

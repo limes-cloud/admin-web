@@ -2,6 +2,7 @@
 	<div class="container">
 		<Breadcrumb />
 		<a-card class="general-card">
+			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
 				:columns="columns"
@@ -13,8 +14,8 @@
 				@refresh="handleGet"
 				@update-menu="handleTableUpdateMenu"
 			></Table>
-			<Form ref="formRef" :roles="tableData" :departments="departments" :data="form" @refresh="handleGet"></Form>
-			<SelectMenu ref="menuRef" :menus="(menus as TreeNodeData[])" :keys="menuKeys" @update="handleUpdateMenu"></SelectMenu>
+			<Form ref="formRef" :jobs="jobs" :roles="tableData" :departments="departments" :data="form" @refresh="handleGet"></Form>
+			<SelectMenu ref="menuRef" :menus="menus" :keys="menuKeys" @update="handleUpdateMenu"></SelectMenu>
 		</a-card>
 	</div>
 </template>
@@ -24,16 +25,19 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { Message, TreeNodeData } from '@arco-design/web-vue';
-import { ListDepartment } from '@/api/manager/department/api';
+import { Message } from '@arco-design/web-vue';
+import { ListCurrentDepartment } from '@/api/manager/department/api';
 import { ListMenuByCurRole } from '@/api/manager/menu/api';
 import { Menu } from '@/api/manager/menu/type';
-import { Role, UpdateRoleMenuRequest } from '@/api/manager/role/type';
-import { GetRoleMenuIds, ListRole, UpdateRoleMenu } from '@/api/manager/role/api';
+import { ListRoleRequest, Role, UpdateRoleMenuRequest } from '@/api/manager/role/type';
+import { GetRoleMenuIds, ListCurrentRole, UpdateRoleMenu } from '@/api/manager/role/api';
 import { Department } from '@/api/manager/department/type';
+import { ListCurrentJob } from '@/api/manager/job/api';
+import { Job } from '@/api/manager/user/type';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
+import Search from './components/search.vue';
 import SelectMenu from './components/select-menu.vue';
 
 const menuRef = ref();
@@ -45,6 +49,9 @@ const tableData = ref<TableData[]>();
 const departments = ref<Department[]>([]);
 const menus = ref<Menu[]>([]);
 const menuKeys = ref<number[]>([]);
+const jobs = ref<Job[]>([]);
+
+const searchForm = ref<ListRoleRequest>({});
 
 const size = ref<TableSize>('medium');
 const columns = ref<TableColumn[]>([
@@ -87,8 +94,13 @@ const columns = ref<TableColumn[]>([
 	}
 ]);
 
+const handleGetJobs = async () => {
+	const { data } = await ListCurrentJob();
+	jobs.value = data.list;
+};
+
 const handleGetDepartment = async () => {
-	const { data } = await ListDepartment();
+	const { data } = await ListCurrentDepartment();
 	departments.value = data.list;
 };
 
@@ -101,16 +113,26 @@ const handleGetMenu = async () => {
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListRole();
+		const { data } = await ListCurrentRole(searchForm.value);
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
 };
 
+// handleGetJobs();
 handleGet();
 handleGetDepartment();
 handleGetMenu();
+
+const handleSearch = async (req: ListRoleRequest) => {
+	searchForm.value = {
+		...searchForm.value,
+		...req
+	};
+
+	handleGet();
+};
 
 // 处理更新菜单
 const handleUpdateMenu = async (keys: number[]) => {

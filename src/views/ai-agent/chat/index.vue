@@ -50,10 +50,15 @@
 		<div class="chat">
 			<Chat
 				ref="chatRef"
-				title="这是一个房间标题"
+				title="在线对话"
 				:disable-input="disableInput"
+				:user="{
+					logo: appStore.$state.logo,
+					name: appStore.$state.name
+				}"
 				disable-text="请先选择对话参数"
 				:hide-title="true"
+				:messages="chatMessageList"
 				@send="handleSend"
 			></Chat>
 		</div>
@@ -150,6 +155,10 @@
 				>
 					<a-input-number v-model="form.topK" :step="1" :min="1" :max="9999" allow-clear />
 				</a-form-item>
+
+				<a-form-item>
+					<a-button type="primary" @click="submitChatConfig">保存</a-button>
+				</a-form-item>
 			</a-form>
 		</div>
 	</div>
@@ -162,8 +171,18 @@ import { Result, Search } from '@/utils/search';
 import { ListModel } from '@/api/ai-agent/model/api';
 import { ListKnowledge } from '@/api/ai-agent/knowledge/api';
 import { ListTool } from '@/api/ai-agent/tool/api';
-import { ConversationSysChatReply, CreateSysChatRequest, ListSysChatRequest, SysChat, UpdateSysChatRequest } from '@/api/ai-agent/sys_chat/type';
-import { ConversationSysChat, CreateSysChat, DeleteSysChat, ListSysChat } from '@/api/ai-agent/sys_chat/api';
+import {
+	ConversationSysChatReply,
+	CreateSysChatRequest,
+	ListSysChatMessageReply,
+	ListSysChatMessageRequest,
+	ListSysChatRequest,
+	SysChat,
+	UpdateSysChatRequest
+} from '@/api/ai-agent/sys_chat/type';
+import { ConversationSysChat, CreateSysChat, DeleteSysChat, ListSysChat, ListSysChatMessage, UpdateSysChat } from '@/api/ai-agent/sys_chat/api';
+import { Message } from '@arco-design/web-vue';
+import { useAppStore } from '@/store';
 
 const listRef = ref();
 const chatRef = ref();
@@ -172,110 +191,29 @@ const models = ref<Result[]>([]);
 const kns = ref<Result[]>([]);
 const tools = ref<Result[]>([]);
 
-type Type = CreateSysChatRequest | UpdateSysChatRequest;
+type Type = CreateSysChatRequest | UpdateSysChatRequest | SysChat;
 const form = ref<Type>({} as Type);
 const searchForm = ref<ListSysChatRequest>({ page: 1, pageSize: 20 });
+const searchMessageForm = ref<ListSysChatMessageRequest>({ page: 1, pageSize: 20, chatId: 0 });
 const chatId = ref(0);
 const disableInput = ref(true);
 const chatList = ref<SysChat[]>([]);
 const listHeight = ref(0);
 const loading = ref(false);
 const hasNextChat = ref(true);
+const appStore = useAppStore();
 
-watch(
-	() => form.value,
-	(val) => {
-		if (val.modelId) {
-			disableInput.value = false;
-		}
-	},
-	{ deep: true, immediate: true }
-);
+// 转换消息格式
+interface MessageType {
+	role: 'system' | 'user';
+	content: string;
+	extra?: string;
+	cost?: number;
+	tokens?: number;
+}
 
-watch(
-	() => listRef.value,
-	(val) => {
-		if (val) {
-			listHeight.value = val.offsetHeight;
-		}
-	},
-	{ deep: true, immediate: true }
-);
-
-const handleCreateNewChat = async () => {
-	form.value = {} as Type;
-	chatId.value = 0;
-	chatRef.value.clear();
-	disableInput.value = true;
-};
-
-const handleGetChats = async () => {
-	const { data } = await ListSysChat(searchForm.value);
-	if (chatId.value === 0) {
-		chatId.value = data.list[0].id;
-		form.value = { ...data.list[0] };
-	}
-	if (data.list.length < searchForm.value.pageSize) {
-		hasNextChat.value = false;
-	}
-	chatList.value = chatList.value.concat(data.list);
-};
-
-handleGetChats();
-
-const loadNextChat = () => {
-	if (!hasNextChat.value) {
-		return;
-	}
-	loading.value = true;
-	searchForm.value.page += 1;
-	handleGetChats().finally(() => {
-		loading.value = false;
-	});
-};
-
-const handleChoseChat = (chat: SysChat) => {
-	chatId.value = chat.id;
-	form.value = { ...chat };
-};
-
-const handleSend = async (input: string) => {
-	if (!chatId.value) {
-		form.value.title = input;
-		const { data } = await CreateSysChat(form.value as CreateSysChatRequest);
-		chatId.value = data.id;
-		handleGetChats();
-	}
-
-	chatRef.value.reply('');
-
-	// 调用聊天模型接口
-	ConversationSysChat(
-		{ chatId: chatId.value, content: input },
-		{
-			handler: (res: ConversationSysChatReply) => {
-				console.log(res.content);
-				chatRef.value.reply(res.content);
-			},
-			done: () => {
-				console.log('doen');
-				chatRef.value.outputEnd();
-			},
-			error: (err: any) => {
-				console.log(err);
-				chatRef.value.error(err);
-			}
-		}
-	);
-};
-
-const handleDeleteChat = async (id: number) => {
-	await DeleteSysChat({ id });
-	chatList.value = chatList.value.filter((item) => item.id !== id);
-	if (chatId.value === id) {
-		handleCreateNewChat();
-	}
-};
+const hasNextChatMessage = ref(true);
+const chatMessageList = ref<MessageType[]>([]);
 
 const modelSearch = new Search(
 	models.value,
@@ -321,6 +259,168 @@ const toolSearch = new Search(
 		return Boolean(form.value.tools?.includes(val));
 	}
 );
+
+watch(
+	() => listRef.value,
+	(val) => {
+		if (val) {
+			listHeight.value = val.offsetHeight;
+		}
+	},
+	{ deep: true, immediate: true }
+);
+
+watch(
+	() => form.value.modelId,
+	(val) => {
+		if (val) {
+			if (form.value.modelId) {
+				disableInput.value = false;
+			}
+		}
+	},
+	{ deep: true, immediate: true }
+);
+
+const initForm = () => {
+	if (!form.value.modelId) {
+		return;
+	}
+	disableInput.value = false;
+
+	const value = form.value as SysChat;
+
+	// 处理知识库
+	const tmpKns: number[] = [];
+	value.knowledgeList?.forEach((item) => {
+		tmpKns.push(item.id);
+		if (!knSearch.IsExist(item.id)) {
+			kns.value.push({ label: value.title, value: value.id } as Result);
+		}
+	});
+	form.value.knowledges = tmpKns;
+
+	// 处理工具
+	const tmpTools: number[] = [];
+	value.toolList?.forEach((item) => {
+		tmpTools.push(item.id);
+		if (!toolSearch.IsExist(item.id)) {
+			kns.value.push({ label: value.title, value: value.id } as Result);
+		}
+	});
+	form.value.tools = tmpTools;
+};
+
+const submitChatConfig = async () => {
+	await UpdateSysChat(form.value as UpdateSysChatRequest);
+	Message.success('保存成功');
+};
+
+const handleCreateNewChat = async () => {
+	form.value = {} as Type;
+	chatId.value = 0;
+	chatRef.value.clear();
+	disableInput.value = true;
+};
+
+const handleGetChatMessage = async () => {
+	if (chatId.value === 0) {
+		return;
+	}
+
+	searchMessageForm.value.chatId = chatId.value;
+
+	// 获取聊天记录
+	const { data } = await ListSysChatMessage(searchMessageForm.value);
+
+	const list: MessageType[] = [];
+	data.list.forEach((item: ListSysChatMessageReply) => {
+		list.push({
+			role: 'system',
+			content: item.content,
+			cost: item.cost,
+			tokens: item.token
+		});
+		list.push({
+			role: 'user',
+			content: item.question
+		});
+	});
+
+	if (data.list.length < searchMessageForm.value.pageSize) {
+		hasNextChatMessage.value = false;
+	}
+
+	chatMessageList.value = [...chatMessageList.value, ...list.reverse()];
+};
+
+const handleGetChats = async () => {
+	const { data } = await ListSysChat(searchForm.value);
+	if (chatId.value === 0) {
+		form.value = { ...data.list[0] };
+		initForm();
+		chatId.value = form.value.id;
+		handleGetChatMessage();
+	}
+	if (data.list.length < searchForm.value.pageSize) {
+		hasNextChat.value = false;
+	}
+	chatList.value = chatList.value.concat(data.list);
+};
+
+handleGetChats();
+
+const loadNextChat = () => {
+	if (!hasNextChat.value || !chatId.value) {
+		return;
+	}
+	loading.value = true;
+	searchForm.value.page += 1;
+	handleGetChats().finally(() => {
+		loading.value = false;
+	});
+};
+
+const handleChoseChat = (chat: SysChat) => {
+	chatId.value = chat.id;
+	form.value = { ...chat };
+	chatMessageList.value = [];
+	handleGetChatMessage();
+};
+
+const handleSend = async (input: string) => {
+	if (!chatId.value) {
+		form.value.title = input;
+		const { data } = await CreateSysChat(form.value as CreateSysChatRequest);
+		chatId.value = data.id;
+		chatList.value = [];
+		handleGetChats();
+	}
+
+	// 调用聊天模型接口
+	ConversationSysChat(
+		{ chatId: chatId.value, content: input },
+		{
+			handler: (res: ConversationSysChatReply) => {
+				chatRef.value.reply(res.type, res.content);
+			},
+			done: () => {
+				chatRef.value.outputEnd();
+			},
+			error: (err: any) => {
+				chatRef.value.error(err);
+			}
+		}
+	);
+};
+
+const handleDeleteChat = async (id: number) => {
+	await DeleteSysChat({ id });
+	chatList.value = chatList.value.filter((item) => item.id !== id);
+	if (chatId.value === id) {
+		handleCreateNewChat();
+	}
+};
 
 onMounted(() => {
 	modelSearch.Search();

@@ -2,17 +2,24 @@
 	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="keyword"
-				label="职位标识"
+				field="parentId"
+				label="上级职位"
 				:rules="[
 					{
 						required: true,
-						message: '职位标识是必填项'
+						message: '上级职位是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" allow-clear placeholder="请输入职位标识" />
+				<a-cascader
+					v-model="form.parentId"
+					check-strictly
+					:field-names="{ value: 'id', label: 'name' }"
+					:options="jobs"
+					placeholder="请选择上级职位"
+					allow-search
+				/>
 			</a-form-item>
 
 			<a-form-item
@@ -26,7 +33,21 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.name" allow-clear placeholder="请输入职位名称" />
+				<a-input v-model="form.name" placeholder="请输入职位名称" allow-clear />
+			</a-form-item>
+
+			<a-form-item
+				field="keyword"
+				label="职位标志"
+				:rules="[
+					{
+						required: true,
+						message: '职位标志是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="form.keyword" placeholder="请输入职位标志" allow-clear />
 			</a-form-item>
 
 			<a-form-item
@@ -40,57 +61,39 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-textarea v-model="form.description" allow-clear placeholder="请输入职位描述" />
-			</a-form-item>
-
-			<a-form-item
-				field="weight"
-				label="职位权重"
-				:rules="[
-					{
-						required: true,
-						message: '职位权重是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-input-number v-model="form.weight" placeholder="请输入职位权重" :default-value="0" mode="button" />
+				<a-textarea v-model="form.description" placeholder="请输入职位描述" allow-clear />
 			</a-form-item>
 		</a-form>
 	</Popup>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+import { Message, TableData } from '@arco-design/web-vue';
 import { CreateJob, UpdateJob } from '@/api/manager/job/api';
-import { Message } from '@arco-design/web-vue';
 import { Job } from '@/api/manager/job/type';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
 
-const props = defineProps<{
-	data: Job;
+defineProps<{
+	jobs?: TableData[];
 }>();
 
 const form = ref({} as Job);
 const emit = defineEmits(['refresh']);
 
-watch(
-	() => props.data,
-	(val) => {
-		if (!val) return;
-		form.value = { weight: 0, ...val };
-	}
-);
+const showAddDrawer = (data: Job) => {
+	form.value = { ...data };
 
-const showAddDrawer = () => {
 	visible.value = true;
 	isAdd.value = true;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: Job) => {
+	form.value = { ...data };
+
 	visible.value = true;
 	isAdd.value = false;
 };

@@ -45,6 +45,14 @@ export interface DeleteDepartmentClassifyReply {
 export interface ListDepartmentRequest {
 	name?: string;
 	keyword?: string;
+	rootId?: number;
+	classifyId?: number;
+}
+
+export interface Role {
+	id: number;
+	name: string;
+	keyword: string;
 }
 
 export interface Department {
@@ -57,6 +65,8 @@ export interface Department {
 	createdAt: number;
 	updatedAt: number;
 	classify: DepartmentClassify;
+	roles: Role[];
+	roleIds: number[];
 	children: Department[];
 }
 
@@ -66,6 +76,8 @@ export interface ListDepartmentReply {
 }
 
 export interface CreateDepartmentRequest {
+	roleIds: number[];
+	classifyId: number;
 	parentId: number;
 	name: string;
 	keyword: string;
@@ -78,9 +90,11 @@ export interface CreateDepartmentReply {
 
 export interface UpdateDepartmentRequest {
 	id: number;
+	classifyId: number;
 	parentId: number;
 	name: string;
 	description?: string;
+	roleIds: number[];
 }
 
 export interface DeleteDepartmentRequest {

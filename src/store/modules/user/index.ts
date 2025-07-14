@@ -6,6 +6,8 @@ import Message from '@arco-design/web-vue/es/message';
 import { UserLogin, UserLogout, GetCurrentUser, UpdateCurrentUserRole, UpdateCurrentUserSetting } from '@/api/manager/user/api';
 import { UpdateCurrentUserRoleRequest, GetUserReply, UserLoginRequest } from '@/api/manager/user/type';
 
+import { OAuthBindRequest } from '@/api/manager/auth/type';
+import { OAuthBind } from '@/api/manager/auth/api';
 import useAppStore from '../app';
 
 const useUserStore = defineStore('user', {
@@ -84,7 +86,9 @@ const useUserStore = defineStore('user', {
 			appStore.initThemConfig(data.setting);
 			this.setInfo(data);
 		},
-
+		setToken(token) {
+			setToken(token);
+		},
 		// Login
 		async login(req: UserLoginRequest) {
 			const info = {
@@ -96,6 +100,23 @@ const useUserStore = defineStore('user', {
 			};
 			try {
 				const { data } = await UserLogin(info as UserLoginRequest);
+				setToken(data.token);
+			} catch (err) {
+				clearToken();
+				throw err;
+			}
+		},
+		// Login
+		async oauthBind(req: OAuthBindRequest) {
+			const info = {
+				...req,
+				password: rsa.encrypt({
+					password: req.password,
+					time: new Date().getTime()
+				})
+			};
+			try {
+				const { data } = await OAuthBind(info as OAuthBindRequest);
 				setToken(data.token);
 			} catch (err) {
 				clearToken();

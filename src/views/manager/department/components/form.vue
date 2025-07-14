@@ -72,6 +72,29 @@
 			</a-form-item>
 
 			<a-form-item
+				field="roleIds"
+				label="部门角色"
+				:rules="[
+					{
+						required: true,
+						message: '部门角色是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-cascader
+					v-model="form.roleIds"
+					multiple
+					check-strictly
+					:options="roles"
+					placeholder="请选择部门角色"
+					:field-names="{ value: 'id', label: 'name' }"
+					allow-search
+					@focus="searchRole"
+				/>
+			</a-form-item>
+
+			<a-form-item
 				field="description"
 				label="部门描述"
 				:rules="[
@@ -92,8 +115,9 @@
 import { ref } from 'vue';
 import { Message, TableData } from '@arco-design/web-vue';
 import { CreateDepartment, ListDepartmentClassify, UpdateDepartment } from '@/api/manager/department/api';
-import { Department } from '@/api/manager/department/type';
+import { Department, Role } from '@/api/manager/department/type';
 import { Result, Search } from '@/utils/search';
+import { ListCurrentRole } from '@/api/manager/role/api';
 
 const formRef = ref();
 const visible = ref(false);
@@ -101,12 +125,21 @@ const isAdd = ref(false);
 
 const classifies = ref<Result[]>([]);
 
-defineProps<{
+const props = defineProps<{
 	departments?: TableData[];
 }>();
 
 const form = ref({} as Department);
 const emit = defineEmits(['refresh']);
+
+const roles = ref<Role[]>([]);
+
+const searchRole = async () => {
+	const { data } = await ListCurrentRole();
+	roles.value = data.list;
+};
+
+searchRole();
 
 const search = new Search(
 	classifies.value,
@@ -133,7 +166,13 @@ const showAddDrawer = (data: Department) => {
 };
 
 const showUpdateDrawer = (data: Department) => {
-	classifies.value.push({ label: data.classify.name, value: data.classify.id } as Result);
+	if (data.roles) {
+		data.roleIds = data.roles.map((item) => item.id);
+	}
+	if (!search.IsExist(data.classifyId)) {
+		classifies.value.push({ label: data.classify.name, value: data.classify.id } as Result);
+	}
+
 	form.value = { ...data };
 	search.Search();
 	visible.value = true;

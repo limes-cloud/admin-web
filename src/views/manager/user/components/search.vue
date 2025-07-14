@@ -111,8 +111,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ListDepartment } from '@/api/manager/department/api';
-import { ListRole } from '@/api/manager/role/api';
+import { ListCurrentDepartment } from '@/api/manager/department/api';
+import { ListCurrentRole } from '@/api/manager/role/api';
 import { Department, ListUserRequest, Role } from '@/api/manager/user/type';
 import { ref } from 'vue';
 import test from '@/utils/test';
@@ -137,13 +137,13 @@ const phoneValidate = (value, cb) => {
 };
 
 const searchRole = async () => {
-	const { data } = await ListRole();
+	const { data } = await ListCurrentRole();
 	roles.value = data.list;
 };
 searchRole();
 
 const searchDepartment = async () => {
-	const { data } = await ListDepartment();
+	const { data } = await ListCurrentDepartment();
 	departments.value = data.list;
 };
 searchDepartment();

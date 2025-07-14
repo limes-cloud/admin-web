@@ -68,7 +68,7 @@
 			</a-form-item>
 
 			<a-form-item
-				v-if="form.dataScope === 'CUSTOM'"
+				v-if="form.dataScope === 'CUSTOM' || form.dataScope === 'ASSIGN_ALL'"
 				field="depIds"
 				label="选择部门"
 				:rules="[
@@ -86,10 +86,52 @@
 					check-strictly
 					:field-names="{ value: 'id', label: 'name' }"
 					placeholder="请选择部门"
-					multiple
+					:multiple="form.dataScope === 'CUSTOM'"
 					:max-tag-count="3"
 				/>
 			</a-form-item>
+			<!-- 
+			<a-form-item
+				field="jobScope"
+				label="职位权限"
+				:rules="[
+					{
+						required: true,
+						message: '职位权限是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-select v-model="form.jobScope" allow-search placeholder="职位权限">
+					<template v-for="(item, index) in dataScopeTypes" :key="index">
+						<a-option :value="item.value">{{ item.label }}</a-option>
+					</template>
+				</a-select>
+			</a-form-item>
+
+			<a-form-item
+				v-if="form.jobScope === 'CUSTOM' || form.jobScope === 'ALL'"
+				field="jids"
+				label="选择职级"
+				:rules="[
+					{
+						required: true,
+						message: '请选择部门'
+					}
+				]"
+				:validate-trigger="['change']"
+			>
+				<a-cascader
+					v-model="form.jids"
+					:options="jobs"
+					:style="{ width: '320px' }"
+					check-strictly
+					:field-names="{ value: 'id', label: 'name' }"
+					placeholder="请选择职级"
+					:multiple="form.jobScope === 'CUSTOM'"
+					:max-tag-count="3"
+				/>
+			</a-form-item> -->
 
 			<a-form-item
 				field="description"
@@ -111,7 +153,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { Message, SelectOptionData, TableData } from '@arco-design/web-vue';
-import { join, split } from 'lodash';
+import { isNumber, join, split } from 'lodash';
 import { CreateRole, UpdateRole } from '@/api/manager/role/api';
 import { Role } from '@/api/manager/role/type';
 import { Department } from '@/api/manager/department/type';
@@ -123,26 +165,31 @@ const emit = defineEmits(['refresh']);
 const props = defineProps<{
 	departments: Department[];
 	roles?: TableData[];
+	jobs: TableData[];
 	data: Role;
 }>();
 
-const form = ref({} as Role & { depIds: number[] });
+const form = ref({} as Role & { depIds: number[] | number; jids: number[] | number });
 const dataScopeTypes = computed<SelectOptionData[]>(() => [
 	{
-		label: '所有部门',
-		value: 'ALL'
+		label: '仅自己',
+		value: 'SELF'
 	},
 	{
-		label: '当前部门',
+		label: '当前',
 		value: 'CUR'
 	},
 	{
-		label: '当前部门以及下级部门',
+		label: '下级',
+		value: 'DOWN'
+	},
+	{
+		label: '当前以及下级',
 		value: 'CUR_DOWN'
 	},
 	{
-		label: '下级部门',
-		value: 'DOWN'
+		label: '指定层级下所有',
+		value: 'ASSIGN_ALL'
 	},
 	{
 		label: '自定义',
@@ -153,15 +200,24 @@ const dataScopeTypes = computed<SelectOptionData[]>(() => [
 watch(
 	() => props.data,
 	(val) => {
-		form.value = { ...val, depIds: [] };
-		const ids: number[] = [];
+		form.value = { ...val, depIds: [], jids: [] };
+		const dids: number[] = [];
 		if (val.departmentIds) {
 			const arr = split(val.departmentIds as string, ',');
 			arr.forEach((id) => {
-				ids.push(Number(id));
+				dids.push(Number(id));
 			});
 		}
-		form.value.depIds = ids;
+
+		const jids: number[] = [];
+		if (val.jobIds) {
+			const arr = split(val.jobIds as string, ',');
+			arr.forEach((id) => {
+				jids.push(Number(id));
+			});
+		}
+		form.value.depIds = dids;
+		form.value.jids = jids;
 	}
 );
 
@@ -187,8 +243,20 @@ const handleSubmit = async () => {
 		return false;
 	}
 
-	if (form.value.depIds.length) {
-		form.value.departmentIds = join(form.value.depIds, ',');
+	if (form.value.depIds) {
+		if (isNumber(form.value.depIds)) {
+			form.value.departmentIds = `${form.value.depIds}`;
+		} else {
+			form.value.departmentIds = join(form.value.depIds, ',');
+		}
+	}
+
+	if (form.value.jids) {
+		if (isNumber(form.value.jids)) {
+			form.value.jobIds = `${form.value.jids}`;
+		} else {
+			form.value.jobIds = join(form.value.jids, ',');
+		}
 	}
 
 	const data = form.value;

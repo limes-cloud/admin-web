@@ -3,7 +3,7 @@
 		<a-form ref="formRef" :model="form" label-align="left" layout="vertical" auto-label-width>
 			<a-form-item
 				field="type"
-				label="模型标题"
+				label="模型类型"
 				:rules="[
 					{
 						required: true,

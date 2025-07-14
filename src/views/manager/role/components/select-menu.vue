@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts" setup>
+import { Menu } from '@/api/manager/menu/type';
 import { Message } from '@arco-design/web-vue';
-import { TreeNodeData } from '@arco-design/web-vue/es/tree/interface';
 import { ref, watch } from 'vue';
 
 const visible = ref(false);
@@ -26,7 +26,7 @@ const halfIds = ref<number[]>([]);
 
 const props = defineProps<{
 	keys: number[];
-	menus: TreeNodeData[];
+	menus: Menu[];
 }>();
 const emit = defineEmits(['update']);
 

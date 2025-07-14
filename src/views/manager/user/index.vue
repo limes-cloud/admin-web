@@ -15,7 +15,7 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="(form as any)" @refresh="handleGet"></Form>
+			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
 		</a-card>
 	</div>
 </template>
@@ -26,7 +26,7 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
-import { ListUserRequest, User } from '@/api/manager/user/type';
+import { GetUserReply, ListUserRequest, User } from '@/api/manager/user/type';
 import { GetUser, ListUser } from '@/api/manager/user/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
@@ -34,7 +34,7 @@ import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref({});
+const form = ref<GetUserReply>({} as GetUserReply);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -71,15 +71,6 @@ const columns = ref<TableColumn[]>([
 	{
 		title: '用户性别',
 		slotName: 'gender'
-	},
-	{
-		title: '当前角色',
-		slotName: 'role'
-	},
-
-	{
-		title: '用户部门',
-		slotName: 'team'
 	},
 	{
 		title: '用户状态',
@@ -143,7 +134,7 @@ const handlePageChange = async (page: Pagination) => {
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as User;
+	form.value = {} as GetUserReply;
 	formRef.value.showAddDrawer();
 };
 

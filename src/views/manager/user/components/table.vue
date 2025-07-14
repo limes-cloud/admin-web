@@ -10,8 +10,7 @@
 			:pagination="false"
 			:size="size"
 			:scroll="{
-				x: 2000,
-				y: 200
+				x: 1920
 			}"
 		>
 			<template #role="{ record }">
