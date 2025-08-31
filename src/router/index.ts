@@ -1,20 +1,24 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import NProgress from 'nprogress'; // progress bar
-import 'nprogress/nprogress.css';
+import type { App } from 'vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { staticRoutes } from './routes/staticRoutes'
+import { configureNProgress } from './utils/utils'
+import { setupBeforeEachGuard } from './guards/beforeEach'
+import { setupAfterEachGuard } from './guards/afterEach'
 
-import createRouteGuard from './guard';
-import { LOGIN_ROUTE } from './routes/base';
+// 创建路由实例
+export const router = createRouter({
+  history: createWebHashHistory(),
+  routes: staticRoutes, // 静态路由
+  scrollBehavior: () => ({ left: 0, top: 0 }) // 滚动行为
+})
 
-NProgress.configure({ showSpinner: false }); // NProgress Configuration
+// 初始化路由
+export function initRouter(app: App<Element>): void {
+  configureNProgress() // 顶部进度条
+  setupBeforeEachGuard(router) // 路由前置守卫
+  setupAfterEachGuard(router) // 路由后置守卫
+  app.use(router)
+}
 
-const router = createRouter({
-	history: createWebHistory(),
-	routes: [LOGIN_ROUTE],
-	scrollBehavior() {
-		return { top: 0 };
-	}
-});
-
-createRouteGuard(router);
-
-export default router;
+// 主页路径，默认使用菜单第一个有效路径，配置后使用此路径
+export const HOME_PAGE_PATH = ''

@@ -1,85 +1,34 @@
-type TargetContext = '_self' | '_parent' | '_blank' | '_top';
+/**
+ * Utils 工具函数统一导出
+ * 提供向后兼容性和便捷导入
+ */
 
-export const openWindow = (url: string, opts?: { target?: TargetContext; [key: string]: any }) => {
-	const { target = '_blank', ...others } = opts || {};
-	window.open(
-		url,
-		target,
-		Object.entries(others)
-			.reduce((preValue: string[], curValue) => {
-				const [key, value] = curValue;
-				return [...preValue, `${key}=${value}`];
-			}, [])
-			.join(',')
-	);
-};
+// UI 相关
+export * from './ui'
 
-export const regexUrl = new RegExp(
-	'^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$',
-	'i'
-);
+// 浏览器相关
+export * from './browser'
 
-interface Node {
-	id: number;
-	children: Node[];
-}
+// 数据处理相关
+export * from './dataprocess'
 
-export const findNode = (root: Node, id: number): Node | null => {
-	if (root === null || root.id === id) {
-		return root;
-	}
+// 路由导航相关
+export * from './navigation'
 
-	if (root.children) {
-		for (let i = 0; i < root.children.length; i += 1) {
-			const node = findNode(root.children[i], id);
-			if (node !== null) {
-				return node;
-			}
-		}
-	}
+// 系统管理相关
+export * from './sys'
 
-	return null;
-};
+// 常量定义相关
+export * from './constants'
 
-export const extractValues = (data: any, path: string) => {
-	const result: any[] = [];
+// 存储相关
+export * from './storage'
 
-	const getValue = (value: any, keys: string[]) => {
-		const type = typeof value;
-		const copyKeys = [...keys];
-		if (copyKeys.length === 0) {
-			return;
-		}
+// 主题相关
+export * from './theme'
 
-		if (Array.isArray(value)) {
-			value.forEach((val) => {
-				if (copyKeys.length >= 1) {
-					getValue(val, copyKeys);
-				} else {
-					result.push(val[copyKeys[0]]);
-				}
-			});
-		} else if (type === 'object') {
-			const key = copyKeys.shift() as string;
-			const val = value[key];
+// HTTP 相关
+export * from './http'
 
-			if (copyKeys.length >= 1) {
-				getValue(val, copyKeys);
-			} else {
-				result.push(val);
-			}
-		}
-	};
-	getValue(data, path.split('.'));
-	return result;
-};
-
-export const getFileSize = (size: number) => {
-	if (!size) return '';
-	const num = 1024.0; // byte
-	if (size < num) return `${size}B`;
-	if (size < num ** 2) return `${(size / num).toFixed(2)}K`; // kb
-	if (size < num ** 3) return `${(size / num ** 2).toFixed(2)}M`; // M
-	if (size < num ** 4) return `${(size / num ** 3).toFixed(2)}G`; // G
-	return `${(size / num ** 4).toFixed(2)}T`; // T
-};
+// 验证相关
+export * from './validation'

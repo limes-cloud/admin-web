@@ -1,52 +1,38 @@
-import { createApp } from 'vue';
-import ArcoVue, { Message } from '@arco-design/web-vue';
-import ArcoVueIcon from '@arco-design/web-vue/es/icon';
-import globalComponents from '@/components';
-import logo from '@/assets/logo.png';
-import router from './router';
-import store, { useAppStore } from './store';
-import directive from './directive';
-import App from './App.vue';
-import '@/assets/style/global.less';
-import '@/utils/interceptor';
-import { formatUrl } from './utils/url';
-import { formatTime, parseTime } from './utils/time';
-import { dataType, densityList, genderList } from './utils/consts';
-import { hasPermission } from './utils/permission';
-// eslint-disable-next-line import/no-unresolved
-import 'virtual:svg-icons-register';
-import '@/assets/style/them/gray.less';
-import '@/assets/style/animation.less';
-import { debounce } from './utils/global';
+import App from './App.vue'
+import { createApp } from 'vue'
+import { initStore } from './store'                 // Store
+import { initRouter } from './router'               // Router
+import '@styles/reset.scss'                         // 重置HTML样式
+import '@styles/app.scss'                           // 全局样式
+import '@styles/el-ui.scss'                         // 优化element样式
+import '@styles/mobile.scss'                        // 移动端样式优化
+import '@styles/change.scss'                        // 主题切换过渡优化
+import '@styles/theme-animation.scss'               // 主题切换动画
+import '@styles/el-light.scss'                      // Element 自定义主题（亮色）
+import '@styles/el-dark.scss'                       // Element 自定义主题（暗色）
+import '@styles/dark.scss'                          // 系统主题
+import '@icons/system/iconfont.js'                  // 系统彩色图标
+import '@icons/system/iconfont.css'                 // 系统图标
+import '@utils/sys/console.ts'                      // 控制台输出内容
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { setupGlobDirectives } from './directives'
+import language from './locales'
 
-const app = createApp(App);
-if (import.meta.env?.MODE === 'development') {
-	app.use(ArcoVue, {});
+document.addEventListener(
+  'touchstart',
+  function () {},
+  { passive: false }
+)
+
+const app = createApp(App)
+initStore(app)
+initRouter(app)
+setupGlobDirectives(app)
+
+app.use(language)
+
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
 }
-app.use(ArcoVueIcon);
-app.use(router);
-app.use(store);
-app.use(globalComponents);
-app.use(directive);
+app.mount('#app')
 
-useAppStore()
-	.loadSystemSetting()
-	.then((res) => {
-		app.config.globalProperties.$dataType = dataType;
-		app.config.globalProperties.$rurl = formatUrl;
-		app.config.globalProperties.$logo = logo;
-		app.config.globalProperties.$formatTime = formatTime;
-		app.config.globalProperties.$parseTime = parseTime;
-		app.config.globalProperties.$densityList = densityList;
-		app.config.globalProperties.$genderList = genderList;
-		app.config.globalProperties.$hasPermission = hasPermission;
-		app.config.globalProperties.$debounce = debounce;
-		document.title = res.title;
-		if (res.logo) {
-			app.config.globalProperties.$logo = res.logo;
-		}
-		app.mount('#app');
-	})
-	.catch((data) => {
-		Message.error(data.message);
-	});
