@@ -39,6 +39,7 @@ import cryptoJs from 'crypto-js';
 import { AxiosResponse } from 'axios';
 import { Message } from '@arco-design/web-vue';
 import { PrepareUploadFileReply } from '@/api/resource/file/type';
+import { rurl } from '@/utils/url';
 
 const emit = defineEmits(['change']);
 const appStore = useAppStore();
@@ -258,7 +259,7 @@ const handleUpload = async (info: PrepareUploadFileReply, binary: ArrayBuffer, o
 			.then((res) => {
 				onProgress(Math.ceil((index + 1) / pArrr.length));
 				if ((index + 1) / pArrr.length) {
-					fileItem.url = res.data.url;
+					fileItem.url = rurl(res.data.key);
 					onSuccess(res.data);
 				}
 			})
@@ -290,7 +291,7 @@ const customRequest = (options: RequestOption) => {
 			const { data } = await PrepareUploadFile(params);
 			// 触发秒传
 			if (data.uploaded) {
-				fileItem.url = data.url;
+				fileItem.url = rurl(data.key as string);
 				onProgress(100);
 				onSuccess(data);
 			} else {

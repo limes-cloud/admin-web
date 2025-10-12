@@ -87,13 +87,12 @@ export interface PrepareUploadFileRequest {
 
 export interface PrepareUploadFileReply {
 	uploaded: boolean;
-	src?: string;
 	chunkSize?: number;
 	chunkCount?: number;
 	uploadId?: string;
 	uploadChunks?: number[];
 	sha?: string;
-	url?: string;
+	key?: string;
 }
 
 export interface UploadFileReply {
