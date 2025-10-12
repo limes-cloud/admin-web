@@ -19,7 +19,9 @@ const useAppStore = defineStore('app', {
 		isLoading: false,
 		loadTitle: '',
 		name: '',
-		changePasswordType: 'password'
+		keyword: 'manager',
+		changePasswordType: 'password',
+		disFooter: new Map()
 	}),
 	getters: {
 		appCurrentSetting(state: AppState): AppState {

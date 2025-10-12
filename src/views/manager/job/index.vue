@@ -1,46 +1,56 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @classify="handleShowClassify"></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
 				:data="tableData"
 				:size="size"
-				:total="total"
-				:pagination="searchForm"
-				@page-change="handlePageChange"
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
+				@role="handleRole"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" :jobs="tableData" @refresh="handleGet"></Form>
+		</div>
+		<a-modal
+			v-model:visible="showRole"
+			title="角色绑定"
+			:modal-style="{ width: '400px' }"
+			:body-style="{ padding: 0, height: '60%', minHeight: '500px', display: 'flex', flexDirection: 'column' }"
+			:footer="false"
+			unmount-on-close
+		>
+			<Role :job-id="jobId" />
+		</a-modal>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Pagination, TableColumn, TableSize } from '@/types/global';
+import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Job, ListJobRequest } from '@/api/manager/job/type';
 import { ListJob } from '@/api/manager/job/api';
+
+import Search from './components/search.vue';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
-import Search from './components/search.vue';
+import Role from './role/index.vue';
 
+const jobId = ref<number>(0);
+const showRole = ref(false);
 const formRef = ref();
-const form = ref<Job>({} as Job);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
-
-const total = ref(0);
+const showGroup = ref(false);
 const searchForm = ref<ListJobRequest>({
 	page: 1,
 	pageSize: 10
@@ -48,16 +58,12 @@ const searchForm = ref<ListJobRequest>({
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '职位名称',
-		dataIndex: 'name'
-	},
-	{
 		title: '职位标识',
 		dataIndex: 'keyword'
 	},
 	{
-		title: '职位权重',
-		dataIndex: 'weight'
+		title: '职位名称',
+		dataIndex: 'name'
 	},
 	{
 		title: '职位描述',
@@ -65,20 +71,15 @@ const columns = ref<TableColumn[]>([
 	},
 	{
 		title: '创建时间',
-		slotName: 'createdAt',
-		width: 170
+		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		slotName: 'updatedAt',
-		width: 170
+		slotName: 'updatedAt'
 	},
 	{
 		title: '操作',
-		dataIndex: 'operations',
-		slotName: 'operations',
-		fixed: 'right',
-		width: 200
+		slotName: 'operations'
 	}
 ]);
 
@@ -87,8 +88,7 @@ const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await ListJob(searchForm.value);
-		tableData.value = data.list as unknown as TableData[];
-		total.value = data.total;
+		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
@@ -96,7 +96,6 @@ const handleGet = async () => {
 
 handleGet();
 
-// 处理查询
 const handleSearch = async (req: ListJobRequest) => {
 	searchForm.value = {
 		...searchForm.value,
@@ -106,29 +105,28 @@ const handleSearch = async (req: ListJobRequest) => {
 	handleGet();
 };
 
-// 处理页面变更
-const handlePageChange = async (page: Pagination) => {
-	searchForm.value.page = page.page;
-	searchForm.value.pageSize = page.pageSize;
-	handleGet();
-};
-
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Job;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (data: Job) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+const handleTableUpdate = (data: Job) => {
+	formRef.value.showUpdateDrawer(data);
 };
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as Job;
-	formRef.value.showAddDrawer();
+	formRef.value.showAddDrawer({ parentId: id });
+};
+
+const handleShowClassify = () => {
+	showGroup.value = true;
+};
+
+const handleRole = (data: Job) => {
+	jobId.value = data.id;
+	showRole.value = true;
 };
 </script>
 

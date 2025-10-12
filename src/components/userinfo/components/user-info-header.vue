@@ -2,49 +2,52 @@
 	<div>
 		<div class="header">
 			<a-space :size="12" direction="vertical" align="center" style="z-index: 99">
-				<Upload
-					:files="[{ url: userInfo.avatar ? userInfo.avatar : $logo }]"
-					:limit="1"
-					:auto-upload="true"
-					directory-path="manager/avatar"
-					@change="handleUploadAvatar"
-				></Upload>
+				<Upload :files="files()" :limit="1" :auto-upload="true" directory-path="manager/avatar" @change="handleUploadAvatar"></Upload>
 				<!-- <a-avatar :size="100">
-					<img alt="avatar" :src="userInfo.avatar ? userInfo.avatar : $logo" />
+					<img alt="avatar" :src="userinfo.avatar ? userinfo.avatar : $logo" />
 				</a-avatar> -->
 				<a-typography-title :heading="6" :style="{ margin: 0, color: '#fff' }">
-					{{ userInfo.name }}
+					{{ userinfo.nickname }}
 				</a-typography-title>
 			</a-space>
 		</div>
 		<div class="user-msg">
 			<div class="msg-item">
 				<div class="label">
-					<icon-user-group size="16" />
-					所属部门
+					<icon-user size="16" />
+					用户账户
 				</div>
 				<div class="desc">
-					{{ userInfo.department?.name }}
+					{{ userinfo.username }}
+				</div>
+			</div>
+			<div class="msg-item">
+				<div class="label">
+					<icon-user-group size="16" />
+					主要部门
+				</div>
+				<div class="desc">
+					{{ userinfo.dept?.name }}
 				</div>
 			</div>
 
 			<div class="msg-item">
 				<div class="label">
 					<icon-safe size="16" />
-					所属角色
+					担任职位
 				</div>
 				<div class="desc">
-					{{ userInfo.role?.name }}
+					{{ userinfo.job?.name }}
 				</div>
 			</div>
 
-			<div class="msg-item">
+			<!-- <div class="msg-item">
 				<div class="label">
 					<icon-mobile size="14" />
 					联系电话
 				</div>
 				<div class="desc">
-					{{ userInfo.phone }}
+					{{ userinfo.phone }}
 				</div>
 			</div>
 
@@ -54,35 +57,40 @@
 					当前邮箱
 				</div>
 				<div class="desc">
-					{{ userInfo.email }}
+					{{ userinfo.email }}
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
+import { ref, getCurrentInstance } from 'vue';
 import { UpdateCurrentUser } from '@/api/manager/user/api';
 import { useUserStore } from '@/store';
 import { FileItem, Message } from '@arco-design/web-vue';
 
-const userInfo = useUserStore();
+const { proxy } = getCurrentInstance() as any;
+const userinfo = useUserStore();
 
 const handleUploadAvatar = (list: FileItem[]) => {
 	if (!list.length) return;
-	UpdateCurrentUser({ avatar: list[0].response.sha }).then(() => {
+	UpdateCurrentUser({ avatar: list[0].response.key }).then(() => {
 		Message.success('头像更换成功');
 	});
 };
-// const uploadCallback = async (files: any[]) => {
-//   // todo更新用户信息
-//   if (files.length) {
-//     console.log({ id: userInfo.id, avatar: files[0].url });
-//     await updateUser({ id: userInfo.id, avatar: files[0].url });
-//     Message.success('更换头像成功');
-//     // userInfo.info();
-//   }
-// };
+
+const files = () => {
+	if (userinfo.avatar) {
+		return [
+			{
+				url: proxy.$rurl(userinfo.avatar, 100, 100),
+				key: userinfo.avatar
+			}
+		];
+	}
+	return [{ url: proxy.$logo }];
+};
 </script>
 
 <style scoped lang="less">

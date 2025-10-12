@@ -23,27 +23,28 @@ if (import.meta.env.VITE_API_BASE_URL) {
 	axios.defaults.headers.common['Content-Type'] = 'application/json;charset=utf8';
 	axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 	axios.defaults.withCredentials = false;
+
 	axios.defaults.timeout = 10000;
 }
 
 if (import.meta.env.VITE_API_BASE_PORT) {
 	axios.defaults.headers.common['Content-Type'] = 'application/json;charset=utf8';
 	axios.defaults.baseURL = `${window.location.protocol}//${window.location.hostname}:${import.meta.env.VITE_API_BASE_PORT}`;
-	axios.defaults.withCredentials = false;
+	axios.defaults.withCredentials = true;
 	axios.defaults.timeout = 10000;
 }
 
 if (window.serverPort) {
 	axios.defaults.headers.common['Content-Type'] = 'application/json;charset=utf8';
 	axios.defaults.baseURL = `${window.location.protocol}//${window.location.hostname}:${window.serverPort}`;
-	axios.defaults.withCredentials = false;
+	axios.defaults.withCredentials = true;
 	axios.defaults.timeout = 10000;
 }
 
 if (window.serverHost) {
 	axios.defaults.headers.common['Content-Type'] = 'application/json;charset=utf8';
 	axios.defaults.baseURL = window.serverHost;
-	axios.defaults.withCredentials = false;
+	axios.defaults.withCredentials = true;
 	axios.defaults.timeout = 10000;
 }
 
@@ -65,6 +66,23 @@ axios.interceptors.request.use(
 		if (!config.data) {
 			config.data = {};
 		}
+
+		if (!config.params) {
+			config.params = {};
+		}
+
+		// 处理params,删除空白字符以及undefined
+		const params = {};
+		const paramsKeys = Object.keys(config.params);
+		paramsKeys.forEach((key) => {
+			const val = config.params[key];
+			if (val !== undefined && val !== null && val !== '') {
+				params[key] = val;
+			}
+		});
+
+		config.params = params;
+
 		return config;
 	},
 	(error) => {
@@ -96,7 +114,6 @@ axios.interceptors.response.use(
 			Message.error('网络请求错误');
 			return Promise.reject(error.message);
 		}
-
 		const res = error.response;
 
 		const { config } = res;

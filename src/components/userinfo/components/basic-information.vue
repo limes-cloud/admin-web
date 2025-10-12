@@ -12,7 +12,7 @@
 		>
 			<a-input v-model="formData.nickname" :max-length="15" placeholder="请输入昵称" />
 		</a-form-item>
-
+		<!-- 
 		<a-form-item
 			field="gender"
 			label="性别"
@@ -28,7 +28,7 @@
 					<a-option :value="index">{{ item }}</a-option>
 				</template>
 			</a-select>
-		</a-form-item>
+		</a-form-item> -->
 
 		<a-form-item>
 			<a-space>
@@ -50,8 +50,7 @@ const userInfo = useUserStore();
 
 const formRef = ref<FormInstance>();
 const formData = ref<UpdateCurrentUserRequest>({
-	nickname: userInfo.nickname,
-	gender: userInfo.gender
+	nickname: userInfo.nickname
 });
 
 const validate = async () => {

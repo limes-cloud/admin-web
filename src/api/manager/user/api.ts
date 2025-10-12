@@ -7,13 +7,10 @@ import {
 	CreateUserReply,
 	CreateUserRequest,
 	UpdateUserRequest,
-	UpdateUserStatusRequest,
 	DeleteUserReply,
 	DeleteUserRequest,
 	ResetUserPasswordRequest,
 	UpdateCurrentUserRequest,
-	UpdateCurrentUserRoleReply,
-	UpdateCurrentUserRoleRequest,
 	UpdateCurrentUserPasswordRequest,
 	UpdateCurrentUserSettingRequest,
 	SendCurrentUserCaptchaReply,
@@ -22,8 +19,13 @@ import {
 	UserLoginReply,
 	UserLoginRequest,
 	UserRefreshTokenReply,
-	ListLoginLogRequest,
-	ListLoginLogReply
+	ListUserDeptRequest,
+	ListUserDeptReply,
+	CreateUserDeptReply,
+	CreateUserDeptRequest,
+	DeleteUserDeptReply,
+	DeleteUserDeptRequest,
+	GetCurrentUserRequest
 } from './type';
 
 // GetUser 获取指定的用户信息
@@ -46,19 +48,14 @@ export function UpdateUser(data: UpdateUserRequest) {
 	return axios.put('/manager/api/v1/user', data);
 }
 
-// UpdateUserStatus 更新用户信息状态
-export function UpdateUserStatus(data: UpdateUserStatusRequest) {
-	return axios.put('/manager/api/v1/user/status', data);
-}
-
 // DeleteUser 删除用户信息
 export function DeleteUser(params: DeleteUserRequest) {
 	return axios.delete<DeleteUserReply>('/manager/api/v1/user', { params });
 }
 
 // GetCurrentUser 获取当前用户信息
-export function GetCurrentUser() {
-	return axios.get<GetUserReply>('/manager/api/v1/user/current');
+export function GetCurrentUser(params?: GetCurrentUserRequest) {
+	return axios.get<GetUserReply>('/manager/api/v1/current/user', { params });
 }
 
 // ResetUserPassword 重置用户密码
@@ -68,12 +65,7 @@ export function ResetUserPassword(data: ResetUserPasswordRequest) {
 
 // UpdateCurrentUser 更新当前用户信息
 export function UpdateCurrentUser(data: UpdateCurrentUserRequest) {
-	return axios.put('/manager/api/v1/user/current/info', data);
-}
-
-// UpdateCurrentUserRole 切换用户当前角色
-export function UpdateCurrentUserRole(data: UpdateCurrentUserRoleRequest) {
-	return axios.put<UpdateCurrentUserRoleReply>('/manager/api/v1/user/current/role', data);
+	return axios.put('/manager/api/v1/current/user', data);
 }
 
 // UpdateCurrentUserPassword 用户修改密码
@@ -83,7 +75,7 @@ export function UpdateCurrentUserPassword(data: UpdateCurrentUserPasswordRequest
 
 // UpdateCurrentUserSetting 用户设置保存
 export function UpdateCurrentUserSetting(data: UpdateCurrentUserSettingRequest) {
-	return axios.put('/manager/api/v1/user/current/setting', data);
+	return axios.put('/manager/api/v1/current/user/setting', data);
 }
 
 // SendCurrentUserCaptcha 发送用户验证吗
@@ -93,25 +85,35 @@ export function SendCurrentUserCaptcha(data: SendCurrentUserCaptchaRequest) {
 
 // GetUserLoginCaptcha 获取用户登陆验证吗
 export function GetUserLoginCaptcha() {
-	return axios.get<GetUserLoginCaptchaReply>('/manager/api/v1/user/login/captcha');
+	return axios.get<GetUserLoginCaptchaReply>('/manager/api/v1/login/captcha');
 }
 
 // UserLogin 用户登陆
 export function UserLogin(data: UserLoginRequest) {
-	return axios.post<UserLoginReply>('/manager/api/v1/user/login', data);
+	return axios.post<UserLoginReply>('/manager/api/v1/login', data);
 }
 
 // UserLogout 用户退出
 export function UserLogout() {
-	return axios.post('/manager/api/v1/user/logout');
+	return axios.post('/manager/api/v1/logout');
 }
 
 // UserRefreshToken 用户刷新token
 export function UserRefreshToken() {
-	return axios.post<UserRefreshTokenReply>('/manager/api/v1/user/token/refresh');
+	return axios.post<UserRefreshTokenReply>('/manager/api/v1/token/refresh');
 }
 
-// ListLoginLog 获取登陆日志
-export function ListLoginLog(params: ListLoginLogRequest) {
-	return axios.get<ListLoginLogReply>('/manager/api/v1/user/login/logs', { params });
+// ListUserDept 获取用户部门列表
+export function ListUserDept(params?: ListUserDeptRequest) {
+	return axios.get<ListUserDeptReply>('/manager/api/v1/user/depts', { params });
+}
+
+// CreateUserDept 创建用户部门信息
+export function CreateUserDept(data: CreateUserDeptRequest) {
+	return axios.post<CreateUserDeptReply>('/manager/api/v1/user/dept', data);
+}
+
+// DeleteUserDept 删除用户部门信息
+export function DeleteUserDept(params: DeleteUserDeptRequest) {
+	return axios.delete<DeleteUserDeptReply>('/manager/api/v1/user/dept', { params });
 }

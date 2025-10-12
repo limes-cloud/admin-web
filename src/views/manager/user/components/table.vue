@@ -9,17 +9,13 @@
 			:bordered="false"
 			:pagination="false"
 			:size="size"
-			:scroll="{
-				x: 2000,
-				y: 200
-			}"
 		>
 			<template #role="{ record }">
 				{{ record.role?.name }}
 			</template>
 
 			<template #team="{ record }">
-				{{ record.department?.name }}
+				{{ record.Dept?.name }}
 			</template>
 
 			<template #avatar="{ record }">
@@ -63,30 +59,7 @@
 			</template>
 
 			<template #operations="{ record }">
-				<a-space v-if="record.id != 1" class="cursor-pointer">
-					<a-tag v-permission="'manager:user:update'" color="orangered" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						修改
-					</a-tag>
-
-					<template v-if="$hasPermission('manager:user:reset:password')">
-						<a-popconfirm content="您确认重置此用户密码？" type="warning" @ok="handleResetPassword(record.id)">
-							<a-tag color="red">
-								<template #icon><icon-refresh /></template>
-								重置密码
-							</a-tag>
-						</a-popconfirm>
-					</template>
-
-					<template v-if="$hasPermission('manager:user:delete')">
-						<a-popconfirm content="您确认删除此用户" type="warning" @ok="handleDelete(record.id)">
-							<a-tag color="red">
-								<template #icon><icon-delete /></template>
-								删除
-							</a-tag>
-						</a-popconfirm>
-					</template>
-				</a-space>
+				<Operation v-if="record.id != 1" :data="record" :list="operations"></Operation>
 			</template>
 		</a-table>
 		<a-pagination
@@ -108,10 +81,10 @@ import Modal from '@arco-design/web-vue/es/modal';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { watch, ref } from 'vue';
 import { User } from '@/api/manager/user/type';
-import { DeleteUser, ResetUserPassword, UpdateUserStatus } from '@/api/manager/user/api';
+import { DeleteUser, ResetUserPassword, UpdateUser } from '@/api/manager/user/api';
 import { Message } from '@arco-design/web-vue';
 
-const emit = defineEmits(['refresh', 'update', 'add', 'pageChange']);
+const emit = defineEmits(['refresh', 'update', 'add', 'dept', 'role', 'pageChange']);
 
 const props = defineProps<{
 	columns: TableColumn[];
@@ -134,6 +107,56 @@ watch(
 	},
 	{ deep: true, immediate: true }
 );
+
+const operations = [
+	{
+		icon: 'user-group',
+		text: '部门绑定',
+		color: 'arcoblue',
+		permission: 'manager:user:dept',
+		click: (record: User) => {
+			emit('dept', record);
+		}
+	},
+	// {
+	// 	icon: 'user-group',
+	// 	text: '详细信息',
+	// 	color: 'arcoblue',
+	// 	permission: 'manager:user:dept',
+	// 	click: (record: User) => {
+	// 		emit('dept', record);
+	// 	}
+	// },
+	{
+		icon: 'edit',
+		text: '修改用户',
+		color: 'arcoblue',
+		permission: 'manager:user:update',
+		click: (record: User) => {
+			emit('update', record);
+		}
+	},
+	{
+		icon: 'refresh',
+		popconfirm: true,
+		text: '重置密码',
+		color: 'warning',
+		permission: 'manager:user:reset:password',
+		click: (record: User) => {
+			handleResetPassword(record.id);
+		}
+	},
+	{
+		icon: 'delete',
+		popconfirm: true,
+		text: '删除用户',
+		color: 'red',
+		permission: 'manager:user:delete',
+		click: (record: User) => {
+			handleDelete(record.id);
+		}
+	}
+];
 
 const pageChange = (current: number) => {
 	page.value.page = current;
@@ -164,7 +187,7 @@ const updateStatus = (record: User) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateUserStatus({ id: record.id, status: record.status as boolean });
+			await UpdateUser({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

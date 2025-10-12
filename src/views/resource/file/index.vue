@@ -1,40 +1,43 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<div
-			class="general-card"
-			:style="{
-				display: 'flex',
-				flexDirection: 'row',
-				height: 'calc(100vh - ' + pageOhterHeight + 'px' + ')'
-			}"
-		>
-			<div class="directory">
-				<DirectoryTree @select-directory="handleSelectDirectory"></DirectoryTree>
+
+		<Container v-slot="value">
+			<div
+				class="file-card"
+				:style="{
+					display: 'flex',
+					flexDirection: 'row',
+					height: value.height + 'px'
+				}"
+			>
+				<div class="directory">
+					<DirectoryTree @select-directory="handleSelectDirectory"></DirectoryTree>
+				</div>
+				<div class="file">
+					<Header
+						:disable="!ListFileParams.directoryId"
+						:selectd-length="selectFile.length"
+						:directory-id="ListFileParams.directoryId"
+						@upload="handleUploadFile"
+						@change-show-card="handleChangeShowCard"
+						@delete-file="handleBatchDeleteFile"
+						@search-file="handlerSearchFile"
+						@export="handleExportFile"
+					></Header>
+					<Body
+						:total="fileTotal"
+						:show-card="showCard"
+						:file-list="fileList"
+						:multiple-select="false"
+						@select-file="handleSelectFile"
+						@delete-file="handleDeleteFile"
+						@update-file="handleUpdateFile"
+						@page-change="handlePageChange"
+					></Body>
+				</div>
 			</div>
-			<div class="file">
-				<Header
-					:disable="!ListFileParams.directoryId"
-					:selectd-length="selectFile.length"
-					:directory-id="ListFileParams.directoryId"
-					@upload="handleUploadFile"
-					@change-show-card="handleChangeShowCard"
-					@delete-file="handleBatchDeleteFile"
-					@search-file="handlerSearchFile"
-					@export="handleExportFile"
-				></Header>
-				<Body
-					:total="fileTotal"
-					:show-card="showCard"
-					:file-list="fileList"
-					:multiple-select="false"
-					@select-file="handleSelectFile"
-					@delete-file="handleDeleteFile"
-					@update-file="handleUpdateFile"
-					@page-change="handlePageChange"
-				></Body>
-			</div>
-		</div>
+		</Container>
 	</div>
 </template>
 
@@ -52,13 +55,6 @@ import Body from './components/body.vue';
 import DirectoryTree from './components/directory.vue';
 
 const appStore = useAppStore();
-const pageOhterHeight = ref(56 + 58 + 20);
-if (appStore.footer) {
-	pageOhterHeight.value += 40;
-}
-if (appStore.tabBar) {
-	pageOhterHeight.value += 32;
-}
 
 const selectFile = ref<number[]>([]);
 const showCard = ref(false);
@@ -133,11 +129,7 @@ const handleUpdateFile = async (data: UpdateFileRequest) => {
 };
 
 const handleExportFile = async (name: string) => {
-	const info = useUserStore().$state;
 	await ExportFile({
-		userId: info.id,
-		departmentId: info.department?.id as number,
-		scene: 'ResourceExport',
 		name,
 		ids: selectFile.value
 	});
@@ -157,9 +149,7 @@ export default {
 
 <style scoped lang="less">
 .container {
-	padding: 0 20px 20px;
-
-	.general-card {
+	.file-card {
 		padding-top: 0;
 
 		.directory {

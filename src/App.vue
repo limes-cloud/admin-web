@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading" class="loadingBox">
-		<a-spin dot :tip="(title as string)" />
+		<a-spin dot :tip="title" />
 	</div>
 	<router-view />
 </template>
@@ -8,10 +8,12 @@
 <script lang="ts" setup>
 import { useAppStore } from '@/store';
 import { computed } from 'vue';
+import { pageHeight } from './utils/global';
 
 const appStore = useAppStore();
 const loading = computed(() => appStore.isLoading);
-const title = computed(() => appStore.loadingTitle);
+const title = computed(() => appStore.loadingTitle as string);
+const ph = pageHeight();
 </script>
 
 <style lang="less" scoped>
@@ -84,7 +86,11 @@ const title = computed(() => appStore.loadingTitle);
 }
 
 .container {
-	padding: 0 20px 20px;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 0 20px;
+	overflow: hidden !important;
 
 	:deep(.arco-list-content) {
 		overflow-x: hidden;
@@ -92,6 +98,35 @@ const title = computed(() => appStore.loadingTitle);
 
 	:deep(.arco-card-meta-title) {
 		font-size: 14px;
+	}
+
+	.general-card {
+		display: flex; /* 开启Flexbox布局 */
+		flex-direction: column; /* 子元素垂直排列 */
+		flex-grow: 1;
+		height: v-bind(ph);
+		padding: 20px;
+		color: var(--color-text-2);
+		background-color: var(--color-bg-1);
+		-webkit-font-smoothing: antialiased;
+	}
+
+	.arco-menu-vertical .arco-menu-item,
+	.arco-menu-vertical .arco-menu-group-title,
+	.arco-menu-vertical .arco-menu-pop-header,
+	.arco-menu-vertical .arco-menu-inline-header {
+		padding: 0 12px;
+		line-height: 32px;
+	}
+}
+
+.arco-modal-body {
+	.container {
+		padding: 0;
+	}
+
+	.general-card {
+		height: 100% !important;
 	}
 }
 
@@ -107,5 +142,23 @@ const title = computed(() => appStore.loadingTitle);
 
 .arco-tree-node-title-text {
 	width: 100%;
+}
+
+.line-1 {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.scrollbar {
+	.arco-scrollbar-track-direction-vertical {
+		width: 6px;
+	}
+
+	.arco-scrollbar-thumb-bar {
+		width: 3px;
+	}
 }
 </style>

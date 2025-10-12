@@ -8,7 +8,7 @@
 			:limit="limit"
 			:multiple="multiple"
 			:accept="accept"
-			:list-type="(listType as ListType)"
+			:list-type="assertedListType()"
 			:show-upload-button="true"
 			:file-list="uploadedFileList"
 			:show-file-list="true"
@@ -17,7 +17,10 @@
 			@change="uploadChange"
 		>
 			<template #upload-button>
-				<div class="upload-card" :class="shape">
+				<template v-if="$slots.default">
+					<slot></slot>
+				</template>
+				<div v-else class="upload-card" :class="shape">
 					<icon-camera v-if="accept == 'image/*'" class="icon" />
 					<icon-plus v-else class="icon"></icon-plus>
 					<span v-if="text" class="text">{{ text }}</span>
@@ -99,6 +102,9 @@ const props = defineProps({
 	rename: {
 		type: String
 	},
+	store: {
+		type: String
+	},
 	autoUpload: Boolean
 });
 const uploadRef = ref();
@@ -120,6 +126,10 @@ if (props.height) {
 if (props.limit === 1) {
 	dommargin.value = '0px !important';
 }
+
+const assertedListType = (): ListType => {
+	return props.listType as ListType;
+};
 
 const GetUploadList = (): FileItem[] => {
 	return uploadedFileList.value;
@@ -208,7 +218,8 @@ const getPrepareUploadReq = async (data: any, file: File) => {
 		directoryPath: props.directoryPath,
 		name,
 		sha: hash,
-		size: Math.ceil(file.size / 1024)
+		size: Math.ceil(file.size / 1024),
+		store: props.store
 	};
 };
 

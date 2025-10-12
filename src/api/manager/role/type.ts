@@ -1,10 +1,13 @@
+import { Entity } from '../entity/type';
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface GetRoleMenuIdsRequest {
 	roleId: number;
+	appId: number;
 }
 
 export interface GetRoleMenuIdsReply {
-	list: number[];
+	menuIds: number[];
 }
 
 export interface ListRoleRequest {
@@ -19,7 +22,9 @@ export interface Role {
 	keyword: string;
 	status?: boolean;
 	dataScope: string;
-	departmentIds?: string;
+	deptIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
@@ -36,8 +41,6 @@ export interface CreateRoleRequest {
 	name: string;
 	keyword: string;
 	status?: boolean;
-	dataScope: string;
-	departmentIds?: string;
 	description?: string;
 }
 
@@ -47,10 +50,9 @@ export interface CreateRoleReply {
 
 export interface UpdateRoleRequest {
 	id: number;
-	parentId: number;
-	name: string;
-	dataScope: string;
-	departmentIds?: string;
+	parentId?: number;
+	name?: string;
+	status?: boolean;
 	description?: string;
 }
 
@@ -79,7 +81,9 @@ export interface GetRoleReply {
 	keyword: string;
 	status?: boolean;
 	dataScope: string;
-	departmentIds?: string;
+	deptIds?: string;
+	jobScope: string;
+	jobIds?: string;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
@@ -87,5 +91,65 @@ export interface GetRoleReply {
 
 export interface UpdateRoleMenuRequest {
 	roleId: number;
+	appId: number;
 	menuIds: number[];
+}
+
+export interface ListRoleEntityRequest {
+	page: number;
+	pageSize: number;
+	roleId: number;
+	appId?: number;
+	entityId?: number;
+}
+
+export interface RoleEntity {
+	id: number;
+	roleId: number;
+	entityId: number;
+	action: string;
+	scope: string;
+	fields: string;
+	rules: string;
+	createdAt: number;
+	updatedAt: number;
+	entity: Entity;
+}
+
+export interface ListRoleEntityReply {
+	total: number;
+	list: RoleEntity[];
+}
+
+export interface CreateRoleEntityRequest {
+	roleId: number;
+	entityId?: number;
+	appId: number;
+	action: string;
+	scope: string;
+	fields: string;
+	rules: string;
+}
+
+export interface CreateRoleEntityReply {
+	id: number;
+}
+
+export interface UpdateRoleEntityRequest {
+	id: number;
+	roleId: number;
+	appId: number;
+	entityId?: number;
+	action: string;
+	scope: string;
+	fields: string;
+	rules: string;
+}
+
+export interface DeleteRoleEntityRequest {
+	id: number;
+}
+
+export interface DeleteRoleEntityReply {
+	total: number;
 }

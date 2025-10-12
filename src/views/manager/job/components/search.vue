@@ -1,5 +1,5 @@
 <template>
-	<a-row v-permission="'manager:job:query'">
+	<a-row>
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
@@ -36,9 +36,10 @@
 </template>
 
 <script lang="ts" setup>
+import { ListJobRequest } from '@/api/manager/job/type';
 import { ref } from 'vue';
 
-const form = ref<{ name?: string; keyword?: string }>({});
+const form = ref<ListJobRequest>({});
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {

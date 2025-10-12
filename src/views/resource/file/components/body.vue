@@ -10,7 +10,7 @@
 							</div>
 
 							<div v-if="fileType(file) === 'image'" class="image">
-								<img :src="$rurl(file.url, 100, 100)" />
+								<img :src="$rurl(file.key, 100, 100)" />
 								<span class="preview" @click.stop="openFile(file)">预览</span>
 							</div>
 
@@ -18,7 +18,7 @@
 
 							<div v-if="fileType(file) === 'video'" class="video">
 								<video :id="'video-' + file.id" preload="metadata">
-									<source :src="$rurl(file.url)" />
+									<source :src="$rurl(file.key)" />
 								</video>
 								<div class="cover">
 									<icon-play-circle class="icon" size="28" @click="openFile(file)" />
@@ -43,11 +43,10 @@
 
 			<div v-else class="list content">
 				<a-table
-					v-model:selectedKeys="selectd"
+					v-model:selected-keys="selectd"
 					row-key="id"
 					:columns="columns"
 					:data="fileList"
-					:sticky-header="400"
 					:scroll="{
 						x: '100%',
 						y: '100%'
@@ -70,8 +69,8 @@
 						</div>
 					</template>
 
-					<template #created_at="{ record }">
-						{{ $formatTime(record.created_at) }}
+					<template #createdAt="{ record }">
+						{{ $formatTime(record.createdAt) }}
 					</template>
 
 					<template #size="{ record }">
@@ -81,10 +80,10 @@
 					<template #operations="{ record }">
 						<a-space class="cursor-pointer">
 							<span style="color: #165dff">
-								<icon-copy v-copy="$rurl(record.url)" size="15" />
+								<icon-copy v-copy="$rurl(record.key)" size="15" />
 							</span>
 
-							<a-popconfirm content="您确认要下载此文件？" @ok="handleDownloadFile($rurl(record.url))">
+							<a-popconfirm content="您确认要下载此文件？" @ok="handleDownloadFile($rurl(record.key))">
 								<span style="color: #165dff">
 									<icon-cloud-download size="15" />
 								</span>
@@ -147,7 +146,7 @@
 				<div>{{ curFile.name }}</div>
 			</template>
 			<video v-if="playVideoVisible" class="video-model" autoplay controls preload="metadata">
-				<source :src="$rurl(curFile.url)" />
+				<source :src="$rurl(curFile.key)" />
 				当前浏览器不支持 video直接播放
 			</video>
 		</a-modal>
@@ -170,7 +169,7 @@
 			<template #title>
 				<div>{{ curFile.name }}</div>
 			</template>
-			<img v-if="showImageVisible" style="width: 100%" :src="$rurl(curFile.url)" />
+			<img v-if="showImageVisible" style="width: 100%" :src="$rurl(curFile.key)" />
 		</a-modal>
 
 		<a-modal v-model:visible="updateVisible" simple title="修改文件名" @cancel="updateVisible = false" @before-ok="handleUpdateFile">
@@ -249,8 +248,7 @@ const columns = [
 	{
 		title: '上传时间',
 		dataIndex: 'createdAt',
-		slotName: 'createdAt',
-		width: 200
+		slotName: 'createdAt'
 	},
 	{
 		title: '操作',
