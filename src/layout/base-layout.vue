@@ -14,6 +14,14 @@
 				<a-layout style="flex-direction: row">
 					<component :is="view" :key="appStore.layout" />
 					<a-drawer v-if="hideMenu" :visible="drawerVisible" placement="left" :footer="false" mask-closable :closable="false" @cancel="drawerCancel">
+						<template #header>
+							<a-space>
+								<img alt="logo" :src="$logo" style="width: 50px; height: 50px" />
+								<a-typography-title :style="{ margin: 0, fontSize: '18px', width: '100%' }" :heading="5">
+									{{ appStore.currentAppinfo.title }}
+								</a-typography-title>
+							</a-space>
+						</template>
 						<Menu />
 					</a-drawer>
 
@@ -47,7 +55,7 @@ const userStore = useUserStore();
 
 const watermark = computed(() => {
 	if (appStore.watermark) {
-		return `${appStore.watermark}-${userStore.name}`;
+		return `${appStore.watermark}-${userStore.username}`;
 	}
 	return '';
 });
@@ -69,18 +77,19 @@ const drawerCancel = () => {
 	drawerVisible.value = false;
 };
 
-watchEffect(() => {
+const getView = () => {
 	switch (appStore.layout) {
 		case 'twoColumns':
-			view.value = TwoColumnsLayout;
-			break;
+			return TwoColumnsLayout;
 		case 'topMenu':
-			view.value = undefined;
-			break;
+			return undefined;
 		default:
-			view.value = DefaultLayout;
-			break;
+			return DefaultLayout;
 	}
+};
+
+watchEffect(() => {
+	view.value = getView();
 });
 
 provide('toggleDrawerMenu', () => {

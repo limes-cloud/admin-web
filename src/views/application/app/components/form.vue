@@ -1,12 +1,5 @@
 <template>
-	<a-drawer
-		v-model:visible="visible"
-		unmount-on-close
-		:title="isAdd ? '新建' : '修改'"
-		width="380px"
-		@cancel="visible = false"
-		@before-ok="handleSubmit"
-	>
+	<Popup v-model:visible="visible" unmount-on-close :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="right" layout="horizontal" auto-label-width>
 			<a-form-item
 				field="logo"
@@ -50,16 +43,16 @@
 
 			<a-form-item
 				field="keyword"
-				label="应用标志"
+				label="应用标识"
 				:rules="[
 					{
 						required: true,
-						message: '应用标志是必填项'
+						message: '应用标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入应用标志" allow-clear />
+				<a-input v-model="form.keyword" placeholder="请输入应用标识" allow-clear />
 			</a-form-item>
 
 			<a-form-item
@@ -132,7 +125,7 @@
 				<a-textarea v-model="form.description" placeholder="请输入应用描述" allow-clear />
 			</a-form-item>
 		</a-form>
-	</a-drawer>
+	</Popup>
 </template>
 
 <script lang="ts" setup>
@@ -261,6 +254,6 @@ const files = () => {
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.logo = file.response.sha;
+	form.value.logo = file.response.key;
 };
 </script>

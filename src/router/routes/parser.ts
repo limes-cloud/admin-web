@@ -3,6 +3,18 @@ import { Menu } from '@/api/manager/menu/type';
 import { DEFAULT_LAYOUT } from './base';
 import { App, Component, Home } from '../types';
 
+function paramsToObject(query: string) {
+	if (query === '') {
+		return {};
+	}
+	const params = new URLSearchParams(query);
+	const obj: Record<string, string> = {};
+	params.forEach((value, key) => {
+		obj[key] = value;
+	});
+	return obj;
+}
+
 class Parser {
 	// 应用名称集合
 	apps: App[] = [];
@@ -45,7 +57,7 @@ class Parser {
 			// 获取指令/路由/首页
 			const routers: RouteRecordNormalized[] = [];
 			this.apiRouters = [];
-			this.handler([{ ...menu }], routers, false, menu.keyword as string);
+			this.handler([{ ...menu }], routers, false, menu.keyword as string, '');
 
 			if (routers.length && routers[0].children.length) {
 				if (this.home) this.homes.set(menu.keyword as string, { ...this.home });
@@ -87,7 +99,7 @@ class Parser {
 	};
 
 	// handler 加载菜单以及指令
-	private handler = (menus: Menu[], routers: RouteRecordNormalized[], h: boolean, key: string) => {
+	private handler = (menus: Menu[], routers: RouteRecordNormalized[], h: boolean, key: string, parentKey: string) => {
 		menus.forEach((menu) => {
 			let hidden: boolean = h;
 			// 处理菜单
@@ -134,23 +146,30 @@ class Parser {
 				const isHidden = (apiPage ? true : !!menu.isHidden) || hidden;
 				hidden = isHidden;
 
+				// 格式化path, /a/1?id=2 分割出path和params
+				const [pathStr, paramsStr] = menu.path.split('?');
+
 				router = {
-					path: menu.path,
+					path: pathStr,
 					name: keyword,
 					component,
 					redirect: menu.redirect,
 					activeMenu: keyword,
 					children: [],
 					meta: {
+						params: paramsToObject(paramsStr),
 						keyword: key,
 						title: menu.title,
 						icon: `icon-${menu.icon}`,
 						hideInMenu: isHidden,
 						order: -Number(menu.weight),
 						ignoreCache: !menu.isCache,
-						noAffix: !menu.isAffix
+						noAffix: !menu.isAffix,
+						pk: parentKey,
+						notLayout: menu.component !== 'Layout'
 					}
 				};
+
 				if (!apiPage) routers.push(router);
 				else this.apiRouters.push(router);
 			}
@@ -163,9 +182,9 @@ class Parser {
 			// 处理子菜单;
 			if (menu.children) {
 				if (router) {
-					this.handler(menu.children, router.children, hidden, key);
+					this.handler(menu.children, router.children, hidden, key, router.name);
 				} else {
-					this.handler(menu.children, routers, hidden, key);
+					this.handler(menu.children, routers, hidden, key, '');
 				}
 			}
 		});

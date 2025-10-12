@@ -8,8 +8,8 @@
 						<a-input v-model="form.config.label" allow-clear placeholder="请输入标题" />
 					</a-form-item>
 
-					<a-form-item label="字段标志" :rules="[{ required: true, message: '字段标志是必填项' }]">
-						<a-input v-model="form.field" allow-clear placeholder="请输入字段标志" />
+					<a-form-item label="字段标识" :rules="[{ required: true, message: '字段标识是必填项' }]">
+						<a-input v-model="form.field" allow-clear placeholder="请输入字段标识" />
 					</a-form-item>
 
 					<a-form-item v-if="form.type != 'number'" label="输入提示" :rules="[{ required: true, message: '提示是必填项' }]">

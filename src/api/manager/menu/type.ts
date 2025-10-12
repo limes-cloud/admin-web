@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 export interface ListMenuRequest {
+	appId: number;
 	title?: string;
+	filterBaseApi?: boolean;
+	filterRoot?: boolean;
+	filterTenant?: boolean;
 }
 
 export interface Menu {
 	id: number;
+	appId: number;
 	parentId: number;
 	title: string;
 	type: string;
@@ -31,7 +36,7 @@ export interface ListMenuReply {
 	list: Menu[];
 }
 
-export interface ListMenuByCurRoleReply {
+export interface ListCurrentMenuReply {
 	total: number;
 	list: Menu[];
 }

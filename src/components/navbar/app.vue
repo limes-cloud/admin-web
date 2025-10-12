@@ -6,7 +6,7 @@ import { getHomeByMenu, homeTransTag } from '@/router/guard/permission';
 import router from '@/router';
 import { Button, Doption, Dropdown, TypographyText } from '@arco-design/web-vue';
 import Menu from '@/components/menu/index.vue';
-
+import { rurl } from '@/utils/url';
 export default defineComponent({
 	emit: ['collapse'],
 	setup(_, { attrs }) {
@@ -33,7 +33,9 @@ export default defineComponent({
 			function travel(apps: App[], nodes = []) {
 				apps.forEach((app) => {
 					// This is demo, modify nodes as needed
-					const icon = () => h(compile(`<icon-${app.icon}/>`));
+					// const icon = () => h(compile(`<icon-${app.icon}/>`));
+					const icon = () => h(compile('<a-avatar :size="32" shape="square"><img alt="avatar" src="' + rurl(app.icon) + '"/></a-avatar>'));
+
 					const node = (
 						<a-menu-item key={app.keyword} v-slots={{ icon }} onClick={() => switchApp(app)}>
 							{app.title}

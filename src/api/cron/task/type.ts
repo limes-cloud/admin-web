@@ -80,6 +80,8 @@ export interface GetTaskReply {
 	maxExecTime: number;
 	version: string;
 	description?: string;
+	start?: number;
+	end?: number;
 	createdAt: number;
 	updatedAt: number;
 	group?: Name;
@@ -116,6 +118,8 @@ export interface Task {
 	maxExecTime: number;
 	version: string;
 	description?: string;
+	start?: number;
+	end?: number;
 	createdAt: number;
 	updatedAt: number;
 }
@@ -141,6 +145,10 @@ export interface CreateTaskRequest {
 	retryWaitTime: number;
 	maxExecTime: number;
 	description?: string;
+	execCycle: boolean;
+	startAndEnd: number[];
+	start?: number;
+	end?: number;
 }
 
 export interface CreateTaskReply {
@@ -163,6 +171,10 @@ export interface UpdateTaskRequest {
 	retryWaitTime: number;
 	maxExecTime: number;
 	description?: string;
+	execCycle: boolean;
+	startAndEnd: number[];
+	start?: number;
+	end?: number;
 }
 
 export interface UpdateTaskStatusRequest {

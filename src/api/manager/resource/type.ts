@@ -4,11 +4,11 @@ export interface GetResourceRequest {
 }
 
 export interface GetResourceReply {
-	departmentIds: number[];
+	deptIds: number[];
 }
 
 export interface UpdateResourceRequest {
 	keyword: string;
 	resourceId: number;
-	departmentIds: number[];
+	deptIds: number[];
 }

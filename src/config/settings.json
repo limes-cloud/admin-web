@@ -19,5 +19,6 @@
 	"watermark":"",
 	"copyright":"",
 	"language": "zh_CN",
-	"animation": "gp-slide-down"
+	"animation": "gp-slide-down",
+	"popupType":"modal"
 }

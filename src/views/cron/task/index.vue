@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search :groups="groups" @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @show-group="showGroup = true"></Tool>
 			<Table
@@ -17,11 +17,11 @@
 				@refresh="handleGet"
 			></Table>
 			<Form ref="formRef" :groups="groups" @refresh="handleGet"></Form>
-		</a-card>
+		</div>
 		<a-modal
 			v-model:visible="showGroup"
 			title="任务分组"
-			:modal-style="{ height: '80%', width: '80%', maxWidth: '800px' }"
+			:modal-style="{ width: '80%', maxWidth: '800px' }"
 			:body-style="{ padding: 0 }"
 			:footer="false"
 		>
@@ -29,7 +29,7 @@
 		</a-modal>
 		<a-modal
 			v-model:visible="showLog"
-			:modal-style="{ height: '80%', width: '80%', maxWidth: '900px' }"
+			:modal-style="{ width: '80%', maxWidth: '900px' }"
 			unmount-on-close
 			title="任务日志"
 			:body-style="{ padding: 0, height: 'calc(100% - 48px)' }"

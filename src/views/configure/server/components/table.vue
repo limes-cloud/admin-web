@@ -106,7 +106,7 @@ const updateStatus = (record: Server) => {
 	const status = record.status ? '启用' : '禁用';
 	Modal.info({
 		title: '状态变更提示',
-		content: () => `您确认要 '${status}'此环境？`,
+		content: () => `您确认要 '${status}'此服务？`,
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {

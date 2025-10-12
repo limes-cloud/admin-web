@@ -1,13 +1,13 @@
 <template>
 	<div class="navbar">
 		<div class="left-side" :style="{ width: appStore.menuWidth + 'px' }">
-			<a-space>
+			<a-space v-if="appStore.device !== 'mobile'">
 				<img alt="logo" :src="$logo" style="width: 50px; height: 50px" />
 				<a-typography-title :style="{ margin: 0, fontSize: '18px', width: '100%', minWidth: titleWidth() }" :heading="5" :ellipsis="true">
 					{{ appStore.currentAppinfo.title }}
 				</a-typography-title>
-				<!-- <icon-menu-fold v-if="appStore.device === 'mobile'" style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" /> -->
 			</a-space>
+			<icon-menu-fold v-else style="font-size: 22px; cursor: pointer" @click="toggleDrawerMenu" />
 		</div>
 		<div v-if="appVisable" class="center-side">
 			<App />
@@ -71,25 +71,11 @@
 			</li>
 			<li>
 				<a-dropdown trigger="click">
-					<a-avatar :size="32" :style="{ marginRight: '8px', cursor: 'pointer' }">
-						<img v-if="avatar" alt="avatar" :src="avatar" />
+					<a-avatar shape="square" :size="32" :style="{ marginRight: '8px', cursor: 'pointer' }">
+						<img v-if="avatar" alt="avatar" :src="$rurl(avatar, 100, 100)" />
 						<img v-else alt="avatar" :src="$logo" />
 					</a-avatar>
 					<template #content>
-						<a-dsubmenu v-if="roles.length > 1" trigger="hover">
-							<template #default>
-								<a-space>
-									<icon-tag />
-									<span>切换角色</span>
-								</a-space>
-							</template>
-							<template #content>
-								<template v-for="item in roles" :key="item.keyword">
-									<a-doption :disabled="userStore.roleId == item.id" @click="switchRoles(item.id)">{{ item.name }}</a-doption>
-								</template>
-							</template>
-						</a-dsubmenu>
-
 						<a-doption>
 							<a-space @click="showUserinfoVisible = true">
 								<icon-user />
@@ -135,10 +121,6 @@ const appVisable = computed(() => {
 	return appStore.apps.length > 1 && appStore.layout !== 'twoColumns';
 });
 
-const roles = computed((): Role[] => {
-	return userStore.roles as Role[];
-});
-
 const theme = computed(() => {
 	return appStore.theme;
 });
@@ -178,10 +160,8 @@ const handleToggleTheme = () => {
 const handleLogout = () => {
 	logout();
 };
-const switchRoles = async (role: number) => {
-	userStore.switchRoles(role);
-};
-// const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
+
+const toggleDrawerMenu = inject('toggleDrawerMenu') as () => void;
 </script>
 
 <style scoped lang="less">

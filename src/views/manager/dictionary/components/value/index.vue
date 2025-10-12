@@ -1,5 +1,5 @@
 <template>
-	<div class="container">
+	<template v-if="dictionary.id">
 		<Search @search="handleSearch"></Search>
 		<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 		<Table
@@ -8,15 +8,23 @@
 			:data="tableData"
 			:size="size"
 			:total="total"
-			:data-type="type"
+			:data-type="dictionary.type"
 			:pagination="searchForm"
 			@page-change="handlePageChange"
 			@add="handleTableAdd"
 			@update="handleTableUpdate"
 			@refresh="handleGet"
 		></Table>
-		<Form ref="formRef" :dictionary-id="id" :values="tableData" :data="form" :data-type="type" @refresh="handleGet"></Form>
-	</div>
+		<Form ref="formRef" :dictionary-id="dictionary.id" :values="tableData" :data="form" :data-type="dictionary.type" @refresh="handleGet"></Form>
+	</template>
+	<template v-else>
+		<div class="empty">
+			<div class="empty-content">
+				<svgIcon name="empty-data" :size="180" text="请选择应用" />
+				请选择字典
+			</div>
+		</div>
+	</template>
 </template>
 
 <script lang="ts" setup>
@@ -24,13 +32,12 @@ import { ref } from 'vue';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { ListDictionaryValue } from '@/api/manager/dictionary/api';
-import { DictionaryValue, ListDictionaryValueRequest } from '@/api/manager/dictionary/type';
+import { Dictionary, DictionaryValue, ListDictionaryValueRequest } from '@/api/manager/dictionary/type';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 
-const props = defineProps<{ id: number; type: string }>();
 const formRef = ref();
 const form = ref<DictionaryValue>({} as DictionaryValue);
 const { setLoading } = useLoading(true);
@@ -38,10 +45,11 @@ const loading = ref(false);
 const tableData = ref<DictionaryValue[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
+const dictionary = ref<Dictionary>({ id: 0, type: '' } as Dictionary);
+
 const searchForm = ref<ListDictionaryValueRequest>({
 	page: 1,
-	pageSize: 10,
-	dictionaryId: props.id
+	pageSize: 10
 });
 
 const columns = ref<TableColumn[]>([
@@ -82,8 +90,7 @@ const columns = ref<TableColumn[]>([
 	{
 		title: '操作',
 		slotName: 'operations',
-		fixed: 'right',
-		width: 200
+		fixed: 'right'
 	}
 ]);
 
@@ -91,6 +98,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
+		searchForm.value.dictionaryId = dictionary.value.id;
 		const { data } = await ListDictionaryValue(searchForm.value);
 		tableData.value = data.list;
 		total.value = data.total;
@@ -98,8 +106,6 @@ const handleGet = async () => {
 		setLoading(false);
 	}
 };
-
-handleGet();
 
 // 处理查询
 const handleSearch = async (req: ListDictionaryValueRequest) => {
@@ -119,7 +125,7 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 //  处理tool按钮新建
-const handleToolAdd = () => {
+const handleToolAdd = (pid: number) => {
 	form.value = {} as DictionaryValue;
 	formRef.value.showAddDrawer();
 };
@@ -132,9 +138,16 @@ const handleTableUpdate = async (data: DictionaryValue) => {
 
 // 处理table点击添加
 const handleTableAdd = (id: number) => {
-	form.value = { id } as DictionaryValue;
+	form.value = { parentId: id } as DictionaryValue;
 	formRef.value.showAddDrawer();
 };
+
+const show = (dict: Dictionary) => {
+	dictionary.value = dict;
+	handleGet();
+};
+
+defineExpose({ show });
 </script>
 
 <script lang="ts">
@@ -142,3 +155,19 @@ export default {
 	name: 'ManagerDictionaryValue'
 };
 </script>
+<style lang="less" scoped>
+.empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+
+	.empty-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+}
+</style>

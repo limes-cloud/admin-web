@@ -1,95 +1,57 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
-			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
-			<Table
-				:columns="columns"
-				:loading="loading"
-				:data="tableData"
-				:size="size"
-				:total="total"
-				:pagination="searchForm"
-				@page-change="handlePageChange"
-				@update="handleTableUpdate"
-				@value="handleTableValue"
-				@refresh="handleGet"
-			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-			<Value ref="valueRef"></Value>
-		</a-card>
+		<div class="flex-card">
+			<div class="general-card left">
+				<Header @search="handleSearch" @add="handleAdd"></Header>
+				<Menu
+					:data="list"
+					:total="total"
+					:pagination="searchForm"
+					@page-change="handlePageChange"
+					@update="handleTableUpdate"
+					@value="handleTableValue"
+					@refresh="handleGet"
+				></Menu>
+				<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
+			</div>
+			<div class="general-card right">
+				<Value ref="valueRef"></Value>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { TableData } from '@arco-design/web-vue/es/table/interface';
-import { Pagination, TableColumn, TableSize } from '@/types/global';
+import { Pagination } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
 import { Dictionary, ListDictionaryRequest } from '@/api/manager/dictionary/type';
 import { ListDictionary } from '@/api/manager/dictionary/api';
-import Tool from './components/tool.vue';
-import Table from './components/table.vue';
+import Menu from './components/menu.vue';
 import Form from './components/form.vue';
-import Search from './components/search.vue';
-import Value from './components/value.vue';
+import Header from './components/header.vue';
+import Value from './components/value/index.vue';
 
 const valueRef = ref();
 const formRef = ref();
 const form = ref<Dictionary>({} as Dictionary);
 const { setLoading } = useLoading(true);
-const loading = ref(false);
-const tableData = ref<TableData[]>();
-const size = ref<TableSize>('medium');
+const list = ref<Dictionary[]>([]);
 const total = ref(0);
 const searchForm = ref<ListDictionaryRequest>({
 	page: 1,
 	pageSize: 10
 });
-
-const columns = ref<TableColumn[]>([
-	{
-		title: '字典名称',
-		dataIndex: 'name'
-	},
-	{
-		title: '字典标识',
-		dataIndex: 'keyword'
-	},
-	{
-		title: '字典类型',
-		slotName: 'type'
-	},
-	{
-		title: '字典描述',
-		dataIndex: 'description'
-	},
-	{
-		title: '创建时间',
-		slotName: 'createdAt',
-		width: 170
-	},
-	{
-		title: '更新时间',
-		slotName: 'updatedAt',
-		width: 170
-	},
-	{
-		title: '操作',
-		slotName: 'operations',
-		fixed: 'right',
-		width: 200
-	}
-]);
+const currentId = ref<number | null>(null);
 
 // handleGet 处理查询
 const handleGet = async () => {
 	setLoading(true);
 	try {
 		const { data } = await ListDictionary(searchForm.value);
-		tableData.value = data.list as unknown as TableData[];
+		list.value = data.list;
 		total.value = data.total;
 	} finally {
 		setLoading(false);
@@ -118,13 +80,13 @@ const handlePageChange = async (page: Pagination) => {
 };
 
 //  处理tool按钮新建
-const handleToolAdd = () => {
+const handleAdd = () => {
 	form.value = {} as Dictionary;
 	formRef.value.showAddDrawer();
 };
 
-const handleTableValue = (data: Dictionary) => {
-	valueRef.value.show(data.id, data.name, data.type);
+const handleTableValue = (dict: Dictionary) => {
+	valueRef.value.show(dict);
 };
 
 // 处理table点击更新
@@ -139,3 +101,21 @@ export default {
 	name: 'ManagerDictionary'
 };
 </script>
+
+<style lang="less" scoped>
+.flex-card {
+	display: flex;
+	height: 100%;
+
+	.left {
+		width: 220px;
+		min-width: 220px;
+		max-width: 220px;
+		margin-right: 15px;
+	}
+
+	.right {
+		flex: 1;
+	}
+}
+</style>

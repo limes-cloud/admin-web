@@ -105,10 +105,11 @@ export interface CreateDictionaryValueReply {
 
 export interface UpdateDictionaryValueRequest {
 	id: number;
-	dictionaryId: number;
-	parentId: number;
-	label: string;
-	value: string;
+	status?: boolean;
+	dictionaryId?: number;
+	parentId?: number;
+	label?: string;
+	value?: string;
 	weight?: number;
 	type?: string;
 	extra?: string;

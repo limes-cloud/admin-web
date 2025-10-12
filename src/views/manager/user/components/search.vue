@@ -18,12 +18,12 @@
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item field="department_id" label="用户部门">
+						<a-form-item field="dept_id" label="用户部门">
 							<a-cascader
-								v-model="form.departmentId"
+								v-model="form.DeptId"
 								allow-clear
 								check-strictly
-								:options="departments"
+								:options="depts"
 								:field-names="{ value: 'id', label: 'name' }"
 								placeholder="请选择用户部门"
 								allow-search
@@ -111,9 +111,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ListDepartment } from '@/api/manager/department/api';
-import { ListRole } from '@/api/manager/role/api';
-import { Department, ListUserRequest, Role } from '@/api/manager/user/type';
+import { ListCurrentDept } from '@/api/manager/dept/api';
+import { ListCurrentRole } from '@/api/manager/role/api';
+import { Dept, ListUserRequest, Role } from '@/api/manager/user/type';
 import { ref } from 'vue';
 import test from '@/utils/test';
 
@@ -122,7 +122,7 @@ const form = ref({} as ListUserRequest);
 const emit = defineEmits(['search']);
 
 const roles = ref<Role[]>([]);
-const departments = ref<Department[]>([]);
+const depts = ref<Dept[]>([]);
 
 const phoneValidate = (value, cb) => {
 	if (!value) {
@@ -137,16 +137,16 @@ const phoneValidate = (value, cb) => {
 };
 
 const searchRole = async () => {
-	const { data } = await ListRole();
+	const { data } = await ListCurrentRole();
 	roles.value = data.list;
 };
 searchRole();
 
-const searchDepartment = async () => {
-	const { data } = await ListDepartment();
-	departments.value = data.list;
+const searchDept = async () => {
+	const { data } = await ListCurrentDept();
+	depts.value = data.list;
 };
-searchDepartment();
+searchDept();
 
 const handleSearch = async () => {
 	const isError = await formRef.value.validate();

@@ -36,7 +36,7 @@ export interface File {
 	size: number;
 	sha: string;
 	src: string;
-	url: string;
+	key: string;
 	status: string;
 	uploadId: string;
 	chunkCount: number;
@@ -79,6 +79,7 @@ export interface DeleteFileReply {
 export interface PrepareUploadFileRequest {
 	directoryId?: number;
 	directoryPath?: string;
+	store?: string;
 	name: string;
 	size: number;
 	sha: string;
@@ -98,4 +99,5 @@ export interface PrepareUploadFileReply {
 export interface UploadFileReply {
 	src: string;
 	sha: string;
+	key: string;
 }

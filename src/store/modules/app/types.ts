@@ -12,6 +12,7 @@ export interface AppThem {
 	menuWidth: number;
 	tabBar: boolean;
 	themeColor: string;
+	popupType: string;
 }
 
 export interface DictionaryItems {
@@ -26,6 +27,7 @@ export interface Dictionary {
 }
 
 export interface AppState extends AppThem {
+	keyword: string;
 	name: string;
 	colorWeak: boolean;
 	navbar: boolean;
@@ -49,5 +51,6 @@ export interface AppState extends AppThem {
 	changePasswordType: string;
 	watermark?: string;
 	dictionaries?: Record<string, Dictionary>;
+	disFooter: Map<string, boolean>;
 	[key: string]: unknown;
 }

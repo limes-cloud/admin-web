@@ -61,7 +61,7 @@ const props = defineProps<{
 	id: number;
 }>();
 
-const id = ref(0);
+const rid = ref(0);
 const total = ref(0);
 const list = ref<Log[]>([]);
 const params = reactive<ListLogRequest>({
@@ -75,9 +75,19 @@ const params = reactive<ListLogRequest>({
 const content = ref<LogMsg[]>([]);
 const isRunning = ref(false);
 
+watch(
+	() => props.id,
+	() => {
+		if (props.id) {
+			rid.value = props.id;
+		}
+	},
+	{ immediate: true }
+);
+
 const handleSwitchLog = async (v: number) => {
-	id.value = v;
-	const { data } = await GetLog({ id: id.value });
+	rid.value = v;
+	const { data } = await GetLog({ id: rid.value });
 	const str = `[${data.content}]`;
 	content.value = JSON.parse(str);
 	if (data.status === 'running') {
@@ -96,9 +106,9 @@ const handlePageLog = async () => {
 	const { data } = await ListLog(params);
 	list.value = data.list;
 	total.value = data.total;
-	if (data.list && !id.value) {
-		id.value = data.list[0].id;
-		handleSwitchLog(id.value);
+	if (data.list && !rid.value) {
+		rid.value = data.list[0].id;
+		handleSwitchLog(rid.value);
 	}
 };
 handlePageLog();
@@ -107,8 +117,8 @@ const pageTimer = setInterval(() => {
 }, 5000);
 
 const runTimer = setInterval(() => {
-	if (id.value && isRunning.value) {
-		handleSwitchLog(id.value);
+	if (rid.value && isRunning.value) {
+		handleSwitchLog(rid.value);
 	}
 }, 1000);
 

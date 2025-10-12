@@ -6,12 +6,13 @@ export interface GetExportRequest {
 export interface GetExportReply {
 	id: number;
 	userId: number;
-	departmentId: number;
+	DeptId: number;
 	scene: string;
 	name: string;
 	size: number;
 	sha?: string;
 	src?: string;
+	url?: string;
 	status: string;
 	reason?: string;
 	expiredAt: number;
@@ -24,14 +25,15 @@ export interface ListExportRequest {
 	pageSize: number;
 	order?: string;
 	orderBy?: string;
+	name?: string;
 	userId?: number;
-	departmentId?: number;
+	DeptId?: number;
 }
 
 export interface Export {
 	id: number;
 	userId: number;
-	departmentId: number;
+	DeptId: number;
 	scene: string;
 	name: string;
 	size: number;
@@ -51,7 +53,7 @@ export interface ListExportReply {
 
 export interface ExportFileRequest {
 	userId: number;
-	departmentId: number;
+	DeptId: number;
 	scene: string;
 	name: string;
 	ids: number[];
@@ -66,7 +68,7 @@ export interface ExportFileReply {
 export interface UpdateExportRequest {
 	id: number;
 	userId: number;
-	departmentId: number;
+	DeptId: number;
 	scene: string;
 }
 

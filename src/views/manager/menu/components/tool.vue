@@ -1,12 +1,19 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'manager:menu:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建菜单
-			</a-button>
+			<a-space>
+				<a-button @click="$back">
+					<template #icon>
+						<icon-left />
+					</template>
+				</a-button>
+				<a-button v-permission="'manager:menu:add'" type="primary" @click="emit('add')">
+					<template #icon>
+						<icon-plus />
+					</template>
+					新建菜单
+				</a-button>
+			</a-space>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -33,7 +40,7 @@
 									<icon-drag-arrow />
 								</div>
 								<div>
-									<a-checkbox v-model="item.checked" @change="handleChange($event, item as TableColumnData, index)"></a-checkbox>
+									<a-checkbox v-model="item.checked" @change="handleChange($event, item, index)"></a-checkbox>
 								</div>
 								<div class="title">
 									{{ item.title === '#' ? 'index' : item.title }}
@@ -49,7 +56,6 @@
 
 <script lang="ts" setup>
 import { TableColumn, TableSize } from '@/types/global';
-import { TableColumnData } from '@arco-design/web-vue';
 import { cloneDeep } from 'lodash';
 import Sortable from 'sortablejs';
 import { nextTick, ref } from 'vue';
@@ -65,6 +71,7 @@ const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
 const cloneColumns = ref<TableColumn[]>([]);
 const showColumns = ref<TableColumn[]>([]);
 
+const defaultHidden = ['extra', 'updatedAt', 'createdAt'];
 // 修改表格字体大小
 const handleSelectDensity = (val: string | number | Record<string, any> | undefined) => {
 	emit('update:size', val);
@@ -72,11 +79,19 @@ const handleSelectDensity = (val: string | number | Record<string, any> | undefi
 
 const initColmun = (val: TableColumn[]) => {
 	cloneColumns.value = cloneDeep(val);
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	cloneColumns.value.forEach((item, index) => {
-		item.checked = true;
+		if (!defaultHidden.includes(item.slotName as string)) {
+			item.checked = true;
+		}
 	});
+
 	showColumns.value = cloneDeep(cloneColumns.value);
+
+	cloneColumns.value = showColumns.value.filter((item) => item.checked);
+
+	emit('update:columns', cloneColumns.value);
 };
 
 initColmun(props.columns);

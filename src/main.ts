@@ -9,7 +9,7 @@ import directive from './directive';
 import App from './App.vue';
 import '@/assets/style/global.less';
 import '@/utils/interceptor';
-import { formatUrl } from './utils/url';
+import { rurl, durl } from './utils/url';
 import { formatTime, parseTime } from './utils/time';
 import { dataType, densityList, genderList } from './utils/consts';
 import { hasPermission } from './utils/permission';
@@ -17,7 +17,7 @@ import { hasPermission } from './utils/permission';
 import 'virtual:svg-icons-register';
 import '@/assets/style/them/gray.less';
 import '@/assets/style/animation.less';
-import { debounce } from './utils/global';
+import { back, debounce, pageHeight } from './utils/global';
 
 const app = createApp(App);
 if (import.meta.env?.MODE === 'development') {
@@ -33,7 +33,9 @@ useAppStore()
 	.loadSystemSetting()
 	.then((res) => {
 		app.config.globalProperties.$dataType = dataType;
-		app.config.globalProperties.$rurl = formatUrl;
+		app.config.globalProperties.$rurl = rurl;
+		app.config.globalProperties.$durl = durl;
+		app.config.globalProperties.$back = back;
 		app.config.globalProperties.$logo = logo;
 		app.config.globalProperties.$formatTime = formatTime;
 		app.config.globalProperties.$parseTime = parseTime;
@@ -41,6 +43,7 @@ useAppStore()
 		app.config.globalProperties.$genderList = genderList;
 		app.config.globalProperties.$hasPermission = hasPermission;
 		app.config.globalProperties.$debounce = debounce;
+		app.config.globalProperties.$pageHeight = pageHeight;
 		document.title = res.title;
 		if (res.logo) {
 			app.config.globalProperties.$logo = res.logo;

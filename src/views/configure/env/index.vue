@@ -1,13 +1,13 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table :columns="columns" :loading="loading" :data="tableData" :size="size" @update="handleTableUpdate" @refresh="handleGet"></Table>
 			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+		</div>
 	</div>
 </template>
 
@@ -34,7 +34,7 @@ const searchForm = ref<ListEnvRequest>({});
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '环境标志',
+		title: '环境标识',
 		dataIndex: 'keyword',
 		slotName: 'keyword'
 	},

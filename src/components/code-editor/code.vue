@@ -56,6 +56,10 @@ const props = defineProps({
 		type: Boolean,
 		default: false
 	},
+	autoWrap: {
+		type: Boolean,
+		default: false
+	},
 	id: String,
 	showSwitchLang: Boolean,
 	showFullscreen: Boolean,
@@ -121,6 +125,10 @@ const initEditor = () => {
 			vertical: 'hidden',
 			horizontal: 'hidden'
 		},
+		unicodeHighlight: {
+			ambiguousCharacters: false
+		},
+		wordWrap: props.autoWrap ? 'on' : 'off',
 		padding: { top: 10, bottom: 10 },
 		fontSize: 13,
 		lineNumbers: props.showLine ? 'on' : 'off',
