@@ -17,9 +17,5 @@ module.exports = {
 	endOfLine: 'lf',
 	embeddedLanguageFormatting: 'auto',
 	singleAttributePerLine: false
-	//自定义文件后缀对应的parser
-	// parsers: {
-	// 	".nvue": "vue",
-	// 	".ux": "vue"
-	// }
+	// 移除不支持的parsers选项
 };
