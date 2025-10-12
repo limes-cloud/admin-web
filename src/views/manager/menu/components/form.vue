@@ -16,7 +16,7 @@
 				<a-cascader
 					v-model="form.parentId"
 					check-strictly
-					:options="menus"
+					:options="[{ id: 0, title: '顶级菜单', children: menus }]"
 					:field-names="{ value: 'id', label: 'title' }"
 					placeholder="请选择父菜单"
 					allow-search
@@ -259,28 +259,30 @@ const menuTypes = computed<SelectOptionData[]>(() => [
 
 const props = defineProps<{
 	menus?: TableData[];
-	data: Menu;
+	appId: number;
 }>();
 
 const form = ref({} as Menu);
 const emit = defineEmits(['refresh']);
 
 watch(
-	() => props.data,
-	(val) => {
-		if (!val) return;
-		form.value = { weight: 0, ...val };
-	}
+	() => props.appId,
+	() => {
+		form.value.appId = props.appId;
+	},
+	{ immediate: true }
 );
 
-const showAddDrawer = () => {
+const showAddDrawer = (data?: Menu) => {
 	visible.value = true;
 	isAdd.value = true;
+	form.value = { weight: 0, ...data } as Menu;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: Menu) => {
 	visible.value = true;
 	isAdd.value = false;
+	form.value = { weight: 0, ...data };
 };
 
 const closeDrawer = () => {

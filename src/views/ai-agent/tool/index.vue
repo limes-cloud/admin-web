@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<ToolEle v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @show-group="showGroup = true"></ToolEle>
 			<Table
@@ -19,7 +19,7 @@
 			></Table>
 			<Form ref="formRef" @refresh="handleGet"></Form>
 			<Exec ref="execRef"></Exec>
-		</a-card>
+		</div>
 	</div>
 </template>
 

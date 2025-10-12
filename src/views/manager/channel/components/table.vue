@@ -1,5 +1,5 @@
 <template>
-	<a-space direction="vertical" fill>
+	<Container v-slot="value">
 		<a-table
 			v-permission="'manager:channel:query'"
 			row-key="id"
@@ -9,10 +9,11 @@
 			:data="data"
 			:bordered="false"
 			:size="size"
+			:scroll="{ y: value.height - 36 }"
 		>
 			<template #logo="{ record }">
 				<a-avatar v-if="record.logo" alt="avatar" :size="38" shape="square">
-					<img alt="avatar" :src="$rurl(record.logoUrl, 100, 100)" />
+					<img alt="avatar" :src="$rurl(record.logo, 100, 100)" />
 				</a-avatar>
 				<a-avatar v-else :style="{ backgroundColor: '#3370ff' }" :size="48" shape="square">
 					<span>{{ record.keyword }}</span>
@@ -33,34 +34,21 @@
 			</template>
 
 			<template #operations="{ record }">
-				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:channel:update'" color="orangered" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						修改
-					</a-tag>
-
-					<template v-if="$hasPermission('manager:channel:delete')">
-						<a-popconfirm content="您确认删除此渠道" type="warning" @ok="handleDelete(record.id)">
-							<a-tag color="red">
-								<template #icon><icon-delete /></template>
-								删除
-							</a-tag>
-						</a-popconfirm>
-					</template>
-				</a-space>
+				<Operation :data="record" :list="operations"></Operation>
 			</template>
 		</a-table>
-		<a-pagination
-			:total="total"
-			:current="page.page"
-			:page-size="page.pageSize"
-			show-total
-			show-jumper
-			show-page-size
-			@change="pageChange"
-			@page-size-change="pageSizeChange"
-		/>
-	</a-space>
+	</Container>
+	<a-pagination
+		class="mt-15"
+		:total="total"
+		:current="page.page"
+		:page-size="page.pageSize"
+		show-total
+		show-jumper
+		show-page-size
+		@change="pageChange"
+		@page-size-change="pageSizeChange"
+	/>
 </template>
 
 <script lang="ts" setup>
@@ -84,6 +72,30 @@ defineProps<{
 	pagination: Pagination;
 	total: number;
 }>();
+
+const operations = [
+	{
+		icon: 'edit',
+		text: '修改渠道',
+		color: 'arcoblue',
+		permission: 'manager:channel:update',
+		click: (record: Channel) => {
+			emit('update', record);
+		}
+	},
+	{
+		icon: 'delete',
+		popconfirm: true,
+		text: '删除渠道',
+		color: 'red',
+		permission: 'manager:channel:delete',
+		click: async (record: Channel) => {
+			await DeleteChannel({ id: record.id });
+			emit('refresh');
+			Message.success('删除成功');
+		}
+	}
+];
 
 const pageChange = (current: number) => {
 	page.value.page = current;
@@ -110,12 +122,5 @@ const updateStatus = (record: Channel) => {
 			record.status = !record.status;
 		}
 	});
-};
-
-// 处理数据删除
-const handleDelete = async (id: number) => {
-	await DeleteChannel({ ids: [id] });
-	emit('refresh');
-	Message.success('删除成功');
 };
 </script>

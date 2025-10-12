@@ -1,5 +1,5 @@
 <template>
-	<a-space direction="vertical" fill>
+	<Container v-slot="value">
 		<a-table
 			v-permission="'manager:dictionary:value:query'"
 			row-key="id"
@@ -9,6 +9,7 @@
 			:bordered="false"
 			:pagination="false"
 			:size="size"
+			:scroll="{ y: value.height - 36 }"
 		>
 			<template #status="{ record }">
 				<a-switch v-model="record.status" :disabled="!$hasPermission('manager:dictionary:value:status')" type="round" @change="updateStatus(record)">
@@ -24,38 +25,25 @@
 			</template>
 
 			<template #operations="{ record }">
-				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:dictionary:value:update'" color="orangered" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						修改
-					</a-tag>
-					<template v-if="$hasPermission('manager:dictionary:value:delete')">
-						<a-popconfirm content="您确认删除此字典值" type="warning" @ok="handleDelete(record.id)">
-							<a-tag color="red">
-								<template #icon><icon-delete /></template>
-								删除
-							</a-tag>
-						</a-popconfirm>
-					</template>
-				</a-space>
+				<Operation :data="record" :list="getOpt()"></Operation>
 			</template>
 		</a-table>
-		<a-pagination
-			v-if="dataType == 'list'"
-			:total="total"
-			:current="page.page"
-			:page-size="page.pageSize"
-			show-total
-			show-jumper
-			show-page-size
-			@change="pageChange"
-			@page-size-change="pageSizeChange"
-		/>
-	</a-space>
+	</Container>
+	<a-pagination
+		v-if="dataType == 'list'"
+		:total="total"
+		:current="page.page"
+		:page-size="page.pageSize"
+		show-total
+		show-jumper
+		show-page-size
+		@change="pageChange"
+		@page-size-change="pageSizeChange"
+	/>
 </template>
 
 <script lang="ts" setup>
-import { DeleteDictionaryValue, UpdateDictionaryValueStatus } from '@/api/manager/dictionary/api';
+import { DeleteDictionaryValue, UpdateDictionaryValue } from '@/api/manager/dictionary/api';
 import { DictionaryValue } from '@/api/manager/dictionary/type';
 import { TableSize, TableColumn, Pagination } from '@/types/global';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -87,6 +75,49 @@ watch(
 	{ deep: true, immediate: true }
 );
 
+const addOpt = [
+	{
+		icon: 'plus',
+		text: '新增值',
+		color: 'arcoblue',
+		permission: 'manager:dictionary:value:add',
+		click: (record: DictionaryValue) => {
+			emit('add', record.id);
+		}
+	}
+];
+
+const operations = [
+	{
+		icon: 'edit',
+		text: '修改值',
+		color: 'arcoblue',
+		permission: 'manager:dictionary:value:update',
+		click: (record: DictionaryValue) => {
+			emit('update', record);
+		}
+	},
+	{
+		icon: 'delete',
+		popconfirm: true,
+		text: '删除值',
+		color: 'red',
+		permission: 'manager:dictionary:value:delete',
+		click: async (record: DictionaryValue) => {
+			await DeleteDictionaryValue({ id: record.id });
+			emit('refresh');
+			Message.success('删除成功');
+		}
+	}
+];
+
+const getOpt = () => {
+	if (props.dataType === 'list') {
+		return operations;
+	}
+	return [...addOpt, ...operations];
+};
+
 const pageChange = (current: number) => {
 	page.value.page = current;
 	emit('pageChange', page.value);
@@ -97,11 +128,11 @@ const pageSizeChange = (size: number) => {
 	emit('pageChange', page.value);
 };
 
-const handleDelete = async (id: number) => {
-	await DeleteDictionaryValue({ id });
-	Message.success('删除成功');
-	emit('refresh');
-};
+// const handleDelete = async (id: number) => {
+// 	await DeleteDictionaryValueValue({ id });
+// 	Message.success('删除成功');
+// 	emit('refresh');
+// };
 
 const updateStatus = (record: DictionaryValue) => {
 	const status = record.status ? '启用' : '禁用';
@@ -111,7 +142,7 @@ const updateStatus = (record: DictionaryValue) => {
 		closable: true,
 		hideCancel: false,
 		onOk: async () => {
-			await UpdateDictionaryValueStatus({ id: record.id, status: record.status as boolean });
+			await UpdateDictionaryValue({ id: record.id, status: record.status as boolean });
 			Message.success(`${status}成功`);
 		},
 		onCancel: () => {

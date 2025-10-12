@@ -38,7 +38,21 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入渠道标识" allow-clear />
+				<a-input v-model="form.keyword" :disabled="!isAdd" placeholder="请输入渠道标识" allow-clear />
+			</a-form-item>
+
+			<a-form-item
+				field="name"
+				label="渠道名称"
+				:rules="[
+					{
+						required: true,
+						message: '渠道名称是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="form.name" placeholder="请输入渠道名称" allow-clear />
 			</a-form-item>
 
 			<a-form-item
@@ -59,26 +73,6 @@
 					:options="types"
 					:field-names="{ value: 'keyword', label: 'name' }"
 					@change="handleSelectType"
-				></a-select>
-			</a-form-item>
-			<a-form-item
-				field="admin"
-				label="后台授权"
-				:rules="[
-					{
-						required: true,
-						message: '后台授权是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-select
-					v-model="form.admin"
-					placeholder="请选是否开启后台授权"
-					:options="[
-						{ label: '开启', value: true },
-						{ label: '关闭', value: false }
-					]"
 				></a-select>
 			</a-form-item>
 
@@ -150,20 +144,9 @@ const visible = ref(false);
 const isAdd = ref(false);
 const { proxy } = getCurrentInstance() as any;
 
-const props = defineProps<{
-	data: Channel;
-}>();
-
 type Type = CreateChannelRequest | UpdateChannelRequest;
-const form = ref<Type>({ ...props.data });
+const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
-
-watch(
-	() => props.data,
-	(val) => {
-		form.value = val;
-	}
-);
 
 const handleGetTypes = async () => {
 	const { data } = await ListChannelType();
@@ -175,11 +158,13 @@ handleGetTypes();
 const showAddDrawer = () => {
 	visible.value = true;
 	isAdd.value = true;
+	form.value = {} as Type;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: Channel) => {
 	visible.value = true;
 	isAdd.value = false;
+	form.value = { ...data };
 };
 
 const closeDrawer = () => {
@@ -197,11 +182,11 @@ const handleSelectType = () => {
 defineExpose({ showAddDrawer, showUpdateDrawer, closeDrawer });
 
 const files = () => {
-	if (props.data.logo) {
+	if (form.value.logo) {
 		return [
 			{
-				url: proxy.$rurl(props.data.logoUrl, 100, 100),
-				sha: props.data.logo
+				url: proxy.$rurl(form.value.logo, 100, 100),
+				key: form.value.logo
 			}
 		];
 	}
@@ -211,7 +196,7 @@ const files = () => {
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.logo = file.response.sha;
+	form.value.logo = file.response.key;
 };
 
 const handleSubmit = async () => {

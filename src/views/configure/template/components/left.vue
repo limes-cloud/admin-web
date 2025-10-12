@@ -24,7 +24,7 @@
 				<span class="value">{{ current?.label }}</span>
 			</div>
 			<div class="item">
-				<span class="label">服务标志</span>
+				<span class="label">服务标识</span>
 				<span class="value">{{ current?.keyword }}</span>
 			</div>
 		</div>

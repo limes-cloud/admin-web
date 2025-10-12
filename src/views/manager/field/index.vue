@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
@@ -16,8 +16,8 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" :types="types" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" :types="types" @refresh="handleGet"></Form>
+		</div>
 	</div>
 </template>
 
@@ -139,8 +139,7 @@ const handleToolAdd = () => {
 
 // 处理table点击更新
 const handleTableUpdate = (data: Field) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+	formRef.value.showUpdateDrawer(data);
 };
 
 // 处理页面变更

@@ -16,22 +16,22 @@ import {
 
 // ListFeedbackCategory 获取反馈建议分类列表
 export function ListFeedbackCategory(params: ListFeedbackCategoryRequest) {
-	return axios.get<ListFeedbackCategoryReply>('/manager/api/v1/feedback_categories', { params });
+	return axios.get<ListFeedbackCategoryReply>('/manager/api/v1/feedback/categories', { params });
 }
 
 // CreateFeedbackCategory 创建反馈建议分类
 export function CreateFeedbackCategory(data: CreateFeedbackCategoryRequest) {
-	return axios.post<CreateFeedbackCategoryReply>('/manager/api/v1/feedback_category', data);
+	return axios.post<CreateFeedbackCategoryReply>('/manager/api/v1/feedback/category', data);
 }
 
 // UpdateFeedbackCategory 更新反馈建议分类
 export function UpdateFeedbackCategory(data: UpdateFeedbackCategoryRequest) {
-	return axios.put('/manager/api/v1/feedback_category', data);
+	return axios.put('/manager/api/v1/feedback/category', data);
 }
 
 // DeleteFeedbackCategory 删除反馈建议分类
 export function DeleteFeedbackCategory(params: DeleteFeedbackCategoryRequest) {
-	return axios.delete('/manager/api/v1/feedback_category', { params });
+	return axios.delete('/manager/api/v1/feedback/category', { params });
 }
 
 // ListFeedback 获取反馈建议列表

@@ -76,7 +76,7 @@ export default defineComponent({
 		};
 
 		listenerRouteChange((newRoute) => {
-			const { activeMenu, hideInMenu } = newRoute.meta;
+			const { activeMenu, hideInMenu, pk } = newRoute.meta;
 
 			if (!hideInMenu || activeMenu) {
 				const menuOpenKeys = findMenuOpenKeys((activeMenu || newRoute.name) as string);
@@ -85,6 +85,9 @@ export default defineComponent({
 				openKeys.value = [...keySet];
 
 				selectedKey.value = [activeMenu || menuOpenKeys[menuOpenKeys.length - 1]];
+			}
+			if (hideInMenu) {
+				selectedKey.value = [pk as string];
 			}
 		}, true);
 
@@ -121,6 +124,8 @@ export default defineComponent({
 			}
 			return travel(menuTree.value);
 		};
+
+		// console.log(selectedKey.value);
 
 		return () => (
 			<a-menu

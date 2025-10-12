@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
@@ -15,8 +15,8 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" @refresh="handleGet"></Form>
+		</div>
 	</div>
 </template>
 
@@ -33,7 +33,6 @@ import Form from './components/form.vue';
 import Search from './components/search.vue';
 
 const formRef = ref();
-const form = ref<Channel>({} as Channel);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -45,7 +44,7 @@ const total = ref(0);
 const size = ref<TableSize>('medium');
 const columns = ref<TableColumn[]>([
 	{
-		title: '渠道logo',
+		title: '渠道图标',
 		dataIndex: 'logo',
 		slotName: 'logo'
 	},
@@ -70,7 +69,7 @@ const columns = ref<TableColumn[]>([
 		slotName: 'sk'
 	},
 	{
-		title: '备注',
+		title: '渠道备注',
 		dataIndex: 'description'
 	},
 	{
@@ -130,14 +129,12 @@ const handlePageChange = async (page: Pagination) => {
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Channel;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
 const handleTableUpdate = (data: Channel) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+	formRef.value.showUpdateDrawer(data);
 };
 </script>
 

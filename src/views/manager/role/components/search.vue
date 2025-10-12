@@ -4,8 +4,8 @@
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="6">
-						<a-form-item field="name" label="角色标识">
-							<a-input v-model="form.keyword" allow-clear placeholder="请输入角色名称" />
+						<a-form-item field="keyword" label="角色标识">
+							<a-input v-model="form.keyword" allow-clear placeholder="请输入角色标识" />
 						</a-form-item>
 					</a-col>
 					<a-col :span="6">

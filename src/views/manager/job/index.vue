@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @classify="handleShowClassify"></Tool>
 			<Table
@@ -12,9 +12,20 @@
 				@add="handleTableAdd"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
+				@role="handleRole"
 			></Table>
 			<Form ref="formRef" :jobs="tableData" @refresh="handleGet"></Form>
-		</a-card>
+		</div>
+		<a-modal
+			v-model:visible="showRole"
+			title="角色绑定"
+			:modal-style="{ width: '400px' }"
+			:body-style="{ padding: 0, height: '60%', minHeight: '500px', display: 'flex', flexDirection: 'column' }"
+			:footer="false"
+			unmount-on-close
+		>
+			<Role :job-id="jobId" />
+		</a-modal>
 	</div>
 </template>
 
@@ -24,29 +35,31 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 import { Job, ListJobRequest } from '@/api/manager/job/type';
-import { ListCurrentJob } from '@/api/manager/job/api';
+import { ListJob } from '@/api/manager/job/api';
 
 import Search from './components/search.vue';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
+import Role from './role/index.vue';
 
+const jobId = ref<number>(0);
+const showRole = ref(false);
 const formRef = ref();
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const showGroup = ref(false);
-const searchForm = ref<ListJobRequest>({});
+const searchForm = ref<ListJobRequest>({
+	page: 1,
+	pageSize: 10
+});
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '职位标志',
+		title: '职位标识',
 		dataIndex: 'keyword'
-	},
-	{
-		title: '职位分类',
-		dataIndex: 'classify.name'
 	},
 	{
 		title: '职位名称',
@@ -74,7 +87,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListCurrentJob(searchForm.value);
+		const { data } = await ListJob(searchForm.value);
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
@@ -109,6 +122,11 @@ const handleTableAdd = (id: number) => {
 
 const handleShowClassify = () => {
 	showGroup.value = true;
+};
+
+const handleRole = (data: Job) => {
+	jobId.value = data.id;
+	showRole.value = true;
 };
 </script>
 

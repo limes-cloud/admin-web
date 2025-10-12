@@ -4,49 +4,53 @@ export interface GetUserRequest {
 	email?: string;
 }
 
+export interface GetCurrentUserRequest {
+	app?: string;
+}
+
+export interface Info {
+	field: string;
+	value: any;
+}
+
 export interface Role {
 	id: number;
 	name: string;
-	keyword: string;
 }
 
 export interface Job {
 	id: number;
 	name: string;
-	keyword: string;
 }
 
-export interface Department {
+export interface Dept {
 	id: number;
 	name: string;
 	keyword: string;
 }
 
 export interface GetUserReply {
+	isLogin: boolean;
 	id: number;
-	name: string;
+	avatar: string;
+	username: string;
 	nickname: string;
-	gender: string;
-	avatar?: string;
-	phone: string;
-	email: string;
 	status?: boolean;
-	setting?: string;
 	loggedAt: number;
 	createdAt: number;
 	updatedAt: number;
-	roles: Role[];
-	jobs: Job[];
-	jobIds: number[];
-	roleIds: number[];
-	departments?: Department[];
-	departmentIds: number[];
+	job?: Job;
+	jobId: number;
+	dept?: Dept;
+	deptId: number;
+	setting: string;
+	infos: Info[];
 }
 
 export interface ListUserRequest {
 	page: number;
 	pageSize: number;
-	departmentId?: number;
+	DeptId?: number;
 	roleId?: number;
 	name?: string;
 	phone?: string;
@@ -58,13 +62,13 @@ export interface ListUserRequest {
 
 export interface User {
 	id: number;
-	name: string;
+	username: string;
 	nickname: string;
-	gender: string;
-	avatar?: string;
-	phone: string;
-	email: string;
 	status?: boolean;
+	deptId: number;
+	jobId: number;
+	job?: Job;
+	dept?: Dept;
 	loggedAt: number;
 	createdAt: number;
 	updatedAt: number;
@@ -76,13 +80,11 @@ export interface ListUserReply {
 }
 
 export interface CreateUserRequest {
-	name: string;
-	gender: string;
-	phone: string;
-	email: string;
-	jobIds: number[];
-	roleIds: number[];
-	departmentIds: number[];
+	username: string;
+	nickname: string;
+	status?: boolean;
+	deptId: number;
+	jobId: number;
 }
 
 export interface CreateUserReply {
@@ -91,18 +93,11 @@ export interface CreateUserReply {
 
 export interface UpdateUserRequest {
 	id: number;
-	name: string;
-	gender: string;
-	phone: string;
-	email: string;
-	jobIds: number[];
-	roleIds: number[];
-	departmentIds: number[];
-}
-
-export interface UpdateUserStatusRequest {
-	id: number;
-	status: boolean;
+	username?: string;
+	nickname?: string;
+	status?: boolean;
+	deptId?: number;
+	jobId?: number;
 }
 
 export interface DeleteUserRequest {
@@ -139,10 +134,12 @@ export interface UpdateCurrentUserPasswordRequest {
 }
 
 export interface UpdateCurrentUserSettingRequest {
+	app: string;
 	setting: string;
 }
 
 export interface UserLoginRequest {
+	tenant: string;
 	username: string;
 	password: string;
 	captchaId: string;
@@ -173,25 +170,34 @@ export interface GetUserLoginCaptchaReply {
 	expire: number;
 }
 
-export interface ListLoginLogRequest {
+export interface ListUserDeptRequest {
 	page: number;
 	pageSize: number;
-	username?: string;
-	createdAts?: number[];
+	name?: string;
+	userId: number;
 }
 
-export interface LoginLog {
-	username: string;
-	type: string;
-	ip: string;
-	address: string;
-	browser: string;
-	device: string;
-	code: number;
-	description: string;
+export interface Dept {
+	id: number;
+	name: string;
 }
 
-export interface ListLoginLogReply {
+export interface ListUserDeptReply {
 	total: number;
-	list: LoginLog[];
+	list: Dept[];
 }
+
+export interface CreateUserDeptRequest {
+	userId: number;
+	deptId: number;
+	jobId: number;
+}
+
+export interface CreateUserDeptReply {}
+
+export interface DeleteUserDeptRequest {
+	userId: number;
+	deptId: number;
+}
+
+export interface DeleteUserDeptReply {}

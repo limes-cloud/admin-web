@@ -66,7 +66,7 @@ body,
 }
 
 .container {
-	padding: 0 20px 20px 20px;
+	padding: 0 20px 0 20px;
 }
 
 :deep(.arco-table-th) {
@@ -139,4 +139,57 @@ body,
 
 .cursor-pointer {
 	cursor: pointer;
+}
+
+.header-title {
+	font-size: 16px;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	&::before{
+		content: '';
+		display: block;
+		width: 4px;
+		height: 14px;
+		border-radius: 2px;
+		background-color: rgb(var(--blue-6));
+		margin-right: 5px;
+	}
+}
+
+.mt-15{
+	margin-top: 15px;
+}
+
+.mb-15{
+	margin-bottom: 15px;
+}
+
+.ml-15{
+	margin-left: 15px;
+}
+
+.mr-15{
+	margin-right: 15px;
+}
+
+
+.pt-15{
+	padding-top: 15px;
+	box-sizing: border-box;
+}
+
+.pb-15{
+	padding-bottom: 15px;
+	box-sizing: border-box;
+}
+
+.pl-15{
+	padding-left: 15px;
+	box-sizing: border-box;
+}
+
+.pr-15{
+	padding-right: 15px;
+	box-sizing: border-box;
 }

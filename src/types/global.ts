@@ -13,6 +13,7 @@ export interface Resource {
 	size: number;
 	sha: string;
 	src: string;
+	key: string;
 }
 
 export interface SimpleUser {

@@ -27,6 +27,7 @@ export interface Dictionary {
 }
 
 export interface AppState extends AppThem {
+	keyword: string;
 	name: string;
 	colorWeak: boolean;
 	navbar: boolean;

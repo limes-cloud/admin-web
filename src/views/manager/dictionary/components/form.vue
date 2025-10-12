@@ -16,6 +16,28 @@
 			</a-form-item>
 
 			<a-form-item
+				field="type"
+				label="字典类型"
+				:rules="[
+					{
+						required: true,
+						message: '字典类型是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-select
+					v-model="form.type"
+					:options="[
+						{ label: '列表类型', value: 'list' },
+						{ label: '树状类型', value: 'tree' }
+					]"
+					allow-clear
+					placeholder="请选择字典类型"
+				/>
+			</a-form-item>
+
+			<a-form-item
 				field="name"
 				label="字典名称"
 				:rules="[

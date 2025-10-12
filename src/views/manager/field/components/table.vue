@@ -1,5 +1,5 @@
 <template>
-	<a-space direction="vertical" fill>
+	<Container v-slot="value">
 		<a-table
 			v-permission="'manager:field:query'"
 			row-key="id"
@@ -9,6 +9,7 @@
 			:data="data"
 			:bordered="false"
 			:size="size"
+			:scroll="{ y: value.height - 36 }"
 		>
 			<template #status="{ record }">
 				<a-switch v-model="record.status" :disabled="!$hasPermission('manager:field:update:status')" type="round" @change="updateStatus(record)">
@@ -29,33 +30,21 @@
 			</template>
 
 			<template #operations="{ record }">
-				<a-space class="cursor-pointer">
-					<a-tag v-permission="'manager:field:update'" color="orangered" @click="emit('update', record)">
-						<template #icon><icon-edit /></template>
-						修改
-					</a-tag>
-					<template v-if="$hasPermission('manager:field:delete')">
-						<a-popconfirm content="您确认删除此字段" type="warning" @ok="handleDelete(record.id)">
-							<a-tag color="red">
-								<template #icon><icon-delete /></template>
-								删除
-							</a-tag>
-						</a-popconfirm>
-					</template>
-				</a-space>
+				<Operation :data="record" :list="operations"></Operation>
 			</template>
 		</a-table>
-		<a-pagination
-			:total="total"
-			:current="page.current"
-			:page-size="page.pageSize"
-			show-total
-			show-jumper
-			show-page-size
-			@change="pageChange"
-			@page-size-change="pageSizeChange"
-		/>
-	</a-space>
+	</Container>
+	<a-pagination
+		class="mt-15"
+		:total="total"
+		:current="page.current"
+		:page-size="page.pageSize"
+		show-total
+		show-jumper
+		show-page-size
+		@change="pageChange"
+		@page-size-change="pageSizeChange"
+	/>
 </template>
 
 <script lang="ts" setup>
@@ -104,6 +93,30 @@ watch(
 );
 
 handleTypes();
+
+const operations = [
+	{
+		icon: 'edit',
+		text: '修改字段',
+		color: 'arcoblue',
+		permission: 'manager:field:update',
+		click: (record: Field) => {
+			emit('update', record);
+		}
+	},
+	{
+		icon: 'delete',
+		popconfirm: true,
+		text: '删除字段',
+		color: 'red',
+		permission: 'manager:field:delete',
+		click: async (record: Field) => {
+			await DeleteField({ id: record.id });
+			emit('refresh');
+			Message.success('删除成功');
+		}
+	}
+];
 
 const pageChange = (current: number) => {
 	page.value.current = current;

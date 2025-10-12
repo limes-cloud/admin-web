@@ -8,10 +8,12 @@
 <script lang="ts" setup>
 import { useAppStore } from '@/store';
 import { computed } from 'vue';
+import { pageHeight } from './utils/global';
 
 const appStore = useAppStore();
 const loading = computed(() => appStore.isLoading);
 const title = computed(() => appStore.loadingTitle as string);
+const ph = pageHeight();
 </script>
 
 <style lang="less" scoped>
@@ -84,7 +86,11 @@ const title = computed(() => appStore.loadingTitle as string);
 }
 
 .container {
-	padding: 0 20px 20px;
+	padding: 0 20px 0 20px;
+	overflow: hidden !important;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 
 	:deep(.arco-list-content) {
 		overflow-x: hidden;
@@ -92,6 +98,33 @@ const title = computed(() => appStore.loadingTitle as string);
 
 	:deep(.arco-card-meta-title) {
 		font-size: 14px;
+	}
+	.general-card {
+		flex-grow: 1;
+		padding: 20px;
+		color: var(--color-text-2);
+		background-color: var(--color-bg-1);
+		-webkit-font-smoothing: antialiased;
+
+		height: v-bind(ph);
+		display: flex; /* 开启Flexbox布局 */
+		flex-direction: column; /* 子元素垂直排列 */
+	}
+	.arco-menu-vertical .arco-menu-item,
+	.arco-menu-vertical .arco-menu-group-title,
+	.arco-menu-vertical .arco-menu-pop-header,
+	.arco-menu-vertical .arco-menu-inline-header {
+		padding: 0 12px;
+		line-height: 32px;
+	}
+}
+
+.arco-modal-body {
+	.container {
+		padding: 0px;
+	}
+	.general-card {
+		height: 100% !important;
 	}
 }
 

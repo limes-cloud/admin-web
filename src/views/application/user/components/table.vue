@@ -19,7 +19,7 @@
 			</template>
 
 			<template #team="{ record }">
-				{{ record.department?.name }}
+				{{ record.Dept?.name }}
 			</template>
 
 			<template #avatar="{ record }">

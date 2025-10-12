@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch" @select="handleSearchSelect"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" :enable-create="!!searchForm.serverId" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
@@ -18,7 +18,7 @@
 			></Table>
 			<Form ref="formRef" :data="form" :server-id="searchForm.serverId" @refresh="handleGet"></Form>
 			<Value ref="valueRef" :type="current.type" :envs="envs"></Value>
-		</a-card>
+		</div>
 	</div>
 </template>
 

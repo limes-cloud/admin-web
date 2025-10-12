@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card
+		<div
 			class="general-card"
 			:style="{
 				height: 'calc(100vh - ' + pageOhterHeight + 'px' + ')'
@@ -17,7 +17,7 @@
 			>
 				<iframe class="iframe" :src="iframeUrl" height="100%"></iframe>
 			</div>
-		</a-card>
+		</div>
 	</div>
 </template>
 

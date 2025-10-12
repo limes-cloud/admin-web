@@ -118,9 +118,9 @@ setupMock({
 								},
 								{
 									app: 'manager',
-									path: '/manager/department',
-									keyword: 'managerDepartment',
-									component: 'manager/department/index',
+									path: '/manager/Dept',
+									keyword: 'managerDept',
+									component: 'manager/dept/index',
 									redirect: '',
 									is_hidden: false,
 									type: 'M',

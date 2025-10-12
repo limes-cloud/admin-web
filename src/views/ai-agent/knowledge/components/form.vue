@@ -174,7 +174,7 @@ const files = () => {
 const handleUpload = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.sha = file.response.sha;
+	form.value.sha = file.response.key;
 	const arr = file.response.src.split('.');
 	form.value.type = arr[arr.length - 1];
 };

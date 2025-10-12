@@ -2,12 +2,6 @@
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
 			<a-space>
-				<a-button type="primary" status="success" @click="emit('classify')">
-					<template #icon>
-						<icon-ordered-list />
-					</template>
-					职位分类
-				</a-button>
 				<a-button v-permission="'manager:job:add'" type="primary" @click="emit('add')">
 					<template #icon>
 						<icon-plus />
@@ -72,6 +66,7 @@ const emit = defineEmits(['update:size', 'update:columns', 'add', 'classify', 'r
 const cloneColumns = ref<TableColumn[]>([]);
 const showColumns = ref<TableColumn[]>([]);
 
+const defaultHidden = ['extra', 'updatedAt', 'createdAt'];
 // 修改表格字体大小
 const handleSelectDensity = (val: string | number | Record<string, any> | undefined) => {
 	emit('update:size', val);
@@ -79,11 +74,19 @@ const handleSelectDensity = (val: string | number | Record<string, any> | undefi
 
 const initColmun = (val: TableColumn[]) => {
 	cloneColumns.value = cloneDeep(val);
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	cloneColumns.value.forEach((item, index) => {
-		item.checked = true;
+		if (!defaultHidden.includes(item.slotName as string)) {
+			item.checked = true;
+		}
 	});
+
 	showColumns.value = cloneDeep(cloneColumns.value);
+
+	cloneColumns.value = showColumns.value.filter((item) => item.checked);
+
+	emit('update:columns', cloneColumns.value);
 };
 
 initColmun(props.columns);

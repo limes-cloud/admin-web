@@ -17,16 +17,16 @@
 
 			<a-form-item
 				field="keyword"
-				label="服务标志"
+				label="服务标识"
 				:rules="[
 					{
 						required: true,
-						message: '服务标志是必填项'
+						message: '服务标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入服务标志" allow-clear />
+				<a-input v-model="form.keyword" placeholder="请输入服务标识" allow-clear />
 			</a-form-item>
 
 			<a-form-item

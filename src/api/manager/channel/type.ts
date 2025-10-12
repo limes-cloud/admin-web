@@ -11,16 +11,7 @@ export interface ListChannelRequest {
 	keyword?: string;
 	name?: string;
 	status?: boolean;
-}
-
-export interface AdminChannel {
-	id: number;
-	logo: string;
-	logoUrl: string;
-	keyword: string;
-	type: string;
-	name: string;
-	description?: string;
+	appId?: number;
 }
 
 export interface Channel {
@@ -34,7 +25,6 @@ export interface Channel {
 	ak?: string;
 	sk?: string;
 	extra?: string;
-	admin?: boolean;
 	description?: string;
 	createdAt: number;
 	updatedAt: number;
@@ -54,7 +44,6 @@ export interface CreateChannelRequest {
 	ak?: string;
 	sk?: string;
 	extra?: string;
-	admin?: boolean;
 	description?: string;
 }
 
@@ -72,12 +61,11 @@ export interface UpdateChannelRequest {
 	sk?: string;
 	extra?: string;
 	status?: boolean;
-	admin?: boolean;
 	description?: string;
 }
 
 export interface DeleteChannelRequest {
-	ids: number[];
+	id: number;
 }
 
 export interface DeleteChannelReply {

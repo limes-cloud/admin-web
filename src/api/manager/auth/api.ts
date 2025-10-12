@@ -1,10 +1,22 @@
 import axios from 'axios';
 
-import { OAuthWayReply, OAuthWayRequest, OAuthBindReply, OAuthBindRequest, OAuthLoginReply, OAuthLoginRequest, ReportOAuthCodeRequest } from './type';
+import {
+	OAuthBindReply,
+	OAuthBindRequest,
+	OAuthLoginReply,
+	OAuthLoginRequest,
+	ReportOAuthCodeRequest,
+	ListLoginLogRequest,
+	ListLoginLogReply,
+	ListAuthLogReply,
+	ListAuthLogRequest,
+	OAuthHandlerRequest,
+	OAuthHandlerReply
+} from './type';
 
 // ListChannel 获取可用的登陆渠道列表
-export function OAuthWay(data: OAuthWayRequest) {
-	return axios.post<OAuthWayReply>('/manager/api/v1/oauth/way', data);
+export function OAuthHandler(data: OAuthHandlerRequest) {
+	return axios.post<OAuthHandlerReply>('/manager/api/v1/oauth/handler', data);
 }
 
 // OAuthLogin 三方渠道登陆
@@ -20,4 +32,14 @@ export function OAuthBind(data: OAuthBindRequest) {
 // OAuthLogin 三方渠道登陆
 export function ReportOAuthCode(data: ReportOAuthCodeRequest) {
 	return axios.post('/manager/api/v1/oauth/report', data);
+}
+
+// ListLoginLog 获取登陆日志
+export function ListLoginLog(params: ListLoginLogRequest) {
+	return axios.get<ListLoginLogReply>('/manager/api/v1/login/logs', { params });
+}
+
+// ListAuthLog 获取鉴权日志
+export function ListAuthLog(params: ListAuthLogRequest) {
+	return axios.get<ListAuthLogReply>('/manager/api/v1/auth/logs', { params });
 }

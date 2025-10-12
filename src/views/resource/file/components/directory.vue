@@ -42,16 +42,16 @@
 			<a-form ref="submitFormRef" :model="submitForm" layout="vertical">
 				<a-form-item
 					field="name"
-					label="请输入文件夹名称"
+					label="目录名称"
 					:rules="[
 						{
 							required: true,
-							message: '文件夹名称是必填项'
+							message: '目录名称是必填项'
 						}
 					]"
 					:validate-trigger="['change', 'input']"
 				>
-					<a-input v-model="submitForm.name" placeholder="请输入文件夹名称" />
+					<a-input v-model="submitForm.name" placeholder="请输入目录名称" />
 				</a-form-item>
 
 				<a-form-item
@@ -71,6 +71,7 @@
 				<a-form-item
 					field="maxSize"
 					label="最大阈值"
+					tooltip="允许上传的文件大小阈值（单位:M ）"
 					:rules="[
 						{
 							required: true,

@@ -19,6 +19,15 @@ function checkPermission(el: HTMLElement, binding: DirectiveBinding) {
 				};
 			}
 		}
+	} else if (Array.isArray(value)) {
+		var has = false;
+		value.forEach((item) => {
+			has = has || permissions.has(item);
+		});
+
+		if (!has && el.parentNode) {
+			el.parentNode.removeChild(el);
+		}
 	} else {
 		throw new Error(`need roles! Like v-permission="'permission'"`);
 	}

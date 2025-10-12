@@ -2,7 +2,7 @@ import axios from 'axios';
 import {
 	ListMenuReply,
 	ListMenuRequest,
-	ListMenuByCurRoleReply,
+	ListCurrentMenuReply,
 	CreateMenuReply,
 	CreateMenuRequest,
 	UpdateMenuRequest,
@@ -15,9 +15,8 @@ export function ListMenu(params?: ListMenuRequest) {
 	return axios.get<ListMenuReply>('/manager/api/v1/menus', { params });
 }
 
-// ListMenuByCurRole 获取菜单信息列表
-export function ListMenuByCurRole() {
-	return axios.get<ListMenuByCurRoleReply>('/manager/api/v1/menus/by/cur_role');
+export function ListCurrentMenu(params?: ListMenuRequest) {
+	return axios.get<ListCurrentMenuReply>('/manager/api/v1/current/menus', { params });
 }
 
 // CreateMenu 创建菜单信息

@@ -1,9 +1,10 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
+				class="general-table"
 				:columns="columns"
 				:loading="loading"
 				:data="tableData"
@@ -12,24 +13,26 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :menus="tableData" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" :menus="tableData" :app-id="appId" @refresh="handleGet"></Form>
+		</div>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import useLoading from '@/hooks/loading';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableColumn, TableSize } from '@/types/global';
-import useLoading from '@/hooks/loading';
 import { Menu } from '@/api/manager/menu/type';
 import { ListMenu } from '@/api/manager/menu/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 
+const router = useRouter();
+const appId = ref(0);
 const formRef = ref();
-const form = ref<Menu>({} as Menu);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -70,31 +73,32 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListMenu();
+		const { data } = await ListMenu({ appId: appId.value });
 		tableData.value = data.list;
 	} finally {
 		setLoading(false);
 	}
 };
 
-handleGet();
-
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Menu;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
 const handleTableUpdate = (data: Menu) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+	formRef.value.showUpdateDrawer(data);
 };
 
 const handleTableAdd = (data: Menu) => {
-	form.value = { parentId: data.id } as Menu;
-	formRef.value.showAddDrawer();
+	formRef.value.showAddDrawer({ parentId: data.id });
 };
+
+onMounted(() => {
+	const aid = router.currentRoute.value.query.appId;
+	appId.value = Number(aid) as unknown as number;
+	handleGet();
+});
 
 // 处理
 </script>

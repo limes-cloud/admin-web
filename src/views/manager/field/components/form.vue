@@ -69,7 +69,7 @@
 
 <script lang="ts" setup>
 import { CreateField, UpdateField } from '@/api/manager/field/api';
-import { CreateFieldRequest, FieldType, UpdateFieldRequest } from '@/api/manager/field/type';
+import { CreateFieldRequest, Field, FieldType, UpdateFieldRequest } from '@/api/manager/field/type';
 import { ref, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
 
@@ -78,28 +78,22 @@ const visible = ref(false);
 const isAdd = ref(false);
 type Type = CreateFieldRequest | UpdateFieldRequest;
 const props = defineProps<{
-	data: Type;
 	types: FieldType[];
 }>();
 
-const form = ref({ ...props.data });
+const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
-
-watch(
-	() => props.data,
-	(val) => {
-		form.value = val;
-	}
-);
 
 const showAddDrawer = () => {
 	visible.value = true;
 	isAdd.value = true;
+	form.value = {} as Type;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: Field) => {
 	visible.value = true;
 	isAdd.value = false;
+	form.value = { ...data };
 };
 
 const closeDrawer = () => {
@@ -113,15 +107,19 @@ const handleSubmit = async () => {
 	if (isError) {
 		return false;
 	}
-	const data = form.value;
-	if (isAdd.value) {
-		await CreateField(data as CreateFieldRequest);
-		Message.success('创建成功');
-	} else {
-		await UpdateField(data as UpdateFieldRequest);
-		Message.success('更新成功');
+	try {
+		const data = form.value;
+		if (isAdd.value) {
+			await CreateField(data as CreateFieldRequest);
+			Message.success('创建成功');
+		} else {
+			await UpdateField(data as UpdateFieldRequest);
+			Message.success('更新成功');
+		}
+		emit('refresh');
+		return true;
+	} catch (e) {
+		return false;
 	}
-	emit('refresh');
-	return true;
 };
 </script>

@@ -19,6 +19,7 @@ const useAppStore = defineStore('app', {
 		isLoading: false,
 		loadTitle: '',
 		name: '',
+		keyword: 'manager',
 		changePasswordType: 'password',
 		disFooter: new Map()
 	}),

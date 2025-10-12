@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
@@ -14,9 +14,20 @@
 				@page-change="handlePageChange"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
+				@dept="handleDept"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" @refresh="handleGet"></Form>
+		</div>
+		<a-modal
+			v-model:visible="showDept"
+			title="部门绑定"
+			:modal-style="{ width: '400px' }"
+			:body-style="{ padding: 0, height: '60%', minHeight: '500px', display: 'flex', flexDirection: 'column' }"
+			:footer="false"
+			unmount-on-close
+		>
+			<Dept :user-id="userId" />
+		</a-modal>
 	</div>
 </template>
 
@@ -26,15 +37,18 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
-import { GetUserReply, ListUserRequest, User } from '@/api/manager/user/type';
+import { ListUserRequest, User } from '@/api/manager/user/type';
 import { GetUser, ListUser } from '@/api/manager/user/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import Dept from './dept/index.vue';
+
+const showDept = ref(false);
+const userId = ref<number>(0);
 
 const formRef = ref();
-const form = ref<GetUserReply>({} as GetUserReply);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -53,24 +67,24 @@ const columns = ref<TableColumn[]>([
 		dataIndex: 'nickname'
 	},
 	{
-		title: '用户姓名',
-		dataIndex: 'name'
-	},
-	{
-		title: '用户电话',
-		dataIndex: 'phone'
+		title: '用户账号',
+		dataIndex: 'username'
 	},
 	{
 		title: '用户头像',
 		slotName: 'avatar'
 	},
 	{
-		title: '用户邮箱',
-		dataIndex: 'email'
+		title: '用户状态',
+		slotName: 'status'
 	},
 	{
-		title: '用户性别',
-		slotName: 'gender'
+		title: '所属部门',
+		dataIndex: 'dept.name'
+	},
+	{
+		title: '担任职位',
+		dataIndex: 'job.name'
 	},
 	{
 		title: '用户状态',
@@ -83,19 +97,17 @@ const columns = ref<TableColumn[]>([
 	},
 	{
 		title: '创建时间',
-		slotName: 'createdAt',
-		width: 170
+		slotName: 'createdAt'
 	},
 	{
 		title: '更新时间',
-		slotName: 'updatedAt',
-		width: 170
+		slotName: 'updatedAt'
 	},
 	{
 		title: '操作',
 		slotName: 'operations',
 		fixed: 'right',
-		width: 240
+		width: 60
 	}
 ]);
 
@@ -134,15 +146,18 @@ const handlePageChange = async (page: Pagination) => {
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as GetUserReply;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
 const handleTableUpdate = async (user: User) => {
 	const { data } = await GetUser({ id: user.id });
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+	formRef.value.showUpdateDrawer(data);
+};
+
+const handleDept = (data: User) => {
+	userId.value = data.id;
+	showDept.value = true;
 };
 </script>
 

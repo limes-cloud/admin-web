@@ -1,6 +1,6 @@
 <template>
 	<a-spin :loading="loading" style="width: 100%">
-		<a-card
+		<div
 			class="general-card"
 			:header-style="{ paddingBottom: 0 }"
 			:body-style="{
@@ -12,7 +12,7 @@
 				<a-link>查看更多</a-link>
 			</template>
 			<Chart height="289px" :option="chartOption" />
-		</a-card>
+		</div>
 	</a-spin>
 </template>
 

@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search :groups="groups" @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @show-category="showCategory = true"></Tool>
 			<Table
@@ -17,7 +17,7 @@
 				@template="handleShowTemplate"
 			></Table>
 			<Form ref="formRef" :groups="groups" @refresh="handleGet"></Form>
-		</a-card>
+		</div>
 		<a-modal
 			v-model:visible="showCategory"
 			title="通知分组"

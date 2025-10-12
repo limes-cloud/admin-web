@@ -137,7 +137,7 @@ const files = () => {
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.logo = file.response.sha;
+	form.value.logo = file.response.key;
 };
 
 const handleSubmit = async () => {

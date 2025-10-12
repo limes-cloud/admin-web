@@ -1,6 +1,6 @@
 <template>
 	<div class="container" :style="{ padding: 0 }">
-		<a-card class="general-card">
+		<div class="general-card">
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
 				:columns="columns"
@@ -14,7 +14,7 @@
 				@refresh="handleGet"
 			></Table>
 			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+		</div>
 	</div>
 </template>
 

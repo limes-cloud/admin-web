@@ -1,6 +1,6 @@
 <template>
-	<a-drawer v-if="appStore.popupType === 'drawer'" :width="getDrawerWidth()"><slot /></a-drawer>
-	<a-modal v-else body-class="modal" :width="getModalWidth()"><slot /></a-modal>
+	<a-drawer v-if="appStore.popupType === 'drawer'" :unmount-on-close="unmountOnClose" :width="getDrawerWidth()"><slot /></a-drawer>
+	<a-modal v-else body-class="modal" :unmount-on-close="unmountOnClose" :width="getModalWidth()"><slot /></a-modal>
 </template>
 
 <script lang="ts" setup>
@@ -8,7 +8,10 @@ import { useAppStore } from '@/store';
 
 const appStore = useAppStore();
 
-const props = defineProps<{ width?: string | number }>();
+const props = withDefaults(defineProps<{ width?: string | number; unmountOnClose?: boolean }>(), {
+	width: '680px',
+	unmountOnClose: true
+});
 
 const getModalWidth = () => {
 	if (!props.width) {

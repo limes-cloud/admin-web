@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search :groups="groups" @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd" @show-group="showGroup = true"></Tool>
 			<Table
@@ -15,7 +15,7 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 			></Table>
-		</a-card>
+		</div>
 		<a-modal v-model:visible="showGroup" title="反馈分类" width="580px" :body-style="{ padding: 0 }" :footer="false">
 			<Group />
 		</a-modal>

@@ -43,98 +43,33 @@
 
 			<a-form-item
 				field="keyword"
-				label="应用标志"
+				label="应用标识"
 				:rules="[
 					{
 						required: true,
-						message: '应用标志是必填项'
+						message: '应用标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入应用标志" allow-clear />
+				<a-input v-model="form.keyword" placeholder="请输入应用标识" allow-clear />
 			</a-form-item>
 
 			<a-form-item
-				field="allowRegistry"
-				label="允许注册"
+				field="private"
+				label="是否私有"
 				:rules="[
 					{
 						required: true,
-						message: '允许注册是必填项'
+						message: '是否私有是必选项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-radio-group v-model="form.allowRegistry">
+				<a-radio-group v-model="form.private">
 					<a-radio :value="true">是</a-radio>
 					<a-radio :value="false">否</a-radio>
 				</a-radio-group>
-			</a-form-item>
-
-			<a-form-item
-				field="channelIds"
-				label="授权渠道"
-				:rules="[
-					{
-						required: true,
-						message: '授权渠道是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-select
-					v-model="form.channelIds"
-					placeholder="请选择授权渠道"
-					multiple
-					:max-tag-count="2"
-					:scrollbar="true"
-					:options="channels"
-					allow-search
-					@search="searchChannelFactory.Search"
-					@dropdown-reach-bottom="searchChannelFactory.NextSearch"
-				></a-select>
-			</a-form-item>
-
-			<a-form-item field="fieldIds" label="信息字段">
-				<a-select
-					v-model="form.fieldIds"
-					placeholder="请选择信息字段"
-					multiple
-					:max-tag-count="2"
-					:scrollbar="true"
-					:options="fields"
-					@search="searchFieldFactory.Search"
-					@dropdown-reach-bottom="searchFieldFactory.NextSearch"
-				></a-select>
-			</a-form-item>
-
-			<a-form-item
-				field="version"
-				label="应用版本"
-				:rules="[
-					{
-						required: true,
-						message: '允许注册是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-input v-model="form.version" placeholder="请输入应用版本" allow-clear />
-			</a-form-item>
-
-			<a-form-item
-				field="copyright"
-				label="应用版权"
-				:rules="[
-					{
-						required: true,
-						message: '允许注册是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-input v-model="form.copyright" placeholder="请输入应用版权" allow-clear />
 			</a-form-item>
 
 			<a-form-item field="extra" label="扩展信息">
@@ -149,91 +84,31 @@
 </template>
 
 <script lang="ts" setup>
-import { CreateApp, GetApp, UpdateApp } from '@/api/manager/app/api';
+import { CreateApp, UpdateApp } from '@/api/manager/app/api';
 import { App, CreateAppRequest, UpdateAppRequest } from '@/api/manager/app/type';
 import { Message } from '@arco-design/web-vue';
 import { FileItem } from '@arco-design/web-vue/es/upload/interfaces';
 import { ref, getCurrentInstance } from 'vue';
-import { Search, Result } from '@/utils/search';
-import { ListChannel } from '@/api/manager/channel/api';
-import { ListField } from '@/api/manager/field/api';
 
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
-const props = defineProps<{
-	data: App;
-}>();
 
 type Type = CreateAppRequest | UpdateAppRequest;
 const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
 const { proxy } = getCurrentInstance() as any;
 
-const channels = ref<Result[]>([]);
-const fields = ref<Result[]>([]);
-
-const searchChannelFactory = new Search(
-	channels.value,
-	async (req): Promise<Result[]> => {
-		const res: Result[] = [];
-		const { data } = await ListChannel({ ...req, name: req.query as string | undefined });
-		data.list.forEach((item) => {
-			res.push({ label: `${item.name}（${item.description}）`, value: item.id });
-		});
-		return res;
-	},
-	(val): boolean => {
-		return form.value.channelIds.includes(val as number);
-	}
-);
-searchChannelFactory.Search();
-
-const searchFieldFactory = new Search(
-	fields.value,
-	async (req): Promise<Result[]> => {
-		const res: Result[] = [];
-		const { data } = await ListField({ ...req, name: req.query as string | undefined });
-		data.list.forEach((item) => {
-			res.push({ label: item.name, value: item.id });
-		});
-		return res;
-	},
-	(val): boolean => {
-		return form.value.fieldIds.includes(val as number);
-	}
-);
-searchFieldFactory.Search();
-
-const handleGetApp = async () => {
-	if (!props.data.id) return;
-	const { data } = await GetApp({ id: props.data.id });
-	form.value = { ...data, channelIds: [], fieldIds: [] };
-	if (data.channels) {
-		form.value.channelIds = data.channels.map((obj) => obj.id);
-	}
-	if (data.fields) {
-		form.value.fieldIds = data.fields.map((obj) => obj.id);
-	}
-};
-
-watch(
-	() => props.data,
-	() => {
-		handleGetApp();
-	}
-);
-
 const showAddDrawer = () => {
 	visible.value = true;
 	isAdd.value = true;
-	handleGetApp();
+	form.value = {} as App;
 };
 
-const showUpdateDrawer = () => {
+const showUpdateDrawer = (data: App) => {
 	visible.value = true;
 	isAdd.value = false;
-	handleGetApp();
+	form.value = { ...data } as Type;
 };
 
 const closeDrawer = () => {
@@ -264,11 +139,11 @@ const handleSubmit = async () => {
 };
 
 const files = () => {
-	if (props.data.logoUrl) {
+	if (form.value.logo) {
 		return [
 			{
-				url: proxy.$rurl(props.data.logoUrl, 100, 100),
-				sha: props.data.logo
+				url: proxy.$rurl(form.value.logo, 100, 100),
+				key: form.value.logo
 			}
 		];
 	}
@@ -278,6 +153,6 @@ const files = () => {
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.logo = file.response.sha;
+	form.value.logo = file.response.key;
 };
 </script>

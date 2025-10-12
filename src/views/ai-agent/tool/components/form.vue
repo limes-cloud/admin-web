@@ -223,6 +223,6 @@ const files = () => {
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.icon = file.response.sha;
+	form.value.icon = file.response.key;
 };
 </script>

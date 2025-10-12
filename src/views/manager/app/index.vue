@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<Search @search="handleSearch"></Search>
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table
@@ -14,9 +14,31 @@
 				@page-change="handlePageChange"
 				@update="handleTableUpdate"
 				@refresh="handleGet"
+				@channel="handleTableChannel"
+				@field="handleTableField"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</a-card>
+			<Form ref="formRef" @refresh="handleGet"></Form>
+		</div>
+		<a-modal
+			v-model:visible="showChannel"
+			title="应用授权渠道管理"
+			unmount-on-close
+			:modal-style="{ width: '80%', maxWidth: '800px' }"
+			:body-style="{ padding: 0, height: '500px' }"
+			:footer="false"
+		>
+			<Channel :app-id="appId" />
+		</a-modal>
+		<a-modal
+			v-model:visible="showField"
+			title="应用信息字段管理"
+			unmount-on-close
+			:modal-style="{ width: '80%', maxWidth: '800px' }"
+			:body-style="{ padding: 0, height: '500px' }"
+			:footer="false"
+		>
+			<Field :app-id="appId" />
+		</a-modal>
 	</div>
 </template>
 
@@ -25,15 +47,22 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
+import { useAppStore } from '@/store';
+
 import { App, ListAppRequest } from '@/api/manager/app/type';
-import { ListApp } from '@/api/manager/app/api';
+import { ListApp, ListCurrentApp } from '@/api/manager/app/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
+import Channel from './channel/index.vue';
+import Field from './field/index.vue';
+import { ListTenantApp } from '@/api/manager/tenant/api';
+const showField = ref(false);
+const showChannel = ref(false);
+const appId = ref(0);
 
 const formRef = ref();
-const form = ref<App>({} as App);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -43,6 +72,8 @@ const searchForm = ref<ListAppRequest>({
 	page: 1,
 	pageSize: 10
 });
+
+const { permissions } = useAppStore();
 
 const columns = ref<TableColumn[]>([
 	{
@@ -59,23 +90,18 @@ const columns = ref<TableColumn[]>([
 		slotName: 'name'
 	},
 	{
-		title: '应用标志',
+		title: '应用标识',
 		dataIndex: 'keyword',
 		slotName: 'keyword'
 	},
 	{
-		title: '允许注册',
-		slotName: 'allowRegistry'
+		title: '是否私有',
+		slotName: 'private'
 	},
 	{
 		title: '应用状态',
 		dataIndex: 'status',
 		slotName: 'status'
-	},
-	{
-		title: '应用版本',
-		dataIndex: 'version',
-		slotName: 'version'
 	},
 	{
 		title: '创建时间',
@@ -96,9 +122,15 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListApp(searchForm.value);
-		tableData.value = data.list;
-		total.value = data.total;
+		if (!permissions.has('manager:app:query')) {
+			const { data } = await ListCurrentApp({ ...searchForm.value });
+			tableData.value = data.list;
+			total.value = data.total;
+		} else {
+			const { data } = await ListApp(searchForm.value);
+			tableData.value = data.list;
+			total.value = data.total;
+		}
 	} finally {
 		setLoading(false);
 	}
@@ -119,14 +151,12 @@ const handleSearch = async (req: ListAppRequest) => {
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as App;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
 const handleTableUpdate = (data: App) => {
-	form.value = { ...data };
-	formRef.value.showUpdateDrawer();
+	formRef.value.showUpdateDrawer(data);
 };
 
 // 处理页面变更
@@ -134,6 +164,18 @@ const handlePageChange = async (page: Pagination) => {
 	searchForm.value.page = page.page;
 	searchForm.value.pageSize = page.pageSize;
 	handleGet();
+};
+
+// 处理table点击渠道
+const handleTableChannel = (data: App) => {
+	appId.value = data.id;
+	showChannel.value = true;
+};
+
+// 处理table点击字段
+const handleTableField = (data: App) => {
+	appId.value = data.id;
+	showField.value = true;
 };
 </script>
 

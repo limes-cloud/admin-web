@@ -7,6 +7,8 @@ export interface Channel {
 	id: number;
 	name: string;
 	keyword: string;
+	logo: string;
+	type: string;
 }
 
 export interface Field {
@@ -19,12 +21,11 @@ export interface Field {
 export interface GetAppReply {
 	id: number;
 	logo: string;
-	logoUrl: string;
 	keyword: string;
 	name: string;
 	status?: boolean;
 	disableDesc?: string;
-	allowRegistry?: boolean;
+	private?: boolean;
 	version: string;
 	copyright: string;
 	extra?: string;
@@ -48,12 +49,11 @@ export interface ListAppRequest {
 export interface App {
 	id: number;
 	logo: string;
-	logoUrl: string;
 	keyword: string;
 	name: string;
 	status?: boolean;
 	disableDesc?: string;
-	allowRegistry?: boolean;
+	private?: boolean;
 	version: string;
 	copyright: string;
 	extra?: string;
@@ -72,13 +72,9 @@ export interface CreateAppRequest {
 	keyword: string;
 	name: string;
 	status?: boolean;
-	allowRegistry?: boolean;
-	version: string;
-	copyright: string;
+	private?: boolean;
 	extra?: string;
 	description?: string;
-	channelIds: number[];
-	fieldIds: number[];
 }
 
 export interface CreateAppReply {
@@ -87,24 +83,86 @@ export interface CreateAppReply {
 
 export interface UpdateAppRequest {
 	id: number;
-	logo: string;
-	keyword: string;
-	name: string;
-	allowRegistry?: boolean;
-	version: string;
-	copyright: string;
+	logo?: string;
+	keyword?: string;
+	name?: string;
+	status?: boolean;
+	disableDesc?: string;
+	private?: boolean;
 	extra?: string;
 	description?: string;
-	channelIds: number[];
-	fieldIds: number[];
-}
-
-export interface UpdateAppStatusRequest {
-	id: number;
-	status: boolean;
-	disableDesc?: string;
 }
 
 export interface DeleteAppRequest {
+	id: number;
+}
+
+export interface AppOAuthChannel {
+	id: number;
+	appId: number;
+	channelId: number;
+	channel: Channel;
+}
+
+export interface ListAppOAuthChannelRequest {
+	page: number;
+	pageSize: number;
+	appId?: number;
+	order?: string;
+	orderBy?: string;
+	keyword?: string;
+	name?: string;
+}
+
+export interface ListAppOAuthChannelReply {
+	list: AppOAuthChannel[];
+}
+
+export interface ListTenantAppOAuthChannelRequest {
+	app: string;
+	tenant: string;
+}
+
+export interface ListTenantAppOAuthChannelReply {
+	list: Channel[];
+}
+
+export interface CreateAppOAuthChannelRequest {
+	appId: number;
+	channelId: number;
+}
+
+export interface DeleteAppOAuthChannelRequest {
+	id: number;
+}
+
+export interface AppField {
+	id: number;
+	appId: number;
+	fieldId: number;
+	field: Field;
+}
+
+export interface ListAppFieldRequest {
+	page: number;
+	pageSize: number;
+	appId: number;
+	order?: string;
+	orderBy?: string;
+	keyword?: string;
+	name?: string;
+}
+
+export interface ListAppFieldReply {
+	total: number;
+	list: AppField[];
+}
+
+export interface CreateAppFieldRequest {
+	appId: number;
+	fieldId: number;
+}
+
+export interface DeleteAppFieldRequest {
 	id: number;
 }

@@ -16,7 +16,9 @@ import ResourcePermission from './resource-permission/index.vue';
 import Download from './download/index.vue';
 import Popup from './popup/index.vue';
 import QRCode from './qrcode/qrcode.vue';
-
+import Operation from './operation/index.vue';
+import Container from './container/index.vue';
+import SqlConditionBuilder from './sql-condition-builder/index.vue';
 // Manually introduce ECharts modules to reduce packing size
 
 use([
@@ -47,5 +49,8 @@ export default {
 		Vue.component('ResourcePermission', ResourcePermission);
 		Vue.component('Popup', Popup);
 		Vue.component('QRCode', QRCode);
+		Vue.component('Operation', Operation);
+		Vue.component('Container', Container);
+		Vue.component('SqlConditionBuilder', SqlConditionBuilder);
 	}
 };

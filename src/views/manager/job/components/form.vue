@@ -2,27 +2,6 @@
 	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
-				field="parentId"
-				label="上级职位"
-				:rules="[
-					{
-						required: true,
-						message: '上级职位是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-cascader
-					v-model="form.parentId"
-					check-strictly
-					:field-names="{ value: 'id', label: 'name' }"
-					:options="jobs"
-					placeholder="请选择上级职位"
-					allow-search
-				/>
-			</a-form-item>
-
-			<a-form-item
 				field="name"
 				label="职位名称"
 				:rules="[
@@ -38,16 +17,16 @@
 
 			<a-form-item
 				field="keyword"
-				label="职位标志"
+				label="职位标识"
 				:rules="[
 					{
 						required: true,
-						message: '职位标志是必填项'
+						message: '职位标识是必填项'
 					}
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-input v-model="form.keyword" placeholder="请输入职位标志" allow-clear />
+				<a-input v-model="form.keyword" placeholder="请输入职位标识" allow-clear />
 			</a-form-item>
 
 			<a-form-item

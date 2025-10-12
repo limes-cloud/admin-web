@@ -15,6 +15,7 @@ declare module 'vue' {
 		$genderList: Record<string, string>;
 		$hasPermission: DetermineFunc;
 		$debounce: any;
+		$back: () => void;
 	}
 }
 

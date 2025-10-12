@@ -18,6 +18,25 @@
 					<div class="login-form-error-msg">{{ errorMessage }}</div>
 					<div class="login-container-box">
 						<a-form v-if="oauthWay.action === 'password'" :model="loginForm" class="login-form" layout="vertical" @submit="handleSubmit">
+							<a-form-item
+								v-if="!isQueryTenant"
+								field="tenant"
+								:rules="[{ required: true, message: '所属租户是必填项' }]"
+								:validate-trigger="['change', 'input']"
+								hide-label
+							>
+								<a-select
+									v-model="loginForm.tenant"
+									placeholder="请选择所属租户"
+									:scrollbar="true"
+									:options="tenants"
+									:disabled="isBind"
+									@search="search.Search"
+									@dropdown-reach-bottom="search.NextSearch"
+								>
+									<template #prefix><icon-user-group /></template>
+								</a-select>
+							</a-form-item>
 							<a-form-item field="username" :rules="[{ required: true, message: '账户不能为空' }]" :validate-trigger="['change', 'blur']" hide-label>
 								<a-input v-model="loginForm.username" size="large" placeholder="请输入账户">
 									<template #prefix><icon-user /></template>
@@ -104,8 +123,8 @@
 						<a-divider orientation="center">其他登陆方式</a-divider>
 						<div class="oauth-login">
 							<template v-for="(item, index) in channels" :key="index">
-								<div class="login-btn" @click="handleGetOAuthWay(item.keyword, item.type)">
-									<a-avatar shape="square" :image-url="item.logoUrl" object-fit="fill"></a-avatar>
+								<div class="login-btn" @click="handleGetOAuthHandler(item.keyword, item.type)">
+									<a-avatar shape="square" :image-url="$rurl(item.logo, 100, 100)" object-fit="fill"></a-avatar>
 								</div>
 								<a-divider v-if="index !== channels.length - 1" direction="vertical" />
 							</template>
@@ -128,7 +147,6 @@
 </template>
 
 <script lang="ts" setup>
-import Footer from '@/components/footer/index.vue';
 import { ref, reactive, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -138,18 +156,21 @@ import { useUserStore, useAppStore } from '@/store';
 import useLoading from '@/hooks/loading';
 import { GetUserLoginCaptcha } from '@/api/manager/user/api';
 import { UserLoginRequest } from '@/api/manager/user/type';
-import { ListAdminChannel } from '@/api/manager/channel/api';
-import { AdminChannel } from '@/api/manager/channel/type';
+import { ListTenantAppOAuthChannel } from '@/api/manager/app/api';
+import { Channel } from '@/api/manager/app/type';
 import { split } from 'lodash';
-import { OAuthWayReply, OAuthBindRequest, OAuthLoginRequest } from '@/api/manager/auth/type';
-import { OAuthWay, OAuthLogin, ReportOAuthCode } from '@/api/manager/auth/api';
+import { OAuthHandlerReply, OAuthBindRequest, OAuthLoginRequest } from '@/api/manager/auth/type';
+import { OAuthHandler, OAuthLogin, ReportOAuthCode } from '@/api/manager/auth/api';
+import Footer from '@/components/footer/index.vue';
+import { Search, Result } from '@/utils/search';
+import { ListTenant } from '@/api/manager/tenant/api';
 
 const timeInter: any = ref(null);
 const autoLoginTimeInter: any = ref(null);
 const router = useRouter();
 const errorMessage = ref('');
-const channels = ref<AdminChannel[]>([]);
-const oauthWay = ref<OAuthWayReply>({ action: 'password' } as OAuthWayReply);
+const channels = ref<Channel[]>([]);
+const oauthWay = ref<OAuthHandlerReply>({ action: 'password' } as OAuthHandlerReply);
 const isBind = ref(false);
 const currentOAuthReq = ref<OAuthLoginRequest>({} as OAuthLoginRequest);
 const isScanResult = ref(false);
@@ -160,8 +181,48 @@ const userStore = useUserStore();
 const appStore = useAppStore();
 const loginConfig = useStorage('login-config', {
 	rememberPassword: true,
+	tenant: '',
 	username: '',
 	password: ''
+});
+
+const captchaBase64 = ref('');
+const captchaTip = ref('获取验证码');
+
+const loginForm = reactive<UserLoginRequest>({
+	username: loginConfig.value.username,
+	password: loginConfig.value.password,
+	tenant: loginConfig.value.tenant,
+	captcha: '',
+	captchaId: ''
+});
+
+const tenants = ref<Result[]>([]);
+const search = new Search(
+	tenants.value,
+	async (req): Promise<Result[]> => {
+		const res: Result[] = [];
+		const { data } = await ListTenant({ ...req, name: req.query as string | undefined });
+
+		data.list.forEach((item) => {
+			res.push({ label: item.name, value: item.keyword });
+		});
+		return res;
+	},
+	(val: any): boolean => {
+		return loginForm.tenant === val;
+	}
+);
+
+const isQueryTenant = ref(false);
+onMounted(() => {
+	const params = router.currentRoute.value.query;
+	if (params.tenant) {
+		loginForm.tenant = params.tenant as string;
+		isQueryTenant.value = true;
+	} else {
+		search.Search();
+	}
 });
 
 onUnmounted(() => {
@@ -172,18 +233,8 @@ onUnmounted(() => {
 	autoLoginTimeInter.value = null;
 });
 
-const captchaBase64 = ref('');
-const captchaTip = ref('获取验证码');
-
-const loginForm = reactive<UserLoginRequest>({
-	username: loginConfig.value.username,
-	password: loginConfig.value.password,
-	captcha: '',
-	captchaId: ''
-});
-
 const handleSwitchPassword = () => {
-	oauthWay.value = { action: 'password' } as OAuthWayReply;
+	oauthWay.value = { action: 'password' } as OAuthHandlerReply;
 };
 
 const sendCaptcha = async () => {
@@ -191,7 +242,7 @@ const sendCaptcha = async () => {
 		return;
 	}
 
-	const { data } = await OAuthWay({ keyword: oauthWay.value.keyword, user: loginForm.username });
+	const { data } = await OAuthHandler({ keyword: oauthWay.value.keyword, user: loginForm.username });
 	captchaLoading.value = true;
 	const duration = Number(data.value);
 	let index = duration;
@@ -329,9 +380,10 @@ const handleSubmit = async ({ errors, values }: { errors: Record<string, Validat
 
 				Message.success('登陆成功');
 				const { rememberPassword } = loginConfig.value;
-				const { username, password } = values;
+				const { username, password, tenant } = values;
 				loginConfig.value.username = rememberPassword ? username : '';
 				loginConfig.value.password = rememberPassword ? password : '';
+				loginConfig.value.tenant = rememberPassword ? tenant : '';
 			} else {
 				await oauthLogin({
 					...currentOAuthReq.value,
@@ -353,18 +405,29 @@ const setRememberPassword = (value: boolean) => {
 };
 
 const getOAuthChannels = async () => {
-	const { data } = await ListAdminChannel();
+	const app = useAppStore();
+	const { data } = await ListTenantAppOAuthChannel({ app: app.keyword, tenant: loginForm.tenant });
 	channels.value = data.list;
 };
 
-getOAuthChannels();
+watch(
+	() => loginForm.tenant,
+	() => {
+		if (loginForm.tenant) {
+			getOAuthChannels();
+		} else {
+			channels.value = [];
+		}
+	},
+	{ immediate: true }
+);
 
-const handleGetOAuthWay = async (key: string, type: string) => {
+const handleGetOAuthHandler = async (key: string, type: string) => {
 	if (type === 'email') {
-		oauthWay.value = { action: 'captcha', keyword: key } as OAuthWayReply;
+		oauthWay.value = { action: 'captcha', keyword: key } as OAuthHandlerReply;
 		return;
 	}
-	const { data } = await OAuthWay({ keyword: key });
+	const { data } = await OAuthHandler({ keyword: key });
 
 	oauthWay.value = data;
 
@@ -377,7 +440,7 @@ const handleGetOAuthWay = async (key: string, type: string) => {
 
 const handleInit = async () => {
 	const getCode = async (keyword, query) => {
-		const { data } = await OAuthWay({ keyword });
+		const { data } = await OAuthHandler({ keyword });
 		return query[data.codeField] || '';
 	};
 
@@ -574,7 +637,7 @@ handleInit();
 			padding-bottom: 0px;
 		}
 		.footer {
-			bottom: 10px;
+			bottom: 25px;
 		}
 	}
 }

@@ -30,6 +30,12 @@ export const NOT_FOUND_ROUTE: RouteRecordRaw = {
 	component: () => import('@/views/not-found/index.vue')
 };
 
+export const ERROR_ROUTE: RouteRecordRaw = {
+	path: '/error',
+	name: 'error',
+	component: () => import('@/views/error/index.vue')
+};
+
 export const LOGIN_ROUTE: RouteRecordRaw = {
 	path: '/login',
 	name: 'login',

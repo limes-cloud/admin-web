@@ -2,11 +2,11 @@
 	<a-drawer :width="340" :visible="visible" title="设置资源所属部门" unmount-on-close @before-ok="submit" @cancel="close">
 		<div>
 			<a-tree
-				v-model:checked-keys="form.departmentIds"
+				v-model:checked-keys="form.deptIds"
 				v-model:half-checked-keys="halfIds"
 				check-strictly
 				:checkable="true"
-				:data="departments"
+				:data="depts"
 				:only-check-leaf="true"
 				:field-names="{
 					key: 'id',
@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ListCurrentDepartment } from '@/api/manager/department/api';
+import { ListCurrentDept } from '@/api/manager/dept/api';
 import { GetResource, UpdateResource } from '@/api/manager/resource/api';
 import { UpdateResourceRequest } from '@/api/manager/resource/type';
 import { Message, TreeNodeData } from '@arco-design/web-vue';
@@ -27,11 +27,11 @@ import { ref } from 'vue';
 
 const halfIds = ref<number[]>([]);
 const visible = ref(false);
-const departments = ref<TreeNodeData[]>([]);
+const depts = ref<TreeNodeData[]>([]);
 const form = ref<UpdateResourceRequest>({} as UpdateResourceRequest);
 
 const submit = async () => {
-	if (form.value.departmentIds.length === 0) {
+	if (form.value.deptIds.length === 0) {
 		Message.error('最少选择一个部门');
 		return false;
 	}
@@ -45,13 +45,13 @@ const show = async (key: string, id: number) => {
 	form.value = {
 		keyword: key,
 		resourceId: id,
-		departmentIds: []
+		deptIds: []
 	};
-	const depReply = await ListCurrentDepartment();
-	departments.value = depReply.data.list;
+	const depReply = await ListCurrentDept();
+	depts.value = depReply.data.list;
 
 	const resReply = await GetResource({ keyword: key, resourceId: id });
-	form.value.departmentIds = resReply.data.departmentIds;
+	form.value.deptIds = resReply.data.deptIds;
 
 	visible.value = true;
 };

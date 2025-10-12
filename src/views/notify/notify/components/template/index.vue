@@ -1,11 +1,11 @@
 <template>
 	<div class="container" :style="{ padding: 0 }">
-		<a-card class="general-card">
+		<div class="general-card">
 			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
 			<Table :columns="columns" :loading="loading" :data="tableData" @update="handleTableUpdate" @refresh="handleGet" @send="handleTableSend"></Table>
 			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
 			<Send ref="sendRef" :data="form"></Send>
-		</a-card>
+		</div>
 	</div>
 </template>
 

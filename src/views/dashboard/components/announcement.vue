@@ -1,5 +1,5 @@
 <template>
-	<a-card class="general-card" title="公告" :header-style="{ paddingBottom: '0' }" :body-style="{ padding: '15px 20px 13px 20px' }">
+	<div class="general-card" title="公告" :header-style="{ paddingBottom: '0' }" :body-style="{ padding: '15px 20px 13px 20px' }">
 		<template #extra>
 			<a-link>查看更多</a-link>
 		</template>
@@ -11,7 +11,7 @@
 				</span>
 			</div>
 		</div>
-	</a-card>
+	</div>
 </template>
 
 <script lang="ts" setup>

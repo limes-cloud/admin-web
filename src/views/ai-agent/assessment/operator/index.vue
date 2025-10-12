@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<a-card class="general-card">
+		<div class="general-card">
 			<div class="back">
 				<icon-left />
 				返回
@@ -9,7 +9,7 @@
 			<div class="chat">
 				<Chat title="这是一个房间标题"></Chat>
 			</div>
-		</a-card>
+		</div>
 	</div>
 </template>
 

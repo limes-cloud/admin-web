@@ -158,12 +158,16 @@ const handleSubmit = async () => {
 		return false;
 	}
 	const data = { ...form.value, dictionaryId: props.dictionaryId };
-	if (isAdd.value) {
-		await CreateDictionaryValue(data);
-		Message.success('创建成功');
-	} else {
-		await UpdateDictionaryValue(data);
-		Message.success('更新成功');
+	try {
+		if (isAdd.value) {
+			await CreateDictionaryValue(data as DictionaryValue);
+			Message.success('创建成功');
+		} else {
+			await UpdateDictionaryValue(data);
+			Message.success('更新成功');
+		}
+	} catch (e) {
+		return true;
 	}
 	emit('refresh');
 	return true;

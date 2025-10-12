@@ -52,7 +52,7 @@
 
 			<template #operations="{ record }">
 				<a-space class="cursor-pointer">
-					<a-popconfirm content="您确认要下载此文件？" @ok="handleDownloadFile(record.url, record.name)">
+					<a-popconfirm content="您确认要下载此文件？" @ok="$durl(record.key, record.name)">
 						<a-tag v-if="record.status === 'COMPLETED'" color="arcoblue">
 							<template #icon><icon-download /></template>
 							下载
@@ -118,13 +118,5 @@ const pageChange = (current: number) => {
 const pageSizeChange = (size: number) => {
 	page.value.pageSize = size;
 	emit('pageChange', page.value);
-};
-
-const handleDownloadFile = (src: string, name: string) => {
-	const link = document.createElement('a');
-	link.href = `${src}?download=true&save_name=${name}`;
-	link.target = '_blank';
-	link.download = src.substring(src.lastIndexOf('/'));
-	link.click();
 };
 </script>
