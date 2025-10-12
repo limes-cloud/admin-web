@@ -1,7 +1,6 @@
 <template>
 	<Container>
 		<a-table
-			v-permission="'manager:appchannel:query'"
 			row-key="id"
 			:loading="loading"
 			:columns="columns"
