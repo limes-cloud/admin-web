@@ -42,19 +42,19 @@
 </template>
 
 <script lang="ts" setup>
-import { InterflowClassify, ListInterflowRequest } from '@/api/partyaffairs/resource/type';
+import { ResourceClassify, ListResourceRequest } from '@/api/partyaffairs/resource/type';
 import { ref } from 'vue';
 
-const form = ref<ListInterflowRequest>({} as ListInterflowRequest);
+const form = ref<ListResourceRequest>({} as ListResourceRequest);
 const emit = defineEmits(['search']);
 defineProps<{
-	classifies: InterflowClassify[];
+	classifies: ResourceClassify[];
 }>();
 const handleSearch = () => {
 	emit('search', form.value);
 };
 
 const reset = () => {
-	form.value = {} as ListInterflowRequest;
+	form.value = {} as ListResourceRequest;
 };
 </script>

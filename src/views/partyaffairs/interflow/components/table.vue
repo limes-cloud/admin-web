@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DeleteInterflow } from '@/api/partyaffairs/resource/api';
+import { DeleteResource } from '@/api/partyaffairs/resource/api';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
@@ -91,7 +91,7 @@ const pageSizeChange = (size: number) => {
 };
 
 const handleDelete = async (id: number) => {
-	await DeleteInterflow({ id });
+	await DeleteResource({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

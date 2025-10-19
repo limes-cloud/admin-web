@@ -36,7 +36,7 @@
 					<div class="action-icon"><icon-settings size="18" /></div>
 					<template #content>
 						<div id="tableSetting">
-							<div v-for="(item, index) in showColumns" :key="item.dataIndex" class="setting">
+							<div v-for="(item, index) in showColumns" :key="index" class="setting">
 								<div style="margin-right: 4px; cursor: move">
 									<icon-drag-arrow />
 								</div>

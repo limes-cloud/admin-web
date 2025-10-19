@@ -1,5 +1,5 @@
 <template>
-	<div class="general-card" title="帮助文档" :header-style="{ paddingBottom: 0 }" :body-style="{ paddingTop: 0 }" style="height: 166px">
+	<a-card class="general-card" title="帮助文档" :header-style="{ paddingBottom: 0 }" :body-style="{ paddingTop: 0 }" style="height: 166px">
 		<template #extra>
 			<a-link>查看更多</a-link>
 		</template>
@@ -17,7 +17,7 @@
 				<a-link>接口文档</a-link>
 			</a-col>
 		</a-row>
-	</div>
+	</a-card>
 </template>
 
 <style lang="less" scoped>

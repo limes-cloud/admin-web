@@ -1,12 +1,12 @@
 <template>
 	<a-spin :loading="loading" style="width: 100%">
-		<div class="general-card" :header-style="{ paddingBottom: '0' }" :body-style="{ padding: '17px 20px 21px 20px' }">
+		<a-card class="general-card" :header-style="{ paddingBottom: '0' }" :body-style="{ padding: '17px 20px 21px 20px' }">
 			<template #title>线上热门内容</template>
 			<template #extra>
 				<a-link>查看更多</a-link>
 			</template>
 			<a-space direction="vertical" :size="10" fill>
-				<a-radio-group v-model:model-value="type" type="button" @change="typeChange as any">
+				<a-radio-group v-model:model-value="type" type="button" @change="typeChange">
 					<a-radio value="text">文本</a-radio>
 					<a-radio value="image">图片</a-radio>
 					<a-radio value="video">视频</a-radio>
@@ -43,7 +43,7 @@
 					</template>
 				</a-table>
 			</a-space>
-		</div>
+		</a-card>
 	</a-spin>
 </template>
 

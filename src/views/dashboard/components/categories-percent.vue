@@ -1,6 +1,6 @@
 <template>
 	<a-spin :loading="loading" style="width: 100%">
-		<div
+		<a-card
 			class="general-card"
 			:header-style="{ paddingBottom: '0' }"
 			:body-style="{
@@ -9,7 +9,7 @@
 		>
 			<template #title>内容类型占比</template>
 			<Chart height="310px" :option="chartOption" />
-		</div>
+		</a-card>
 	</a-spin>
 </template>
 

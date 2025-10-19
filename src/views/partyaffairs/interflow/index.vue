@@ -3,7 +3,7 @@
 		<Breadcrumb />
 		<a-card class="general-card">
 			<Search :classifies="classifies" @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" tool @refresh="handleGet" @add="handleToolAdd" @show-classify="showPerson = true" />
+			<Tool v-model:size="size" v-model:columns="columns" tool @refresh="handleGet" @add="handleToolAdd" @show-classify="showClassify = true" />
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -17,12 +17,12 @@
 			></Table>
 			<Form ref="formRef" :data="form" :classifies="classifies" @refresh="handleGet"></Form>
 			<a-modal
-				v-model:visible="showPerson"
+				v-model:visible="showClassify"
 				title="资料分组"
 				:modal-style="{ height: '80%', width: '80%', maxWidth: '800px' }"
 				:body-style="{ padding: 0 }"
 				:footer="false"
-				@close="handleGetPerson()"
+				@close="handleGetClassify()"
 			>
 				<Person />
 			</a-modal>
@@ -36,8 +36,8 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
-import { Interflow, InterflowPerson, ListInterflowRequest } from '@/api/partyaffairs/resource/type';
-import { ListInterflow, GetInterflow, ListInterflowPerson } from '@/api/partyaffairs/resource/api';
+import { Resource, ResourceClassify, ListResourceRequest } from '@/api/partyaffairs/resource/type';
+import { ListResource, GetResource, ListResourceClassify } from '@/api/partyaffairs/resource/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
@@ -45,15 +45,15 @@ import Search from './components/search.vue';
 import Person from './components/person/index.vue';
 
 const formRef = ref();
-const form = ref<Interflow>({} as Interflow);
+const form = ref<Resource>({} as Resource);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const classifies = ref<InterflowPerson[]>([]);
-const showPerson = ref(false);
-const searchForm = ref<ListInterflowRequest>({
+const classifies = ref<ResourceClassify[]>([]);
+const showClassify = ref(false);
+const searchForm = ref<ListResourceRequest>({
 	page: 1,
 	pageSize: 10
 });
@@ -90,18 +90,18 @@ const columns = ref<TableColumn[]>([
 ]);
 
 // handleGet 处理查询
-const handleGetPerson = async () => {
-	const { data } = await ListInterflowPerson();
+const handleGetClassify = async () => {
+	const { data } = await ListResourceClassify();
 	classifies.value = data.list;
 };
 
-handleGetPerson();
+handleGetClassify();
 
 // handleGet 处理查询
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListInterflow(searchForm.value);
+		const { data } = await ListResource(searchForm.value);
 		tableData.value = data.list;
 		total.value = data.total;
 	} finally {
@@ -112,19 +112,19 @@ handleGet();
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as Interflow;
+	form.value = {} as Resource;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (resource: Interflow) => {
-	const { data } = await GetInterflow({ id: resource.id });
+const handleTableUpdate = async (resource: Resource) => {
+	const { data } = await GetResource({ id: resource.id });
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };
 
 // 处理查询
-const handleSearch = async (req: ListInterflowRequest) => {
+const handleSearch = async (req: ListResourceRequest) => {
 	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
@@ -145,6 +145,6 @@ const handlePageChange = async (page: Pagination) => {
 
 <script lang="ts">
 export default {
-	name: 'PartyaffairsInterflow'
+	name: 'PartyaffairsResource'
 };
 </script>
