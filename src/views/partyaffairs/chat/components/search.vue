@@ -1,17 +1,17 @@
 <template>
-	<a-row v-permission="'manager:user:dept:query'">
+	<a-row v-permission="'partyaffairs:chat:query'">
 		<a-col :flex="1">
 			<a-form :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
-					<a-col :span="20">
-						<a-form-item field="name" label="部门名称">
-							<a-input v-model="form.name" allow-clear placeholder="请输入部门名称" />
+					<a-col :span="6">
+						<a-form-item field="name" label="用户姓名">
+							<a-input v-model="form.userName" allow-clear placeholder="请输入通知标题" />
 						</a-form-item>
 					</a-col>
 				</a-row>
 			</a-form>
 		</a-col>
-		<a-col :flex="'86px'" style="text-align: right">
+		<a-col :flex="'220px'" style="text-align: right">
 			<a-space :size="18">
 				<a-button type="primary" @click="handleSearch">
 					<template #icon>
@@ -19,15 +19,22 @@
 					</template>
 					搜索
 				</a-button>
+				<a-button @click="reset">
+					<template #icon>
+						<icon-refresh />
+					</template>
+					重置
+				</a-button>
 			</a-space>
 		</a-col>
 	</a-row>
 </template>
 
 <script lang="ts" setup>
-import { ListUserDeptRequest } from '@/api/manager/user/type';
+import { ListChatRecordRequest } from '@/api/partyaffairs/chat/type';
+import { ref } from 'vue';
 
-const form = ref<ListUserDeptRequest>({} as ListUserDeptRequest);
+const form = ref<ListChatRecordRequest>({} as ListChatRecordRequest);
 const emit = defineEmits(['search']);
 
 const handleSearch = () => {
@@ -35,6 +42,6 @@ const handleSearch = () => {
 };
 
 const reset = () => {
-	form.value = {} as ListUserDeptRequest;
+	form.value = {} as ListChatRecordRequest;
 };
 </script>

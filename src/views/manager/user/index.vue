@@ -15,18 +15,30 @@
 				@update="handleTableUpdate"
 				@refresh="handleGet"
 				@dept="handleDept"
+				@info="handleInfo"
 			></Table>
 			<Form ref="formRef" @refresh="handleGet"></Form>
 		</div>
 		<a-modal
 			v-model:visible="showDept"
 			title="部门绑定"
-			:modal-style="{ width: '400px' }"
+			:modal-style="{ width: '480px' }"
 			:body-style="{ padding: 0, height: '60%', minHeight: '500px', display: 'flex', flexDirection: 'column' }"
 			:footer="false"
 			unmount-on-close
 		>
 			<Dept :user-id="userId" />
+		</a-modal>
+
+		<a-modal
+			v-model:visible="showInfo"
+			title="信息管理"
+			:modal-style="{ width: '480px' }"
+			:body-style="{ padding: 0, height: '60%', minHeight: '500px', display: 'flex', flexDirection: 'column' }"
+			:footer="false"
+			unmount-on-close
+		>
+			<Info :user-id="userId" />
 		</a-modal>
 	</div>
 </template>
@@ -44,8 +56,11 @@ import Table from './components/table.vue';
 import Form from './components/form.vue';
 import Search from './components/search.vue';
 import Dept from './dept/index.vue';
+import Info from './info/index.vue';
 
 const showDept = ref(false);
+const showInfo = ref(false);
+
 const userId = ref<number>(0);
 
 const formRef = ref();
@@ -158,6 +173,11 @@ const handleTableUpdate = async (user: User) => {
 const handleDept = (data: User) => {
 	userId.value = data.id;
 	showDept.value = true;
+};
+
+const handleInfo = (data: User) => {
+	userId.value = data.id;
+	showInfo.value = true;
 };
 </script>
 

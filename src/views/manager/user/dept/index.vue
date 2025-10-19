@@ -49,12 +49,16 @@ const searchForm = ref<ListUserDeptRequest>({
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '角色ID',
+		title: '部门ID',
 		dataIndex: 'id'
 	},
 	{
-		title: '角色名称',
-		dataIndex: 'name'
+		title: '部门名称',
+		dataIndex: 'dept.name'
+	},
+	{
+		title: '担任角色',
+		dataIndex: 'job.name'
 	},
 	{
 		title: '操作',

@@ -46,6 +46,7 @@ import 'tinymce/plugins/wordcount'; // 字数统计
 import { PrepareUploadFileReply } from '@/api/resource/file/type';
 import { AxiosResponse } from 'axios';
 import { useAppStore } from '@/store';
+import { rurl } from '@/utils/url';
 
 const appStore = useAppStore();
 
@@ -208,7 +209,7 @@ const initOptions = {
 						.then((res) => {
 							progress(Math.ceil((index + 1) / pArrr.length));
 							if ((index + 1) / pArrr.length) {
-								resolve(res.data.url);
+								resolve(res.data.key);
 							}
 						})
 						.catch((res) => {
@@ -233,13 +234,15 @@ const initOptions = {
 					const { data } = await PrepareUploadFile(params);
 					// 触发秒传
 					if (data.uploaded) {
-						imageHost.value = getUrlHost(data.url as string);
+						const url = rurl(data.key as string);
+						imageHost.value = getUrlHost(url);
 						progress(100);
-						resolve(data.url);
+						resolve(url);
 					} else {
 						// 处理上传逻辑
-						const url = await handleUpload(data, binary);
-						imageHost.value = getUrlHost(url as string);
+						const key = await handleUpload(data, binary);
+						const url = rurl(key as string);
+						imageHost.value = getUrlHost(url);
 
 						resolve(url);
 					}
@@ -265,11 +268,9 @@ const initOptions = {
 				const src = e.element.getAttribute('src');
 				if (src.indexOf(imageHost.value) !== -1) {
 					const arr = src.split('/');
-					const filename = arr[arr.length - 1];
-					const tmp = filename.split('.');
-					const md5 = tmp[0];
+					const key = arr[arr.length - 1];
 					e.element.setAttribute('data-origin', 'resource');
-					e.element.setAttribute('data-md5', md5);
+					e.element.setAttribute('data-key', key);
 				}
 			}
 		});

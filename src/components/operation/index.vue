@@ -115,7 +115,7 @@ const onClick = (item: Menu) => {
 	.op-item {
 		padding: 3px 0;
 
-		/deep/ .arco-dropdown-option {
+		:deep(.arco-dropdown-option) {
 			.arco-dropdown-option-content {
 				font-size: 13px;
 				line-height: 30px;

@@ -20,14 +20,13 @@
 // };
 
 export const rurl = (key: string, w?: number, h?: number) => {
-	if (!w) {
-		w = 100;
+	let url = `${import.meta.env.VITE_API_BASE_URL}/resource/api/${key}`;
+	if (!w || !h) {
+		return url;
 	}
-	if (!h) {
-		h = 100;
-	}
+
 	const suffix = `?width=${w}&height=${h}&mode=fill`;
-	return `${import.meta.env.VITE_API_BASE_URL}/resource/api/${key}${suffix}`;
+	return `${url}${suffix}`;
 };
 
 export const durl = (key: string, name?: string) => {

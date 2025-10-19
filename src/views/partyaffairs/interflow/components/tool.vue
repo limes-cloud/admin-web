@@ -1,12 +1,20 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'partyaffairs:banner:add'" type="primary" @click="emit('add')">
-				<template #icon>
-					<icon-plus />
-				</template>
-				新建轮播
-			</a-button>
+			<a-space>
+				<a-button v-permission="'partyaffairs:resource:add'" type="primary" @click="emit('add')">
+					<template #icon>
+						<icon-plus />
+					</template>
+					新建资料
+				</a-button>
+				<a-button v-permission="'partyaffairs:resource:classify:query'" type="primary" status="success" @click="emit('showClassify')">
+					<template #icon>
+						<icon-list />
+					</template>
+					资料分类
+				</a-button>
+			</a-space>
 		</a-col>
 
 		<a-col :span="12" class="tool">
@@ -28,12 +36,12 @@
 					<div class="action-icon"><icon-settings size="18" /></div>
 					<template #content>
 						<div id="tableSetting">
-							<div v-for="(item, ind) in showColumns" :key="ind" class="setting">
+							<div v-for="(item, index) in showColumns" :key="item.dataIndex" class="setting">
 								<div style="margin-right: 4px; cursor: move">
 									<icon-drag-arrow />
 								</div>
 								<div>
-									<a-checkbox v-model="item.checked" @change="handleChange($event, item, ind)"></a-checkbox>
+									<a-checkbox v-model="item.checked" @change="handleChange($event, item as TableColumnData, index)"></a-checkbox>
 								</div>
 								<div class="title">
 									{{ item.title === '#' ? 'index' : item.title }}
@@ -61,7 +69,7 @@ const props = defineProps<{
 }>();
 
 // 定义事件
-const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh']);
+const emit = defineEmits(['update:size', 'update:columns', 'add', 'refresh', 'showClassify']);
 const cloneColumns = ref<TableColumn[]>([]);
 const showColumns = ref<TableColumn[]>([]);
 

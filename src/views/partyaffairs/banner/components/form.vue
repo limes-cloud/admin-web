@@ -23,7 +23,7 @@
 			</a-form-item>
 
 			<a-form-item
-				field="src"
+				field="key"
 				label="轮播封面"
 				:rules="[
 					{
@@ -88,10 +88,10 @@ type Type = CreateBannerRequest | UpdateBannerRequest;
 const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
 const files = () => {
-	if (props.data.src) {
+	if (props.data.key) {
 		return [
 			{
-				url: proxy.$rurl(props.data.src, 300, 140)
+				url: proxy.$rurl(props.data.key, 300, 140)
 			}
 		];
 	}
@@ -108,7 +108,7 @@ watch(
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.src = file.response.sha;
+	form.value.key = file.response.key;
 };
 
 const showAddDrawer = () => {
@@ -138,14 +138,10 @@ const handleSubmit = async () => {
 		await CreateBanner(data as CreateBannerRequest);
 		Message.success('创建成功');
 	} else {
-		if (form.value.src === props.data.src) {
-			data.src = undefined;
-		}
 		await UpdateBanner(data as UpdateBannerRequest);
 		Message.success('更新成功');
 	}
 	emit('refresh');
-
 	return true;
 };
 </script>

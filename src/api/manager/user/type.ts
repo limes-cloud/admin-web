@@ -50,7 +50,7 @@ export interface GetUserReply {
 export interface ListUserRequest {
 	page: number;
 	pageSize: number;
-	DeptId?: number;
+	deptId?: number;
 	roleId?: number;
 	name?: string;
 	phone?: string;
@@ -177,14 +177,18 @@ export interface ListUserDeptRequest {
 	userId: number;
 }
 
-export interface Dept {
+export interface Data {
 	id: number;
 	name: string;
 }
 
 export interface ListUserDeptReply {
 	total: number;
-	list: Dept[];
+	list: {
+		userId: number;
+		dept: Data;
+		job: Data;
+	}[];
 }
 
 export interface CreateUserDeptRequest {

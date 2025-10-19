@@ -4,7 +4,7 @@
 			<a-form ref="formRef" :model="form" :label-col-props="{ span: 6 }" :wrapper-col-props="{ span: 18 }" label-align="left" auto-label-width>
 				<a-row :gutter="16">
 					<a-col :span="6">
-						<a-form-item field="team_id" label="用户角色">
+						<a-form-item field="roleId" label="所属应用">
 							<a-cascader
 								v-model="form.roleId"
 								check-strictly
@@ -18,9 +18,23 @@
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item field="dept_id" label="用户部门">
+						<a-form-item field="roleId" label="所属角色">
 							<a-cascader
-								v-model="form.DeptId"
+								v-model="form.roleId"
+								check-strictly
+								allow-clear
+								:options="roles"
+								:field-names="{ value: 'id', label: 'name' }"
+								placeholder="请选择用户角色"
+								allow-search
+							/>
+						</a-form-item>
+					</a-col>
+
+					<a-col :span="6">
+						<a-form-item field="deptId" label="所属部门">
+							<a-cascader
+								v-model="form.deptId"
 								allow-clear
 								check-strictly
 								:options="depts"
@@ -32,8 +46,8 @@
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item field="name" label="用户姓名">
-							<a-input v-model="form.name" allow-clear placeholder="请输入用户姓名" />
+						<a-form-item field="name" label="用户账户">
+							<a-input v-model="form.name" allow-clear placeholder="请输入用户账户" />
 						</a-form-item>
 					</a-col>
 

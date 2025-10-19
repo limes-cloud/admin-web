@@ -43,7 +43,7 @@ export interface GetResourceReply {
 	classifyId: number;
 	title: string;
 	description: string;
-	url: string;
+	key: string;
 	downloadCount: number;
 	createdAt: number;
 	updatedAt: number;
@@ -61,7 +61,7 @@ export interface Resource {
 	classifyId: number;
 	title: string;
 	description: string;
-	url: string;
+	key: string;
 	downloadCount: number;
 	createdAt: number;
 	updatedAt: number;
@@ -76,7 +76,7 @@ export interface CreateResourceRequest {
 	classifyId: number;
 	title: string;
 	description: string;
-	url: string;
+	key: string;
 }
 
 export interface CreateResourceReply {
@@ -88,7 +88,7 @@ export interface UpdateResourceRequest {
 	classifyId?: number;
 	title?: string;
 	description?: string;
-	url?: string;
+	key?: string;
 }
 
 export interface DeleteResourceRequest {

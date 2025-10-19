@@ -88,8 +88,8 @@
 
 <script lang="ts" setup>
 import { ref, watch, getCurrentInstance } from 'vue';
-import { CreateResource, UpdateResource } from '@/api/partyaffairs/resource/api';
-import { CreateResourceRequest, UpdateResourceRequest, Resource, ResourceClassify } from '@/api/partyaffairs/resource/type';
+import { CreateInterflow, UpdateInterflow } from '@/api/partyaffairs/resource/api';
+import { CreateInterflowRequest, UpdateInterflowRequest, Interflow, InterflowClassify } from '@/api/partyaffairs/resource/type';
 import { FileItem, Message } from '@arco-design/web-vue';
 
 const { proxy } = getCurrentInstance() as any;
@@ -98,10 +98,10 @@ const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: Resource;
-	classifies: ResourceClassify[];
+	data: Interflow;
+	classifies: InterflowClassify[];
 }>();
-type Type = CreateResourceRequest | UpdateResourceRequest;
+type Type = CreateInterflowRequest | UpdateInterflowRequest;
 const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
 
@@ -155,7 +155,7 @@ const handleSubmit = async () => {
 
 	if (isAdd.value) {
 		const data = form.value;
-		await CreateResource(data as CreateResourceRequest);
+		await CreateInterflow(data as CreateInterflowRequest);
 		Message.success('创建成功');
 	} else {
 		const data = { id: props.data.id };
@@ -166,7 +166,7 @@ const handleSubmit = async () => {
 			data[key] = form.value[key];
 		});
 
-		await UpdateResource(data as UpdateResourceRequest);
+		await UpdateInterflow(data as UpdateInterflowRequest);
 		Message.success('更新成功');
 	}
 	emit('refresh');

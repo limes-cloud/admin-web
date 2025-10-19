@@ -139,7 +139,7 @@ watch(
 const handleUploadImage = (fs: FileItem[]) => {
 	if (!fs || !fs.length) return;
 	const file = fs[0];
-	form.value.cover = file.response.sha;
+	form.value.cover = file.response.key;
 };
 
 const showAddDrawer = () => {

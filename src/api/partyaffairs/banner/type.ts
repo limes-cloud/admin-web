@@ -10,7 +10,7 @@ export interface ListBannerRequest {
 export interface Banner {
 	id: number;
 	title: string;
-	src: string;
+	key: string;
 	path?: string;
 	weight?: number;
 	status?: boolean;
@@ -25,7 +25,7 @@ export interface ListBannerReply {
 
 export interface CreateBannerRequest {
 	title: string;
-	src: string;
+	key: string;
 	path?: string;
 	weight?: number;
 	status: boolean;
@@ -38,7 +38,7 @@ export interface CreateBannerReply {
 export interface UpdateBannerRequest {
 	id: number;
 	title?: string;
-	src?: string;
+	key?: string;
 	path?: string;
 	weight?: number;
 	status?: boolean;

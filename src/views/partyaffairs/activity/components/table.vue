@@ -14,7 +14,7 @@
 					width="200"
 					:src="$rurl(record.cover, 200, 100)"
 					:preview-props="{
-						src: record.cover
+						src: $rurl(record.cover)
 					}"
 				/>
 			</template>

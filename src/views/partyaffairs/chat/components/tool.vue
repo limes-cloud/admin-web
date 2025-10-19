@@ -1,11 +1,11 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'partyaffairs:banner:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'partyaffairs:chat:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>
-				新建轮播
+				新建通知
 			</a-button>
 		</a-col>
 
@@ -28,12 +28,12 @@
 					<div class="action-icon"><icon-settings size="18" /></div>
 					<template #content>
 						<div id="tableSetting">
-							<div v-for="(item, ind) in showColumns" :key="ind" class="setting">
+							<div v-for="(item, index) in showColumns" :key="index" class="setting">
 								<div style="margin-right: 4px; cursor: move">
 									<icon-drag-arrow />
 								</div>
 								<div>
-									<a-checkbox v-model="item.checked" @change="handleChange($event, item, ind)"></a-checkbox>
+									<a-checkbox v-model="item.checked" @change="handleChange($event, item, index)"></a-checkbox>
 								</div>
 								<div class="title">
 									{{ item.title === '#' ? 'index' : item.title }}

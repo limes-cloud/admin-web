@@ -1,5 +1,5 @@
 <template>
-	<a-space direction="vertical" fill>
+	<Container v-slot="value">
 		<a-table
 			v-permission="'partyaffairs:banner:query'"
 			row-key="id"
@@ -8,13 +8,14 @@
 			:data="data"
 			:bordered="false"
 			:pagination="false"
+			:scroll="{ y: value.height - 36 }"
 		>
-			<template #src="{ record }">
+			<template #key="{ record }">
 				<a-image
 					width="200"
-					:src="$rurl(record.src, 200, 100)"
+					:src="$rurl(record.key, 200, 100)"
 					:preview-props="{
-						src: record.src
+						src: $rurl(record.key)
 					}"
 				/>
 			</template>
@@ -49,17 +50,18 @@
 				</a-space>
 			</template>
 		</a-table>
-		<a-pagination
-			:total="total"
-			:current="page.page"
-			:page-size="page.pageSize"
-			show-total
-			show-jumper
-			show-page-size
-			@change="pageChange"
-			@page-size-change="pageSizeChange"
-		/>
-	</a-space>
+	</Container>
+
+	<a-pagination
+		:total="total"
+		:current="page.page"
+		:page-size="page.pageSize"
+		show-total
+		show-jumper
+		show-page-size
+		@change="pageChange"
+		@page-size-change="pageSizeChange"
+	/>
 </template>
 
 <script lang="ts" setup>

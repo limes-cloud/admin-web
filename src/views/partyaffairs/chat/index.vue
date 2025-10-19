@@ -1,9 +1,9 @@
 <template>
 	<div class="container">
 		<Breadcrumb />
-		<div class="general-card">
+		<a-card class="general-card">
 			<Search @search="handleSearch"></Search>
-			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet" @add="handleToolAdd"></Tool>
+			<Tool v-model:size="size" v-model:columns="columns" @refresh="handleGet"></Tool>
 			<Table
 				:columns="columns"
 				:loading="loading"
@@ -12,11 +12,8 @@
 				:total="total"
 				:pagination="searchForm"
 				@page-change="handlePageChange"
-				@update="handleTableUpdate"
-				@refresh="handleGet"
 			></Table>
-			<Form ref="formRef" :data="form" @refresh="handleGet"></Form>
-		</div>
+		</a-card>
 	</div>
 </template>
 
@@ -26,69 +23,63 @@ import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { Pagination, TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
 
-import { Banner, ListBannerRequest } from '@/api/partyaffairs/banner/type';
-import { ListBanner } from '@/api/partyaffairs/banner/api';
+import { ListChatRecordRequest } from '@/api/partyaffairs/chat/type';
+import { ListChatRecord } from '@/api/partyaffairs/chat/api';
+
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
-import Form from './components/form.vue';
 import Search from './components/search.vue';
 
-const formRef = ref();
-const form = ref<Banner>({} as Banner);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
 const size = ref<TableSize>('medium');
 const total = ref(0);
-const searchForm = ref<ListBannerRequest>({
+const searchForm = ref<ListChatRecordRequest>({
 	page: 1,
-	pageSize: 10
+	pageSize: 10,
+	distinct: true
 });
 
 const columns = ref<TableColumn[]>([
 	{
-		title: '轮播标题',
-		dataIndex: 'title'
+		title: '用户ID',
+		dataIndex: 'userId'
 	},
 	{
-		title: '轮播封面',
-		slotName: 'key'
+		title: '用户名称',
+		slotName: 'userName'
 	},
 	{
-		title: '跳转路径',
-		dataIndex: 'path'
+		title: '用户头像',
+		slotName: 'userAvatar'
 	},
 	{
-		title: '轮播权重',
-		dataIndex: 'weight'
+		title: '信息',
+		dataIndex: 'message'
 	},
 	{
-		title: '轮播状态',
-		slotName: 'status'
+		title: '类型',
+		slotName: 'type'
 	},
 	{
 		title: '创建时间',
 		slotName: 'createdAt',
 		width: 170
-	},
-	{
-		title: '更新时间',
-		slotName: 'updatedAt',
-		width: 170
-	},
-	{
-		title: '操作',
-		slotName: 'operations',
-		fixed: 'right',
-		width: 150
 	}
+	// {
+	// 	title: '操作',
+	// 	slotName: 'operations',
+	// 	fixed: 'right',
+	// 	width: 150
+	// }
 ]);
 
 // handleGet 处理查询
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListBanner(searchForm.value);
+		const { data } = await ListChatRecord(searchForm.value);
 		tableData.value = data.list;
 		total.value = data.total;
 	} finally {
@@ -98,20 +89,8 @@ const handleGet = async () => {
 
 handleGet();
 
-//  处理tool按钮新建
-const handleToolAdd = () => {
-	form.value = { weight: 0 } as Banner;
-	formRef.value.showAddDrawer();
-};
-
-// 处理table点击更新
-const handleTableUpdate = async (banner: Banner) => {
-	form.value = { ...banner };
-	formRef.value.showUpdateDrawer();
-};
-
 // 处理查询
-const handleSearch = async (req: ListBannerRequest) => {
+const handleSearch = async (req: ListChatRecordRequest) => {
 	const { pageSize } = searchForm.value;
 	searchForm.value = {
 		...req,
@@ -132,6 +111,6 @@ const handlePageChange = async (page: Pagination) => {
 
 <script lang="ts">
 export default {
-	name: 'PartyaffairsBanner'
+	name: 'PovertyChatRecord'
 };
 </script>

@@ -84,7 +84,7 @@ import { User } from '@/api/manager/user/type';
 import { DeleteUser, ResetUserPassword, UpdateUser } from '@/api/manager/user/api';
 import { Message } from '@arco-design/web-vue';
 
-const emit = defineEmits(['refresh', 'update', 'add', 'dept', 'role', 'pageChange']);
+const emit = defineEmits(['refresh', 'update', 'add', 'dept', 'role', 'info', 'pageChange']);
 
 const props = defineProps<{
 	columns: TableColumn[];
@@ -118,15 +118,15 @@ const operations = [
 			emit('dept', record);
 		}
 	},
-	// {
-	// 	icon: 'user-group',
-	// 	text: '详细信息',
-	// 	color: 'arcoblue',
-	// 	permission: 'manager:user:dept',
-	// 	click: (record: User) => {
-	// 		emit('dept', record);
-	// 	}
-	// },
+	{
+		icon: 'info-circle',
+		text: '详细信息',
+		color: 'arcoblue',
+		permission: 'manager:user:dept',
+		click: (record: User) => {
+			emit('info', record);
+		}
+	},
 	{
 		icon: 'edit',
 		text: '修改用户',

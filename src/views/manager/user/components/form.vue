@@ -2,6 +2,21 @@
 	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" unmount-on-close @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
+				field="username"
+				label="用户账号"
+				:disabled="!isAdd"
+				:rules="[
+					{
+						required: true,
+						message: '用户账号是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input v-model="form.username" allow-clear placeholder="请输入用户账号" />
+			</a-form-item>
+
+			<a-form-item
 				field="nickname"
 				label="用户昵称"
 				:rules="[
@@ -13,20 +28,6 @@
 				:validate-trigger="['change', 'input']"
 			>
 				<a-input v-model="form.nickname" allow-clear placeholder="请输入用户昵称" />
-			</a-form-item>
-
-			<a-form-item
-				field="username"
-				label="用户账号"
-				:rules="[
-					{
-						required: true,
-						message: '用户账号是必填项'
-					}
-				]"
-				:validate-trigger="['change', 'input']"
-			>
-				<a-input v-model="form.username" allow-clear placeholder="请输入用户账号" />
 			</a-form-item>
 
 			<a-form-item
