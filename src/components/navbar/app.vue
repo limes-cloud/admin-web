@@ -4,7 +4,7 @@ import { useAppStore, useTabBarStore } from '@/store';
 import { App, Home } from '@/router/types';
 import { getHomeByMenu, homeTransTag } from '@/router/guard/permission';
 import router from '@/router';
-import { Button, Doption, Dropdown, TypographyText } from '@arco-design/web-vue';
+import { Button, Doption, Dropdown, TypographyText, Avatar } from '@arco-design/web-vue';
 import Menu from '@/components/menu/index.vue';
 import { rurl } from '@/utils/url';
 export default defineComponent({
@@ -34,8 +34,8 @@ export default defineComponent({
 				apps.forEach((app) => {
 					// This is demo, modify nodes as needed
 					// const icon = () => h(compile(`<icon-${app.icon}/>`));
-					const icon = () => h(compile('<a-avatar :size="32" shape="square"><img alt="avatar" src="' + rurl(app.icon) + '"/></a-avatar>'));
-
+					// const icon = () => h(compile('<a-avatar :size="32" shape="square" image-url="' + rurl(app.icon) + '" />'));
+					const icon = () => h(Avatar, { size: 36, shape: 'square', 'image-url': rurl(app.icon) });
 					const node = (
 						<a-menu-item key={app.keyword} v-slots={{ icon }} onClick={() => switchApp(app)}>
 							{app.title}

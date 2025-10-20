@@ -113,6 +113,7 @@ const uploadedFileList = ref<FileItem[]>([]);
 const domwidth = ref(`${props.size}px`);
 const domheight = ref(`${props.size}px`);
 const dommargin = ref('8px');
+const startUpload = ref(false);
 
 if (props.width) {
 	// eslint-disable-next-line vue/no-setup-props-destructure
@@ -142,6 +143,12 @@ const Upload = (): FileItem[] => {
 
 const WaitUploadSuccess = () => {
 	const isSuccess = () => {
+		if (startUpload.value === false) {
+			return {
+				success: false,
+				error: false
+			};
+		}
 		let success = true;
 		let error = false;
 		uploadedFileList.value.forEach((file: FileItem) => {
@@ -157,10 +164,12 @@ const WaitUploadSuccess = () => {
 		const timer = setInterval(() => {
 			const res = isSuccess();
 			if (res.success) {
+				startUpload.value = false;
 				clearInterval(timer);
 				resolve();
 			}
 			if (res.error) {
+				startUpload.value = false;
 				clearInterval(timer);
 				reject();
 			}
@@ -225,6 +234,7 @@ const getPrepareUploadReq = async (data: any, file: File) => {
 };
 
 const handleUpload = async (info: PrepareUploadFileReply, binary: ArrayBuffer, options: RequestOption) => {
+	startUpload.value = true;
 	const { onProgress, onSuccess, onError, fileItem } = options;
 	const count = info.chunkCount as number;
 	const size = (info.chunkSize as number) * 1024;
