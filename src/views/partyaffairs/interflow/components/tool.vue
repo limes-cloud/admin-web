@@ -2,17 +2,11 @@
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
 			<a-space>
-				<a-button v-permission="'partyaffairs:resource:add'" type="primary" @click="emit('add')">
-					<template #icon>
-						<icon-plus />
-					</template>
-					新建资料
-				</a-button>
 				<a-button v-permission="'partyaffairs:resource:classify:query'" type="primary" status="success" @click="emit('showClassify')">
 					<template #icon>
 						<icon-list />
 					</template>
-					资料分类
+					人员管理
 				</a-button>
 			</a-space>
 		</a-col>
