@@ -13,15 +13,15 @@ import { ref } from 'vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
 import { TableColumn, TableSize } from '@/types/global';
 import useLoading from '@/hooks/loading';
-import { ResourceClassify } from '@/api/partyaffairs/resource/type';
+import { PublicClassify } from '@/api/partyaffairs/public/type';
 
-import { ListResourceClassify } from '@/api/partyaffairs/resource/api';
+import { ListPublicClassify } from '@/api/partyaffairs/public/api';
 import Tool from './components/tool.vue';
 import Table from './components/table.vue';
 import Form from './components/form.vue';
 
 const formRef = ref();
-const form = ref<ResourceClassify>({} as ResourceClassify);
+const form = ref<PublicClassify>({} as PublicClassify);
 const { setLoading } = useLoading(true);
 const loading = ref(false);
 const tableData = ref<TableData[]>();
@@ -59,7 +59,7 @@ const columns = ref<TableColumn[]>([
 const handleGet = async () => {
 	setLoading(true);
 	try {
-		const { data } = await ListResourceClassify();
+		const { data } = await ListPublicClassify();
 		tableData.value = data.list as unknown as TableData[];
 	} finally {
 		setLoading(false);
@@ -70,12 +70,12 @@ handleGet();
 
 //  处理tool按钮新建
 const handleToolAdd = () => {
-	form.value = {} as ResourceClassify;
+	form.value = {} as PublicClassify;
 	formRef.value.showAddDrawer();
 };
 
 // 处理table点击更新
-const handleTableUpdate = async (data: ResourceClassify) => {
+const handleTableUpdate = async (data: PublicClassify) => {
 	form.value = { ...data };
 	formRef.value.showUpdateDrawer();
 };

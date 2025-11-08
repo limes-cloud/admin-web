@@ -1,6 +1,6 @@
 <template>
 	<a-table
-		v-permission="'partyaffairs:resource:classify:query'"
+		v-permission="'partyaffairs:public:classify:query'"
 		row-key="id"
 		:loading="loading"
 		:columns="columns"
@@ -22,13 +22,13 @@
 
 		<template #operations="{ record }">
 			<a-space class="cursor-pointer">
-				<a-tag v-permission="'partyaffairs:resource:classify:update'" color="orangered" @click="emit('update', record)">
+				<a-tag v-permission="'partyaffairs:public:classify:update'" color="orangered" @click="emit('update', record)">
 					<template #icon><icon-edit /></template>
 					修改
 				</a-tag>
 
 				<a-popconfirm content="您确认删除此分组" type="warning" @ok="handleDelete(record.id)">
-					<a-tag v-permission="'partyaffairs:resource:classify:delete'" color="red">
+					<a-tag v-permission="'partyaffairs:public:classify:delete'" color="red">
 						<template #icon><icon-delete /></template>
 						删除
 					</a-tag>
@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DeleteResourceClassify } from '@/api/partyaffairs/resource/api';
+import { DeletePublicClassify } from '@/api/partyaffairs/public/api';
 import { TableColumn, TableSize } from '@/types/global';
 import { Message } from '@arco-design/web-vue';
 import { TableData } from '@arco-design/web-vue/es/table/interface';
@@ -54,7 +54,7 @@ defineProps<{
 }>();
 
 const handleDelete = async (id: number) => {
-	await DeleteResourceClassify({ id });
+	await DeletePublicClassify({ id });
 	Message.success('删除成功');
 	emit('refresh');
 };

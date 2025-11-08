@@ -1,35 +1,28 @@
 import axios from 'axios';
 import {
-	ListInterflowReply,
-	ListInterflowRequest,
-	DeleteInterflowRequest,
-	CreateInterflowPersonReply,
-	CreateInterflowPersonRequest,
-	DeleteInterflowPersonRequest,
-	ListInterflowPersonReply
+	CreateInterflowClassifyReply,
+	CreateInterflowClassifyRequest,
+	DeleteInterflowClassifyRequest,
+	ListInterflowClassifyReply,
+	UpdateInterflowClassifyRequest
 } from './type';
 
-// ListInterflowPerson 获取任务分组列表
-export function ListInterflowPerson() {
-	return axios.get<ListInterflowPersonReply>('/partyaffairs/api/v1/resource/classifies');
+// ListInterflowClassify 获取任务分组列表
+export function ListInterflowClassify() {
+	return axios.get<ListInterflowClassifyReply>('/partyaffairs/api/v1/interflow/classifies');
 }
 
-// CreateInterflowPerson 创建任务分组
-export function CreateInterflowPerson(data: CreateInterflowPersonRequest) {
-	return axios.post<CreateInterflowPersonReply>('/partyaffairs/api/v1/resource/person', data);
+// CreateInterflowClassify 创建任务分组
+export function CreateInterflowClassify(data: CreateInterflowClassifyRequest) {
+	return axios.post<CreateInterflowClassifyReply>('/partyaffairs/api/v1/interflow/classify', data);
 }
 
-// DeleteInterflowPerson 删除任务分组
-export function DeleteInterflowPerson(params: DeleteInterflowPersonRequest) {
-	return axios.delete('/partyaffairs/api/v1/resource/person', { params });
+// UpdateInterflowClassify 更新任务分组
+export function UpdateInterflowClassify(data: UpdateInterflowClassifyRequest) {
+	return axios.put('/partyaffairs/api/v1/interflow/classify', data);
 }
 
-// ListInterflow 获取资讯信息列表
-export function ListInterflow(params: ListInterflowRequest) {
-	return axios.get<ListInterflowReply>('/partyaffairs/api/v1/resources', { params });
-}
-
-// DeleteInterflow 删除资讯信息
-export function DeleteInterflow(params: DeleteInterflowRequest) {
-	return axios.delete('/partyaffairs/api/v1/resource', { params });
+// DeleteInterflowClassify 删除任务分组
+export function DeleteInterflowClassify(params: DeleteInterflowClassifyRequest) {
+	return axios.delete('/partyaffairs/api/v1/interflow/classify', { params });
 }

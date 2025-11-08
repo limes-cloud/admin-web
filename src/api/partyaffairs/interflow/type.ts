@@ -1,90 +1,44 @@
-import { S } from 'mockjs';
-
-export interface InterflowPerson {
-	userId: number;
-	username: string;
-	nickname: string;
+export interface InterflowClassify {
+	id: number;
+	name: string;
+	description: string;
+	weight: number;
+	person: string;
+	personObject: number[];
+	users: {
+		id: number;
+		nickname: string;
+	}[];
 	createdAt: number;
 	updatedAt: number;
 }
 
-export interface ListInterflowPersonReply {
-	list: InterflowPerson[];
-}
-
-export interface CreateInterflowPersonRequest {
-	userId: number;
-}
-
-export interface CreateInterflowPersonReply {
-	id: number;
-}
-
-export interface DeleteInterflowPersonRequest {
-	userId: number;
-}
-
-export interface DeleteInterflowPersonReply {
+export interface ListInterflowClassifyReply {
 	total: number;
+	list: InterflowClassify[];
 }
 
-export interface GetInterflowRequest {
+export interface CreateInterflowClassifyRequest {
+	name: string;
+	weight: number;
+}
+
+export interface CreateInterflowClassifyReply {
 	id: number;
 }
 
-export interface GetInterflowReply {
+export interface UpdateInterflowClassifyRequest {
 	id: number;
-	classifyId: number;
-	title: string;
+	name: string;
+	weight: number;
+	person: string;
 	description: string;
-	key: string;
-	downloadCount: number;
-	createdAt: number;
-	updatedAt: number;
 }
 
-export interface ListInterflowRequest {
-	page: number;
-	pageSize: number;
-	title?: string;
-	classifyId?: number;
-}
-
-export interface Interflow {
+export interface DeleteInterflowClassifyRequest {
 	id: number;
-	classifyId: number;
-	title: string;
-	description: string;
-	key: string;
-	downloadCount: number;
-	createdAt: number;
-	updatedAt: number;
 }
 
-export interface ListInterflowReply {
+export interface DeleteInterflowClassifyReply {
 	total: number;
-	list: Interflow[];
-}
-
-export interface CreateInterflowRequest {
-	classifyId: number;
-	title: string;
-	description: string;
-	key: string;
-}
-
-export interface CreateInterflowReply {
-	id: number;
-}
-
-export interface UpdateInterflowRequest {
-	id: number;
-	classifyId?: number;
-	title?: string;
-	description?: string;
-	key?: string;
-}
-
-export interface DeleteInterflowRequest {
-	id: number;
 }

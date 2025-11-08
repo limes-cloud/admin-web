@@ -33,8 +33,8 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { CreateResourceClassifyRequest, UpdateResourceClassifyRequest, ResourceClassify } from '@/api/partyaffairs/resource/type';
-import { CreateResourceClassify, UpdateResourceClassify } from '@/api/partyaffairs/resource/api';
+import { CreatePublicClassifyRequest, UpdatePublicClassifyRequest, PublicClassify } from '@/api/partyaffairs/public/type';
+import { CreatePublicClassify, UpdatePublicClassify } from '@/api/partyaffairs/public/api';
 import { Message } from '@arco-design/web-vue';
 
 const formRef = ref();
@@ -42,10 +42,10 @@ const visible = ref(false);
 const isAdd = ref(false);
 
 const props = defineProps<{
-	data: ResourceClassify;
+	data: PublicClassify;
 }>();
 
-type Type = CreateResourceClassifyRequest | UpdateResourceClassifyRequest;
+type Type = CreatePublicClassifyRequest | UpdatePublicClassifyRequest;
 const form = ref<Type>({} as Type);
 const emit = defineEmits(['refresh']);
 
@@ -80,10 +80,10 @@ const handleSubmit = async () => {
 
 	const data = form.value;
 	if (isAdd.value) {
-		await CreateResourceClassify(data as CreateResourceClassifyRequest);
+		await CreatePublicClassify(data as CreatePublicClassifyRequest);
 		Message.success('创建成功');
 	} else {
-		await UpdateResourceClassify(data as UpdateResourceClassifyRequest);
+		await UpdatePublicClassify(data as UpdatePublicClassifyRequest);
 		Message.success('更新成功');
 	}
 	emit('refresh');

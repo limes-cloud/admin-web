@@ -1,7 +1,7 @@
 <template>
 	<a-row style="align-items: center; margin-bottom: 16px">
 		<a-col :span="12">
-			<a-button v-permission="'partyaffairs:interflow:classify:add'" type="primary" @click="emit('add')">
+			<a-button v-permission="'partyaffairs:public:classify:add'" type="primary" @click="emit('add')">
 				<template #icon>
 					<icon-plus />
 				</template>

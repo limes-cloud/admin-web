@@ -52,12 +52,12 @@ export interface ListUserRequest {
 	pageSize: number;
 	deptId?: number;
 	roleId?: number;
-	name?: string;
+	username?: string;
 	phone?: string;
 	email?: string;
 	status?: boolean;
-	loggedAts: number[];
-	createdAts: number[];
+	loggedAts?: number[];
+	createdAts?: number[];
 }
 
 export interface User {
