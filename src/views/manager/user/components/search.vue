@@ -18,20 +18,6 @@
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item field="roleId" label="所属角色">
-							<a-cascader
-								v-model="form.roleId"
-								check-strictly
-								allow-clear
-								:options="roles"
-								:field-names="{ value: 'id', label: 'name' }"
-								placeholder="请选择用户角色"
-								allow-search
-							/>
-						</a-form-item>
-					</a-col>
-
-					<a-col :span="6">
 						<a-form-item field="deptId" label="所属部门">
 							<a-cascader
 								v-model="form.deptId"
@@ -46,23 +32,14 @@
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item field="name" label="用户账户">
-							<a-input v-model="form.name" allow-clear placeholder="请输入用户账户" />
+						<a-form-item field="username" label="用户账户">
+							<a-input v-model="form.username" allow-clear placeholder="请输入用户账户" />
 						</a-form-item>
 					</a-col>
 
 					<a-col :span="6">
-						<a-form-item
-							field="phone"
-							label="用户电话"
-							:validate-trigger="['change', 'input']"
-							:rules="[
-								{
-									validator: phoneValidate
-								}
-							]"
-						>
-							<a-input v-model="form.phone" allow-clear placeholder="请输入用户电话" />
+						<a-form-item field="nickname" label="用户昵称" :validate-trigger="['change', 'input']">
+							<a-input v-model="form.nickname" allow-clear placeholder="请输入用户昵称" />
 						</a-form-item>
 					</a-col>
 

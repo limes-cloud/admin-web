@@ -12,13 +12,15 @@
 				]"
 				:validate-trigger="['change', 'input']"
 			>
-				<a-select
+				<a-tree-select
 					v-model="form.deptId"
 					placeholder="请选择部门"
 					:scrollbar="true"
-					:options="depts"
-					@search="search.Search"
-					@dropdown-reach-bottom="search.NextSearch"
+					:fieldNames="{
+						key: 'id',
+						title: 'name'
+					}"
+					:data="depts"
 				/>
 			</a-form-item>
 
@@ -51,7 +53,7 @@ import { Result, Search } from '@/utils/search';
 import { Message } from '@arco-design/web-vue';
 import { ref } from 'vue';
 import { ListCurrentDept } from '@/api/manager/dept/api';
-import { CreateUserDeptRequest } from '@/api/manager/user/type';
+import { CreateUserDeptRequest, Dept } from '@/api/manager/user/type';
 import { CreateUserDept } from '@/api/manager/user/api';
 import { ListJob } from '@/api/manager/job/api';
 
@@ -60,7 +62,6 @@ const emit = defineEmits(['refresh']);
 
 const formRef = ref();
 const visible = ref(false);
-const depts = ref<Result[]>([]);
 const jobs = ref<Result[]>([]);
 const form = ref<CreateUserDeptRequest>({} as CreateUserDeptRequest);
 
@@ -80,24 +81,16 @@ const searchJob = new Search(
 	}
 );
 
-const search = new Search(
-	depts.value,
-	async (req): Promise<Result[]> => {
-		const res: Result[] = [];
-		const { data } = await ListCurrentDept({ ...req, name: req.query as string | undefined });
+const depts = ref<Dept[]>([]);
 
-		data.list.forEach((item) => {
-			res.push({ label: item.name, value: item.id });
-		});
-		return res;
-	},
-	(val: any): boolean => {
-		return form.value.deptId === val;
-	}
-);
+const getDepts = () => {
+	ListCurrentDept().then((res) => {
+		depts.value = res.data.list;
+	});
+};
+getDepts();
 
 const showAddDrawer = async (userId: number) => {
-	await search.Search();
 	await searchJob.Search();
 
 	visible.value = true;

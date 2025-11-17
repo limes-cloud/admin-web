@@ -2,6 +2,31 @@
 	<Popup v-model:visible="visible" :title="isAdd ? '新建' : '修改'" width="380px" unmount-on-close @cancel="visible = false" @before-ok="handleSubmit">
 		<a-form ref="formRef" :model="form" label-align="left" layout="horizontal" auto-label-width>
 			<a-form-item
+				field="avatar"
+				label="用户头像"
+				:rules="[
+					{
+						required: true,
+						message: '用户头像是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<Upload
+					ref="upload"
+					:size="100"
+					:limit="1"
+					:file-size="1000"
+					:draggable="true"
+					:multiple="false"
+					:auto-upload="true"
+					:files="files()"
+					directory-path="manager/user/logo"
+					accept="image/*"
+					@change="handleUploadImage"
+				></Upload>
+			</a-form-item>
+			<a-form-item
 				field="username"
 				label="用户账号"
 				:disabled="!isAdd"
@@ -77,14 +102,14 @@
 
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { Message } from '@arco-design/web-vue';
+import { FileItem, Message } from '@arco-design/web-vue';
 import { CreateUser, UpdateUser } from '@/api/manager/user/api';
 import { CreateUserRequest, Dept, Role, UpdateUserRequest, GetUserReply, User } from '@/api/manager/user/type';
 import { ListJob } from '@/api/manager/job/api';
 import { ListCurrentDept } from '@/api/manager/dept/api';
 import { Job } from '@/api/manager/job/type';
 import { Result, Search } from '@/utils/search';
-
+const { proxy } = getCurrentInstance() as any;
 const formRef = ref();
 const visible = ref(false);
 const isAdd = ref(false);
@@ -165,5 +190,23 @@ const handleSubmit = async () => {
 	} catch (e) {
 		return false;
 	}
+};
+
+const files = () => {
+	if (form.value.avatar) {
+		return [
+			{
+				url: proxy.$rurl(form.value.avatar, 100, 100),
+				key: form.value.avatar
+			}
+		];
+	}
+	return [];
+};
+
+const handleUploadImage = (fs: FileItem[]) => {
+	if (!fs || !fs.length) return;
+	const file = fs[0];
+	form.value.avatar = file.response.key;
 };
 </script>

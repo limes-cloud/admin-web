@@ -186,3 +186,9 @@ export default {
 	name: 'ManagerUser'
 };
 </script>
+
+<style lang="less" scoped>
+.general-card {
+	overflow: scroll;
+}
+</style>

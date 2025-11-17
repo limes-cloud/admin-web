@@ -95,7 +95,7 @@ watch(
 
 const users = ref<User[]>([]);
 const handleSearchUser = async (name?: string) => {
-	const { data } = await ListUser({ page: 1, pageSize: 10, username: name });
+	const { data } = await ListUser({ page: 1, pageSize: 10, nickname: name });
 	users.value = data.list;
 };
 handleSearchUser();

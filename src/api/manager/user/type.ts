@@ -53,6 +53,7 @@ export interface ListUserRequest {
 	deptId?: number;
 	roleId?: number;
 	username?: string;
+	nickname?: string;
 	phone?: string;
 	email?: string;
 	status?: boolean;
@@ -80,6 +81,7 @@ export interface ListUserReply {
 }
 
 export interface CreateUserRequest {
+	avatar?: string;
 	username: string;
 	nickname: string;
 	status?: boolean;
@@ -93,6 +95,7 @@ export interface CreateUserReply {
 
 export interface UpdateUserRequest {
 	id: number;
+	avatar?: string;
 	username?: string;
 	nickname?: string;
 	status?: boolean;
