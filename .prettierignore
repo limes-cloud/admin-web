@@ -1,7 +1,3 @@
+/node_modules/*
 /dist/*
-.local
-.output.js
-/node_modules/**
-/public/*
-**/*.svg
-**/*.sh
+/src/main.ts

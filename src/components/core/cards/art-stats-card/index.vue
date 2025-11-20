@@ -20,16 +20,14 @@
         {{ title }}
       </p>
       <ArtCountTo
-        v-if="count"
         class="stats-card__count"
+        v-if="count !== undefined"
         :target="count"
         :duration="2000"
         :decimals="decimals"
         :separator="separator"
       />
-      <p class="stats-card__description" :style="{ color: textColor }" v-if="description">{{
-        description
-      }}</p>
+      <p class="stats-card__description" :style="{ color: textColor }" v-if="description">{{ description }}</p>
     </div>
     <div class="stats-card__arrow" v-if="showArrow">
       <i class="iconfont-sys">&#xe703;</i>

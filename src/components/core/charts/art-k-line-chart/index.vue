@@ -4,7 +4,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { EChartsOption } from 'echarts'
+  import type { EChartsOption } from '@/utils/echarts'
   import { useChartOps, useChartComponent } from '@/composables/useChart'
   import type { KLineChartProps } from '@/types/component/chart'
 
@@ -49,9 +49,7 @@
     checkEmpty: () => {
       return (
         !props.data?.length ||
-        props.data.every(
-          (item) => item.open === 0 && item.close === 0 && item.high === 0 && item.low === 0
-        )
+        props.data.every((item) => item.open === 0 && item.close === 0 && item.high === 0 && item.low === 0)
       )
     },
     watchSources: [
@@ -76,7 +74,7 @@
           axisPointer: {
             type: 'cross'
           },
-          formatter: (params: any) => {
+          formatter: (params: Array<{ name: string; data: number[] }>) => {
             const param = params[0]
             const data = param.data
             return `

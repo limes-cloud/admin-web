@@ -3,7 +3,11 @@
     <!-- 包含子菜单的项目 -->
     <ElSubMenu v-if="hasChildren(item)" :index="item.path || item.meta.title" :level="level">
       <template #title>
-        <MenuItemIcon :icon="item.meta.icon" :color="theme?.iconColor" />
+        <div class="icon">
+          <ArtIcon :value="item.meta.icon"></ArtIcon>
+        </div>
+
+        <!-- <MenuItemIcon :icon="item.meta.icon" :color="theme?.iconColor" /> -->
         <span class="menu-name">
           {{ formatMenuTitle(item.meta.title) }}
         </span>
@@ -22,16 +26,14 @@
     <!-- 普通菜单项 -->
     <ElMenuItem
       v-else
-      :index="item.path || item.meta.title"
+      :index="isExternalLink(item) ? undefined : item.path || item.meta.title"
       :level-item="level + 1"
       @click="goPage(item)"
     >
-      <MenuItemIcon :icon="item.meta.icon" :color="theme?.iconColor" />
-      <div
-        v-show="item.meta.showBadge && level === 0 && !menuOpen"
-        class="art-badge"
-        style="right: 5px"
-      />
+      <div class="icon">
+        <ArtIcon :value="item.meta.icon"></ArtIcon>
+      </div>
+      <div v-show="item.meta.showBadge && level === 0 && !menuOpen" class="art-badge" style="right: 5px" />
 
       <template #title>
         <span class="menu-name">
@@ -129,8 +131,8 @@
         // 如果有子菜单，递归过滤子菜单
         if (item.children && item.children.length > 0) {
           const filteredChildren = filterRoutes(item.children)
-          // 如果所有子菜单都被过滤掉了，则隐藏父菜单
-          return filteredChildren.length > 0
+          // 如果所有子菜单都被过滤掉了，且父菜单没有重定向，则隐藏父菜单,
+          return !(filteredChildren.length < 0 && !item.redirect)
         }
 
         // 叶子节点且未被隐藏，保留
@@ -155,34 +157,56 @@
     const filteredChildren = filterRoutes(item.children)
     return filteredChildren.length > 0
   }
+
+  /**
+   * 判断是否为外部链接
+   * @param item 菜单项数据
+   * @returns 是否为外部链接
+   */
+  const isExternalLink = (item: AppRouteRecord): boolean => {
+    return !!(item.meta.link && !item.meta.isIframe)
+  }
 </script>
+
+<style lang="scss" scoped>
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .menu-name {
+    margin-left: 5px;
+  }
+</style>
 
 <script lang="ts">
   /**
    * 菜单图标组件
    * 用于渲染菜单项的图标
    */
-  const MenuItemIcon = defineComponent({
-    name: 'MenuItemIcon',
-    props: {
-      /** 图标内容 */
-      icon: {
-        type: String,
-        default: ''
-      },
-      /** 图标颜色 */
-      color: {
-        type: String,
-        default: ''
-      }
-    },
-    setup(props) {
-      return () =>
-        h('i', {
-          class: 'menu-icon iconfont-sys',
-          style: props.color ? { color: props.color } : undefined,
-          innerHTML: props.icon
-        })
-    }
-  })
+  // const MenuItemIcon = defineComponent({
+  //   name: 'MenuItemIcon',
+  //   props: {
+  //     /** 图标内容 */
+  //     icon: {
+  //       type: String,
+  //       default: ''
+  //     },
+  //     /** 图标颜色 */
+  //     color: {
+  //       type: String,
+  //       default: ''
+  //     }
+  //   },
+  //   setup(props) {
+  //     return () =>
+  //       h('i', {
+  //         class: 'menu-icon iconfont-sys',
+  //         style: props.color ? { color: props.color } : undefined,
+  //         innerHTML: props.icon
+  //       })
+  //   }
+  // })
 </script>

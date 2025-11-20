@@ -5,7 +5,7 @@
 
 <script setup lang="ts">
   import { useChartOps, useChartComponent } from '@/composables/useChart'
-  import type { EChartsOption, BarSeriesOption } from 'echarts'
+  import type { EChartsOption, BarSeriesOption } from '@/utils/echarts'
   import type { BidirectionalBarChartProps } from '@/types/component/chart'
 
   defineOptions({ name: 'ArtDualBarCompareChart' })
@@ -50,7 +50,7 @@
     borderRadius: number | number[]
     labelPosition: 'top' | 'bottom'
     colorIndex: number
-    formatter?: (params: any) => string
+    formatter?: (params: unknown) => string
   }): BarSeriesOption => {
     const { fontColor } = useChartOps()
     const animationConfig = getAnimationConfig()
@@ -69,7 +69,7 @@
       label: {
         show: props.showDataLabel,
         position: config.labelPosition,
-        formatter: config.formatter || ((params: any) => String(params.value)),
+        formatter: config.formatter || ((params: unknown) => String((params as Record<string, unknown>).value)),
         color: fontColor,
         fontSize: 12
       },
@@ -95,16 +95,10 @@
         props.isEmpty ||
         !props.positiveData.length ||
         !props.negativeData.length ||
-        (props.positiveData.every((val) => val === 0) &&
-          props.negativeData.every((val) => val === 0))
+        (props.positiveData.every((val) => val === 0) && props.negativeData.every((val) => val === 0))
       )
     },
-    watchSources: [
-      () => props.positiveData,
-      () => props.negativeData,
-      () => props.xAxisData,
-      () => props.colors
-    ],
+    watchSources: [() => props.positiveData, () => props.negativeData, () => props.xAxisData, () => props.colors],
     generateOptions: (): EChartsOption => {
       // 处理负向数据，确保为负值
       const processedNegativeData = props.negativeData.map((val) => (val > 0 ? -val : val))
@@ -173,7 +167,7 @@
             borderRadius: props.negativeBorderRadius,
             labelPosition: 'bottom',
             colorIndex: 1,
-            formatter: (params: any) => String(Math.abs(params.value))
+            formatter: (params: unknown) => String(Math.abs((params as Record<string, unknown>).value as number))
           }),
           // 正向数据系列
           createSeriesConfig({

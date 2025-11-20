@@ -1,12 +1,16 @@
 <!-- 表格头部，包含表格大小、刷新、全屏、列设置、其他设置 -->
 <template>
-  <div class="table-header">
+  <div class="table-header" id="art-table-header">
     <div class="left">
       <slot name="left"></slot>
     </div>
+
     <div class="right">
-      <div v-if="shouldShow('refresh')" class="btn" @click="refresh">
-        <i class="iconfont-sys">&#xe614;</i>
+      <div v-if="showSearchBar != null" class="btn" @click="search" :class="{ active: showSearchBar }">
+        <i class="iconfont-sys">&#xe6cb;</i>
+      </div>
+      <div v-if="shouldShow('refresh')" class="btn" @click="refresh" :class="{ loading: loading && isManualRefresh }">
+        <i class="iconfont-sys">&#xe615;</i>
       </div>
 
       <ElDropdown v-if="shouldShow('size')" @command="handleTableSizeChange">
@@ -38,10 +42,21 @@
           <div class="btn"><i class="iconfont-sys">&#xe6bd;</i> </div>
         </template>
         <div>
-          <VueDraggable v-model="columns">
-            <div v-for="item in columns" :key="item.prop || item.type" class="column-option">
-              <div class="drag-icon">
-                <i class="iconfont-sys">&#xe648;</i>
+          <VueDraggable
+            v-model="columns"
+            :disabled="false"
+            filter=".fixed-column"
+            :prevent-on-filter="false"
+            @move="checkColumnMove"
+          >
+            <div
+              v-for="item in columns"
+              :key="item.prop || item.type"
+              class="column-option"
+              :class="{ 'fixed-column': item.fixed }"
+            >
+              <div class="drag-icon" :class="{ disabled: item.fixed }">
+                <i class="iconfont-sys">{{ item.fixed ? '&#xe648;' : '&#xe648;' }}</i>
               </div>
               <ElCheckbox v-model="item.checked" :disabled="item.disabled">{{
                 item.label || (item.type === 'selection' ? t('table.selection') : '')
@@ -58,12 +73,8 @@
           </div>
         </template>
         <div>
-          <ElCheckbox v-if="showZebra" v-model="isZebra" :value="true">{{
-            t('table.zebra')
-          }}</ElCheckbox>
-          <ElCheckbox v-if="showBorder" v-model="isBorder" :value="true">{{
-            t('table.border')
-          }}</ElCheckbox>
+          <ElCheckbox v-if="showZebra" v-model="isZebra" :value="true">{{ t('table.zebra') }}</ElCheckbox>
+          <ElCheckbox v-if="showBorder" v-model="isBorder" :value="true">{{ t('table.border') }}</ElCheckbox>
           <ElCheckbox v-if="showHeaderBackground" v-model="isHeaderBackground" :value="true">{{
             t('table.headerBackground')
           }}</ElCheckbox>
@@ -79,7 +90,6 @@
   import { storeToRefs } from 'pinia'
   import { TableSizeEnum } from '@/enums/formEnum'
   import { useTableStore } from '@/store/modules/table'
-  import { ElPopover, ElCheckbox, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
   import { VueDraggable } from 'vue-draggable-plus'
   import { useI18n } from 'vue-i18n'
   import type { ColumnOption } from '@/types/component'
@@ -99,6 +109,10 @@
     fullClass?: string
     /** 组件布局，子组件名用逗号分隔 */
     layout?: string
+    /** 加载中 */
+    loading?: boolean
+    /** 搜索栏显示状态 */
+    showSearchBar?: boolean
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -106,7 +120,8 @@
     showBorder: true,
     showHeaderBackground: true,
     fullClass: 'art-page-view',
-    layout: 'refresh,size,fullscreen,columns,settings'
+    layout: 'search,refresh,size,fullscreen,columns,settings',
+    showSearchBar: undefined
   })
 
   const columns = defineModel<ColumnOption[]>('columns', {
@@ -116,9 +131,9 @@
 
   const emit = defineEmits<{
     (e: 'refresh'): void
+    (e: 'search'): void
+    (e: 'update:showSearchBar', value: boolean): void
   }>()
-
-  // ========== 数据和状态 ==========
 
   /** 表格大小选项配置 */
   const tableSizeOptions = [
@@ -130,14 +145,10 @@
   const tableStore = useTableStore()
   const { tableSize, isZebra, isBorder, isHeaderBackground } = storeToRefs(tableStore)
 
-  // ========== 计算属性 ==========
-
   /** 解析 layout 属性，转换为数组 */
   const layoutItems = computed(() => {
     return props.layout.split(',').map((item) => item.trim())
   })
-
-  // ========== 工具方法 ==========
 
   /**
    * 检查组件是否应该显示
@@ -148,10 +159,31 @@
     return layoutItems.value.includes(componentName)
   }
 
-  // ========== 事件处理 ==========
+  /**
+   * 拖拽移动事件处理 - 防止固定列位置改变
+   * @param evt move事件对象
+   * @returns 是否允许移动
+   */
+  const checkColumnMove = (event: any) => {
+    // 拖拽进入的目标 DOM 元素
+    const toElement = event.related as HTMLElement
+    // 如果目标位置是 fixed 列，则不允许移动
+    if (toElement && toElement.classList.contains('fixed-column')) {
+      return false
+    }
+    return true
+  }
+
+  /** 搜索事件处理 */
+  const search = () => {
+    // 切换搜索栏显示状态
+    emit('update:showSearchBar', !props.showSearchBar)
+    emit('search')
+  }
 
   /** 刷新事件处理 */
   const refresh = () => {
+    isManualRefresh.value = true
     emit('refresh')
   }
 
@@ -163,9 +195,10 @@
     useTableStore().setTableSize(command)
   }
 
-  // ========== 全屏功能 ==========
+  /** 是否手动点击刷新 */
+  const isManualRefresh = ref(false)
 
-  /** 是否全屏状态 */
+  /** 加载中 */
   const isFullScreen = ref(false)
 
   /** 保存原始的 overflow 样式，用于退出全屏时恢复 */
@@ -204,8 +237,6 @@
       toggleFullScreen()
     }
   }
-
-  // ========== 生命周期钩子 ==========
 
   /** 组件挂载时注册全局事件监听器 */
   onMounted(() => {
@@ -258,6 +289,7 @@
     .right {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
 
       .btn {
         display: flex;
@@ -265,7 +297,7 @@
         justify-content: center;
         width: 32px;
         height: 32px;
-        margin-left: 10px;
+        margin-left: 8px;
         color: var(--art-gray-700);
         cursor: pointer;
         background-color: rgba(var(--art-gray-200-rgb), 0.8);
@@ -284,6 +316,29 @@
 
           i {
             color: var(--art-gray-800);
+          }
+        }
+
+        &.loading {
+          i {
+            color: var(--art-gray-600);
+            animation: loading-spin 1s linear infinite;
+          }
+        }
+
+        &.active {
+          background-color: var(--el-color-primary);
+
+          i {
+            color: #fff;
+          }
+
+          &:hover {
+            background-color: var(--el-color-primary-light-3);
+
+            i {
+              color: #fff;
+            }
           }
         }
       }
@@ -306,6 +361,22 @@
       i {
         font-size: 18px;
       }
+
+      &.disabled {
+        color: var(--art-gray-300);
+        cursor: default;
+      }
+    }
+
+    .el-checkbox {
+      flex: 1;
+      min-width: 0;
+
+      .el-checkbox__label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 
@@ -323,6 +394,16 @@
           margin-left: 0;
         }
       }
+    }
+  }
+
+  @keyframes loading-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
     }
   }
 </style>

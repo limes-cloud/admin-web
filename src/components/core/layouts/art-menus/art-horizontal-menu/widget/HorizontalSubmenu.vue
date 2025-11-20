@@ -1,12 +1,12 @@
 <template>
   <ElSubMenu v-if="hasChildren" :index="item.path || item.meta.title">
     <template #title>
-      <i
-        class="menu-icon iconfont-sys"
-        :style="{ color: theme?.iconColor }"
-        v-html="item.meta.icon"
-      ></i>
-      <span>{{ formatMenuTitle(item.meta.title) }}</span>
+      <div class="icon">
+        <ArtIcon :value="item.meta.icon"></ArtIcon>
+      </div>
+
+      <!-- <i class="menu-icon iconfont-sys" :style="{ color: theme?.iconColor }" v-html="item.meta.icon"></i> -->
+      <span class="menu-title">{{ formatMenuTitle(item.meta.title) }}</span>
       <div v-if="item.meta.showBadge" class="art-badge art-badge-horizontal" />
       <div v-if="item.meta.showTextBadge" class="art-text-badge">
         {{ item.meta.showTextBadge }}
@@ -25,22 +25,13 @@
     />
   </ElSubMenu>
 
-  <ElMenuItem
-    v-else-if="!item.meta.isHide"
-    :index="item.path || item.meta.title"
-    @click="goPage(item)"
-  >
-    <i
-      class="menu-icon iconfont-sys"
-      :style="{ color: theme?.iconColor }"
-      v-html="item.meta.icon"
-    ></i>
-    <span>{{ formatMenuTitle(item.meta.title) }}</span>
-    <div
-      v-if="item.meta.showBadge"
-      class="art-badge"
-      :style="{ right: level === 0 ? '10px' : '20px' }"
-    />
+  <ElMenuItem v-else-if="!item.meta.isHide" :index="item.path || item.meta.title" @click="goPage(item)">
+    <!-- <i class="menu-icon iconfont-sys" :style="{ color: theme?.iconColor }" v-html="item.meta.icon"></i> -->
+    <div class="icon">
+      <ArtIcon :value="item.meta.icon"></ArtIcon>
+    </div>
+    <span class="menu-title">{{ formatMenuTitle(item.meta.title) }}</span>
+    <div v-if="item.meta.showBadge" class="art-badge" :style="{ right: level === 0 ? '10px' : '20px' }" />
     <div v-if="item.meta.showTextBadge && level !== 0" class="art-text-badge">
       {{ item.meta.showTextBadge }}
     </div>
@@ -92,6 +83,14 @@
 </script>
 
 <style lang="scss" scoped>
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+    font-size: 15px;
+  }
+
   .el-sub-menu {
     padding: 0 !important;
 

@@ -3,10 +3,10 @@
     <span class="label">{{ config.label }}</span>
 
     <!-- 开关类型 -->
-    <el-switch v-if="config.type === 'switch'" :model-value="modelValue" @change="handleChange" />
+    <ElSwitch v-if="config.type === 'switch'" :model-value="modelValue" @change="handleChange" />
 
     <!-- 数字输入类型 -->
-    <el-input-number
+    <ElInputNumber
       v-else-if="config.type === 'input-number'"
       :model-value="modelValue"
       :min="config.min"
@@ -18,19 +18,14 @@
     />
 
     <!-- 选择器类型 -->
-    <el-select
+    <ElSelect
       v-else-if="config.type === 'select'"
       :model-value="modelValue"
       :style="config.style"
       @change="handleChange"
     >
-      <el-option
-        v-for="option in normalizedOptions"
-        :key="option.value"
-        :label="option.label"
-        :value="option.value"
-      />
-    </el-select>
+      <ElOption v-for="option in normalizedOptions" :key="option.value" :label="option.label" :value="option.value" />
+    </ElSelect>
   </div>
 </template>
 
@@ -48,9 +43,7 @@
     step?: number
     style?: Record<string, string>
     controlsPosition?: '' | 'right'
-    options?:
-      | Array<{ value: any; label: string }>
-      | ComputedRef<Array<{ value: any; label: string }>>
+    options?: Array<{ value: any; label: string }> | ComputedRef<Array<{ value: any; label: string }>>
   }
 
   interface Props {

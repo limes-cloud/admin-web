@@ -1,0 +1,181 @@
+@use '@styles/variables.scss' as *;
+
+:deep(.el-tabs__nav-wrap::after) {
+  background: none;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.register {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+
+  .el-input__inner {
+    &:focus {
+      border: 1px solid #4e83fd;
+    }
+  }
+
+  .el-input--medium .el-input__inner {
+    height: var(--el-component-custom-height);
+    line-height: var(--el-component-custom-height);
+  }
+
+  .register-plan {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    margin: auto;
+    background: #fff;
+    border-radius: 8px;
+
+    .left-bg {
+      z-index: 100;
+      width: 300px;
+    }
+
+    .form {
+      padding-top: 20px;
+    }
+
+    .register-wrap {
+      width: 280px;
+      padding: 0 5px;
+      margin: auto;
+      overflow: hidden;
+      background-size: cover;
+      border-radius: 5px;
+      opacity: 0;
+      transform: translateX(30px);
+      animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--art-text-gray-800);
+
+        a {
+          color: var(--main-color);
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: $device-ipad-pro) {
+  .register {
+    .register-plan {
+      margin: auto;
+
+      .register-wrap {
+        position: relative;
+        height: auto;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        opacity: 1;
+        transform: translateX(0);
+        animation: none !important;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: $device-phone) {
+  .register {
+    width: 100vw;
+    height: 100vh;
+
+    .register-plan {
+      box-sizing: border-box;
+      padding: 15px 30px;
+      margin: auto;
+
+      .left-bg {
+        display: none;
+      }
+
+      .register-wrap {
+        width: 100%;
+      }
+
+      .top-register-plan {
+        right: 24px;
+      }
+    }
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.form-box {
+  box-sizing: border-box;
+
+  :deep(.el-input-group__append) {
+    padding: 0;
+  }
+
+  .input-wrap {
+    .input-label {
+      display: block;
+      padding-bottom: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--art-text-gray-800);
+    }
+  }
+
+  .account-select :deep(.el-select__wrapper),
+  .el-input,
+  .register-btn {
+    height: 40px !important;
+  }
+
+  .forget-password {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--art-text-gray-500);
+
+    a {
+      color: var(--main-color);
+      text-decoration: none;
+    }
+  }
+
+  .register-btn {
+    width: 100%;
+    height: 40px !important;
+    color: #fff;
+    border: 0;
+  }
+
+  .back-btn {
+    width: 100%;
+    height: 40px !important;
+  }
+}

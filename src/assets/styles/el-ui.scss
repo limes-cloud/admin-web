@@ -26,6 +26,24 @@
   }
 }
 
+// small 样式重写
+.el-select--small .el-select__wrapper {
+  padding: 8px 10px !important;
+}
+.el-input--small .el-input__wrapper {
+  padding: 4.5px 10px !important;
+}
+.el-button--small {
+  padding: 8px 11px !important;
+  height: 30px !important;
+}
+
+// 优化 el-form-item 标签高度
+.el-form-item__label {
+  height: var(--el-component-custom-height) !important;
+  line-height: var(--el-component-custom-height) !important;
+}
+
 // 日期选择器
 .el-date-range-picker {
   --el-datepicker-inrange-bg-color: rgba(var(--art-gray-200-rgb), 0.6) !important;
@@ -80,6 +98,11 @@ html.dark .el-card {
   height: var(--el-component-custom-height) !important;
 }
 
+// circle 按钮宽度优化
+.el-button--default.is-circle {
+  width: var(--el-component-custom-height) !important;
+}
+
 // 修改 el-select 高度
 .el-select--default {
   .el-select__wrapper {
@@ -103,6 +126,7 @@ html.dark .el-card {
 
 .el-popover {
   min-width: 80px;
+  border-radius: var(--el-border-radius-small) !important;
 }
 
 .el-dialog {
@@ -118,7 +142,9 @@ html.dark .el-card {
 }
 
 .el-dialog__body {
-  padding: 25px 0 !important;
+  padding: 5px 0 0 0 !important;
+  overflow-x: hidden;
+  box-sizing: border-box;
   position: relative; // 为了兼容 el-pagination 样式，需要设置 relative，不然会影响 el-pagination 的样式，比如 el-pagination__jump--small 会被影响，导致 el-pagination__jump--small 按钮无法点击，详见 URL_ADDRESS.com/element-plus/element-plus/issues/5684#issuecomment-1176299275;
 }
 
@@ -156,7 +182,6 @@ html.dark .el-card {
     0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
 
   p {
-    color: #515a6e !important;
     font-size: 13px;
   }
 }
@@ -172,6 +197,11 @@ html.dark .el-card {
     border-radius: 6px !important;
 
     &:hover:not(.is-disabled) {
+      color: var(--art-gray-900) !important;
+      background-color: var(--art-gray-200) !important;
+    }
+
+    &:focus:not(.is-disabled) {
       color: var(--art-gray-900) !important;
       background-color: var(--art-gray-200) !important;
     }
@@ -230,12 +260,12 @@ html.dark .el-card {
 
 // 修改el-tag样式
 .el-tag {
-  height: 26px !important;
-  line-height: 26px !important;
-  border: 0 !important;
-  border-radius: 6px !important;
-  font-weight: bold;
+  font-weight: 500;
   transition: all 0s !important;
+
+  &.el-tag--default {
+    height: 26px !important;
+  }
 }
 
 .el-checkbox-group {
@@ -427,13 +457,9 @@ html.dark .el-card {
     padding: 5px !important;
 
     .el-select-dropdown__item {
-      height: 34px !important;
-      line-height: 34px !important;
-      border-radius: 6px !important;
-
-      &.is-hovering {
-        background-color: transparent !important;
-      }
+      height: var(--el-component-custom-height) !important;
+      line-height: var(--el-component-custom-height) !important;
+      border-radius: 2px !important;
 
       &.is-selected {
         color: var(--art-gray-900) !important;
@@ -461,7 +487,7 @@ html.dark .el-card {
 
     .el-tree-node {
       .el-tree-node__content {
-        height: 36px !important;
+        height: var(--el-component-custom-height) !important;
         border-radius: 6px !important;
 
         &:hover {
@@ -487,5 +513,34 @@ html.dark .el-card {
 .el-picker-panel {
   .el-picker-panel__footer {
     border-radius: 0 0 var(--el-border-radius-base) var(--el-border-radius-base);
+  }
+}
+
+// 优化树型菜单样式
+.el-tree-node__content {
+  border-radius: 4px;
+  margin-bottom: 4px;
+  padding: 1px 0;
+
+  &:hover {
+    background-color: rgba(var(--art-gray-200-rgb), 0.6) !important;
+  }
+}
+
+.dark {
+  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+    background-color: rgba(var(--art-gray-300-rgb), 0.7) !important;
+  }
+}
+
+.el-form-item--label-top {
+  .el-form-item__label {
+    display: flex !important;
+  }
+}
+
+.el-table__inner-wrapper {
+  &::before {
+    background-color: transparent !important;
   }
 }

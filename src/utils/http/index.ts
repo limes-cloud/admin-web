@@ -1,13 +1,13 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { useUserStore } from '@/store/modules/user'
 import { ApiStatus } from './status'
-import { HttpError, handleError, showError } from './error'
+import { HttpError, handleError, showError, showSuccess } from './error'
 import { $t } from '@/locales'
 
 /** 请求配置常量 */
 const REQUEST_TIMEOUT = 15000
 const LOGOUT_DELAY = 500
-const MAX_RETRIES = 2
+const MAX_RETRIES = 0
 const RETRY_DELAY = 1000
 const UNAUTHORIZED_DEBOUNCE_TIME = 3000
 
@@ -18,6 +18,7 @@ let unauthorizedTimer: NodeJS.Timeout | null = null
 /** 扩展 AxiosRequestConfig */
 interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
   showErrorMessage?: boolean
+  showSuccessMessage?: boolean
 }
 
 const { VITE_API_URL, VITE_WITH_CREDENTIALS } = import.meta.env
@@ -64,11 +65,12 @@ axiosInstance.interceptors.request.use(
 
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
-  (response: AxiosResponse<Api.Http.BaseResponse>) => {
-    const { code, msg } = response.data
+  (response: AxiosResponse<Http.BaseResponse>) => {
+    const { code, message } = response.data
+    console.log(code, message)
     if (code === ApiStatus.success) return response
-    if (code === ApiStatus.unauthorized) handleUnauthorizedError(msg)
-    throw createHttpError(msg || $t('httpMsg.requestFailed'), code)
+    if (code === ApiStatus.unauthorized) handleUnauthorizedError(message)
+    throw createHttpError(message || $t('httpMsg.requestFailed'), code)
   },
   (error) => {
     if (error.response?.status === ApiStatus.unauthorized) handleUnauthorizedError()
@@ -108,7 +110,7 @@ function resetUnauthorizedError() {
 /** 退出登录函数 */
 function logOut() {
   setTimeout(() => {
-    useUserStore().logOut()
+    useUserStore().logout()
   }, LOGOUT_DELAY)
 }
 
@@ -124,10 +126,7 @@ function shouldRetry(statusCode: number) {
 }
 
 /** 请求重试逻辑 */
-async function retryRequest<T>(
-  config: ExtendedAxiosRequestConfig,
-  retries: number = MAX_RETRIES
-): Promise<T> {
+async function retryRequest<T>(config: ExtendedAxiosRequestConfig, retries: number = MAX_RETRIES): Promise<T> {
   try {
     return await request<T>(config)
   } catch (error) {
@@ -147,17 +146,19 @@ function delay(ms: number) {
 /** 请求函数 */
 async function request<T = any>(config: ExtendedAxiosRequestConfig): Promise<T> {
   // POST | PUT 参数自动填充
-  if (
-    ['POST', 'PUT'].includes(config.method?.toUpperCase() || '') &&
-    config.params &&
-    !config.data
-  ) {
+  if (['POST', 'PUT'].includes(config.method?.toUpperCase() || '') && config.params && !config.data) {
     config.data = config.params
     config.params = undefined
   }
 
   try {
-    const res = await axiosInstance.request<Api.Http.BaseResponse<T>>(config)
+    const res = await axiosInstance.request<Http.BaseResponse<T>>(config)
+
+    // 显示成功消息
+    if (config.showSuccessMessage && res.data.message) {
+      showSuccess(res.data.message)
+    }
+
     return res.data.data as T
   } catch (error) {
     if (error instanceof HttpError && error.code !== ApiStatus.unauthorized) {

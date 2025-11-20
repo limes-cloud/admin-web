@@ -1,16 +1,10 @@
 <!-- 散点图 -->
 <template>
-  <div
-    ref="chartRef"
-    class="art-scatter-chart"
-    :style="{ height: props.height }"
-    v-loading="props.loading"
-  >
-  </div>
+  <div ref="chartRef" class="art-scatter-chart" :style="{ height: props.height }" v-loading="props.loading"> </div>
 </template>
 
 <script setup lang="ts">
-  import type { EChartsOption } from 'echarts'
+  import type { EChartsOption } from '@/utils/echarts'
   import { getCssVar } from '@/utils/ui'
   import { useChartOps, useChartComponent } from '@/composables/useChart'
   import type { ScatterChartProps } from '@/types/component/chart'
@@ -68,7 +62,7 @@
         },
         tooltip: props.showTooltip
           ? getTooltipStyle('item', {
-              formatter: (params: any) => {
+              formatter: (params: { value: [number, number] }) => {
                 const [x, y] = params.value
                 return `X: ${x}<br/>Y: ${y}`
               }

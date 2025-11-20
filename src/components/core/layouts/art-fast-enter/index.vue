@@ -17,11 +17,9 @@
       <div class="fast-enter-trigger">
         <div class="btn">
           <i class="iconfont-sys">&#xe81a;</i>
-          <span class="red-dot"></span>
         </div>
       </div>
     </template>
-
     <div class="fast-enter">
       <div class="apps-section">
         <div class="apps-grid">
@@ -30,14 +28,10 @@
             v-for="application in enabledApplications"
             :key="application.name"
             class="app-item"
-            @click="handleNavigate(application.path)"
+            @click="handleApplicationClick(application)"
           >
             <div class="app-icon">
-              <i
-                class="iconfont-sys"
-                v-html="application.icon"
-                :style="{ color: application.iconColor }"
-              />
+              <i class="iconfont-sys" v-html="application.icon" :style="{ color: application.iconColor }" />
             </div>
             <div class="app-info">
               <h3>{{ application.name }}</h3>
@@ -50,11 +44,7 @@
       <div class="quick-links">
         <h3>快速链接</h3>
         <ul>
-          <li
-            v-for="quickLink in enabledQuickLinks"
-            :key="quickLink.name"
-            @click="handleNavigate(quickLink.path)"
-          >
+          <li v-for="quickLink in enabledQuickLinks" :key="quickLink.name" @click="handleQuickLinkClick(quickLink)">
             <span>{{ quickLink.name }}</span>
           </li>
         </ul>
@@ -65,6 +55,7 @@
 
 <script setup lang="ts">
   import { useFastEnter } from '@/composables/useFastEnter'
+  import type { FastEnterApplication, FastEnterQuickLink } from '@/types/config'
 
   defineOptions({ name: 'ArtFastEnter' })
 
@@ -74,15 +65,42 @@
   // 使用快速入口配置
   const { enabledApplications, enabledQuickLinks } = useFastEnter()
 
-  const isExternalLink = (path: string): boolean => path.startsWith('http')
+  /**
+   * 处理导航跳转
+   * @param routeName 路由名称
+   * @param link 外部链接
+   */
+  const handleNavigate = (routeName?: string, link?: string): void => {
+    const targetPath = routeName || link
 
-  const handleNavigate = (path: string): void => {
-    if (isExternalLink(path)) {
-      window.open(path, '_blank')
-    } else {
-      router.push(path)
+    if (!targetPath) {
+      console.warn('导航配置无效：缺少路由名称或链接')
+      return
     }
+
+    if (targetPath.startsWith('http')) {
+      window.open(targetPath, '_blank')
+    } else {
+      router.push({ name: targetPath })
+    }
+
     popoverRef.value?.hide()
+  }
+
+  /**
+   * 处理应用项点击
+   * @param application 应用配置对象
+   */
+  const handleApplicationClick = (application: FastEnterApplication): void => {
+    handleNavigate(application.routeName, application.link)
+  }
+
+  /**
+   * 处理快速链接点击
+   * @param quickLink 快速链接配置对象
+   */
+  const handleQuickLinkClick = (quickLink: FastEnterQuickLink): void => {
+    handleNavigate(quickLink.routeName, quickLink.link)
   }
 </script>
 

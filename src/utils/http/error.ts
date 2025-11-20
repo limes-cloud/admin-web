@@ -1,12 +1,11 @@
 import { AxiosError } from 'axios'
-import { ElMessage } from 'element-plus'
 import { ApiStatus } from './status'
 import { $t } from '@/locales'
 
 // 错误响应接口
 export interface ErrorResponse {
   code: number
-  msg: string
+  message: string
   data?: unknown
 }
 
@@ -94,7 +93,7 @@ export function handleError(error: AxiosError<ErrorResponse>): never {
   }
 
   const statusCode = error.response?.status
-  const errorMessage = error.response?.data?.msg || error.message
+  const errorMessage = error.response?.data?.message || error.message
   const requestConfig = error.config
 
   // 处理网络错误
@@ -106,9 +105,9 @@ export function handleError(error: AxiosError<ErrorResponse>): never {
   }
 
   // 处理 HTTP 状态码错误
-  const message = statusCode
-    ? getErrorMessage(statusCode)
-    : errorMessage || $t('httpMsg.requestFailed')
+  const message =
+    statusCode && !error.response?.data ? getErrorMessage(statusCode) : errorMessage || $t('httpMsg.requestFailed')
+
   throw new HttpError(message, statusCode || ApiStatus.error, {
     data: error.response.data,
     url: requestConfig?.url,
@@ -121,12 +120,28 @@ export function handleError(error: AxiosError<ErrorResponse>): never {
  * @param error 错误对象
  * @param showMessage 是否显示错误消息
  */
+const isShow = ref(false)
 export function showError(error: HttpError, showMessage: boolean = true): void {
-  if (showMessage) {
+  if (showMessage && !isShow.value) {
+    isShow.value = true
     ElMessage.error(error.message)
+    setTimeout(() => {
+      isShow.value = false
+    }, 1000)
   }
   // 记录错误日志
   console.error('[HTTP Error]', error.toLogData())
+}
+
+/**
+ * 显示成功消息
+ * @param message 成功消息
+ * @param showMessage 是否显示消息
+ */
+export function showSuccess(message: string, showMessage: boolean = true): void {
+  if (showMessage) {
+    ElMessage.success(message)
+  }
 }
 
 /**

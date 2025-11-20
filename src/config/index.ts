@@ -11,11 +11,7 @@ import { headerBarConfig } from './headerBar'
 const appConfig: SystemConfig = {
   // 系统信息
   systemInfo: {
-    name: 'Art Design Pro' // 系统名称
-  },
-  // Element Plus 主题
-  elementPlusTheme: {
-    primary: '#5D87FF'
+    name: '统理系统' // 系统名称
   },
   // 系统主题
   systemThemeStyles: {
@@ -64,12 +60,6 @@ const appConfig: SystemConfig = {
       systemNameColor: 'var(--art-text-gray-800)',
       iconColor: '#6B6B6B',
       textColor: '#29343D',
-      textActiveColor: '#3F8CFF',
-      iconActiveColor: '#333333',
-      tabBarBackground: '#FAFBFC',
-      systemBackground: '#FAFBFC',
-      leftLineColor: '#EDEEF0',
-      rightLineColor: '#EDEEF0',
       img: configImages.menuStyles.design
     },
     {
@@ -78,12 +68,6 @@ const appConfig: SystemConfig = {
       systemNameColor: '#BABBBD',
       iconColor: '#BABBBD',
       textColor: '#BABBBD',
-      textActiveColor: '#FFFFFF',
-      iconActiveColor: '#FFFFFF',
-      tabBarBackground: '#FFFFFF',
-      systemBackground: '#F8F8F8',
-      leftLineColor: '#3F4257',
-      rightLineColor: '#EDEEF0',
       img: configImages.menuStyles.dark
     },
     {
@@ -92,44 +76,24 @@ const appConfig: SystemConfig = {
       systemNameColor: '#68758E',
       iconColor: '#6B6B6B',
       textColor: '#29343D',
-      textActiveColor: '#3F8CFF',
-      iconActiveColor: '#333333',
-      tabBarBackground: '#FFFFFF',
-      systemBackground: '#F8F8F8',
-      leftLineColor: '#EDEEF0',
-      rightLineColor: '#EDEEF0',
       img: configImages.menuStyles.light
     }
   ],
-
+  // 暗黑模式菜单样式
   darkMenuStyles: [
     {
       theme: MenuThemeEnum.DARK,
       background: '#161618',
       systemNameColor: '#DDDDDD',
       iconColor: '#BABBBD',
-      textColor: 'rgba(#FFFFFF, 0.7)',
-      textActiveColor: '',
-      iconActiveColor: '#FFFFFF',
-      tabBarBackground: '#FFFFFF',
-      systemBackground: '#F8F8F8',
-      leftLineColor: '#3F4257',
-      rightLineColor: '#EDEEF0'
+      textColor: 'rgba(#FFFFFF, 0.7)'
     }
   ],
   // 系统主色
-  systemMainColor: [
-    '#5D87FF',
-    '#B48DF3',
-    '#1D84FF',
-    '#60C041',
-    '#38C0FC',
-    '#F9901F',
-    '#FF80C8'
-  ] as const,
+  systemMainColor: ['#5D87FF', '#B48DF3', '#1D84FF', '#60C041', '#38C0FC', '#F9901F', '#FF80C8'] as const,
   // 系统其他项默认配置
   systemSetting: {
-    defaultMenuWidth: 240, // 菜单宽度
+    defaultMenuWidth: 230, // 菜单宽度
     defaultCustomRadius: '0.75', // 自定义圆角
     defaultTabStyle: 'tab-default' // 标签样式
   },

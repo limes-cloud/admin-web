@@ -1,15 +1,11 @@
 node_modules
 .DS_Store
 dist
-dist.zip
 dist-ssr
 *.local
-node_modules
-.DS_Store
-dist
-dist-ssr
-*.local
-.idea
-.idea/
-.idea/*
-.vscode/*
+.cursorrules
+
+# Auto-generated files
+src/types/auto-imports.d.ts
+src/types/components.d.ts
+.auto-import.json

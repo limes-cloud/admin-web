@@ -5,9 +5,9 @@
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { AppRouteRecord } from '@/types/router'
 import { saveIframeRoutes } from './menuToRouter'
-import { RoutesAlias } from '../routesAlias'
 import { h } from 'vue'
 import { useMenuStore } from '@/store/modules/menu'
+import { RoutesAlias } from '../routesAlias'
 
 /**
  * 动态导入 views 目录下所有 .vue 组件
@@ -68,7 +68,6 @@ function checkDuplicateRoutes(routes: AppRouteRecord[], parentPath = ''): void {
       // 处理路径拼接
       const currentPath = route.path || ''
       const fullPath = resolvePath(parentPath, currentPath)
-
       // 名称重复检测
       if (route.name) {
         if (routeNameMap.has(String(route.name))) {
@@ -111,13 +110,6 @@ function getComponentPathString(component: any): string {
     return component
   }
 
-  // 对于其他别名路由，获取组件名称
-  for (const key in RoutesAlias) {
-    if (RoutesAlias[key as keyof typeof RoutesAlias] === component) {
-      return `RoutesAlias.${key}`
-    }
-  }
-
   return ''
 }
 
@@ -146,9 +138,7 @@ function loadComponent(componentPath: string, routeName: string): () => Promise<
   const module = modules[fullPath] || modules[fullPathWithIndex]
 
   if (!module) {
-    console.error(
-      `[路由错误] 未找到组件：${routeName}，尝试过的路径: ${fullPath} 和 ${fullPathWithIndex}`
-    )
+    console.error(`[路由错误] 未找到组件：${routeName}，尝试过的路径: ${fullPath} 和 ${fullPathWithIndex}`)
     return () =>
       Promise.resolve({
         render() {
@@ -172,11 +162,7 @@ interface ConvertedRoute extends Omit<RouteRecordRaw, 'children'> {
 /**
  * 转换路由组件配置
  */
-function convertRouteComponent(
-  route: AppRouteRecord,
-  iframeRoutes: AppRouteRecord[],
-  depth = 0
-): ConvertedRoute {
+function convertRouteComponent(route: AppRouteRecord, iframeRoutes: AppRouteRecord[], depth = 0): ConvertedRoute {
   const { component, children, ...routeConfig } = route
 
   // 基础路由配置
@@ -186,11 +172,10 @@ function convertRouteComponent(
   }
 
   // 是否为一级菜单
-  const isFirstLevel =
-    depth === 0 && route.children?.length === 0 && component !== RoutesAlias.Layout
+  const isFirstLevel = depth === 0 && route.children?.length === 0 && component !== RoutesAlias.Layout
 
   if (route.meta.isIframe) {
-    handleIframeRoute(converted, route, iframeRoutes)
+    handleIframeRoute(converted, route, iframeRoutes, depth)
   } else if (isFirstLevel) {
     handleLayoutRoute(converted, route, component as string)
   } else {
@@ -199,35 +184,48 @@ function convertRouteComponent(
 
   // 递归时增加深度
   if (children?.length) {
-    converted.children = children.map((child) =>
-      convertRouteComponent(child, iframeRoutes, depth + 1)
-    )
+    converted.children = children.map((child) => convertRouteComponent(child, iframeRoutes, depth + 1))
   }
 
   return converted
 }
-
 /**
  * 处理 iframe 类型路由
  */
 function handleIframeRoute(
-  converted: ConvertedRoute,
-  route: AppRouteRecord,
-  iframeRoutes: AppRouteRecord[]
+  targetRoute: ConvertedRoute,
+  sourceRoute: AppRouteRecord,
+  iframeRoutes: AppRouteRecord[],
+  depth: number
 ): void {
-  converted.path = `/outside/iframe/${String(route.name)}`
-  converted.component = () => import('@/views/outside/Iframe.vue')
-  iframeRoutes.push(route)
+  const LAYOUT_VIEW = () => import('@/views/index/index.vue')
+  const IFRAME_VIEW = () => import('@/views/outside/Iframe.vue')
+
+  if (depth === 0) {
+    // 顶级 iframe：用 Layout 包裹
+    targetRoute.component = LAYOUT_VIEW
+    targetRoute.path = `/${(sourceRoute.path?.split('/')[1] || '').trim()}`
+    targetRoute.name = ''
+
+    targetRoute.children = [
+      {
+        ...sourceRoute,
+        component: IFRAME_VIEW
+      } as ConvertedRoute
+    ]
+  } else {
+    // 非顶级（嵌套）iframe：直接使用 Iframe.vue
+    targetRoute.component = IFRAME_VIEW
+  }
+
+  // 记录 iframe 路由，供 Iframe.vue 查找对应的外链
+  iframeRoutes.push(sourceRoute)
 }
 
 /**
  * 处理一级菜单路由
  */
-function handleLayoutRoute(
-  converted: ConvertedRoute,
-  route: AppRouteRecord,
-  component: string | undefined
-): void {
+function handleLayoutRoute(converted: ConvertedRoute, route: AppRouteRecord, component: string | undefined): void {
   converted.component = () => import('@/views/index/index.vue')
   converted.path = `/${(route.path?.split('/')[1] || '').trim()}`
   converted.name = ''
@@ -244,15 +242,9 @@ function handleLayoutRoute(
 /**
  * 处理普通路由
  */
-function handleNormalRoute(
-  converted: ConvertedRoute,
-  component: string | undefined,
-  routeName: string
-): void {
+function handleNormalRoute(converted: ConvertedRoute, component: string | undefined, routeName: string): void {
   if (component) {
-    const aliasComponent = RoutesAlias[
-      component as keyof typeof RoutesAlias
-    ] as unknown as RouteRecordRaw['component']
-    converted.component = aliasComponent || loadComponent(component as string, routeName)
+    // 直接使用组件路径加载组件
+    converted.component = loadComponent(component as string, routeName)
   }
 }

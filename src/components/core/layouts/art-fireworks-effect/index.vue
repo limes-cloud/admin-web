@@ -318,8 +318,7 @@
         particle.color = CONFIG.COLORS[Math.floor(Math.random() * CONFIG.COLORS.length)]
         particle.rotation = Math.random() * 360
         particle.rotationSpeed =
-          (Math.random() * CONFIG.ROTATION.RANDOM_SPEED + CONFIG.ROTATION.BASE_SPEED) *
-          (Math.random() > 0.5 ? 1 : -1) // 随机旋转方向
+          (Math.random() * CONFIG.ROTATION.RANDOM_SPEED + CONFIG.ROTATION.BASE_SPEED) * (Math.random() > 0.5 ? 1 : -1) // 随机旋转方向
         particle.scale = 0.8 + Math.random() * 0.4 // 随机缩放
         particle.shape = availableShapes[Math.floor(Math.random() * availableShapes.length)]
         particle.opacity = 1
@@ -438,12 +437,7 @@
 
         case 'square':
           // 绘制正方形
-          ctx.value.fillRect(
-            -SIZES.SQUARE.SIZE / 2,
-            -SIZES.SQUARE.SIZE / 2,
-            SIZES.SQUARE.SIZE,
-            SIZES.SQUARE.SIZE
-          )
+          ctx.value.fillRect(-SIZES.SQUARE.SIZE / 2, -SIZES.SQUARE.SIZE / 2, SIZES.SQUARE.SIZE, SIZES.SQUARE.SIZE)
           break
 
         case 'circle':

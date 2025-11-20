@@ -1,39 +1,19 @@
 // 全局样式
-
-@font-face {
-  font-family: 'DMSans';
-  font-style: normal;
-  font-weight: 400;
-  src: url(../fonts/DMSans.woff2) format('woff2');
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  font-style: normal;
-  font-weight: 400;
-  src: url(../fonts/Montserrat.woff2) format('woff2');
-}
-
-.btn-icon {
-  font-size: 10px;
-}
-
-.el-btn-red {
-  color: #fa6962 !important;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:active {
-    opacity: 0.7;
-  }
-}
-
 // 顶部进度条颜色
 #nprogress .bar {
   z-index: 2400;
   background-color: color-mix(in srgb, var(--main-color) 65%, white);
+}
+
+#nprogress .peg {
+  box-shadow:
+    0 0 10px var(--main-color),
+    0 0 5px var(--main-color) !important;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: var(--main-color) !important;
+  border-left-color: var(--main-color) !important;
 }
 
 // 处理移动端组件兼容性
@@ -114,10 +94,6 @@
   .art-table-card {
     border: 1px solid var(--art-card-border) !important;
   }
-
-  .layout-sidebar {
-    border-right: 1px solid var(--art-card-border) !important;
-  }
 }
 
 // 盒子阴影
@@ -156,12 +132,21 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-top: 15px;
+  margin-top: 12px;
   border-radius: calc(var(--custom-radius) / 2 + 2px) !important;
 
   .el-card__body {
     height: 100%;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .search {
+    margin-bottom: 15px;
+  }
+  .table {
+    flex: 1;
+    height: 100%;
   }
 }
 
@@ -258,4 +243,63 @@
   top: auto !important;
   left: auto !important;
   transform: none !important;
+}
+
+.scroll-dialog,
+.art-form-dialog {
+  max-height: calc(100vh - 300px);
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+.is-fullscreen {
+  .scroll-dialog,
+  .art-form-dialog {
+    max-height: 100% !important;
+    height: 100%;
+    overflow-y: scroll;
+  }
+  .scroll-dialog-footer {
+    height: calc(100% - 100px);
+    overflow-y: scroll;
+    max-height: 100% !important;
+  }
+}
+
+.btn-square {
+  padding: 8px;
+  height: 34px !important;
+  width: 34px !important;
+  flex-basis: 36px;
+  flex-grow: 0; /* 防止伸展 */
+  flex-shrink: 0; /* 防止收缩 */
+}
+
+.form-row {
+  margin-bottom: 0 !important;
+  .el-form-item__content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+}
+
+/* 解决菜单图标不对齐问题 */
+.el-image__inner {
+  vertical-align: top !important;
+}
+
+.menu-left-close {
+  .el-sub-menu__title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.art-form-dialog {
+  overflow: hidden;
+  height: 100%;
+  display: flex;
 }

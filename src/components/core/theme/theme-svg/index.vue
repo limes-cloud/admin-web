@@ -44,17 +44,12 @@
 
   // 将主题色应用到 SVG 内容
   const applyThemeToSvg = (content: string): string => {
-    return Object.entries(COLOR_MAPPINGS).reduce(
-      (processedContent, [originalColor, themeColor]) => {
-        const fillRegex = new RegExp(`fill="${originalColor}"`, 'gi')
-        const strokeRegex = new RegExp(`stroke="${originalColor}"`, 'gi')
+    return Object.entries(COLOR_MAPPINGS).reduce((processedContent, [originalColor, themeColor]) => {
+      const fillRegex = new RegExp(`fill="${originalColor}"`, 'gi')
+      const strokeRegex = new RegExp(`stroke="${originalColor}"`, 'gi')
 
-        return processedContent
-          .replace(fillRegex, `fill="${themeColor}"`)
-          .replace(strokeRegex, `stroke="${themeColor}"`)
-      },
-      content
-    )
+      return processedContent.replace(fillRegex, `fill="${themeColor}"`).replace(strokeRegex, `stroke="${themeColor}"`)
+    }, content)
   }
 
   // 加载 SVG 文件内容

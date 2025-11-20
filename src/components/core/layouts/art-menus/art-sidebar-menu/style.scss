@@ -1,14 +1,18 @@
 @use '@styles/variables.scss' as *;
 
+.menu-left-close {
+  :deep(.image-icon) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
 .layout-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 300;
   display: flex;
   height: 100vh;
   user-select: none;
   scrollbar-width: none;
+  border-right: 1px solid var(--art-border-color);
 
   &.no-border {
     border-right: none !important;
@@ -18,7 +22,7 @@
     position: relative;
     width: 80px;
     height: 100%;
-    border-right: 1px solid var(--art-card-border) !important;
+    border-right: 1px solid var(--art-border-color) !important;
 
     // 隐藏滚动条
     :deep(.el-scrollbar__bar.is-vertical) {
@@ -97,7 +101,11 @@
 
   .menu-left {
     box-sizing: border-box;
-    height: 100dvh;
+    height: 100vh;
+
+    @media only screen and (max-width: $device-phone) {
+      height: 100dvh;
+    }
 
     .el-menu {
       height: 100%;
@@ -116,14 +124,14 @@
     cursor: pointer;
 
     .logo {
-      margin-left: 28px;
+      margin-left: 22px;
     }
 
     p {
       position: absolute;
       top: 0;
       bottom: 0;
-      left: 64px;
+      left: 58px;
       box-sizing: border-box;
       margin-left: 10px;
       font-size: 18px;
@@ -159,23 +167,33 @@
 
 @media only screen and (max-width: $device-ipad) {
   .layout-sidebar {
+    width: 0;
+
     .header {
-      display: none;
+      height: 50px;
+      line-height: 50px;
     }
 
     .el-menu {
-      height: 100vh;
+      height: calc(100vh - 60px);
     }
 
     .el-menu--collapse {
       width: 0;
     }
-  }
-}
 
-@media only screen and (max-width: $device-ipad) {
-  .layout-sidebar {
-    width: 0;
+    // 折叠状态下的header样式
+    .menu-left-close .header {
+      .logo {
+        display: none;
+      }
+
+      p {
+        left: 16px;
+        font-size: 0;
+        opacity: 0 !important;
+      }
+    }
 
     .menu-model {
       position: fixed;
@@ -188,5 +206,11 @@
       background: rgba($color: #000, $alpha: 50%);
       transition: opacity 0.2s ease-in-out;
     }
+  }
+}
+
+@media only screen and (max-width: $device-phone) {
+  .layout-sidebar {
+    border-right: 0 !important;
   }
 }

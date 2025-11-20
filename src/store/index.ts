@@ -2,6 +2,7 @@ import type { App } from 'vue'
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { StorageKeyManager } from '@/utils/storage/storage-key-manager'
+import { useAppStore } from './modules/app'
 
 export const store = createPinia()
 
@@ -25,4 +26,6 @@ store.use(
  */
 export function initStore(app: App<Element>): void {
   app.use(store)
+
+  useAppStore().initSystemSetting()
 }

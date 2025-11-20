@@ -9,6 +9,8 @@ import { HOME_PAGE_PATH } from '@/router'
  * 管理应用的菜单列表、首页路径、菜单宽度和动态路由移除函数
  */
 export const useMenuStore = defineStore('menuStore', () => {
+  /** 菜单权限按钮 */
+  const permissions = ref<Map<string, string>>()
   /** 首页路径 */
   const homePath = ref(HOME_PAGE_PATH)
   /** 菜单列表 */
@@ -24,7 +26,23 @@ export const useMenuStore = defineStore('menuStore', () => {
    */
   const setMenuList = (list: AppRouteRecord[]) => {
     menuList.value = list
-    setHomePath(homePath.value || getFirstMenuPath(list))
+    setHomePath(HOME_PAGE_PATH || getFirstMenuPath(list))
+  }
+
+  /**
+   * 设置菜单权限按钮
+   * @param map 菜单权限按钮映射
+   */
+  const setPermissions = (val: Map<string, string>) => {
+    permissions.value = val
+  }
+
+  /**
+   * 是否存在权限
+   * @param map 菜单权限按钮映射
+   */
+  const hasPermission = (val: string): boolean => {
+    return !!permissions.value?.has(val)
   }
 
   /**
@@ -40,12 +58,6 @@ export const useMenuStore = defineStore('menuStore', () => {
   const setHomePath = (path: string) => {
     homePath.value = path
   }
-
-  /**
-   * 设置菜单宽度
-   * @param width 菜单宽度值
-   */
-  const setMenuWidth = (width: string) => (menuWidth.value = width)
 
   /**
    * 添加路由移除函数
@@ -76,11 +88,12 @@ export const useMenuStore = defineStore('menuStore', () => {
     menuWidth,
     removeRouteFns,
     setMenuList,
-    setMenuWidth,
     getHomePath,
     setHomePath,
     addRemoveRouteFns,
     removeAllDynamicRoutes,
-    clearRemoveRouteFns
+    clearRemoveRouteFns,
+    setPermissions,
+    hasPermission
   }
 })

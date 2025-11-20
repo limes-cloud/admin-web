@@ -180,14 +180,8 @@
     }
 
     // 确保不会超出边界
-    x = Math.max(
-      props.boundaryDistance,
-      Math.min(x, screenWidth - props.menuWidth - props.boundaryDistance)
-    )
-    y = Math.max(
-      props.boundaryDistance,
-      Math.min(y, screenHeight - menuHeight - props.boundaryDistance)
-    )
+    x = Math.max(props.boundaryDistance, Math.min(x, screenWidth - props.menuWidth - props.boundaryDistance))
+    y = Math.max(props.boundaryDistance, Math.min(y, screenHeight - menuHeight - props.boundaryDistance))
 
     return { x, y }
   }

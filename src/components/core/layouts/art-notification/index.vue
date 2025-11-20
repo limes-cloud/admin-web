@@ -30,10 +30,7 @@
         <!-- 通知 -->
         <ul class="notice-list" v-show="barActiveIndex === 0">
           <li v-for="(item, index) in noticeList" :key="index">
-            <div
-              class="icon"
-              :style="{ background: getNoticeStyle(item.type).backgroundColor + '!important' }"
-            >
+            <div class="icon" :style="{ background: getNoticeStyle(item.type).backgroundColor + '!important' }">
               <i
                 class="iconfont-sys"
                 :style="{ color: getNoticeStyle(item.type).iconColor + '!important' }"
@@ -77,9 +74,9 @@
       </div>
 
       <div class="btn-wrapper">
-        <el-button class="view-all" @click="handleViewAll" v-ripple>
+        <ElButton class="view-all" @click="handleViewAll" v-ripple>
           {{ $t('notice.viewAll') }}
-        </el-button>
+        </ElButton>
       </div>
     </div>
 
@@ -393,12 +390,11 @@
   const { getNoticeStyle } = useNotificationStyles()
   const { showNotice } = useNotificationAnimation()
   const { handleNoticeAll, handleMsgAll, handlePendingAll } = useBusinessLogic()
-  const { changeBar, currentTabIsEmpty, handleViewAll } = useTabManagement(
-    noticeList,
-    msgList,
-    pendingList,
-    { handleNoticeAll, handleMsgAll, handlePendingAll }
-  )
+  const { changeBar, currentTabIsEmpty, handleViewAll } = useTabManagement(noticeList, msgList, pendingList, {
+    handleNoticeAll,
+    handleMsgAll,
+    handlePendingAll
+  })
 
   // 监听属性变化
   watch(

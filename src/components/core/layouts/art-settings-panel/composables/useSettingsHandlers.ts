@@ -30,9 +30,9 @@ export function useSettingsHandlers() {
     setBodyClass: (className: string, add: boolean) => {
       const el = document.getElementsByTagName('body')[0]
       if (add) {
-        el.setAttribute('class', className)
+        el.classList.add(className)
       } else {
-        el.removeAttribute('class')
+        el.classList.remove(className)
       }
     }
   }
@@ -46,10 +46,7 @@ export function useSettingsHandlers() {
   }
 
   // 通用值变更处理器
-  const createValueHandler = <T>(
-    storeMethod: (value: T) => void,
-    callback?: (value: T) => void
-  ) => {
+  const createValueHandler = <T>(storeMethod: (value: T) => void, callback?: (value: T) => void) => {
     return (value: T) => {
       if (value !== undefined && value !== null) {
         storeMethod(value)
@@ -93,27 +90,19 @@ export function useSettingsHandlers() {
     ),
 
     // 水印显示
-    watermark: createToggleHandler(() =>
-      settingStore.setWatermarkVisible(!settingStore.watermarkVisible)
-    ),
+    watermark: createToggleHandler(() => settingStore.setWatermarkVisible(!settingStore.watermarkVisible)),
 
     // 菜单展开宽度
-    menuOpenWidth: createValueHandler<number>((width: number) =>
-      settingStore.setMenuOpenWidth(width)
-    ),
+    menuOpenWidth: createValueHandler<number>((width: number) => settingStore.setMenuOpenWidth(width)),
 
     // 标签页风格
     tabStyle: createValueHandler<string>((style: string) => settingStore.setTabStyle(style)),
 
     // 页面切换动画
-    pageTransition: createValueHandler<string>((transition: string) =>
-      settingStore.setPageTransition(transition)
-    ),
+    pageTransition: createValueHandler<string>((transition: string) => settingStore.setPageTransition(transition)),
 
     // 圆角大小
-    customRadius: createValueHandler<string>((radius: string) =>
-      settingStore.setCustomRadius(radius)
-    )
+    customRadius: createValueHandler<string>((radius: string) => settingStore.setCustomRadius(radius))
   }
 
   // 盒子样式处理器

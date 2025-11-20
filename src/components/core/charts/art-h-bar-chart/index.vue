@@ -6,9 +6,8 @@
 <script setup lang="ts">
   import { useChartOps, useChartComponent } from '@/composables/useChart'
   import { getCssVar } from '@/utils/ui'
-  import type { EChartsOption } from 'echarts'
+  import { graphic, type EChartsOption } from '@/utils/echarts'
   import type { BarChartProps, BarDataItem } from '@/types/component/chart'
-  import * as echarts from 'echarts'
 
   defineOptions({ name: 'ArtHBarChart' })
 
@@ -39,10 +38,7 @@
   // 判断是否为多数据
   const isMultipleData = computed(() => {
     return (
-      Array.isArray(props.data) &&
-      props.data.length > 0 &&
-      typeof props.data[0] === 'object' &&
-      'name' in props.data[0]
+      Array.isArray(props.data) && props.data.length > 0 && typeof props.data[0] === 'object' && 'name' in props.data[0]
     )
   })
 
@@ -55,7 +51,7 @@
     }
 
     // 默认渐变色
-    return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+    return new graphic.LinearGradient(0, 0, 1, 0, [
       {
         offset: 0,
         color: getCssVar('--el-color-primary')
@@ -69,7 +65,7 @@
 
   // 创建渐变色
   const createGradientColor = (color: string) => {
-    return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+    return new graphic.LinearGradient(0, 0, 1, 0, [
       {
         offset: 0,
         color: color
@@ -82,7 +78,7 @@
   }
 
   // 获取基础样式配置
-  const getBaseItemStyle = (color: any) => ({
+  const getBaseItemStyle = (color: string | InstanceType<typeof graphic.LinearGradient> | undefined) => ({
     borderRadius: 4,
     color: typeof color === 'string' ? createGradientColor(color) : color
   })
@@ -91,7 +87,7 @@
   const createSeriesItem = (config: {
     name?: string
     data: number[]
-    color?: string | echarts.graphic.LinearGradient
+    color?: string | InstanceType<typeof graphic.LinearGradient>
     barWidth?: string | number
     stack?: string
   }) => {
@@ -131,10 +127,7 @@
       // 检查多数据情况
       if (Array.isArray(props.data) && typeof props.data[0] === 'object') {
         const multiData = props.data as BarDataItem[]
-        return (
-          !multiData.length ||
-          multiData.every((item) => !item.data?.length || item.data.every((val) => val === 0))
-        )
+        return !multiData.length || multiData.every((item) => !item.data?.length || item.data.every((val) => val === 0))
       }
 
       return true

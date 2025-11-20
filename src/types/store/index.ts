@@ -21,13 +21,7 @@ export interface MenuThemeType {
   background: string
   systemNameColor: string
   textColor: string
-  textActiveColor: string
   iconColor: string
-  iconActiveColor: string
-  tabBarBackground: string
-  systemBackground: string
-  leftLineColor: string
-  rightLineColor: string
   img?: string
 }
 
@@ -61,7 +55,7 @@ export interface WorkTab {
 
 // 用户Store状态
 export interface UserState {
-  userInfo: Api.User.UserInfo | null
+  userInfo: Api.Auth.UserInfo | null
   token: string | null
   roles: string[]
   permissions: string[]

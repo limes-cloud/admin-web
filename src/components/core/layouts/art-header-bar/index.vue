@@ -1,12 +1,12 @@
 <!-- 顶部栏 -->
 <template>
-  <div class="layout-top-bar" :class="[tabStyle]" :style="{ width: topBarWidth() }">
+  <div class="layout-top-bar" :class="[tabStyle]">
     <div class="menu">
       <div class="left" style="display: flex">
         <!-- 系统信息  -->
         <div class="top-header" @click="toHome" v-if="isTopMenu">
           <ArtLogo class="logo" />
-          <p v-if="width >= 1400">{{ AppConfig.systemInfo.name }}</p>
+          <p v-if="width >= 1400">{{ appStore.setting.title }}</p>
         </div>
 
         <ArtLogo class="logo2" @click="toHome" />
@@ -28,9 +28,7 @@
         <ArtFastEnter v-if="shouldShowFastEnter && width >= headerBarFastEnterMinWidth" />
 
         <!-- 面包屑 -->
-        <ArtBreadcrumb
-          v-if="(shouldShowBreadcrumb && isLeftMenu) || (shouldShowBreadcrumb && isDualMenu)"
-        />
+        <ArtBreadcrumb v-if="(shouldShowBreadcrumb && isLeftMenu) || (shouldShowBreadcrumb && isDualMenu)" />
 
         <!-- 顶部菜单 -->
         <ArtHorizontalMenu v-if="isTopMenu" :list="menuList" />
@@ -57,10 +55,7 @@
 
         <!-- 全屏按钮 -->
         <div class="btn-box screen-box" v-if="shouldShowFullscreen" @click="toggleFullScreen">
-          <div
-            class="btn"
-            :class="{ 'full-screen-btn': !isFullscreen, 'exit-full-screen-btn': isFullscreen }"
-          >
+          <div class="btn" :class="{ 'full-screen-btn': !isFullscreen, 'exit-full-screen-btn': isFullscreen }">
             <i class="iconfont-sys">{{ isFullscreen ? '&#xe62d;' : '&#xe8ce;' }}</i>
           </div>
         </div>
@@ -87,10 +82,7 @@
             <template #dropdown>
               <ElDropdownMenu>
                 <div v-for="item in languageOptions" :key="item.value" class="lang-btn-item">
-                  <ElDropdownItem
-                    :command="item.value"
-                    :class="{ 'is-selected': locale === item.value }"
-                  >
+                  <ElDropdownItem :command="item.value" :class="{ 'is-selected': locale === item.value }">
                     <span class="menu-txt">{{ item.label }}</span>
                     <i v-if="locale === item.value" class="iconfont-sys">&#xe621;</i>
                   </ElDropdownItem>
@@ -110,8 +102,8 @@
             <template #default>
               <p
                 >{{ $t('topBar.guide.title')
-                }}<span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.theme') }} </span
-                >、 <span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.menu') }} </span
+                }}<span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.theme') }} </span>、
+                <span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.menu') }} </span
                 >{{ $t('topBar.guide.description') }}
               </p>
             </template>
@@ -146,7 +138,7 @@
                   <img class="cover" src="@imgs/user/avatar.webp" style="float: left" />
                   <div class="user-wrap">
                     <span class="name">{{ userInfo.userName }}</span>
-                    <span class="email">art.design@gmail.com</span>
+                    <span class="email">{{ userInfo.email }}</span>
                   </div>
                 </div>
                 <ul class="user-menu">
@@ -188,17 +180,17 @@
   import { useRouter } from 'vue-router'
   import { ElMessageBox } from 'element-plus'
   import { useFullscreen, useWindowSize } from '@vueuse/core'
-  import { LanguageEnum, MenuTypeEnum, MenuWidth } from '@/enums/appEnum'
+  import { LanguageEnum, MenuTypeEnum } from '@/enums/appEnum'
   import { useSettingStore } from '@/store/modules/setting'
   import { useUserStore } from '@/store/modules/user'
   import { useMenuStore } from '@/store/modules/menu'
-  import AppConfig from '@/config'
   import { languageOptions } from '@/locales'
   import { WEB_LINKS } from '@/utils/constants'
   import { mittBus } from '@/utils/sys'
   import { themeAnimation } from '@/utils/theme/animation'
   import { useCommon } from '@/composables/useCommon'
   import { useHeaderBar } from '@/composables/useHeaderBar'
+  import { useAppStore } from '@/store/modules/app'
 
   defineOptions({ name: 'ArtHeaderBar' })
 
@@ -212,6 +204,7 @@
   const settingStore = useSettingStore()
   const userStore = useUserStore()
   const menuStore = useMenuStore()
+  const appStore = useAppStore()
 
   // 顶部栏功能配置
   const {
@@ -229,8 +222,7 @@
     fastEnterMinWidth: headerBarFastEnterMinWidth
   } = useHeaderBar()
 
-  const { menuOpen, systemThemeColor, showSettingGuide, menuType, isDark, tabStyle } =
-    storeToRefs(settingStore)
+  const { menuOpen, systemThemeColor, showSettingGuide, menuType, isDark, tabStyle } = storeToRefs(settingStore)
 
   const { language, getUserInfo: userInfo } = storeToRefs(userStore)
   const { menuList } = storeToRefs(menuStore)
@@ -261,30 +253,6 @@
    */
   const toggleFullScreen = (): void => {
     toggleFullscreen()
-  }
-
-  /**
-   * 计算顶部栏宽度
-   * @returns {string} 计算后的宽度值
-   */
-  const topBarWidth = (): string => {
-    const { TOP, DUAL_MENU, TOP_LEFT } = MenuTypeEnum
-    const { getMenuOpenWidth } = settingStore
-    const { isFirstLevel } = router.currentRoute.value.meta
-    const type = menuType.value
-    const isMenuOpen = menuOpen.value
-
-    const isTopLayout = type === TOP || (type === TOP_LEFT && isFirstLevel)
-
-    if (isTopLayout) {
-      return '100%'
-    }
-
-    if (type === DUAL_MENU) {
-      return isFirstLevel ? 'calc(100% - 80px)' : `calc(100% - 80px - ${getMenuOpenWidth})`
-    }
-
-    return isMenuOpen ? `calc(100% - ${getMenuOpenWidth})` : `calc(100% - ${MenuWidth.CLOSE})`
   }
 
   /**
@@ -334,7 +302,7 @@
         cancelButtonText: t('common.cancel'),
         customClass: 'login-out-dialog'
       }).then(() => {
-        userStore.logOut()
+        userStore.logout()
       })
     }, 200)
   }

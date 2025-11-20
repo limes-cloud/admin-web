@@ -60,16 +60,15 @@
 <style scoped lang="scss">
   .btn-text {
     display: inline-block;
-    min-width: 34px;
+    width: 34px;
     height: 34px;
-    padding: 0 10px;
-    margin-right: 10px;
     font-size: 13px;
     line-height: 34px;
     color: #666;
+    text-align: center;
     cursor: pointer;
     background-color: rgba(var(--art-gray-200-rgb), 0.7);
-    border-radius: 6px;
+    border-radius: 4px;
     transition: all 0.2s ease-in-out;
 
     &:hover {

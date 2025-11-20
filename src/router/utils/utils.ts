@@ -1,10 +1,8 @@
-import { useTheme } from '@/composables/useTheme'
-import { useSettingStore } from '@/store/modules/setting'
 import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
-import AppConfig from '@/config'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import i18n, { $t } from '@/locales'
+import { useAppStore } from '@/store/modules/app'
 
 /** 扩展的路由配置类型 */
 export type AppRouteRecordRaw = RouteRecordRaw & {
@@ -27,21 +25,12 @@ export const configureNProgress = () => {
  * @param to 当前路由对象
  */
 export const setPageTitle = (to: RouteLocationNormalized): void => {
+  const appStore = useAppStore()
   const { title } = to.meta
   if (title) {
     setTimeout(() => {
-      document.title = `${formatMenuTitle(String(title))} - ${AppConfig.systemInfo.name}`
+      document.title = `${formatMenuTitle(String(title))} - ${appStore.setting.title}`
     }, 150)
-  }
-}
-
-/**
- * 根据路由元信息设置系统主题
- * @param to 当前路由对象
- */
-export const setSystemTheme = (to: RouteLocationNormalized): void => {
-  if (to.meta.setTheme) {
-    useTheme().switchThemeStyles(useSettingStore().systemThemeType)
   }
 }
 

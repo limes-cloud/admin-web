@@ -24,7 +24,8 @@
             :class="{ active: item.isActive }"
             @click="handleMenuJump(item, true)"
           >
-            <i class="iconfont-sys" v-html="item.meta.icon" />
+            <div class="icon"><ArtIcon :value="item.meta.icon"></ArtIcon></div>
+            <!-- <i class="iconfont-sys" v-html="item.meta.icon" /> -->
             <span>{{ item.formattedTitle }}</span>
             <div v-if="item.meta.showBadge" class="art-badge art-badge-mixed" />
           </div>
@@ -43,7 +44,6 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted, nextTick } from 'vue'
-  import { ElScrollbar, ElIcon } from 'element-plus'
   import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
   import { useThrottleFn } from '@vueuse/core'
   import { formatMenuTitle } from '@/router/utils/utils'
@@ -246,7 +246,10 @@
 
       .item {
         position: relative;
+        display: flex;
         flex-shrink: 0; // 防止菜单项被压缩
+        align-items: center;
+        justify-content: center;
         height: 40px;
         padding: 0 12px;
         font-size: 14px;
@@ -254,7 +257,10 @@
         cursor: pointer;
         border-radius: 6px;
 
-        i {
+        .icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           margin-right: 5px;
           font-size: 15px;
         }

@@ -7,10 +7,7 @@
           <p class="value">{{ value }}</p>
           <p class="label">{{ label }}</p>
         </div>
-        <div
-          class="percentage"
-          :class="{ 'is-increase': percentage > 0, 'is-mini-chart': isMiniChart }"
-        >
+        <div class="percentage" :class="{ 'is-increase': percentage > 0, 'is-mini-chart': isMiniChart }">
           {{ percentage > 0 ? '+' : '' }}{{ percentage }}%
         </div>
         <div class="date" v-if="date" :class="{ 'is-mini-chart': isMiniChart }">{{ date }}</div>
@@ -27,7 +24,7 @@
 
 <script setup lang="ts">
   import { useChartOps, useChartComponent } from '@/composables/useChart'
-  import { EChartsOption } from 'echarts'
+  import { type EChartsOption } from '@/utils/echarts'
 
   defineOptions({ name: 'ArtBarChartCard' })
 

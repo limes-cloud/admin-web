@@ -41,9 +41,9 @@ export interface DynamicColumnConfig<T = any> {
   addColumn: (column: ColumnOption<T>, index?: number) => void
   /**
    * 删除列
-   * @param prop 列的唯一标识
+   * @param prop 列的唯一标识或标识数组
    */
-  removeColumn: (prop: string) => void
+  removeColumn: (prop: string | string[]) => void
   /**
    * 切换列显示状态
    * @param prop 列的唯一标识
@@ -98,9 +98,7 @@ export function useTableColumns<T = any>(
   watch(
     dynamicColumns,
     (newCols) => {
-      const checkedMap = new Map(
-        columnChecks.value.map((c) => [getColumnKey(c), c.checked ?? true])
-      )
+      const checkedMap = new Map(columnChecks.value.map((c) => [getColumnKey(c), c.checked ?? true]))
       const newChecks = getColumnChecks(newCols).map((c) => ({
         ...c,
         checked: checkedMap.has(getColumnKey(c)) ? checkedMap.get(getColumnKey(c)) : c.checked
@@ -141,13 +139,14 @@ export function useTableColumns<T = any>(
         return next
       }),
 
-    removeColumn: (prop: string) =>
-      setDynamicColumns((cols) => cols.filter((c) => getColumnKey(c) !== prop)),
+    removeColumn: (prop: string | string[]) =>
+      setDynamicColumns((cols) => {
+        const propsToRemove = Array.isArray(prop) ? prop : [prop]
+        return cols.filter((c) => !propsToRemove.includes(getColumnKey(c)))
+      }),
 
     updateColumn: (prop: string, updates: Partial<ColumnOption<T>>) =>
-      setDynamicColumns((cols) =>
-        cols.map((c) => (getColumnKey(c) === prop ? { ...c, ...updates } : c))
-      ),
+      setDynamicColumns((cols) => cols.map((c) => (getColumnKey(c) === prop ? { ...c, ...updates } : c))),
 
     toggleColumn: (prop: string, visible?: boolean) => {
       const i = columnChecks.value.findIndex((c) => getColumnKey(c) === prop)

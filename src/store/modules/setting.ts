@@ -5,6 +5,7 @@ import AppConfig from '@/config'
 import { SystemThemeEnum, MenuThemeEnum, MenuTypeEnum, ContainerWidthEnum } from '@/enums/appEnum'
 import { setElementThemeColor } from '@/utils/ui'
 import { useCeremony } from '@/composables/useCeremony'
+import { StorageConfig } from '@/utils'
 
 const { defaultMenuWidth, defaultCustomRadius, defaultTabStyle } = AppConfig.systemSetting
 
@@ -33,7 +34,7 @@ export const useSettingStore = defineStore(
     /** 菜单主题类型 */
     const menuThemeType = ref(MenuThemeEnum.DESIGN)
     /** 系统主题颜色 */
-    const systemThemeColor = ref(AppConfig.elementPlusTheme.primary)
+    const systemThemeColor = ref(AppConfig.systemMainColor[0])
 
     // 界面显示设置
     /** 是否显示菜单按钮 */
@@ -49,7 +50,7 @@ export const useSettingStore = defineStore(
     /** 是否显示语言切换 */
     const showLanguage = ref(true)
     /** 是否显示进度条 */
-    const showNprogress = ref(true)
+    const showNprogress = ref(false)
     /** 是否显示设置引导 */
     const showSettingGuide = ref(true)
     /** 是否显示节日文本 */
@@ -151,6 +152,7 @@ export const useSettingStore = defineStore(
     const setGlopTheme = (theme: SystemThemeEnum, themeMode: SystemThemeEnum) => {
       systemThemeType.value = theme
       systemThemeMode.value = themeMode
+      localStorage.setItem(StorageConfig.THEME_KEY, theme)
     }
 
     /**

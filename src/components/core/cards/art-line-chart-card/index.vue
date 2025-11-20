@@ -7,10 +7,7 @@
           <p class="value">{{ value }}</p>
           <p class="label">{{ label }}</p>
         </div>
-        <div
-          class="percentage"
-          :class="{ 'is-increase': percentage > 0, 'is-mini-chart': isMiniChart }"
-        >
+        <div class="percentage" :class="{ 'is-increase': percentage > 0, 'is-mini-chart': isMiniChart }">
           {{ percentage > 0 ? '+' : '' }}{{ percentage }}%
         </div>
         <div class="date" v-if="date" :class="{ 'is-mini-chart': isMiniChart }">
@@ -28,10 +25,9 @@
 </template>
 
 <script setup lang="ts">
-  import * as echarts from 'echarts'
+  import { graphic, type EChartsOption } from '@/utils/echarts'
   import { getCssVar, hexToRgba } from '@/utils/ui'
   import { useChartOps, useChartComponent } from '@/composables/useChart'
-  import { EChartsOption } from 'echarts'
 
   defineOptions({ name: 'ArtLineChartCard' })
 
@@ -100,7 +96,7 @@
             },
             areaStyle: props.showAreaColor
               ? {
-                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  color: new graphic.LinearGradient(0, 0, 0, 1, [
                     {
                       offset: 0,
                       color: props.color

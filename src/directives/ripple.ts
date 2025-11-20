@@ -4,12 +4,12 @@ import type { App, Directive, DirectiveBinding } from 'vue'
  * 水波纹指令
  * 用法：
  * <!-- 基础用法 -->
- * <el-button v-ripple>点击查看水波纹效果</el-button>
+ * <ElButton v-ripple>点击查看水波纹效果</ElButton>
  *
  * <!-- 自定义颜色 -->
- * <el-button v-ripple="{ color: 'rgba(0, 0, 0, 0.2)' }">
+ * <ElButton v-ripple="{ color: 'rgba(0, 0, 0, 0.2)' }">
  *   自定义水波纹颜色
- * </el-button>
+ * </ElButton>
  */
 export interface RippleOptions {
   color?: string
@@ -49,9 +49,7 @@ export const vRipple: Directive = {
       ripple.style.pointerEvents = 'none'
 
       // 判断是否为有色按钮（Element Plus 按钮类型）
-      const buttonTypes = ['primary', 'info', 'warning', 'danger', 'success'].map(
-        (type) => `el-button--${type}`
-      )
+      const buttonTypes = ['primary', 'info', 'warning', 'danger', 'success'].map((type) => `el-button--${type}`)
       const isColoredButton = buttonTypes.some((type) => el.classList.contains(type))
       const defaultColor = isColoredButton
         ? 'rgba(255, 255, 255, 0.35)' // 有色按钮使用白色水波纹

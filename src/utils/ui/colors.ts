@@ -1,5 +1,4 @@
 import { useSettingStore } from '@/store/modules/setting'
-import { ElMessage } from 'element-plus'
 
 /**
  * 颜色转换结果接口
@@ -198,17 +197,11 @@ export function handleElementThemeColor(theme: string, isDark: boolean = false):
   document.documentElement.style.setProperty('--el-color-primary', theme)
 
   for (let i = 1; i <= 9; i++) {
-    document.documentElement.style.setProperty(
-      `--el-color-primary-light-${i}`,
-      getLightColor(theme, i / 10, isDark)
-    )
+    document.documentElement.style.setProperty(`--el-color-primary-light-${i}`, getLightColor(theme, i / 10, isDark))
   }
 
   for (let i = 1; i <= 9; i++) {
-    document.documentElement.style.setProperty(
-      `--el-color-primary-dark-${i}`,
-      getDarkColor(theme, i / 10)
-    )
+    document.documentElement.style.setProperty(`--el-color-primary-dark-${i}`, getDarkColor(theme, i / 10))
   }
 }
 

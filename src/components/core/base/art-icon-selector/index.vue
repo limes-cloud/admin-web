@@ -8,15 +8,8 @@
       :class="[size, { 'is-disabled': disabled }, { 'has-icon': selectValue }]"
     >
       <div class="icon">
-        <i
-          :class="`iconfont-sys ${selectValue}`"
-          v-show="props.iconType === IconTypeEnum.CLASS_NAME"
-        ></i>
-        <i
-          class="iconfont-sys"
-          v-html="selectValue"
-          v-show="props.iconType === IconTypeEnum.UNICODE"
-        ></i>
+        <i :class="`iconfont-sys ${selectValue}`" v-show="props.iconType === IconTypeEnum.CLASS_NAME"></i>
+        <i class="iconfont-sys" v-html="selectValue" v-show="props.iconType === IconTypeEnum.UNICODE"></i>
       </div>
       <div class="text"> {{ props.text }} </div>
       <div class="arrow">
@@ -25,30 +18,23 @@
       </div>
     </div>
 
-    <el-dialog title="选择图标" width="40%" v-model="visible" align-center>
-      <el-scrollbar height="400px">
+    <ElDialog title="选择图标" width="40%" v-model="visible" align-center>
+      <ElScrollbar height="400px">
         <ul class="icons-list" v-show="activeName === 'icons'">
           <li v-for="icon in iconsList" :key="icon.className" @click="selectorIcon(icon)">
-            <i
-              :class="`iconfont-sys ${icon.className}`"
-              v-show="iconType === IconTypeEnum.CLASS_NAME"
-            ></i>
-            <i
-              class="iconfont-sys"
-              v-html="icon.unicode"
-              v-show="iconType === IconTypeEnum.UNICODE"
-            ></i>
+            <i :class="`iconfont-sys ${icon.className}`" v-show="iconType === IconTypeEnum.CLASS_NAME"></i>
+            <i class="iconfont-sys" v-html="icon.unicode" v-show="iconType === IconTypeEnum.UNICODE"></i>
           </li>
         </ul>
-      </el-scrollbar>
+      </ElScrollbar>
 
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="visible = false">取 消</el-button>
-          <el-button type="primary" @click="visible = false">确 定</el-button>
+          <ElButton @click="visible = false">取 消</ElButton>
+          <ElButton type="primary" @click="visible = false">确 定</ElButton>
         </span>
       </template>
-    </el-dialog>
+    </ElDialog>
   </div>
 </template>
 
@@ -115,8 +101,7 @@
 
   // 选择图标
   const selectorIcon = (icon: IconfontType): void => {
-    const iconValue =
-      props.iconType === IconTypeEnum.CLASS_NAME ? icon.className : icon.unicode || ''
+    const iconValue = props.iconType === IconTypeEnum.CLASS_NAME ? icon.className : icon.unicode || ''
 
     selectValue.value = iconValue
     visible.value = false

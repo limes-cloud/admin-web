@@ -1,17 +1,10 @@
 <!-- 折线图，支持多组数据，支持阶梯式动画效果 -->
 <template>
-  <div
-    ref="chartRef"
-    class="art-line-chart"
-    :style="{ height: props.height }"
-    v-loading="props.loading"
-  >
-  </div>
+  <div ref="chartRef" class="art-line-chart" :style="{ height: props.height }" v-loading="props.loading"> </div>
 </template>
 
 <script setup lang="ts">
-  import * as echarts from 'echarts'
-  import type { EChartsOption } from 'echarts'
+  import { echarts, graphic, type EChartsOption } from '@/utils/echarts'
   import { getCssVar, hexToRgba } from '@/utils/ui'
   import { useChartOps, useChart } from '@/composables/useChart'
   import type { LineChartProps, LineDataItem } from '@/types/component/chart'
@@ -86,10 +79,7 @@
     // 检查多数据情况
     if (Array.isArray(props.data) && typeof props.data[0] === 'object') {
       const multiData = props.data as LineDataItem[]
-      return (
-        !multiData.length ||
-        multiData.every((item) => !item.data?.length || item.data.every((val) => val === 0))
-      )
+      return !multiData.length || multiData.every((item) => !item.data?.length || item.data.every((val) => val === 0))
     }
 
     return true
@@ -98,10 +88,7 @@
   // 判断是否为多数据
   const isMultipleData = computed(() => {
     return (
-      Array.isArray(props.data) &&
-      props.data.length > 0 &&
-      typeof props.data[0] === 'object' &&
-      'name' in props.data[0]
+      Array.isArray(props.data) && props.data.length > 0 && typeof props.data[0] === 'object' && 'name' in props.data[0]
     )
   })
 
@@ -138,9 +125,7 @@
 
   // 复制真实数据
   const copyRealData = () => {
-    return isMultipleData.value
-      ? [...(props.data as LineDataItem[])]
-      : [...(props.data as number[])]
+    return isMultipleData.value ? [...(props.data as LineDataItem[])] : [...(props.data as number[])]
   }
 
   // 获取颜色配置
@@ -163,7 +148,7 @@
     if (areaConfig.custom) return areaConfig.custom
 
     return {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      color: new graphic.LinearGradient(0, 0, 0, 1, [
         {
           offset: 0,
           color: hexToRgba(color, areaConfig.startOpacity || 0.2).rgba
@@ -182,7 +167,7 @@
 
     const color = getColor(props.colors[0])
     return {
-      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+      color: new graphic.LinearGradient(0, 0, 0, 1, [
         {
           offset: 0,
           color: hexToRgba(color, 0.2).rgba
@@ -379,8 +364,7 @@
   // 监听主题变化 - 使用setOption更新而不是重新渲染
   watch(isDark, () => {
     // 获取图表实例
-    const chartInstance =
-      (chartRef.value as any)?.__echart__ || echarts.getInstanceByDom(chartRef.value as HTMLElement)
+    const chartInstance = (chartRef.value as any)?.__echart__ || echarts.getInstanceByDom(chartRef.value as HTMLElement)
 
     if (chartInstance && !isEmpty.value) {
       // 重新生成配置并更新图表，避免重新渲染

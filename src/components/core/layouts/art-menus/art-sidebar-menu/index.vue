@@ -1,10 +1,6 @@
 <!-- 左侧菜单 或 双列菜单 -->
 <template>
-  <div
-    class="layout-sidebar"
-    v-if="showLeftMenu || isDualMenu"
-    :class="{ 'no-border': menuList.length === 0 }"
-  >
+  <div class="layout-sidebar" v-if="showLeftMenu || isDualMenu" :class="{ 'no-border': menuList.length === 0 }">
     <!-- 双列菜单（左侧） -->
     <div v-if="isDualMenu" class="dual-menu-left" :style="{ background: getMenuTheme.background }">
       <ArtLogo class="logo" @click="navigateToHome" />
@@ -23,23 +19,29 @@
             >
               <div
                 :class="{
-                  'is-active': menu.meta.isFirstLevel
-                    ? menu.path === route.path
-                    : menu.path === firstLevelMenuPath
+                  'is-active': isActive(menu)
                 }"
                 :style="{
                   margin: dualMenuShowText ? '5px' : '15px',
-                  height: dualMenuShowText ? '60px' : '46px'
+                  height: dualMenuShowText ? '60px' : '46px',
+                  width: dualMenuShowText ? '60px' : '46px'
                 }"
               >
-                <i
+                <!-- <i
                   class="iconfont-sys"
                   v-html="menu.meta.icon"
                   :style="{
                     fontSize: dualMenuShowText ? '18px' : '22px',
                     marginBottom: dualMenuShowText ? '5px' : '0'
                   }"
-                />
+                /> -->
+                <div class="icon" :style="{ marginBottom: dualMenuShowText ? '5px' : '0' }">
+                  <ArtIcon
+                    :value="menu.meta.icon"
+                    :style="{ fontWeight: '100' }"
+                    :size="dualMenuShowText ? 18 : 28"
+                  ></ArtIcon>
+                </div>
                 <span v-if="dualMenuShowText">
                   {{ $t(menu.meta.title) }}
                 </span>
@@ -63,13 +65,8 @@
       :style="{ background: getMenuTheme.background }"
     >
       <ElScrollbar style="height: calc(100% - 10px)">
-        <div
-          class="header"
-          @click="navigateToHome"
-          :style="{ background: getMenuTheme.background }"
-        >
+        <div class="header" @click="navigateToHome" :style="{ background: getMenuTheme.background }">
           <ArtLogo v-if="!isDualMenu" class="logo" />
-
           <p
             :class="{ 'is-dual-menu-name': isDualMenu }"
             :style="{
@@ -77,7 +74,7 @@
               opacity: !menuOpen ? 0 : 1
             }"
           >
-            {{ AppConfig.systemInfo.name }}
+            {{ appStore.setting.title }}
           </p>
         </div>
 
@@ -88,18 +85,12 @@
           :text-color="getMenuTheme.textColor"
           :unique-opened="uniqueOpened"
           :background-color="getMenuTheme.background"
-          :active-text-color="getMenuTheme.textActiveColor"
           :default-openeds="defaultOpenedMenus"
           :popper-class="`menu-left-${getMenuTheme.theme}-popper`"
           :show-timeout="50"
           :hide-timeout="50"
         >
-          <SidebarSubmenu
-            :list="menuList"
-            :isMobile="isMobileMode"
-            :theme="getMenuTheme"
-            @close="handleMenuClose"
-          />
+          <SidebarSubmenu :list="menuList" :isMobile="isMobileMode" :theme="getMenuTheme" @close="handleMenuClose" />
         </ElMenu>
       </ElScrollbar>
 
@@ -116,7 +107,6 @@
 </template>
 
 <script setup lang="ts">
-  import AppConfig from '@/config'
   import { useSettingStore } from '@/store/modules/setting'
   import { MenuTypeEnum, MenuWidth } from '@/enums/appEnum'
   import { useMenuStore } from '@/store/modules/menu'
@@ -124,6 +114,8 @@
   import { handleMenuJump } from '@/utils/navigation'
   import SidebarSubmenu from './widget/SidebarSubmenu.vue'
   import { useCommon } from '@/composables/useCommon'
+  import { useAppStore } from '@/store/modules/app'
+  import { AppRouteRecord } from '@/types/router'
 
   defineOptions({ name: 'ArtSidebarMenu' })
 
@@ -134,6 +126,7 @@
   const route = useRoute()
   const router = useRouter()
   const settingStore = useSettingStore()
+  const appStore = useAppStore()
 
   const { getMenuOpenWidth, menuType, uniqueOpened, dualMenuShowText, menuOpen, getMenuTheme } =
     storeToRefs(settingStore)
@@ -150,14 +143,18 @@
 
   // 菜单类型判断
   const isTopLeftMenu = computed(() => menuType.value === MenuTypeEnum.TOP_LEFT)
-  const showLeftMenu = computed(
-    () => menuType.value === MenuTypeEnum.LEFT || menuType.value === MenuTypeEnum.TOP_LEFT
-  )
+  const showLeftMenu = computed(() => menuType.value === MenuTypeEnum.LEFT || menuType.value === MenuTypeEnum.TOP_LEFT)
   const isDualMenu = computed(() => menuType.value === MenuTypeEnum.DUAL_MENU)
 
   // 路由相关
   const firstLevelMenuPath = computed(() => route.matched[0]?.path)
-  const routerPath = computed(() => String(route.meta.activePath || route.path))
+  const routerPath = computed((): string => {
+    // 如果当前的路径是隐藏的，则寻找他的父路径
+    if (route.meta.isHide) {
+      return route.meta.parentPath as string
+    }
+    return (route.meta.activePath || route.path) as string
+  })
 
   // 菜单数据
   const firstLevelMenus = computed(() => {
@@ -303,6 +300,15 @@
     }
   }
 
+  const isActive = (menu: AppRouteRecord) => {
+    // return true
+    if (menu.meta.isFirstLevel) {
+      return menu.path === route.path
+    } else {
+      return menu.path === firstLevelMenuPath.value
+    }
+  }
+
   /**
    * 监听菜单开关状态变化
    */
@@ -332,6 +338,18 @@
 
 <style lang="scss" scoped>
   @use './style';
+
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .is-active {
+    .icon {
+      color: #fff !important;
+    }
+  }
 </style>
 
 <style lang="scss">

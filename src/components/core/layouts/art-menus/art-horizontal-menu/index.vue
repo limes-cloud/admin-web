@@ -12,13 +12,7 @@
       :hide-timeout="50"
       popper-class="horizontal-menu-popper"
     >
-      <HorizontalSubmenu
-        v-for="item in filteredMenuItems"
-        :key="item.path"
-        :item="item"
-        :isMobile="false"
-        :level="0"
-      />
+      <HorizontalSubmenu v-for="item in filteredMenuItems" :key="item.path" :item="item" :isMobile="false" :level="0" />
     </ElMenu>
   </div>
 </template>
@@ -52,7 +46,13 @@
    * 当前激活的路由路径
    * 用于菜单高亮显示
    */
-  const routerPath = computed(() => String(route.meta.activePath || route.path))
+  const routerPath = computed((): string => {
+    // 如果当前的路径是隐藏的，则寻找他的父路径
+    if (route.meta.isHide) {
+      return route.meta.parentPath as string
+    }
+    return (route.meta.activePath || route.path) as string
+  })
 
   /**
    * 递归过滤菜单项，移除隐藏的菜单
@@ -72,7 +72,7 @@
         if (item.children && item.children.length > 0) {
           const filteredChildren = filterMenuItems(item.children)
           // 如果所有子菜单都被过滤掉了，则隐藏父菜单
-          return filteredChildren.length > 0
+          return !(filteredChildren.length < 0 && !item.redirect)
         }
 
         // 叶子节点且未被隐藏，保留

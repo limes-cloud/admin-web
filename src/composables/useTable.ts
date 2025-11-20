@@ -4,7 +4,6 @@ import { useTableColumns } from './useTableColumns'
 import type { ColumnOption } from '@/types/component'
 import { TableCache, CacheInvalidationStrategy, type ApiResponse } from '../utils/table/tableCache'
 import {
-  type BaseRequestParams,
   type TableError,
   defaultResponseAdapter,
   extractTableData,
@@ -12,25 +11,32 @@ import {
   createSmartDebounce,
   createErrorHandler
 } from '../utils/table/tableUtils'
+import { tableConfig } from '../utils/table/tableConfig'
 
-// 优化的配置接口 - 按功能域分组
+// 类型推导工具类型
+type InferApiParams<T> = T extends (params: infer P) => any ? P : never
+type InferApiResponse<T> = T extends (params: any) => Promise<infer R> ? R : never
+type InferRecordType<T> = T extends Api.Common.PaginatedResponse<infer U> ? U : never
+
+// 优化的配置接口 - 支持自动类型推导
 export interface UseTableConfig<
-  T = unknown,
-  P extends BaseRequestParams = BaseRequestParams,
-  R = any
+  TApiFn extends (params: any) => Promise<any> = (params: any) => Promise<any>,
+  TRecord = InferRecordType<InferApiResponse<TApiFn>>,
+  TParams = InferApiParams<TApiFn>,
+  TResponse = InferApiResponse<TApiFn>
 > {
   // 核心配置
   core: {
     /** API 请求函数 */
-    apiFn: (params: P) => Promise<R>
+    apiFn: TApiFn
     /** 默认请求参数 */
-    apiParams?: Partial<P>
+    apiParams?: Partial<TParams>
     /** 排除 apiParams 中的属性 */
-    excludeParams?: (keyof P)[]
+    excludeParams?: string[]
     /** 是否立即加载数据 */
     immediate?: boolean
     /** 列配置工厂函数 */
-    columnsFactory?: () => ColumnOption<T>[]
+    columnsFactory?: () => ColumnOption<TRecord>[]
     /** 自定义分页字段映射 */
     paginationKey?: {
       /** 当前页码字段名，默认为 'current' */
@@ -43,9 +49,9 @@ export interface UseTableConfig<
   // 数据处理
   transform?: {
     /** 数据转换函数 */
-    dataTransformer?: (data: unknown) => T[]
+    dataTransformer?: (data: TRecord[]) => TRecord[]
     /** 响应数据适配器 */
-    responseAdapter?: (response: R) => ApiResponse<T>
+    responseAdapter?: (response: TResponse) => ApiResponse<TRecord>
   }
 
   // 性能优化
@@ -63,11 +69,11 @@ export interface UseTableConfig<
   // 生命周期钩子
   hooks?: {
     /** 数据加载成功回调（仅网络请求成功时触发） */
-    onSuccess?: (data: T[], response: ApiResponse<T>) => void
+    onSuccess?: (data: TRecord[], response: ApiResponse<TRecord>) => void
     /** 错误处理回调 */
     onError?: (error: TableError) => void
     /** 缓存命中回调（从缓存获取数据时触发） */
-    onCacheHit?: (data: T[], response: ApiResponse<T>) => void
+    onCacheHit?: (data: TRecord[], response: ApiResponse<TRecord>) => void
     /** 加载状态变化回调 */
     onLoading?: (loading: boolean) => void
     /** 重置表单回调函数 */
@@ -83,8 +89,12 @@ export interface UseTableConfig<
   }
 }
 
+export function useTable<TApiFn extends (params: any) => Promise<any>>(config: UseTableConfig<TApiFn>) {
+  return useTableImpl(config)
+}
+
 /**
- * useTable - 强大的表格数据管理 Hook
+ * useTable 的核心实现 - 强大的表格数据管理 Hook
  *
  * 提供完整的表格解决方案，包括：
  * - 数据获取与缓存
@@ -94,49 +104,44 @@ export interface UseTableConfig<
  * - 错误处理
  * - 列配置管理
  */
-export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestParams, R = any>(
-  config: UseTableConfig<T, P, R>
-) {
+function useTableImpl<TApiFn extends (params: any) => Promise<any>>(config: UseTableConfig<TApiFn>) {
+  type TRecord = InferRecordType<InferApiResponse<TApiFn>>
+  type TParams = InferApiParams<TApiFn>
   const {
     core: {
       apiFn,
-      apiParams = {} as Partial<P>,
+      apiParams = {} as Partial<TParams>,
       excludeParams = [],
       immediate = true,
       columnsFactory,
-      paginationKey = { current: 'current', size: 'size' }
+      paginationKey
     },
     transform: { dataTransformer, responseAdapter = defaultResponseAdapter } = {},
-    performance: {
-      enableCache = false,
-      cacheTime = 5 * 60 * 1000,
-      debounceTime = 300,
-      maxCacheSize = 50
-    } = {},
+    performance: { enableCache = false, cacheTime = 5 * 60 * 1000, debounceTime = 300, maxCacheSize = 50 } = {},
     hooks: { onSuccess, onError, onCacheHit, resetFormCallback } = {},
     debug: { enableLog = false } = {}
   } = config
 
-  // 分页字段名配置
-  const pageKey = paginationKey?.current || 'current'
-  const sizeKey = paginationKey?.size || 'size'
+  // 分页字段名配置：优先使用传入的配置，否则使用全局配置
+  const pageKey = paginationKey?.current || tableConfig.paginationKey.current
+  const sizeKey = paginationKey?.size || tableConfig.paginationKey.size
 
   // 响应式触发器，用于手动更新缓存统计信息
   const cacheUpdateTrigger = ref(0)
 
   // 日志工具函数
   const logger = {
-    log: (message: string, ...args: any[]) => {
+    log: (message: string, ...args: unknown[]) => {
       if (enableLog) {
         console.log(`[useTable] ${message}`, ...args)
       }
     },
-    warn: (message: string, ...args: any[]) => {
+    warn: (message: string, ...args: unknown[]) => {
       if (enableLog) {
         console.warn(`[useTable] ${message}`, ...args)
       }
     },
-    error: (message: string, ...args: any[]) => {
+    error: (message: string, ...args: unknown[]) => {
       if (enableLog) {
         console.error(`[useTable] ${message}`, ...args)
       }
@@ -144,7 +149,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   }
 
   // 缓存实例
-  const cache = enableCache ? new TableCache<T>(cacheTime, maxCacheSize, enableLog) : null
+  const cache = enableCache ? new TableCache<TRecord>(cacheTime, maxCacheSize, enableLog) : null
 
   // 加载状态
   const loading = ref(false)
@@ -153,7 +158,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   const error = ref<TableError | null>(null)
 
   // 表格数据
-  const data = ref<T[]>([])
+  const data = ref<TRecord[]>([])
 
   // 请求取消控制器
   let abortController: AbortController | null = null
@@ -169,13 +174,13 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
         [sizeKey]: 10
       },
       apiParams || {}
-    ) as P
+    ) as TParams
   )
 
   // 分页配置
-  const pagination = reactive<Api.Common.PaginatingParams>({
-    current: (searchParams as any)[pageKey] || 1,
-    size: (searchParams as any)[sizeKey] || 10,
+  const pagination = reactive<Api.Common.PaginationParams>({
+    current: ((searchParams as Record<string, unknown>)[pageKey] as number) || 1,
+    size: ((searchParams as Record<string, unknown>)[sizeKey] as number) || 10,
     total: 0
   })
 
@@ -187,7 +192,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   }))
 
   // 列配置
-  const columnConfig = columnsFactory ? useTableColumns<T>(columnsFactory) : null
+  const columnConfig = columnsFactory ? useTableColumns<TRecord>(columnsFactory) : null
   const columns = columnConfig?.columns
   const columnChecks = columnConfig?.columnChecks
 
@@ -237,10 +242,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   }
 
   // 获取数据的核心方法
-  const fetchData = async (
-    params?: Partial<P>,
-    useCache = enableCache
-  ): Promise<ApiResponse<T>> => {
+  const fetchData = async (params?: Partial<TParams>, useCache = enableCache): Promise<ApiResponse<TRecord>> => {
     // 取消上一个请求
     if (abortController) {
       abortController.abort()
@@ -262,16 +264,23 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
           [sizeKey]: pagination.size
         },
         params || {}
-      ) as P
+      ) as TParams
 
       // 剔除不需要的参数
       if (excludeParams.length > 0) {
         const filteredParams = { ...requestParams }
         excludeParams.forEach((key) => {
-          delete (filteredParams as any)[key]
+          delete (filteredParams as Record<string, unknown>)[key]
         })
-        requestParams = filteredParams as P
+        requestParams = filteredParams as TParams
       }
+
+      // 删除空值
+      Object.keys(requestParams).forEach((key) => {
+        if (requestParams[key as keyof TParams] === undefined || requestParams[key as keyof TParams] === '') {
+          delete requestParams[key as keyof TParams]
+        }
+      })
 
       // 检查缓存
       if (useCache && cache) {
@@ -281,11 +290,12 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
           updatePaginationFromResponse(pagination, cachedItem.response)
 
           // 修复：避免重复设置相同的值，防止响应式循环更新
-          if ((searchParams as any)[pageKey] !== pagination.current) {
-            ;(searchParams as any)[pageKey] = pagination.current
+          const paramsRecord = searchParams as Record<string, unknown>
+          if (paramsRecord[pageKey] !== pagination.current) {
+            paramsRecord[pageKey] = pagination.current
           }
-          if ((searchParams as any)[sizeKey] !== pagination.size) {
-            ;(searchParams as any)[sizeKey] = pagination.size
+          if (paramsRecord[sizeKey] !== pagination.size) {
+            paramsRecord[sizeKey] = pagination.size
           }
 
           loading.value = false
@@ -323,11 +333,12 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
       updatePaginationFromResponse(pagination, standardResponse)
 
       // 修复：避免重复设置相同的值，防止响应式循环更新
-      if ((searchParams as any)[pageKey] !== pagination.current) {
-        ;(searchParams as any)[pageKey] = pagination.current
+      const paramsRecord = searchParams as Record<string, unknown>
+      if (paramsRecord[pageKey] !== pagination.current) {
+        paramsRecord[pageKey] = pagination.current
       }
-      if ((searchParams as any)[sizeKey] !== pagination.size) {
-        ;(searchParams as any)[sizeKey] = pagination.size
+      if (paramsRecord[sizeKey] !== pagination.size) {
+        paramsRecord[sizeKey] = pagination.size
       }
 
       // 缓存数据
@@ -363,7 +374,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   }
 
   // 获取数据 (保持当前页)
-  const getData = async (params?: Partial<P>): Promise<ApiResponse<T> | void> => {
+  const getData = async (params?: Partial<TParams>): Promise<ApiResponse<TRecord> | void> => {
     try {
       return await fetchData(params)
     } catch {
@@ -373,9 +384,9 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   }
 
   // 分页获取数据 (重置到第一页) - 专门用于搜索场景
-  const getDataByPage = async (params?: Partial<P>): Promise<ApiResponse<T> | void> => {
+  const getDataByPage = async (params?: Partial<TParams>): Promise<ApiResponse<TRecord> | void> => {
     pagination.current = 1
-    ;(searchParams as any)[pageKey] = 1
+    ;(searchParams as Record<string, unknown>)[pageKey] = 1
 
     // 搜索时清空当前搜索条件的缓存，确保获取最新数据
     clearCache(CacheInvalidationStrategy.CLEAR_CURRENT, '搜索数据')
@@ -397,14 +408,15 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
     debouncedGetDataByPage.cancel()
 
     // 保存分页相关的默认值
+    const paramsRecord = searchParams as Record<string, unknown>
     const defaultPagination = {
       [pageKey]: 1,
-      [sizeKey]: (searchParams as any)[sizeKey] || 10
+      [sizeKey]: (paramsRecord[sizeKey] as number) || 10
     }
 
     // 清空所有搜索参数
     Object.keys(searchParams).forEach((key) => {
-      delete (searchParams as Record<string, any>)[key]
+      delete paramsRecord[key]
     })
 
     // 重新设置默认参数
@@ -412,7 +424,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
 
     // 重置分页
     pagination.current = 1
-    pagination.size = (defaultPagination as any)[sizeKey]
+    pagination.size = defaultPagination[sizeKey] as number
 
     // 清空错误状态
     error.value = null
@@ -439,10 +451,11 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
 
     debouncedGetDataByPage.cancel()
 
+    const paramsRecord = searchParams as Record<string, unknown>
     pagination.size = newSize
     pagination.current = 1
-    ;(searchParams as any)[sizeKey] = newSize
-    ;(searchParams as any)[pageKey] = 1
+    paramsRecord[sizeKey] = newSize
+    paramsRecord[pageKey] = 1
 
     clearCache(CacheInvalidationStrategy.CLEAR_CURRENT, '分页大小变化')
 
@@ -468,10 +481,11 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
       isCurrentChanging = true
 
       // 修复：只更新必要的状态
+      const paramsRecord = searchParams as Record<string, unknown>
       pagination.current = newCurrent
       // 只有当 searchParams 的分页字段与新值不同时才更新
-      if ((searchParams as any)[pageKey] !== newCurrent) {
-        ;(searchParams as any)[pageKey] = newCurrent
+      if (paramsRecord[pageKey] !== newCurrent) {
+        paramsRecord[pageKey] = newCurrent
       }
 
       await getData()
@@ -486,7 +500,7 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
   const refreshCreate = async (): Promise<void> => {
     debouncedGetDataByPage.cancel()
     pagination.current = 1
-    ;(searchParams as any)[pageKey] = 1
+    ;(searchParams as Record<string, unknown>)[pageKey] = 1
     clearCache(CacheInvalidationStrategy.CLEAR_PAGINATION, '新增数据')
     await getData()
   }
@@ -499,20 +513,18 @@ export function useTable<T = unknown, P extends BaseRequestParams = BaseRequestP
 
   // 删除后刷新：智能处理页码，避免空页面（适用于删除数据后）
   const refreshRemove = async (): Promise<void> => {
-    const { total, size, current } = pagination
-    const totalPage = Math.max(1, Math.ceil(total / size))
-    const isLastPage = current === totalPage
-    const isSingleItemPage = data.value.length === 1
-    const isEmptyLastPage = isLastPage && data.value.length === 0
+    const { current } = pagination
 
-    // 如果当前页是单条数据且不是第一页，或最后一页为空，则回到上一页
-    if ((isSingleItemPage && current > 1) || isEmptyLastPage) {
-      pagination.current -= 1
-      ;(searchParams as any)[pageKey] = pagination.current
-    }
-
+    // 清除缓存并获取最新数据
     clearCache(CacheInvalidationStrategy.CLEAR_CURRENT, '删除数据')
     await getData()
+
+    // 如果当前页为空且不是第一页，回到上一页
+    if (data.value.length === 0 && current > 1) {
+      pagination.current = current - 1
+      ;(searchParams as Record<string, unknown>)[pageKey] = current - 1
+      await getData()
+    }
   }
 
   // 全量刷新：清空所有缓存，重新获取数据（适用于手动刷新按钮）

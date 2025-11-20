@@ -22,7 +22,6 @@
   import * as XLSX from 'xlsx'
   import FileSaver from 'file-saver'
   import { ref, computed, nextTick } from 'vue'
-  import { ElMessage } from 'element-plus'
   import { Loading } from '@element-plus/icons-vue'
   import type { ButtonType } from 'element-plus'
   import { useThrottleFn } from '@vueuse/core'
@@ -152,12 +151,7 @@
   }
 
   /** 格式化单元格值 */
-  const formatCellValue = (
-    value: ExportValue,
-    key: string,
-    row: ExportData,
-    index: number
-  ): string => {
+  const formatCellValue = (value: ExportValue, key: string, row: ExportData, index: number): string => {
     // 使用列配置的格式化函数
     const column = props.columns[key]
     if (column?.formatter) {
@@ -238,11 +232,7 @@
   }
 
   /** 导出到 Excel */
-  const exportToExcel = async (
-    data: ExportData[],
-    filename: string,
-    sheetName: string
-  ): Promise<void> => {
+  const exportToExcel = async (data: ExportData[], filename: string, sheetName: string): Promise<void> => {
     try {
       emit('export-progress', 10)
 

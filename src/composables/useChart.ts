@@ -1,5 +1,4 @@
-import * as echarts from 'echarts'
-import type { EChartsOption } from 'echarts'
+import { echarts, type EChartsOption } from '@/utils/echarts'
 import { storeToRefs } from 'pinia'
 import { useSettingStore } from '@/store/modules/setting'
 import { getCssVar } from '@/utils/ui'
@@ -16,15 +15,7 @@ export const useChartOps = (): ChartThemeConfig => ({
   /** 主题颜色 */
   themeColor: getCssVar('--el-color-primary-light-1'),
   /** 颜色组 */
-  colors: [
-    getCssVar('--el-color-primary-light-1'),
-    '#4ABEFF',
-    '#EDF2FF',
-    '#14DEBA',
-    '#FFAF20',
-    '#FA8A6C',
-    '#FFAF20'
-  ]
+  colors: [getCssVar('--el-color-primary-light-1'), '#4ABEFF', '#EDF2FF', '#14DEBA', '#FFAF20', '#FA8A6C', '#FFAF20']
 })
 
 // 常量定义
@@ -175,10 +166,7 @@ export function useChart(options: UseChartOptions = {}) {
   })
 
   // 获取统一的图例配置
-  const getLegendStyle = (
-    position: 'bottom' | 'top' | 'left' | 'right' = 'bottom',
-    customOptions: any = {}
-  ) => {
+  const getLegendStyle = (position: 'bottom' | 'top' | 'left' | 'right' = 'bottom', customOptions: any = {}) => {
     const baseConfig = {
       textStyle: {
         color: isDark.value ? '#fff' : '#333'
@@ -366,10 +354,7 @@ export function useChart(options: UseChartOptions = {}) {
       `
 
       // 确保父容器有相对定位
-      if (
-        chartRef.value.style.position !== 'relative' &&
-        chartRef.value.style.position !== 'absolute'
-      ) {
+      if (chartRef.value.style.position !== 'relative' && chartRef.value.style.position !== 'absolute') {
         chartRef.value.style.position = 'relative'
       }
 
@@ -535,14 +520,7 @@ interface UseChartComponentOptions<T extends BaseChartProps> {
 }
 
 export function useChartComponent<T extends BaseChartProps>(options: UseChartComponentOptions<T>) {
-  const {
-    props,
-    generateOptions,
-    checkEmpty,
-    watchSources = [],
-    onVisible,
-    chartOptions = {}
-  } = options
+  const { props, generateOptions, checkEmpty, watchSources = [], onVisible, chartOptions = {} } = options
 
   const chart = useChart(chartOptions)
   const { chartRef, initChart, isDark, emptyStateManager } = chart

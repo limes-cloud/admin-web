@@ -22,33 +22,21 @@
           @contextmenu.prevent="(e: MouseEvent) => showMenu(e, item.path)"
         >
           {{ item.customTitle || formatMenuTitle(item.title) }}
-          <el-icon
-            v-if="list.length > 1 && !item.fixedTab"
-            @click.stop="closeWorktab('current', item.path)"
-          >
+          <ElIcon v-if="list.length > 1 && !item.fixedTab" @click.stop="closeWorktab('current', item.path)">
             <Close />
-          </el-icon>
+          </ElIcon>
           <div class="line"></div>
         </li>
       </ul>
     </div>
 
     <div class="right">
-      <el-icon
-        class="btn console-box art-custom-card"
-        @click="(e: MouseEvent) => showMenu(e, activeTab)"
-      >
+      <ElIcon class="btn console-box art-custom-card" @click="(e: MouseEvent) => showMenu(e, activeTab)">
         <ArrowDown />
-      </el-icon>
+      </ElIcon>
     </div>
 
-    <ArtMenuRight
-      ref="menuRef"
-      :menu-items="menuItems"
-      :menu-width="140"
-      :border-radius="10"
-      @select="handleSelect"
-    />
+    <ArtMenuRight ref="menuRef" :menu-items="menuItems" :menu-width="140" :border-radius="10" @select="handleSelect" />
   </div>
 </template>
 
@@ -285,10 +273,7 @@
       const xMin = scrollRef.value.offsetWidth - tabsRef.value.offsetWidth
       const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
 
-      scrollState.value.translateX = Math.min(
-        Math.max(scrollState.value.translateX - delta, xMin),
-        xMax
-      )
+      scrollState.value.translateX = Math.min(Math.max(scrollState.value.translateX - delta, xMin), xMax)
     }
 
     const handleTouchStart = (event: TouchEvent) => {
@@ -302,10 +287,7 @@
       const deltaX = touchState.value.currentX - touchState.value.startX
       const xMin = scrollRef.value.offsetWidth - tabsRef.value.offsetWidth
 
-      scrollState.value.translateX = Math.min(
-        Math.max(scrollState.value.translateX + deltaX, xMin),
-        0
-      )
+      scrollState.value.translateX = Math.min(Math.max(scrollState.value.translateX + deltaX, xMin), 0)
       touchState.value.startX = touchState.value.currentX
     }
 
@@ -414,10 +396,8 @@
   // 组合所有逻辑
   const { menuItems } = useContextMenu()
   const { setTransition, autoPositionTab } = useScrolling()
-  const { setupEventListeners, cleanupEventListeners, adjustPositionAfterClose } =
-    useEventHandlers()
-  const { clickTab, closeWorktab, showMenu, handleSelect } =
-    useTabOperations(adjustPositionAfterClose)
+  const { setupEventListeners, cleanupEventListeners, adjustPositionAfterClose } = useEventHandlers()
+  const { clickTab, closeWorktab, showMenu, handleSelect } = useTabOperations(adjustPositionAfterClose)
 
   // 生命周期
   onMounted(() => {

@@ -20,8 +20,7 @@ export function useHeaderBar() {
   const headerBarConfigRef = computed<HeaderBarFeatureConfig>(() => headerBarConfig)
 
   // 从store中获取相关状态
-  const { showMenuButton, showFastEnter, showRefreshButton, showCrumbs, showLanguage } =
-    storeToRefs(settingStore)
+  const { showMenuButton, showFastEnter, showRefreshButton, showCrumbs, showLanguage } = storeToRefs(settingStore)
 
   /**
    * 检查特定功能是否启用

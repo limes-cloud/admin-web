@@ -1,7 +1,7 @@
 <!-- 水印组件 -->
 <template>
   <div v-if="watermarkVisible" class="layout-watermark" :style="{ zIndex: zIndex }">
-    <el-watermark
+    <ElWatermark
       :content="content"
       :font="{ fontSize: fontSize, color: fontColor }"
       :rotate="rotate"
@@ -9,12 +9,12 @@
       :offset="[offsetX, offsetY]"
     >
       <div style="height: 100vh"></div>
-    </el-watermark>
+    </ElWatermark>
   </div>
 </template>
 
 <script setup lang="ts">
-  import AppConfig from '@/config'
+  import { useAppStore } from '@/store/modules/app'
   import { useSettingStore } from '@/store/modules/setting'
 
   defineOptions({ name: 'ArtWatermark' })
@@ -46,7 +46,7 @@
   }
 
   withDefaults(defineProps<WatermarkProps>(), {
-    content: AppConfig.systemInfo.name,
+    content: useAppStore().setting.title,
     visible: false,
     fontSize: 16,
     fontColor: 'rgba(128, 128, 128, 0.2)',

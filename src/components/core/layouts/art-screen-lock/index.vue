@@ -50,12 +50,7 @@
       <div class="box">
         <img class="cover" src="@imgs/user/avatar.webp" alt="用户头像" />
         <div class="username">{{ userInfo.userName }}</div>
-        <ElForm
-          ref="unlockFormRef"
-          :model="unlockForm"
-          :rules="rules"
-          @submit.prevent="handleUnlock"
-        >
+        <ElForm ref="unlockFormRef" :model="unlockForm" :rules="rules" @submit.prevent="handleUnlock">
           <ElFormItem prop="password">
             <ElInput
               v-model="unlockForm.password"
@@ -86,7 +81,6 @@
 
 <script setup lang="ts">
   import { Lock, Unlock } from '@element-plus/icons-vue'
-  import { ElMessage } from 'element-plus'
   import type { FormInstance, FormRules } from 'element-plus'
   import { useI18n } from 'vue-i18n'
   import CryptoJS from 'crypto-js'
@@ -134,9 +128,7 @@
 
   // 检测是否为移动设备
   const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    )
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   }
 
   // 添加禁用控制台的函数
@@ -271,8 +263,7 @@
       if (!isLock.value || isMobile()) return
 
       const isDevToolsOpen =
-        window.outerHeight - window.innerHeight > threshold ||
-        window.outerWidth - window.innerWidth > threshold
+        window.outerHeight - window.innerHeight > threshold || window.outerWidth - window.innerWidth > threshold
 
       if (isDevToolsOpen && !devtools.open) {
         devtools.open = true
@@ -303,9 +294,7 @@
   // 工具函数
   const verifyPassword = (inputPassword: string, storedPassword: string): boolean => {
     try {
-      const decryptedPassword = CryptoJS.AES.decrypt(storedPassword, ENCRYPT_KEY).toString(
-        CryptoJS.enc.Utf8
-      )
+      const decryptedPassword = CryptoJS.AES.decrypt(storedPassword, ENCRYPT_KEY).toString(CryptoJS.enc.Utf8)
       return inputPassword === decryptedPassword
     } catch (error) {
       console.error('密码解密失败:', error)
@@ -370,7 +359,7 @@
   }
 
   const toLogin = () => {
-    userStore.logOut()
+    userStore.logout()
   }
 
   const openLockScreen = () => {
