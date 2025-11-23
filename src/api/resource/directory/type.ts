@@ -22,7 +22,7 @@ export interface Directory {
   id: number
   parentId: number
   name: string
-  accept: string
+  accept: string | string[]
   maxSize: number
   createdAt: number
   updatedAt: number

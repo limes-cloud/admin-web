@@ -29,7 +29,7 @@ export const setPageTitle = (to: RouteLocationNormalized): void => {
   const { title } = to.meta
   if (title) {
     setTimeout(() => {
-      document.title = `${formatMenuTitle(String(title))} - ${appStore.setting.title}`
+      document.title = `${formatMenuTitle(String(title))} - ${appStore.app.name}`
     }, 150)
   }
 }

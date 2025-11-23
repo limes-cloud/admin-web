@@ -27,5 +27,5 @@ store.use(
 export function initStore(app: App<Element>): void {
   app.use(store)
 
-  useAppStore().initSystemSetting()
+  useAppStore().initApp()
 }

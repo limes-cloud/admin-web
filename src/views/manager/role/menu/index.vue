@@ -45,7 +45,7 @@
   }
 
   const getMenus = async (appId: number) => {
-    const data = await ListCurrentMenu({ appId: appId })
+    const data = await ListCurrentMenu({ appId: appId, onlyMenu: true, filterTenant: true })
 
     // 递归去除菜单中type=BA的节点,返回新的节点树
     const removeBase = (list: Menu[]) => {

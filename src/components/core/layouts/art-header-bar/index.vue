@@ -6,7 +6,7 @@
         <!-- 系统信息  -->
         <div class="top-header" @click="toHome" v-if="isTopMenu">
           <ArtLogo class="logo" />
-          <p v-if="width >= 1400">{{ appStore.setting.title }}</p>
+          <p v-if="width >= 1400">{{ appStore.app.name }}</p>
         </div>
 
         <ArtLogo class="logo2" @click="toHome" />

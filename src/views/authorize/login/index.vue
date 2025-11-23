@@ -3,50 +3,56 @@
     <Background></Background>
 
     <div class="login-plan">
-      <div class="left-bg">
-        <ThemeSvg :src="loginIcon" size="100%" />
+      <div class="login-header">
+        <div class="login-title">欢迎回来，用户登陆</div>
+        <div class="login-subtitle">{{ appStore.app.description }}</div>
       </div>
-      <div class="login-wrap">
-        <el-tabs v-model="loginType" class="login-tabs" @tab-change="handleChangeLoginType">
-          <el-tab-pane label="密码登陆" name="username">
-            <template #label>
-              <div class="tab-item">
-                <el-image style="width: 18px; height: 18px" :src="PasswordImage" />
-                <span style="margin-left: 5px">密码登陆</span>
+      <div class="login-box">
+        <div class="left-bg">
+          <ThemeSvg :src="loginIcon" size="100%" />
+        </div>
+        <div class="login-wrap">
+          <el-tabs v-model="loginType" class="login-tabs" @tab-change="handleChangeLoginType">
+            <el-tab-pane label="密码登陆" name="username">
+              <template #label>
+                <div class="tab-item">
+                  <ElImage style="width: 18px; height: 18px" :src="PasswordImage" />
+                  <span style="margin-left: 5px">密码登陆</span>
+                </div>
+              </template>
+              <div class="form" v-if="loginType === 'username'">
+                <PasswordLogin :data="loginData" @success="handleLogin" />
               </div>
-            </template>
-            <div class="form" v-if="loginType === 'username'">
-              <PasswordLogin :data="loginData" @success="handleLogin" />
-            </div>
-          </el-tab-pane>
-          <el-tab-pane v-if="emailOAuther" label="邮箱登陆" name="email">
-            <template #label>
-              <div class="tab-item">
-                <el-image style="width: 18px; height: 18px" :src="$rurl(emailOAuther.logo)" />
-                <span style="margin-left: 5px">邮箱登陆</span>
+            </el-tab-pane>
+            <el-tab-pane v-if="emailOAuther" label="邮箱登陆" name="email">
+              <template #label>
+                <div class="tab-item">
+                  <ElImage style="width: 18px; height: 18px" :src="$rurl(emailOAuther.logo)" />
+                  <span style="margin-left: 5px">邮箱登陆</span>
+                </div>
+              </template>
+              <div class="form" v-if="loginType === 'email'">
+                <CaptchaLogin type="email" :data="loginData" :oauther="emailOAuther" />
               </div>
-            </template>
-            <div class="form" v-if="loginType === 'email'">
-              <CaptchaLogin type="email" :data="loginData" :oauther="emailOAuther" />
-            </div>
-          </el-tab-pane>
-          <el-tab-pane v-if="phoneOAuther" label="手机登陆" name="phone">
-            <template #label>
-              <div class="tab-item">
-                <el-image style="width: 18px; height: 18px" :src="$rurl(phoneOAuther.logo)" />
-                <span style="margin-left: 5px">手机登陆</span>
+            </el-tab-pane>
+            <el-tab-pane v-if="phoneOAuther" label="手机登陆" name="phone">
+              <template #label>
+                <div class="tab-item">
+                  <ElImage style="width: 18px; height: 18px" :src="$rurl(phoneOAuther.logo)" />
+                  <span style="margin-left: 5px">手机登陆</span>
+                </div>
+              </template>
+              <div class="form">
+                <CaptchaLogin type="phone" :data="loginData" :oauther="phoneOAuther" />
               </div>
-            </template>
-            <div class="form">
-              <CaptchaLogin type="phone" :data="loginData" :oauther="phoneOAuther" />
-            </div>
-          </el-tab-pane>
-        </el-tabs>
-        <div class="footer">
-          <p>
-            还没有账号？
-            <RouterLink :to="{ name: 'Register' }">立即注册</RouterLink>
-          </p>
+            </el-tab-pane>
+          </el-tabs>
+          <div class="footer">
+            <p>
+              还没有账号？
+              <RouterLink :to="{ name: 'Register' }">立即注册</RouterLink>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -63,10 +69,13 @@
   import { OAuther } from '@/api/manager/authorize/type'
   import { useUserStore } from '@/store/modules/user'
   import Background from '@/views/authorize/background/index.vue'
+  import { useAppStore } from '@/store/modules/app'
+
+  const appStore = useAppStore()
 
   const router = useRouter()
   const { tenant, app } = router.currentRoute.value.query
-  console.log(tenant, app)
+
   const tenantConfig = useStorage('login-tenant', {
     tenant: '',
     app: ''
@@ -81,9 +90,9 @@
   console.log('tenantConfig', tenantConfig.value, tenant, app)
 
   //  从缓存中读取，没有则跳转到错误页面
-  if (!tenantConfig.value.tenant || !tenantConfig.value.app) {
-    router.replace({ name: 'Exception500' })
-  }
+  // if (!tenantConfig.value.tenant || !tenantConfig.value.app) {
+  //   router.replace({ name: 'Exception500' })
+  // }
 
   defineOptions({ name: 'Login' })
 

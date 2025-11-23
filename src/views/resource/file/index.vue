@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Directory class="left" @select="handleSelect"></Directory>
-    <!-- <File class="right" :entity-id="entityId" /> -->
+    <File class="right" :directory-id="directoryId" />
   </div>
 </template>
 
@@ -24,12 +24,12 @@
 </style>
 
 <script setup lang="ts">
-  // import File from './file.vue'
+  import File from './file.vue'
   import Directory from './directory.vue'
   import { Entity as EntityType } from '@/api/manager/entity/type'
 
-  const entityId = ref(0)
+  const directoryId = ref(0)
   const handleSelect = (row: EntityType) => {
-    entityId.value = row.id
+    directoryId.value = row.id
   }
 </script>

@@ -3,6 +3,10 @@ export interface GetAppRequest {
   keyword?: string
 }
 
+export interface GetSampleAppRequest {
+  keyword: string
+}
+
 export interface AppSetting {
   jwt: {
     secret: string
@@ -25,6 +29,7 @@ export interface App {
   private?: boolean
   setting?: AppSetting
   description?: string
+  copyright?: string
   createdAt: number
   updatedAt: number
 }

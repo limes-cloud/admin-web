@@ -7,10 +7,16 @@ import {
   UpdateAppRequest,
   DeleteAppRequest,
   GetAppRequest,
-  App
+  App,
+  GetSampleAppRequest
 } from './type'
 
-// ListApp 获取应用信息列表
+// GetApp 获取应用信息列表
+export function GetSampleApp(params: GetSampleAppRequest) {
+  return request.get<App>({ url: '/manager/api/sample/app', params })
+}
+
+// GetApp 获取应用信息列表
 export function GetApp(params: GetAppRequest) {
   return request.get<App>({ url: '/manager/api/app', params })
 }

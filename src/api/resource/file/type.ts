@@ -64,6 +64,7 @@ export interface UpdateFileRequest {
   id: number
   directoryId: number
   name: string
+  store?: string
 }
 
 export interface DeleteFileRequest {

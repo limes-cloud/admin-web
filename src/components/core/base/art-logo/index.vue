@@ -1,11 +1,17 @@
 <!-- 系统logo -->
 <template>
   <div class="art-logo">
-    <img :style="logoStyle" src="@imgs/common/logo.webp" alt="logo" />
+    <el-image :style="logoStyle" :src="$rurl(appStore.app?.logo as string)">
+      <template #error>
+        <img :style="logoStyle" src="@/assets/img/icon/logo.png" alt="logo" />
+      </template>
+    </el-image>
   </div>
 </template>
 
 <script setup lang="ts">
+  import { useAppStore } from '@/store/modules/app'
+  const appStore = useAppStore()
   defineOptions({ name: 'ArtLogo' })
 
   interface Props {
@@ -17,7 +23,7 @@
     size: 36
   })
 
-  const logoStyle = computed(() => ({ width: `${props.size}px` }))
+  const logoStyle = computed(() => ({ width: `${props.size}px`, height: `${props.size}px` }))
 </script>
 
 <style lang="scss" scoped>

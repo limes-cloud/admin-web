@@ -1,4 +1,8 @@
 export const rurl = (key: string, w?: number, h?: number) => {
+  if (key.startsWith('http')) {
+    return key
+  }
+  const { VITE_API_URL } = import.meta.env
   if (!w) {
     w = 100
   }
@@ -6,7 +10,10 @@ export const rurl = (key: string, w?: number, h?: number) => {
     h = 100
   }
   const suffix = `?width=${w}&height=${h}&mode=fill`
-  return `http://127.0.0.1:7080/resource/${key}${suffix}`
+  return `${VITE_API_URL}/resource/${key}${suffix}`
+}
 
-  // return `${import.meta.env.VITE_API_URL}/resource/api/${key}${suffix}`
+export const durl = (key: string, name?: string) => {
+  const { VITE_API_URL } = import.meta.env
+  return `${VITE_API_URL}/resource/${key}?download=true&saveName=${name}`
 }

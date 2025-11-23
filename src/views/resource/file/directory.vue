@@ -150,6 +150,7 @@
   import { Edit, Plus, Delete } from '@element-plus/icons-vue'
   import { CreateDirectory, DeleteDirectory, ListDirectory, UpdateDirectory } from '@/api/resource/directory/api'
   import { CreateDirectoryRequest, Directory, UpdateDirectoryRequest } from '@/api/resource/directory/type'
+  import { isArray } from 'lodash'
 
   const emit = defineEmits<{ select: [data: any] }>()
   defineOptions({ name: 'Directory' })
@@ -176,7 +177,7 @@
     {
       key: 'accept',
       label: '允许格式',
-      type: 'tag',
+      type: 'inputtag',
       tip: '允许上传的文件格式后缀（回车添加多个）',
       props: {
         placeholder: '请输入允许格式',
@@ -270,6 +271,9 @@
   const showDialog = (type: Form.DialogType, row?: Directory): void => {
     dialogType.value = type
     currentData.value = row || {}
+    if (!isArray(currentData.value.accept)) {
+      currentData.value.accept = (currentData.value.accept as string).split(',')
+    }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -277,12 +281,16 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
+    const value = { ...currentData.value }
+    if (isArray(value.accept)) {
+      value.accept = (value.accept as string[]).join(',')
+    }
     if (dialogType.value === 'add') {
-      await CreateDirectory(currentData.value as CreateDirectoryRequest)
+      await CreateDirectory(value as CreateDirectoryRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateDirectory(currentData.value as UpdateDirectoryRequest)
+      await UpdateDirectory(value as UpdateDirectoryRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }

@@ -10,7 +10,7 @@
   // 按钮粗度
   --el-font-weight-primary: 400 !important;
 
-  --el-component-custom-height: 36px !important;
+  --el-component-custom-height: 34px !important;
 
   --el-component-size: var(--el-component-custom-height) !important;
 
@@ -543,4 +543,8 @@ html.dark .el-card {
   &::before {
     background-color: transparent !important;
   }
+}
+
+.el-table__cell:has(.el-image-viewer__wrapper) {
+  z-index: 70 !important;
 }

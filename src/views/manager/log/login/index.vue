@@ -33,11 +33,11 @@
           </template>
 
           <template #avatar="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.user.avatar)"></ElAvatar>
+            <ElAvatar shape="square" :size="36" :src="$rurl(row.user.avatar)"></ElAvatar>
           </template>
           <template #username="{ row }"> {{ row.user.username }}({{ row.user.nickname }}) </template>
           <template #appLogo="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.app.logo)"></ElAvatar>
+            <ElAvatar shape="square" :size="36" :src="$rurl(row.app.logo)"></ElAvatar>
           </template>
           <template #appName="{ row }"> {{ row.app.keyword }}({{ row.app.name }}) </template>
           <template #code="{ row }">

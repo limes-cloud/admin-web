@@ -74,7 +74,7 @@
               opacity: !menuOpen ? 0 : 1
             }"
           >
-            {{ appStore.setting.title }}
+            {{ appStore.app.name }}
           </p>
         </div>
 

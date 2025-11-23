@@ -29,11 +29,11 @@
           @pagination:current-change="handleCurrentChange"
         >
           <template #avatar="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.user.avatar)"></ElAvatar>
+            <ElAvatar shape="square" :size="36" :src="$rurl(row.user.avatar)"></ElAvatar>
           </template>
           <template #username="{ row }"> {{ row.user.username }}({{ row.user.nickname }}) </template>
           <template #appLogo="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.app.logo)"></ElAvatar>
+            <ElAvatar shape="square" :size="36" :src="$rurl(row.app.logo)"></ElAvatar>
           </template>
           <template #appName="{ row }"> {{ row.app.keyword }}({{ row.app.name }}) </template>
         </ArtTable>
@@ -165,10 +165,10 @@
       },
       columnsFactory: () => [
         {
-          prop: 'type',
-          label: '登陆方式',
+          prop: 'username',
+          label: '用户账户',
           useSlot: true,
-          slotName: 'type'
+          slotName: 'username'
         },
         {
           prop: 'avatar',
@@ -177,10 +177,10 @@
           slotName: 'avatar'
         },
         {
-          prop: 'username',
-          label: '用户账户',
+          prop: 'appName',
+          label: '应用名称',
           useSlot: true,
-          slotName: 'username'
+          slotName: 'appName'
         },
         {
           prop: 'appLogo',
@@ -188,37 +188,22 @@
           useSlot: true,
           slotName: 'appLogo'
         },
+
         {
-          prop: 'appName',
-          label: '应用名称',
-          useSlot: true,
-          slotName: 'appName'
+          prop: 'menu.title',
+          label: '接口名称'
         },
         {
-          prop: 'ip',
-          label: 'IP地址'
+          prop: 'menu.api',
+          label: '接口地址'
         },
         {
-          prop: 'address',
-          label: '登陆地址'
-        },
-        {
-          prop: 'browser',
-          label: '浏览器'
-        },
-        {
-          prop: 'device',
-          label: '登陆设备'
-        },
-        {
-          prop: 'code',
-          label: '登陆状态',
-          useSlot: true,
-          slotName: 'code'
+          prop: 'menu.method',
+          label: '接口方法'
         },
         {
           prop: 'createdAt',
-          label: '登陆时间',
+          label: '鉴权时间',
           sortable: true,
           formatter: (row: User) => formatTime(row.createdAt)
         }

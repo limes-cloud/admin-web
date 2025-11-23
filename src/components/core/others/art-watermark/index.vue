@@ -46,7 +46,7 @@
   }
 
   withDefaults(defineProps<WatermarkProps>(), {
-    content: useAppStore().setting.title,
+    content: useAppStore().app.name,
     visible: false,
     fontSize: 16,
     fontColor: 'rgba(128, 128, 128, 0.2)',

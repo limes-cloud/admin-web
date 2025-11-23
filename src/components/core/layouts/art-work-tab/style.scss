@@ -12,6 +12,7 @@
   .scroll-view {
     width: 100%;
     overflow: hidden;
+    overflow-x: scroll;
 
     .tabs {
       float: left;

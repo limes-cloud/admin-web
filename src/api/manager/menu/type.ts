@@ -2,6 +2,7 @@ export interface ListMenuRequest {
   appId: number
   title?: string
   onlyMenu?: boolean
+  filterTenant?: boolean
 }
 
 export interface Menu {

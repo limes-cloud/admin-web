@@ -78,7 +78,6 @@
           v-model="currentData"
           :items="formItems"
           :span="24"
-          :show-button="false"
           @cancel="dialogVisible = false"
           @submit="handleSubmit"
         ></ArtForm>
@@ -240,6 +239,22 @@
         placeholder: '请输入应用备注',
         rules: [{ required: true, message: '请输入应用备注', trigger: ['blur', 'change'] }],
         type: 'textarea'
+      }
+    },
+    {
+      key: 'setting.tenant.mode',
+      label: '租户模式',
+      type: 'select',
+      divider: '租户配置',
+      hidden: currentData.value.type === 'base',
+      tip: '应用于登陆界面的租户项，输入则需要用户主动输入，选择则会提供选择项',
+      props: {
+        placeholder: '请选择租户模式',
+        options: [
+          { label: '输入', value: 'input' },
+          { label: '选择', value: 'select' }
+        ],
+        rules: [{ required: true, message: '请输入授权密钥', trigger: ['blur', 'change'] }]
       }
     },
     {

@@ -5,7 +5,7 @@
       <AuthTopBar />
       <div class="header">
         <ArtLogo class="icon" />
-        <h1>{{ appStore.setting.title }}</h1>
+        <h1>{{ appStore.app.name }}</h1>
       </div>
       <div class="login-wrap">
         <div class="form">

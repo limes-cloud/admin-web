@@ -27,7 +27,7 @@
       <RouterLink :to="{ name: 'ForgetPassword' }">忘记密码</RouterLink>
     </div>
 
-    <div style="margin-top: 30px">
+    <div style="margin-top: 10px">
       <ElButton class="login-btn" type="primary" @click="handleSubmit" :loading="loading" v-ripple> 登陆 </ElButton>
     </div>
   </ElForm>

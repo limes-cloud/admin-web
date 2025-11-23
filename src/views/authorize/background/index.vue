@@ -3,12 +3,12 @@
   <div class="login-background">
     <div class="logo">
       <ArtLogo class="icon" size="46" />
-      <h1 class="title">{{ appStore.setting.title }}</h1>
+      <h1 class="title">{{ appStore.app.name }}</h1>
     </div>
 
     <div class="text-wrap">
       <!-- <h1> {{ appStore.setting.description }} </h1> -->
-      <p> {{ appStore.setting.copyright }}</p>
+      <p> {{ appStore.app.copyright }}</p>
     </div>
 
     <!-- 几何装饰元素 -->

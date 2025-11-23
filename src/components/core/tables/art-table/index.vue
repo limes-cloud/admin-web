@@ -54,7 +54,6 @@
         <ElEmpty v-else :description="emptyText" :image-size="120" />
       </template>
     </ElTable>
-
     <div
       class="pagination custom-pagination"
       v-if="showPagination"
@@ -211,6 +210,7 @@
       const paginationOffset = paginationHeight.value === 0 ? 0 : paginationHeight.value + PAGINATION_SPACING.value
       offset = headerHeight + paginationOffset + TABLE_HEADER_SPACING
     }
+    offset += 5
     return { height: offset === 0 ? '100%' : `calc(100% - ${offset}px)` }
   })
 
@@ -313,7 +313,7 @@
       // 创建 ResizeObserver 监听高度变化
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          if (entry.target === tableHeader) {
+          if (entry.target === tableHeader && entry.contentRect.height > 0) {
             tableHeaderHeight.value = entry.contentRect.height
           }
         }
