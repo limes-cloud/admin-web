@@ -16,6 +16,20 @@
 			</a-form-item>
 
 			<a-form-item
+				field="points"
+				label="任务积分"
+				:rules="[
+					{
+						required: true,
+						message: '任务积分是必填项'
+					}
+				]"
+				:validate-trigger="['change', 'input']"
+			>
+				<a-input-number v-model="form.points" allow-clear placeholder="请输入任务积分" />
+			</a-form-item>
+
+			<a-form-item
 				field="description"
 				label="任务公告"
 				:rules="[

@@ -3,6 +3,7 @@ import { User } from '@/types/global';
 export interface Task {
 	id: number;
 	title: string;
+	points: number;
 	description: string;
 	isUpdate: boolean;
 	start: number;

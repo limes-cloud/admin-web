@@ -161,4 +161,8 @@ const ph = pageHeight();
 		width: 3px;
 	}
 }
+
+.arco-card-body {
+	overflow: scroll;
+}
 </style>
