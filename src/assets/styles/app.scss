@@ -250,7 +250,7 @@
 
 .scroll-dialog,
 .art-form-dialog {
-  max-height: calc(100vh - 300px);
+  max-height: calc(100vh - 200px);
   overflow-y: scroll;
   &::-webkit-scrollbar {
     display: none;
@@ -302,7 +302,6 @@
 }
 
 .art-form-dialog {
-  overflow: hidden;
   height: 100%;
   display: flex;
 }

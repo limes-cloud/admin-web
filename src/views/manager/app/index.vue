@@ -71,7 +71,7 @@
         :title="dialogType === 'add' ? '添加应用' : '编辑应用'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
-        width="420px"
+        width="620px"
         align-center
       >
         <ArtForm

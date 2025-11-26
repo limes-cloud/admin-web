@@ -192,7 +192,6 @@
     list.forEach((ite: UploadFileItem) => {
       if (ite.status === 'success') res.push(ite)
     })
-    emit('change', res)
 
     const resp = item.response as any
     if (!resp?.key) return
@@ -204,6 +203,8 @@
         res.map((ite: UploadFileItem) => (ite.response as { key?: string })?.key)
       )
     }
+
+    emit('change', res)
   }
 
   const readBinary = (file: File) => {

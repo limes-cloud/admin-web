@@ -34,11 +34,25 @@ export interface ListUserRequest {
   createdAts?: number[]
 }
 
+export interface UserDept {
+  dept: {
+    id: number
+    name: string
+    main: boolean
+  }
+  job: {
+    id: number
+    name: string
+  }
+}
+
 export interface User {
   id: number
+  avatar: string
   username: string
   nickname: string
   status?: boolean
+  userDepts: UserDept[]
   loggedAt: number
   createdAt: number
   updatedAt: number
@@ -67,6 +81,11 @@ export interface UpdateUserRequest {
   reason?: string
 }
 
+export interface UpdateCurrentUserRequest {
+  nickname?: string
+  avatar?: string
+}
+
 export interface DeleteUserRequest {
   id: number
 }
@@ -87,8 +106,8 @@ export interface ResetUserPasswordRequest {
 export interface UpdateCurrentUserPasswordRequest {
   password: string
   oldPassword?: string
-  captchaId?: string
-  captcha?: string
+  // captchaId?: string
+  // captcha?: string
 }
 
 export interface UpdateCurrentUserSettingRequest {

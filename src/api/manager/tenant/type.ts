@@ -12,6 +12,10 @@ export interface ListTenantRequest {
   status?: boolean
 }
 
+export interface ListAppTenantRequest {
+  app: string
+}
+
 export interface TenantSetting {
   defaultNickname: string
   defaultUserAvatar: string

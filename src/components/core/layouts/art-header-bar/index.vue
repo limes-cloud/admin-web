@@ -60,19 +60,19 @@
           </div>
         </div>
         <!-- 通知 -->
-        <div class="btn-box notice-btn" v-if="shouldShowNotification" @click="visibleNotice">
+        <!-- <div class="btn-box notice-btn" v-if="shouldShowNotification" @click="visibleNotice">
           <div class="btn notice-button">
             <i class="iconfont-sys notice-btn">&#xe6c2;</i>
             <span class="count notice-btn"></span>
           </div>
-        </div>
+        </div> -->
         <!-- 聊天 -->
-        <div class="btn-box chat-btn" v-if="shouldShowChat" @click="openChat">
+        <!-- <div class="btn-box chat-btn" v-if="shouldShowChat" @click="openChat">
           <div class="btn chat-button">
             <i class="iconfont-sys">&#xe89a;</i>
             <span class="dot"></span>
           </div>
-        </div>
+        </div> -->
         <!-- 语言 -->
         <div class="btn-box" v-if="shouldShowLanguage">
           <ElDropdown @command="changeLanguage" popper-class="langDropDownStyle">
@@ -100,11 +100,11 @@
               </div>
             </template>
             <template #default>
-              <p
-                >{{ $t('topBar.guide.title')
-                }}<span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.theme') }} </span>、
-                <span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.menu') }} </span
-                >{{ $t('topBar.guide.description') }}
+              <p>
+                {{ $t('topBar.guide.title') }}
+                <span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.theme') }} </span>、
+                <span :style="{ color: systemThemeColor }"> {{ $t('topBar.guide.menu') }} </span>
+                {{ $t('topBar.guide.description') }}
               </p>
             </template>
           </ElPopover>
@@ -130,26 +130,34 @@
             popper-style="border: 1px solid var(--art-border-dashed-color); border-radius: calc(var(--custom-radius) / 2 + 4px); padding: 5px 16px; 5px 16px;"
           >
             <template #reference>
-              <img class="cover" src="@imgs/user/avatar.webp" alt="avatar" />
+              <img
+                class="cover"
+                :src="$rurl(userinfo.avatar ? userinfo.avatar : (appStore.app.logo as string))"
+                alt="avatar"
+              />
             </template>
             <template #default>
               <div class="user-menu-box">
                 <div class="user-head">
-                  <img class="cover" src="@imgs/user/avatar.webp" style="float: left" />
+                  <img
+                    class="cover"
+                    :src="$rurl(userinfo.avatar ? userinfo.avatar : (appStore.app.logo as string))"
+                    style="float: left"
+                  />
                   <div class="user-wrap">
-                    <span class="name">{{ userInfo.userName }}</span>
-                    <span class="email">{{ userInfo.email }}</span>
+                    <span class="name">{{ userinfo.nickname }}</span>
+                    <span class="email">{{ userinfo.username }}</span>
                   </div>
                 </div>
                 <ul class="user-menu">
-                  <li @click="goPage('/system/user-center')">
+                  <li @click="openUserCenter">
                     <i class="menu-icon iconfont-sys">&#xe734;</i>
                     <span class="menu-txt">{{ $t('topBar.user.userCenter') }}</span>
                   </li>
-                  <li @click="toDocs()">
+                  <!-- <li @click="toDocs()">
                     <i class="menu-icon iconfont-sys" style="font-size: 15px">&#xe828;</i>
                     <span class="menu-txt">{{ $t('topBar.user.docs') }}</span>
-                  </li>
+                  </li> -->
                   <li @click="toGithub()">
                     <i class="menu-icon iconfont-sys">&#xe8d6;</i>
                     <span class="menu-txt">{{ $t('topBar.user.github') }}</span>
@@ -172,8 +180,39 @@
     <ArtWorkTab />
 
     <ArtNotification v-model:value="showNotice" ref="notice" />
+
+    <!-- 新增/修改弹窗 -->
+    <ElDialog
+      v-model="userDialogVisible"
+      title="用户信息"
+      :destroy-on-close="true"
+      body-class="art-form-dialog"
+      modal-class="art-user-dialog"
+      width="380px"
+      align-center
+    >
+      <template #header>
+        <div class="my-header"> </div>
+      </template>
+      <ArtUserCenter @close="userDialogVisible = false" />
+    </ElDialog>
   </div>
 </template>
+
+<style lang="scss" scoped>
+  :deep(.art-user-dialog .el-dialog) {
+    padding: 0;
+  }
+
+  :deep(.art-user-dialog .el-dialog__header) {
+    display: none;
+  }
+
+  :deep(.art-user-dialog .el-dialog__body) {
+    max-height: 600px;
+    padding: 0 !important;
+  }
+</style>
 
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n'
@@ -193,6 +232,8 @@
   import { useAppStore } from '@/store/modules/app'
 
   defineOptions({ name: 'ArtHeaderBar' })
+
+  const userDialogVisible = ref(false)
 
   // 检测操作系统类型
   const isWindows = navigator.userAgent.includes('Windows')
@@ -214,8 +255,8 @@
     shouldShowBreadcrumb,
     shouldShowGlobalSearch,
     shouldShowFullscreen,
-    shouldShowNotification,
-    shouldShowChat,
+    // shouldShowNotification,
+    // shouldShowChat,
     shouldShowLanguage,
     shouldShowSettings,
     shouldShowThemeToggle,
@@ -224,7 +265,7 @@
 
   const { menuOpen, systemThemeColor, showSettingGuide, menuType, isDark, tabStyle } = storeToRefs(settingStore)
 
-  const { language, getUserInfo: userInfo } = storeToRefs(userStore)
+  const { language, getUserInfo: userinfo } = storeToRefs(userStore)
   const { menuList } = storeToRefs(menuStore)
 
   const showNotice = ref(false)
@@ -249,6 +290,15 @@
   })
 
   /**
+   * 关闭用户菜单弹出层
+   */
+  const closeUserMenu = (): void => {
+    setTimeout(() => {
+      userMenuPopover.value.hide()
+    }, 100)
+  }
+
+  /**
    * 切换全屏状态
    */
   const toggleFullScreen = (): void => {
@@ -266,16 +316,17 @@
    * 页面跳转
    * @param {string} path - 目标路径
    */
-  const goPage = (path: string): void => {
-    router.push(path)
+  const openUserCenter = (): void => {
+    userDialogVisible.value = true
+    userMenuPopover.value.hide()
   }
 
   /**
    * 打开文档页面
    */
-  const toDocs = (): void => {
-    window.open(WEB_LINKS.DOCS)
-  }
+  // const toDocs = (): void => {
+  //   window.open(WEB_LINKS.DOCS)
+  // }
 
   /**
    * 打开 GitHub 页面
@@ -375,31 +426,22 @@
   /**
    * 切换通知面板显示状态
    */
-  const visibleNotice = (): void => {
-    showNotice.value = !showNotice.value
-  }
+  // const visibleNotice = (): void => {
+  //   showNotice.value = !showNotice.value
+  // }
 
   /**
    * 打开聊天窗口
    */
-  const openChat = (): void => {
-    mittBus.emit('openChat')
-  }
+  // const openChat = (): void => {
+  //   mittBus.emit('openChat')
+  // }
 
   /**
    * 打开锁屏功能
    */
   const lockScreen = (): void => {
     mittBus.emit('openLockScreen')
-  }
-
-  /**
-   * 关闭用户菜单弹出层
-   */
-  const closeUserMenu = (): void => {
-    setTimeout(() => {
-      userMenuPopover.value.hide()
-    }, 100)
   }
 </script>
 

@@ -47,7 +47,7 @@
               </div>
             </el-tab-pane>
           </el-tabs>
-          <div class="footer">
+          <div class="footer" v-if="!appStore.app.private">
             <p>
               还没有账号？
               <RouterLink :to="{ name: 'Register' }">立即注册</RouterLink>
@@ -70,6 +70,7 @@
   import { useUserStore } from '@/store/modules/user'
   import Background from '@/views/authorize/background/index.vue'
   import { useAppStore } from '@/store/modules/app'
+  import { ListAppTenant } from '@/api/manager/tenant/api'
 
   const appStore = useAppStore()
 
@@ -101,13 +102,20 @@
 
   let accountConfig: any = undefined
 
+  const getTenants = async () => {
+    const data = await ListAppTenant({ app: appStore.keyword })
+    loginData.value.tenants = data.list
+    loginData.value.selectTenant = appStore.app.setting?.tenant.mode == 'select'
+  }
+  getTenants()
+
   const handleChangeLoginType = () => {
     const key = 'login-config-' + tenantConfig.value.tenant + '-' + loginType.value
     accountConfig = useStorage(key, {
       rememberPassword: true,
       username: ''
     })
-    loginData.value = { ...accountConfig.value, ...tenantConfig.value }
+    Object.assign(loginData.value, { ...accountConfig.value, ...tenantConfig.value })
   }
   handleChangeLoginType()
 

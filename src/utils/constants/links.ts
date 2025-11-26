@@ -3,7 +3,7 @@ export const WEB_LINKS = {
   GITHUB_HOME: 'https://github.com/Daymychen/art-design-pro',
 
   // 项目 Github 主页
-  GITHUB: 'https://github.com/Daymychen/art-design-pro',
+  GITHUB: 'https://github.com/limes-cloud/go-platform',
 
   // 个人博客
   BLOG: 'https://www.artd.pro',

@@ -1,5 +1,17 @@
 <template>
   <ElForm class="form-box" ref="formRef" :model="formData" :rules="rules" @keyup.enter="handleSubmit">
+    <ElFormItem prop="tenant">
+      <ElInput v-if="!data.selectTenant" v-model.trim="formData.tenant" placeholder="请输入租户标识" />
+      <ElSelect
+        v-else
+        v-model.trim="formData.tenant"
+        placeholder="请选择所属租户"
+        :options="data.tenants"
+        :props="{ label: 'name', value: 'keyword' }"
+      >
+      </ElSelect>
+    </ElFormItem>
+
     <ElFormItem prop="username">
       <ElInput :placeholder="'请输入用户' + typeText" v-model.trim="formData.username" />
     </ElFormItem>
@@ -101,6 +113,7 @@
   import { FormRules } from 'element-plus'
   import { OAuther } from '@/api/manager/authorize/type'
   import { OAutherHandle, OAutherLogin } from '@/api/manager/authorize/api'
+  import { Tenant } from '@/api/manager/tenant/type'
 
   const saveKeys = ['username', 'rememberPassword']
   const props = defineProps<{
@@ -109,6 +122,8 @@
       app: string
       username: string
       rememberPassword: boolean
+      selectTenant: boolean
+      tenants: Tenant[]
     }
     oauther: OAuther
   }>()
@@ -125,6 +140,7 @@
 
   const formData = reactive<
     Partial<{
+      tenant: string
       username: string
       captcha: string
       captchaId: string

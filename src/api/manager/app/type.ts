@@ -8,6 +8,9 @@ export interface GetSampleAppRequest {
 }
 
 export interface AppSetting {
+  tenant: {
+    mode: string
+  }
   jwt: {
     secret: string
     expire: number

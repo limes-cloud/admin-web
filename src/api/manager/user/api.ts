@@ -10,7 +10,9 @@ import {
   User,
   GetUserRequest,
   ResetPasswordRequest,
-  OfflineUserRequest
+  OfflineUserRequest,
+  UpdateCurrentUserRequest,
+  UpdateCurrentUserPasswordRequest
 } from './type'
 
 // GetCurrentUser 获取当前用户信息
@@ -48,7 +50,17 @@ export function ResetPassword(data: ResetPasswordRequest) {
   return request.post({ url: '/manager/api/user/password/reset', data })
 }
 
+// UpdateCurrentPassword 更新密码
+export function UpdateCurrentUserPassword(data: UpdateCurrentUserPasswordRequest) {
+  return request.post({ url: '/manager/api/current/user/password', data })
+}
+
 // OfflineUser 下线用户
 export function OfflineUser(data: OfflineUserRequest) {
   return request.post({ url: '/manager/api/user/offline', data })
+}
+
+// UpdateUser 更新用户信息
+export function UpdateCurrentUser(data: UpdateCurrentUserRequest) {
+  return request.put({ url: '/manager/api/current/user', data })
 }

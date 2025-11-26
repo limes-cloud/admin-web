@@ -37,10 +37,7 @@
           </div>
         </div>
 
-        <div
-          class="history-box"
-          v-show="!searchVal && searchResult.length === 0 && historyResult.length > 0"
-        >
+        <div class="history-box" v-show="!searchVal && searchResult.length === 0 && historyResult.length > 0">
           <p class="title">{{ $t('search.historyTitle') }}</p>
           <div class="history-result">
             <div
@@ -93,6 +90,8 @@
   const router = useRouter()
   const userStore = useUserStore()
   const { menuList } = storeToRefs(useMenuStore())
+
+  console.log(menuList)
 
   const showSearchDialog = ref(false)
   const searchVal = ref('')
@@ -166,16 +165,16 @@
     const result: AppRouteRecord[] = []
 
     const flattenAndMatch = (item: AppRouteRecord) => {
-      if (item.meta?.isHide) return
+      if (item.meta?.isHide && !item.redirect) return
 
       const lowerItemTitle = formatMenuTitle(item.meta.title).toLowerCase()
 
       if (item.children && item.children.length > 0) {
         item.children.forEach(flattenAndMatch)
-        return
+        if (!item.redirect) return
       }
 
-      if (lowerItemTitle.includes(lowerVal) && item.path) {
+      if (lowerItemTitle.includes(lowerVal)) {
         result.push({ ...item, children: undefined })
       }
     }
@@ -188,12 +187,10 @@
   const highlightPrevious = () => {
     isKeyboardNavigating.value = true
     if (searchVal.value) {
-      highlightedIndex.value =
-        (highlightedIndex.value - 1 + searchResult.value.length) % searchResult.value.length
+      highlightedIndex.value = (highlightedIndex.value - 1 + searchResult.value.length) % searchResult.value.length
       scrollToHighlightedItem()
     } else {
-      historyHIndex.value =
-        (historyHIndex.value - 1 + historyResult.value.length) % historyResult.value.length
+      historyHIndex.value = (historyHIndex.value - 1 + historyResult.value.length) % historyResult.value.length
       scrollToHighlightedHistoryItem()
     }
     // 延迟重置键盘导航状态，防止立即被 hover 覆盖
@@ -298,9 +295,7 @@
   }
 
   const addHistory = (item: AppRouteRecord) => {
-    const hasItemIndex = historyResult.value.findIndex(
-      (historyItem: AppRouteRecord) => historyItem.path === item.path
-    )
+    const hasItemIndex = historyResult.value.findIndex((historyItem: AppRouteRecord) => historyItem.path === item.path)
 
     if (hasItemIndex !== -1) {
       historyResult.value.splice(hasItemIndex, 1)

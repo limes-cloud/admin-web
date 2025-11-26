@@ -23,8 +23,8 @@
           <ElAvatar shape="square" :size="60" :src="$rurl(row.dept.logo)"></ElAvatar>
         </template>
         <template #main="{ row }">
-          <el-tag v-if="row.main" type="primary">是</el-tag>
-          <el-tag v-else type="info">否</el-tag>
+          <ElTag v-if="row.main" type="primary">是</ElTag>
+          <ElTag v-else type="info">否</ElTag>
         </template>
         <template #operation="{ row }">
           <ArtOperation :list="operationItems" :data="row"></ArtOperation>
@@ -103,7 +103,7 @@
       clearable: true,
       props: {
         rules: [{ required: true, message: '请选择所属部门', trigger: ['blur', 'change'] }],
-        data: depts,
+        data: depts.value,
         checkStrictly: true,
         props: {
           label: 'name',
@@ -128,7 +128,7 @@
             getJobs()
           }
         },
-        options: jobs,
+        options: jobs.value,
         props: {
           label: 'name',
           value: 'id'

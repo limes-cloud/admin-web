@@ -7,7 +7,8 @@ import {
   UpdateTenantRequest,
   DeleteTenantRequest,
   GetTenantRequest,
-  Tenant
+  Tenant,
+  ListAppTenantRequest
 } from './type'
 
 // ListTenant 获取租户信息列表
@@ -18,6 +19,11 @@ export function GetTenant(params: GetTenantRequest) {
 // ListTenant 获取租户信息列表
 export function ListTenant(params: ListTenantRequest) {
   return request.get<ListTenantReply>({ url: '/manager/api/tenants', params })
+}
+
+// ListAppTenant 获取指定的应用租户信息列表
+export function ListAppTenant(params: ListAppTenantRequest) {
+  return request.get<ListTenantReply>({ url: '/manager/api/app/tenants', params })
 }
 
 // CreateTenant 创建租户信息
