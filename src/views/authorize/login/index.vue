@@ -78,8 +78,8 @@
   const { tenant, app } = router.currentRoute.value.query
 
   const tenantConfig = useStorage('login-tenant', {
-    tenant: '',
-    app: ''
+    tenant: 'admin',
+    app: 'manager'
   })
 
   // 如果存在租户和应用参数，则保存
