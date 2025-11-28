@@ -239,7 +239,7 @@
     if (!res) {
       return
     }
-    const value = form.value?.getValue()
+    const value = { ...currentData.value }
     if (dialogType.value === 'add') {
       await CreateDeptClassify(value as CreateDeptClassifyRequest)
       ElMessage.success('创建成功')
