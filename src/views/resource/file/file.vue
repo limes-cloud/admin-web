@@ -34,17 +34,12 @@
         >
           <template #logo="{ row }">
             <template v-if="isImage(row.key)">
-              <div class="image">
-                <ElImage
-                  :src="$rurl(row.key, 100, 100)"
-                  :style="{
-                    width: '100%',
-                    height: '100%'
-                  }"
-                  fit="cover"
-                  :preview-src-list="[$rurl(row.key)]"
-                ></ElImage>
-              </div>
+              <ElImage
+                class="image"
+                :src="$rurl(row.key, 100, 100)"
+                fit="cover"
+                :preview-src-list="[$rurl(row.key)]"
+              ></ElImage>
             </template>
             <template v-else-if="isVideo(row.key)">
               <div class="video">
@@ -65,7 +60,7 @@
               </div>
             </template>
             <template v-else>
-              <ArtFileType :file="row.key"></ArtFileType>
+              <ArtFileType class="image" :file="row.key"></ArtFileType>
             </template>
           </template>
           <template #operation="{ row }">
@@ -138,8 +133,10 @@
   .video,
   .music {
     position: relative;
-    width: 70px;
-    height: 80px;
+    display: flex;
+    width: 100%;
+    max-width: 50px;
+    max-height: 60px;
     overflow: hidden;
     border-radius: 4px;
 
@@ -263,6 +260,7 @@
       hidden: dialogType.value === 'edit',
       props: {
         accept: '*',
+        listType: 'text',
         directoryId: props.directoryId,
         placeholder: '请输入文件名称',
         rules: [{ required: true, message: '请输入文件名称', trigger: ['blur', 'change'] }]

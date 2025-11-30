@@ -272,7 +272,11 @@
     dialogType.value = type
     currentData.value = row || {}
     if (!isArray(currentData.value.accept)) {
-      currentData.value.accept = (currentData.value.accept as string).split(',')
+      if (!currentData.value.accept) {
+        currentData.value.accept = []
+      } else {
+        currentData.value.accept = (currentData.value.accept as string).split(',')
+      }
     }
     nextTick(() => {
       dialogVisible.value = true
