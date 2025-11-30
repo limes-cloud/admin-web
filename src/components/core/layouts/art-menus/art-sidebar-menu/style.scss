@@ -60,7 +60,8 @@
           }
 
           &.is-active {
-            background: var(--main-color);
+            // background: var(--main-color);
+            background: var(--el-color-primary-light-9);
 
             i,
             span {

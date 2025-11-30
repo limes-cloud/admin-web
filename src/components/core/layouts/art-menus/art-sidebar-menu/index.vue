@@ -18,15 +18,16 @@
               :disabled="dualMenuShowText"
             >
               <div
+                class="left-menu-item"
                 :class="{
                   'is-active': isActive(menu)
                 }"
-                :style="{
-                  margin: dualMenuShowText ? '5px' : '15px',
-                  height: dualMenuShowText ? '60px' : '46px',
-                  width: dualMenuShowText ? '60px' : '46px'
-                }"
               >
+                <!-- :style="{
+                  margin: dualMenuShowText ? '5px' : '15px',
+                  height: dualMenuShowText ? '60px' : '60px',
+                  width: dualMenuShowText ? '60px' : '60px',
+                }" -->
                 <!-- <i
                   class="iconfont-sys"
                   v-html="menu.meta.icon"
