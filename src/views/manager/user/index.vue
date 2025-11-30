@@ -299,7 +299,12 @@
       type: 'upload',
       props: {
         rules: [{ required: true, message: '请上传用户头像', trigger: ['blur', 'change'] }],
-        directoryPath: 'manager/user/avatar'
+        directoryPath: 'manager/user/avatar',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
       }
     },
     {

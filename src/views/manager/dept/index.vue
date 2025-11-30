@@ -279,7 +279,12 @@
       type: 'upload',
       props: {
         rules: [{ required: true, message: '请上传部门logo', trigger: ['blur', 'change'] }],
-        directoryPath: 'manager/dept/logo'
+        directoryPath: 'manager/dept/logo',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
       }
     },
     {

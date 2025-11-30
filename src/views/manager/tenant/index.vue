@@ -161,7 +161,12 @@
       type: 'upload',
       props: {
         rules: [{ required: true, message: '请上传租户logo', trigger: ['blur', 'change'] }],
-        directoryPath: 'manager/tenant/logo'
+        directoryPath: 'manager/tenant/logo',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
       }
     },
     {

@@ -146,7 +146,12 @@
       type: 'upload',
       props: {
         rules: [{ required: true, message: '请上传授权logo', trigger: ['blur', 'change'] }],
-        directoryPath: 'manager/oauther/logo'
+        directoryPath: 'manager/oauther/logo',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
       }
     },
     {

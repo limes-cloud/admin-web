@@ -71,7 +71,7 @@
         :title="dialogType === 'add' ? '添加应用' : '编辑应用'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
-        width="620px"
+        width="480px"
         align-center
       >
         <ArtForm
@@ -183,7 +183,12 @@
       props: {
         accept: 'image/*',
         rules: [{ required: true, message: '请上传应用logo', trigger: ['blur', 'change'] }],
-        directoryPath: 'manager/app/logo'
+        directoryPath: 'manager/app/logo',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
       }
     },
     {
@@ -216,8 +221,8 @@
       props: {
         rules: [{ required: true, message: '请选择是否允许注册', trigger: ['blur', 'change'] }],
         options: [
-          { label: '允许', value: true },
-          { label: '禁止', value: false }
+          { label: '允许', value: false },
+          { label: '禁止', value: true }
         ]
       }
     },
