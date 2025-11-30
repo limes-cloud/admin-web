@@ -4,7 +4,7 @@
 
     <div class="login-plan">
       <div class="login-header">
-        <div class="login-title">欢迎回来，用户登陆</div>
+        <div class="login-title">{{ welcome }}，欢迎回来</div>
         <div class="login-subtitle">{{ appStore.app.description }}</div>
       </div>
       <div class="login-box">
@@ -12,46 +12,38 @@
           <ThemeSvg :src="loginIcon" size="100%" />
         </div>
         <div class="login-wrap">
-          <el-tabs v-model="loginType" class="login-tabs" @tab-change="handleChangeLoginType">
-            <el-tab-pane label="密码登陆" name="username">
-              <template #label>
-                <div class="tab-item">
-                  <ElImage style="width: 18px; height: 18px" :src="PasswordImage" />
-                  <span style="margin-left: 5px">密码登陆</span>
-                </div>
-              </template>
-              <div class="form" v-if="loginType === 'username'">
-                <PasswordLogin :data="loginData" @success="handleLogin" />
+          <div class="password-back" v-if="oauthWay.action !== 'password'">
+            <el-tag @click="handleCallbackPassword">
+              <div class="password-back-text">
+                <ArtIcon value="iconsys-zuo2"></ArtIcon>
+                密码登陆
               </div>
-            </el-tab-pane>
-            <el-tab-pane v-if="emailOAuther" label="邮箱登陆" name="email">
-              <template #label>
-                <div class="tab-item">
-                  <ElImage style="width: 18px; height: 18px" :src="$rurl(emailOAuther.logo)" />
-                  <span style="margin-left: 5px">邮箱登陆</span>
-                </div>
-              </template>
-              <div class="form" v-if="loginType === 'email'">
-                <CaptchaLogin type="email" :data="loginData" :oauther="emailOAuther" />
-              </div>
-            </el-tab-pane>
-            <el-tab-pane v-if="phoneOAuther" label="手机登陆" name="phone">
-              <template #label>
-                <div class="tab-item">
-                  <ElImage style="width: 18px; height: 18px" :src="$rurl(phoneOAuther.logo)" />
-                  <span style="margin-left: 5px">手机登陆</span>
-                </div>
-              </template>
-              <div class="form">
-                <CaptchaLogin type="phone" :data="loginData" :oauther="phoneOAuther" />
-              </div>
-            </el-tab-pane>
-          </el-tabs>
+            </el-tag>
+          </div>
+
+          <div class="form" v-if="oauthWay.action === 'password'">
+            <PasswordLogin :data="loginData" @success="handleLogin" @change-tenant="handleChangeTenant" />
+          </div>
+          <div class="form" v-if="oauthWay.action === 'captcha'">
+            <CaptchaLogin type="email" :data="loginData" :oauther="currentOAuther" />
+          </div>
           <div class="footer" v-if="!appStore.app.private">
             <p>
               还没有账号？
               <RouterLink :to="{ name: 'Register' }">立即注册</RouterLink>
             </p>
+          </div>
+
+          <div class="other-login-box" v-if="oauthers.length">
+            <el-divider content-position="center">其他登陆方式</el-divider>
+            <div class="other-login">
+              <template v-for="(item, index) in oauthers" :key="index">
+                <div class="other-login-item" @click="handleGetOAuthWay(item)">
+                  <ElImage class="login-item-logo" :src="$rurl(item.logo)" />
+                  <span class="login-item-text"> {{ item.name }}</span>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -60,19 +52,19 @@
 </template>
 
 <script setup lang="ts">
-  import PasswordImage from '@/assets/img/icon/password.png'
   import loginIcon from '@imgs/svg/login_icon.svg'
   import PasswordLogin from './action/password.vue'
   import CaptchaLogin from './action/captcha.vue'
   import { useStorage } from '@vueuse/core'
-  import { ListOAuther } from '@/api/manager/authorize/api'
-  import { OAuther } from '@/api/manager/authorize/type'
+  import { ListOAuther, OAutherHandle } from '@/api/manager/authorize/api'
+  import { OAuther, OAutherHandleReply } from '@/api/manager/authorize/type'
   import { useUserStore } from '@/store/modules/user'
-  import Background from '@/views/authorize/background/index.vue'
   import { useAppStore } from '@/store/modules/app'
   import { ListAppTenant } from '@/api/manager/tenant/api'
+  import Background from '@/views/authorize/background/index.vue'
 
   const appStore = useAppStore()
+  const userStore = useUserStore()
 
   const router = useRouter()
   const { tenant, app } = router.currentRoute.value.query
@@ -88,18 +80,9 @@
     tenantConfig.value.app = app as string
   }
 
-  console.log('tenantConfig', tenantConfig.value, tenant, app)
-
-  //  从缓存中读取，没有则跳转到错误页面
-  // if (!tenantConfig.value.tenant || !tenantConfig.value.app) {
-  //   router.replace({ name: 'Exception500' })
-  // }
-
   defineOptions({ name: 'Login' })
 
-  const loginType = ref('username')
   const loginData = ref<any>({})
-
   let accountConfig: any = undefined
 
   const getTenants = async () => {
@@ -110,7 +93,7 @@
   getTenants()
 
   const handleChangeLoginType = () => {
-    const key = 'login-config-' + tenantConfig.value.tenant + '-' + loginType.value
+    const key = 'login-config-' + tenantConfig.value.tenant
     accountConfig = useStorage(key, {
       rememberPassword: true,
       username: ''
@@ -119,29 +102,14 @@
   }
   handleChangeLoginType()
 
-  const channels = ref<OAuther[]>([])
-  const emailOAuther = ref<OAuther>()
-  const phoneOAuther = ref<OAuther>()
-
-  ListOAuther({ ...tenantConfig.value }).then((res: any) => {
-    const list: OAuther[] = []
-    res.list.forEach((item: OAuther) => {
-      if (item.type === 'email') {
-        emailOAuther.value = item
-        return
-      }
-      if (item.type === 'phone') {
-        phoneOAuther.value = item
-        return
-      }
-      list.push(item)
-    })
-    channels.value = list
-  })
+  const oauthers = ref<OAuther[]>([])
+  const handleGetOAuther = async () => {
+    const data = await ListOAuther({ ...tenantConfig.value })
+    oauthers.value = data.list
+  }
+  if (tenantConfig.value.tenant) handleGetOAuther()
 
   const handleLogin = async (token: string, value: any) => {
-    console.log(token)
-
     // 获取需要保存的字段
     const saveKeys = value.saveKeys
     const saveObject: any = {}
@@ -153,15 +121,64 @@
     delete value.saveKeys
     Object.assign(accountConfig.value, saveObject)
 
-    const userStore = useUserStore()
-
+    // 登陆
     await userStore.login(token)
-    // userStore.setToken(token, token)
-    // const userInfo = await fetchGetUserInfo()
-    // userStore.setUserInfo(userInfo)
-    // userStore.setLoginStatus(true)
     router.push('/')
   }
+
+  const welcome = ref('')
+  const getDate = () => {
+    const h = new Date().getHours()
+    if (h >= 6 && h < 9) welcome.value = '早上好'
+    else if (h >= 9 && h < 11) welcome.value = '上午好'
+    else if (h >= 11 && h < 13) welcome.value = '中午好'
+    else if (h >= 13 && h < 18) welcome.value = '下午好'
+    else if (h >= 18 && h < 24) welcome.value = '晚上好'
+    else welcome.value = '夜已深'
+  }
+
+  const handleChangeTenant = (tenant: string) => {
+    tenantConfig.value.tenant = tenant
+  }
+
+  // 三方授权相关
+  const currentOAuther = ref<OAuther>({} as OAuther)
+  // const currentOAutherLogin = ref<OAutherLoginRequest>()
+  const captchaTypes = ['email']
+  const oauthWay = ref<OAutherHandleReply>({ action: 'password' } as OAutherHandleReply)
+
+  const handleCallbackPassword = () => {
+    oauthWay.value = { action: 'password' } as OAutherHandleReply
+  }
+  const handleGetOAuthWay = async (oa: OAuther) => {
+    const { type, keyword } = oa
+    currentOAuther.value = oa
+
+    // 特殊处理验证码登陆，点击获取验证码之后在处理
+    if (captchaTypes.includes(type)) {
+      oauthWay.value = { action: 'captcha', keyword } as OAutherHandleReply
+      return
+    }
+
+    // 处理登陆
+    const data = await OAutherHandle({ keyword, tenant: tenantConfig.value.tenant, app: appStore.keyword })
+
+    // 跳转的情况下直接跳转
+    if (data.action === 'jump') {
+      window.location.href = data.value
+    }
+
+    oauthWay.value = data
+    // currentOAutherLogin.value = {
+    //   keyword: data.keyword,
+    //   uuid: data.uuid,
+    //   code: ''
+    // }
+  }
+
+  onMounted(() => {
+    getDate()
+  })
 </script>
 
 <style lang="scss" scoped>

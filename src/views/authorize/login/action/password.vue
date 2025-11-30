@@ -8,6 +8,7 @@
         placeholder="请选择所属租户"
         :options="data.tenants"
         :props="{ label: 'name', value: 'keyword' }"
+        @change="emits('changeTenant', formData.tenant)"
       >
       </ElSelect>
     </ElFormItem>
@@ -70,9 +71,12 @@
       }
     }
 
-    .account-select :deep(.el-select__wrapper),
     .el-input,
     .login-btn {
+      height: 36px !important;
+    }
+
+    :deep(.el-select__wrapper) {
       height: 36px !important;
     }
 
@@ -124,7 +128,6 @@
   }>()
 
   const formRef = useTemplateRef('formRef')
-
   const formData = reactive<Partial<LoginRequest & { rememberPassword: boolean }>>({ ...props.data })
 
   const rules = computed<FormRules>(() => ({
@@ -157,7 +160,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['success'])
+  const emits = defineEmits(['success', 'changeTenant'])
 
   const timeInter: any = ref(null)
   const captchaBase64 = ref('')

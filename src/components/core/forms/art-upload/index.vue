@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/ban-ts-comment -->
 <template>
   <div class="upload" :class="{ 'hide-upload': uploadedFileList.length >= limit }" style="width: 100%">
     <ElUpload
@@ -9,24 +10,54 @@
       :list-type="assertListType()"
       :show-upload-button="true"
       :show-file-list="true"
-      :auto-upload="autoUpload"
+      :auto-upload="autoUpload && !cut"
       :draggable="draggable"
       :http-request="customRequest"
       @change="uploadChange"
+      @remove="handleRemove"
       @preview="handlePreview"
     >
-      <template v-if="$slots.icon">
-        <slot name="icon"></slot>
-      </template>
-      <div v-else class="upload-card" :class="shape">
-        <ElIcon v-if="accept == 'image/*'" class="icon"><Camera /></ElIcon>
-        <ElIcon v-else><Plus /></ElIcon>
-        <span v-if="text" class="text">{{ text }}</span>
+      <div class="upload-card-box">
+        <template v-if="$slots.icon">
+          <slot name="icon"></slot>
+        </template>
+        <div v-else class="upload-card" :class="shape">
+          <ElIcon v-if="accept == 'image/*'" class="icon"><Camera /></ElIcon>
+          <ElIcon v-else><Plus /></ElIcon>
+          <span v-if="text" class="text">{{ text }}</span>
+        </div>
+        <!-- <div class="option-file" @click.stop.prevent="handleOptionFile">
+          <ArtIcon value="iconsys-shanchuwenjian"></ArtIcon>
+        </div> -->
       </div>
     </ElUpload>
 
     <el-image-viewer v-if="showPreview" show-progress :url-list="[previewSrc]" @close="showPreview = false">
     </el-image-viewer>
+
+    <ElDialog
+      v-model="cutVisible"
+      :fullscreen="true"
+      :destroy-on-close="true"
+      modal-class="cut-dialog"
+      title="图片裁剪"
+      align-center
+    >
+      <div class="cutter">
+        <Cutter
+          :img-url="cutFile?.url"
+          :cut-width="cut?.width"
+          :cut-height="cut?.height"
+          @success="handleCutter"
+        ></Cutter>
+      </div>
+    </ElDialog>
+    <!-- 
+    <ElDialog v-model="optionVisible" :fullscreen="true" :destroy-on-close="true" title="图片裁剪" align-center>
+      <div class="cutter">
+        <File></File>
+      </div>
+    </ElDialog> -->
   </div>
 </template>
 
@@ -40,6 +71,7 @@
   import { Plus, Camera } from '@element-plus/icons-vue'
   import { UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
   import { rurl } from '@/utils/resource/url'
+  // import FileEle from '@/views/resource/file/index.vue'
 
   defineOptions({ name: 'ArtUpload' })
 
@@ -65,6 +97,11 @@
     rename?: string
     store?: string
     autoUpload?: boolean
+    cut?: {
+      enable: boolean
+      width: number
+      height: number
+    }
   }
 
   const props = withDefaults(defineProps<UploadProps>(), {
@@ -89,6 +126,9 @@
   const domwidth = ref(`${props.size}px`)
   const domheight = ref(`${props.size}px`)
   const dommargin = ref('8px')
+
+  const cutVisible = ref(false)
+  const cutFile = ref<UploadFileItem>({} as UploadFileItem)
 
   watch(
     () => props.modelValue,
@@ -185,9 +225,31 @@
     } as UploadFileItem)
   })
 
+  const handleCutter = (blob: any) => {
+    const filename = cutFile.value.name
+    const file = new File([blob], filename, {
+      type: blob.type,
+      lastModified: Date.now()
+    })
+
+    // 特殊方式解决，直接替换raw 不会触发change事件
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    cutFile.value.raw.cutFile = file
+    cutVisible.value = false
+
+    Upload()
+  }
+
   // 上传修改触发
   const uploadChange = (item: UploadFileItem, list: UploadFiles) => {
+    if (item.status === 'ready' && props.cut) {
+      cutVisible.value = true
+      cutFile.value = item
+    }
+
     if (item.status !== 'success') return
+
     const res: UploadFileItem[] = []
     list.forEach((ite: UploadFileItem) => {
       if (ite.status === 'success') res.push(ite)
@@ -284,6 +346,16 @@
 
   const customRequest = async (options: UploadRequestOptions): Promise<unknown> => {
     const { onProgress, file } = options
+    let orifile = file
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (file.cutFile) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      orifile = file.cutFile
+    }
+
     if (props.fileSize && (file.size as number) / 1024 > props.fileSize) {
       // onError(new UploadAjaxError('超过文件大小限制', 400, 'POST', ''))
       return Promise.reject('超过文件大小限制')
@@ -291,7 +363,7 @@
     try {
       onProgress({ percent: 0 } as UploadProgressEvent)
       // 获取文件二进制数据
-      const binary = (await readBinary(file)) as ArrayBuffer
+      const binary = (await readBinary(orifile)) as ArrayBuffer
 
       // 进行预上传
       const params = await getPrepareUploadReq(binary, file)
@@ -314,10 +386,71 @@
     previewSrc.value = file.url || ''
     showPreview.value = true
   }
+
+  const handleRemove = (_: UploadFileItem, list: UploadFiles) => {
+    const res: UploadFileItem[] = []
+    list.forEach((ite: UploadFileItem) => {
+      if (ite.status === 'success') res.push(ite)
+    })
+
+    if (props.limit === 1) {
+      emit('update:modelValue', undefined)
+    } else {
+      emit(
+        'update:modelValue',
+        res.map((ite: UploadFileItem) => (ite.response as { key?: string })?.key)
+      )
+    }
+
+    emit('change', res)
+  }
+
+  // const optionVisible = ref(false)
+  // const handleOptionFile = () => {
+  //   optionVisible.value = true
+  // }
 </script>
 
 <style scoped lang="scss">
+  .upload-card-box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .option-file {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    background: var(--el-fill-color-light);
+  }
+
+  :deep(.cut-dialog .el-dialog) {
+    background: rgb(0 0 0 / 10%) !important;
+  }
+
+  .cutter {
+    display: flex;
+    justify-content: center;
+    width: 100vw;
+    height: 100%;
+  }
+
   .upload {
+    :deep(.el-icon) {
+      font-size: 14px !important;
+    }
+
+    :deep(.el-upload-list__item-status-label) {
+      display: none;
+    }
+
     :deep(.el-upload--picture-card) {
       width: v-bind(domwidth) !important;
       height: v-bind(domheight) !important;

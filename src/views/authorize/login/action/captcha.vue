@@ -1,17 +1,5 @@
 <template>
   <ElForm class="form-box" ref="formRef" :model="formData" :rules="rules" @keyup.enter="handleSubmit">
-    <ElFormItem prop="tenant">
-      <ElInput v-if="!data.selectTenant" v-model.trim="formData.tenant" placeholder="请输入租户标识" />
-      <ElSelect
-        v-else
-        v-model.trim="formData.tenant"
-        placeholder="请选择所属租户"
-        :options="data.tenants"
-        :props="{ label: 'name', value: 'keyword' }"
-      >
-      </ElSelect>
-    </ElFormItem>
-
     <ElFormItem prop="username">
       <ElInput :placeholder="'请输入用户' + typeText" v-model.trim="formData.username" />
     </ElFormItem>
@@ -31,10 +19,6 @@
       </div>
     </ElFormItem>
 
-    <div class="forget-password">
-      <ElCheckbox v-model="formData.rememberPassword">记住密码</ElCheckbox>
-    </div>
-
     <div style="margin-top: 10px">
       <ElButton class="login-btn" type="primary" @click="handleSubmit" :loading="loading" v-ripple> 登陆 </ElButton>
     </div>
@@ -44,6 +28,7 @@
 <style lang="scss" scoped>
   .form-box {
     box-sizing: border-box;
+    width: 100%;
 
     :deep(.el-input-group__append) {
       padding: 0;
@@ -111,11 +96,10 @@
 
 <script setup lang="ts">
   import { FormRules } from 'element-plus'
-  import { OAuther } from '@/api/manager/authorize/type'
+  import { OAuther, OAutherLoginReply } from '@/api/manager/authorize/type'
   import { OAutherHandle, OAutherLogin } from '@/api/manager/authorize/api'
   import { Tenant } from '@/api/manager/tenant/type'
 
-  const saveKeys = ['username', 'rememberPassword']
   const props = defineProps<{
     data: {
       tenant: string
@@ -141,12 +125,13 @@
   const formData = reactive<
     Partial<{
       tenant: string
+      app: string
       username: string
       captcha: string
       captchaId: string
       rememberPassword: boolean
     }>
-  >({ ...props.data })
+  >({ tenant: props.data.tenant, app: props.data.app })
 
   const rules = computed<FormRules>(() => ({
     username: [
@@ -178,7 +163,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['submit'])
+  const emits = defineEmits(['success'])
 
   // 获取验证码倒计时
   const disableReSend = ref(false)
@@ -202,7 +187,12 @@
     const valid = await formRef.value?.validateField('username')
     if (!valid) return
 
-    const data = await OAutherHandle({ ...props.data, keyword: props.oauther.keyword, account: formData.username })
+    const data = await OAutherHandle({
+      tenant: props.data.tenant,
+      app: props.data.app,
+      keyword: props.oauther.keyword,
+      account: formData.username
+    })
     ElMessage.success('验证码发送成功，请注意查收')
     formData.captchaId = data.uuid
     countdown(Number(data.value) || 60)
@@ -223,18 +213,23 @@
     }
 
     OAutherLogin({
+      tenant: props.data.tenant,
+      app: props.data.app,
       keyword: props.oauther.keyword,
       uuid: formData.captchaId,
       code: formData.captcha as string,
       account: formData.username
     })
-      .then(() => {
+      .then((res: OAutherLoginReply) => {
+        if (!res.needBind) {
+          ElMessage.error('当前邮箱未绑定账号，请先绑定账号')
+          return
+        }
+        emits('success', res.token)
         ElMessage.success('登录成功')
       })
       .finally(() => {
         loading.value = false
       })
-
-    emits('submit', { ...formData, saveKeys })
   }
 </script>

@@ -33,6 +33,7 @@
     position: relative;
     z-index: 100;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 25px;
@@ -40,13 +41,30 @@
     background: #fff;
     border-radius: 8px;
 
+    .register-box {
+      display: flex;
+    }
+
+    .register-header {
+      width: 100%;
+      text-align: left;
+
+      .register-title {
+        margin-bottom: 5px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .register-subtitle {
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: var(--el-color-info);
+      }
+    }
+
     .left-bg {
       z-index: 100;
       width: 300px;
-    }
-
-    .form {
-      padding-top: 20px;
     }
 
     .register-wrap {
@@ -109,6 +127,7 @@
 
       .register-wrap {
         width: 100%;
+        min-width: 280px;
       }
 
       .top-register-plan {
@@ -150,7 +169,7 @@
   .account-select :deep(.el-select__wrapper),
   .el-input,
   .register-btn {
-    height: 40px !important;
+    height: 36px !important;
   }
 
   .forget-password {
@@ -169,13 +188,13 @@
 
   .register-btn {
     width: 100%;
-    height: 40px !important;
+    height: 36px !important;
     color: #fff;
     border: 0;
   }
 
   .back-btn {
     width: 100%;
-    height: 40px !important;
+    height: 36px !important;
   }
 }

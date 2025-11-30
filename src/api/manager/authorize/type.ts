@@ -62,6 +62,8 @@ export interface ListOAutherRequest {
 }
 
 export interface OAutherHandleRequest {
+  tenant: string
+  app: string
   account?: string
   keyword: string
 }
@@ -76,6 +78,8 @@ export interface OAutherHandleReply {
 }
 
 export interface OAutherLoginRequest {
+  tenant: string
+  app: string
   keyword: string
   uuid: string
   account?: string
