@@ -33,7 +33,7 @@ export function Register(data: RegisterRequest) {
 }
 
 export function Bind(data: BindRequest) {
-  return request.post<BindReply>({ url: '/manager/api/authorize/bind', data })
+  return request.post<BindReply>({ url: '/manager/api/authorize/oauther/bind', data })
 }
 
 // ListOAuther 获取租户应用授权信息列表

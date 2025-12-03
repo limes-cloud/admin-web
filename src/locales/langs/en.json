@@ -208,6 +208,9 @@
     "register": {
       "title": "Register"
     },
+    "bind": {
+      "title": "Bind Account"
+    },
     "forgetPassword": {
       "title": "Forget Password"
     },

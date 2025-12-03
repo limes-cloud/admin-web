@@ -208,6 +208,9 @@
     "register": {
       "title": "注册"
     },
+    "bind": {
+      "title": "绑定账号"
+    },
     "forgetPassword": {
       "title": "忘记密码"
     },

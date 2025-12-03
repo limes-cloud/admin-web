@@ -25,7 +25,13 @@
             <PasswordLogin :data="loginData" @success="handleLogin" @change-tenant="handleChangeTenant" />
           </div>
           <div class="form" v-if="oauthWay.action === 'captcha'">
-            <CaptchaLogin type="email" :data="loginData" :oauther="currentOAuther" />
+            <CaptchaLogin
+              type="email"
+              :data="loginData"
+              :oauther="currentOAuther"
+              @bind="handleBind"
+              @success="handleLogin"
+            />
           </div>
           <div class="footer" v-if="!appStore.app.private">
             <p>
@@ -55,6 +61,7 @@
   import loginIcon from '@imgs/svg/login_icon.svg'
   import PasswordLogin from './action/password.vue'
   import CaptchaLogin from './action/captcha.vue'
+  import { ElMessageBox } from 'element-plus'
   import { useStorage } from '@vueuse/core'
   import { ListOAuther, OAutherHandle } from '@/api/manager/authorize/api'
   import { OAuther, OAutherHandleReply } from '@/api/manager/authorize/type'
@@ -107,7 +114,19 @@
     const data = await ListOAuther({ ...tenantConfig.value })
     oauthers.value = data.list
   }
-  if (tenantConfig.value.tenant) handleGetOAuther()
+
+  const handleBind = (uuid: string) => {
+    ElMessageBox.confirm('当前邮箱未绑定账号，立即跳转绑定', '温馨提示', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(async () => {
+      router.push({
+        name: 'BindAccount',
+        query: { uuid }
+      })
+    })
+  }
 
   const handleLogin = async (token: string, value: any) => {
     // 获取需要保存的字段
@@ -177,6 +196,8 @@
   }
 
   onMounted(() => {
+    if (tenantConfig.value.tenant) handleGetOAuther()
+
     getDate()
   })
 </script>

@@ -163,7 +163,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['success'])
+  const emits = defineEmits(['success', 'bind'])
 
   // 获取验证码倒计时
   const disableReSend = ref(false)
@@ -221,11 +221,11 @@
       account: formData.username
     })
       .then((res: OAutherLoginReply) => {
-        if (!res.needBind) {
-          ElMessage.error('当前邮箱未绑定账号，请先绑定账号')
+        if (res.needBind) {
+          emits('bind', formData.captchaId)
           return
         }
-        emits('success', res.token)
+        emits('success', res.token, { ...formData, saveKeys: ['username'] })
         ElMessage.success('登录成功')
       })
       .finally(() => {
