@@ -16,9 +16,9 @@
           :key="item.key"
           :xs="getColSpan(item.span, 'xs')"
           :sm="getColSpan(item.span, 'sm')"
-          :md="getColSpan(item.span, 'md')"
-          :lg="getColSpan(item.span, 'lg')"
-          :xl="getColSpan(item.span, 'xl')"
+          :md="getColSpan(8, 'md')"
+          :lg="getColSpan(6, 'lg')"
+          :xl="getColSpan(3, 'xl')"
         >
           <ElFormItem :prop="item.key" :label-width="item.label ? item.labelWidth || labelWidth : undefined">
             <template #label v-if="item.label">

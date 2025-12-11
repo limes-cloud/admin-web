@@ -36,7 +36,7 @@
               </ElTooltip>
             </div>
             <div>
-              <ArtOperation :list="operationItems" :data="row">
+              <ArtOperation :single="true" :list="operationItems" :data="row">
                 <i class="iconfont-sys" v-html="'&#xe6df;'"></i>
               </ArtOperation>
             </div>

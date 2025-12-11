@@ -2,7 +2,7 @@
 <template>
   <div v-if="watermarkVisible" class="layout-watermark" :style="{ zIndex: zIndex }">
     <ElWatermark
-      :content="content"
+      :content="watermark"
       :font="{ fontSize: fontSize, color: fontColor }"
       :rotate="rotate"
       :gap="[gapX, gapY]"
@@ -46,7 +46,6 @@
   }
 
   withDefaults(defineProps<WatermarkProps>(), {
-    content: useAppStore().app.name,
     visible: false,
     fontSize: 16,
     fontColor: 'rgba(128, 128, 128, 0.2)',
@@ -57,6 +56,9 @@
     offsetY: 50,
     zIndex: 3100
   })
+
+  const appStore = useAppStore()
+  const watermark = computed(() => appStore.app.watermark)
 </script>
 
 <style lang="scss" scoped>

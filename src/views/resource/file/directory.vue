@@ -30,7 +30,7 @@
               <span> {{ row.name }}</span>
             </div>
             <div>
-              <ArtOperation :list="operationItems" :data="row">
+              <ArtOperation :single="true" :list="operationItems" :data="row">
                 <i class="iconfont-sys" v-html="'&#xe6df;'"></i>
               </ArtOperation>
             </div>
@@ -272,11 +272,7 @@
     dialogType.value = type
     currentData.value = row || {}
     if (!isArray(currentData.value.accept)) {
-      if (!currentData.value.accept) {
-        currentData.value.accept = []
-      } else {
-        currentData.value.accept = (currentData.value.accept as string).split(',')
-      }
+      currentData.value.accept = (currentData.value.accept as string).split(',')
     }
     nextTick(() => {
       dialogVisible.value = true

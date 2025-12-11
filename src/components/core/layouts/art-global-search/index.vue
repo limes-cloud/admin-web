@@ -91,8 +91,6 @@
   const userStore = useUserStore()
   const { menuList } = storeToRefs(useMenuStore())
 
-  console.log(menuList)
-
   const showSearchDialog = ref(false)
   const searchVal = ref('')
   const searchResult = ref<AppRouteRecord[]>([])

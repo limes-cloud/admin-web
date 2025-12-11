@@ -43,7 +43,7 @@
               </ElTooltip>
             </div>
             <div>
-              <ArtOperation :list="operationItems" :data="row">
+              <ArtOperation :single="true" :list="operationItems" :data="row">
                 <i class="iconfont-sys" v-html="'&#xe6df;'"></i>
               </ArtOperation>
             </div>
@@ -81,13 +81,7 @@
     >
       <div class="import-box cuetom-table">
         <div class="import-left">
-          <ElTable
-            :data="loadEntities"
-            style="width: 100%"
-            :show-header="false"
-            :stripe="false"
-            :row-class-name="importTableRowClassName"
-          >
+          <ElTable :data="loadEntities" :show-header="false" :stripe="false" :row-class-name="importTableRowClassName">
             <el-table-column prop="name" label="Date" width="180">
               <template #default="{ row, $index }">
                 <div class="dict-item">
@@ -105,7 +99,7 @@
           </ElTable>
         </div>
         <div class="import-right">
-          <ElTable :data="loadEntities[currentEntityIndex].fields" style="width: 100%" :show-header="false">
+          <ElTable :data="loadEntities[currentEntityIndex].fields" :show-header="false">
             <el-table-column prop="name">
               <template #default="{ row, $index }">
                 <div class="dict-item">

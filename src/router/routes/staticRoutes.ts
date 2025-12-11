@@ -37,6 +37,12 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     meta: { title: 'menus.bind.title', isHideTab: true }
   },
   {
+    path: '/authorize/fillinfo',
+    name: 'FillInfo',
+    component: () => import('@views/authorize/fillinfo/index.vue'),
+    meta: { title: 'menus.fillInfo.title', isHideTab: true }
+  },
+  {
     path: '/authorize/forget-password',
     name: 'ForgetPassword',
     component: () => import('@views/authorize/forget-password/index.vue'),

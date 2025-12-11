@@ -1,7 +1,9 @@
 import { GetSampleApp } from '@/api/manager/app/api'
 import { App } from '@/api/manager/app/type'
-import { GetSystemSetting } from '@/api/manager/system/api'
+import { setWebIcon } from '@/router/utils/utils'
+import { rurl } from '@/utils/resource/url'
 import { defineStore } from 'pinia'
+import { useSettingStore } from './setting'
 
 export const useAppStore = defineStore('appStore', () => {
   const keyword = ref('manager')
@@ -11,21 +13,22 @@ export const useAppStore = defineStore('appStore', () => {
   const initApp = async () => {
     // 获取应用信息
     const data = await GetSampleApp({ keyword: keyword.value })
-    app.value = data
 
-    // 如果直接登陆管理后台，则使用默认的名称，否则获取
-    const setting = await GetSystemSetting()
-    if (keyword.value === 'manager') {
-      Object.assign(app.value, {
-        name: setting.title,
-        logo: setting.logo,
-        keyword: 'manager',
-        description: setting.description,
-        copyright: setting.copyright
-      })
-    }
+    Object.assign(app.value, {
+      id: data.id,
+      name: data.showName,
+      logo: data.logo,
+      keyword: data.keyword,
+      description: data.description,
+      copyright: data.setting?.web?.copyright,
+      watermark: data.setting?.web?.watermark
+    })
 
-    // 初始化系统设置
+    // 设置水印
+    useSettingStore().setWatermarkVisible(!!app.value.watermark)
+
+    // 设置网站图标
+    setWebIcon(rurl(data.favicon))
   }
 
   return {

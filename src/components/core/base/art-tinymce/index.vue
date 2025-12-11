@@ -57,7 +57,6 @@
       type: [Boolean, String],
       default: 'file edit insert view format table tools help'
     },
-
     height: {
       type: Number,
       default: 500

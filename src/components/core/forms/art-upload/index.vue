@@ -130,6 +130,36 @@
   const cutVisible = ref(false)
   const cutFile = ref<UploadFileItem>({} as UploadFileItem)
 
+  // const uploadedFileList = computed({
+  //   get() {
+  //     if (!props.modelValue) {
+  //       return []
+  //     }
+  //     if (Array.isArray(props.modelValue)) {
+  //       return props.modelValue.map(
+  //         (item: string) =>
+  //           ({
+  //             name: item,
+  //             url: rurl(item),
+  //             status: 'success',
+  //             response: {
+  //               key: item
+  //             }
+  //           }) as UploadFileItem
+  //       )
+  //     } else {
+  //       return [
+  //         {
+  //           name: props.modelValue,
+  //           url: rurl(props.modelValue as string),
+  //           status: 'success'
+  //         } as UploadFileItem
+  //       ]
+  //     }
+  //   },
+  //   set() {}
+  // })
+
   watch(
     () => props.modelValue,
     (val) => {
@@ -138,14 +168,25 @@
         return
       }
       if (Array.isArray(val)) {
-        uploadedFileList.value = val.map(
+        const keys = val.join(',')
+        const oriKeys = uploadedFileList.value.map((item: any) => {
+          return item.response?.key
+        })
+
+        if (keys === oriKeys.join(',')) return
+
+        const data = val.map(
           (item: string) =>
             ({
               name: item,
               url: rurl(item),
-              status: 'success'
+              status: 'success',
+              response: {
+                key: item
+              }
             }) as UploadFileItem
         )
+        uploadedFileList.value = data
       } else {
         uploadedFileList.value = [
           {
@@ -250,9 +291,9 @@
 
     if (item.status !== 'success') return
 
-    const res: UploadFileItem[] = []
+    const res: any[] = []
     list.forEach((ite: UploadFileItem) => {
-      if (ite.status === 'success') res.push(ite)
+      if (ite.status === 'success') res.push(ite.response)
     })
 
     const resp = item.response as any
@@ -260,12 +301,9 @@
     if (props.limit === 1) {
       emit('update:modelValue', resp.key)
     } else {
-      emit(
-        'update:modelValue',
-        res.map((ite: UploadFileItem) => (ite.response as { key?: string })?.key)
-      )
+      const keys = res.map((ite) => ite?.key)
+      emit('update:modelValue', keys)
     }
-
     emit('change', res)
   }
 

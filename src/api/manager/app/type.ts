@@ -11,6 +11,10 @@ export interface AppSetting {
   tenant: {
     mode: string
   }
+  web: {
+    watermark?: string
+    copyright?: string
+  }
   jwt: {
     secret: string
     expire: number
@@ -23,8 +27,10 @@ export interface App {
   id: number
   type: string
   logo: string
+  favicon: string
   keyword: string
   name: string
+  showName: string
   secret?: string
   comment?: string
   status?: boolean
@@ -33,6 +39,7 @@ export interface App {
   setting?: AppSetting
   description?: string
   copyright?: string
+  watermark?: string
   createdAt: number
   updatedAt: number
 }
@@ -40,6 +47,7 @@ export interface App {
 export interface ListAppRequest {
   page: number
   pageSize: number
+  type?: string
   order?: string
   orderBy?: string
   keyword?: string
@@ -55,6 +63,7 @@ export interface ListAppReply {
 export interface CreateAppRequest {
   type: string
   logo: string
+  favicon: string
   keyword: string
   name: string
   secret: string

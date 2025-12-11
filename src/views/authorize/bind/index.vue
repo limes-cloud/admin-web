@@ -4,7 +4,7 @@
 
     <div class="register-plan">
       <div class="register-header">
-        <div class="register-title">{{ welcome }}，立即开始绑定账号</div>
+        <div class="register-title">立即开始绑定账号</div>
         <div class="register-subtitle">{{ appStore.app.description }}</div>
       </div>
       <div class="register-box">
@@ -139,19 +139,4 @@
         fetchCaptcha()
       })
   }
-
-  const welcome = ref('')
-  const getDate = () => {
-    const h = new Date().getHours()
-    if (h >= 6 && h < 9) welcome.value = '早上好'
-    else if (h >= 9 && h < 11) welcome.value = '上午好'
-    else if (h >= 11 && h < 13) welcome.value = '中午好'
-    else if (h >= 13 && h < 18) welcome.value = '下午好'
-    else if (h >= 18 && h < 24) welcome.value = '晚上好'
-    else welcome.value = '夜已深'
-  }
-
-  onMounted(() => {
-    getDate()
-  })
 </script>

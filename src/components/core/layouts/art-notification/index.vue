@@ -10,291 +10,107 @@
     @click.stop=""
   >
     <div class="header">
-      <span class="text">{{ $t('notice.title') }}</span>
-      <span class="btn">{{ $t('notice.btnRead') }}</span>
+      <span class="text">系统通知</span>
+      <!-- <span class="btn" v-if="activeTab == 'unread'">标记已读</span> -->
     </div>
 
-    <ul class="bar">
-      <li
-        v-for="(item, index) in barList"
-        :key="index"
-        :class="{ active: barActiveIndex === index }"
-        @click="changeBar(index)"
-      >
-        {{ item.name }} ({{ item.num }})
-      </li>
-    </ul>
+    <div class="bar">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tab-pane label="全部" name="all"><div></div></el-tab-pane>
+        <el-tab-pane label="未读" name="unread"></el-tab-pane>
+      </el-tabs>
+    </div>
 
     <div class="content">
-      <div class="scroll">
-        <!-- 通知 -->
-        <ul class="notice-list" v-show="barActiveIndex === 0">
-          <li v-for="(item, index) in noticeList" :key="index">
-            <div class="icon" :style="{ background: getNoticeStyle(item.type).backgroundColor + '!important' }">
-              <i
-                class="iconfont-sys"
-                :style="{ color: getNoticeStyle(item.type).iconColor + '!important' }"
-                v-html="getNoticeStyle(item.type).icon"
-              >
-              </i>
+      <ArtTable
+        :loading="loading"
+        :data="data"
+        :columns="columns"
+        row-key="id"
+        :pagination="pagination"
+        :show-header="false"
+        :pagination-options="{
+          size: 'small',
+          layout: 'total, sizes, prev, pager'
+        }"
+        @pagination:size-change="handleSizeChange"
+        @pagination:current-change="handleCurrentChange"
+      >
+        <template #item="{ row }">
+          <div class="notice-item" @click="handleLookNotice(row)">
+            <div class="notice-avatar">
+              <ElAvatar shape="square" :size="40" :src="$rurl(row.classify.logo)"></ElAvatar>
             </div>
-            <div class="text">
-              <h4>{{ item.title }}</h4>
-              <p>{{ item.time }}</p>
+            <div class="notice-content">
+              <div class="notice-title">{{ row.title }}</div>
+              <div class="notice-time">{{ formatTime(row.createdAt) }}</div>
             </div>
-          </li>
-        </ul>
-
-        <!-- 消息 -->
-        <ul class="user-list" v-show="barActiveIndex === 1">
-          <li v-for="(item, index) in msgList" :key="index">
-            <div class="avatar">
-              <img :src="item.avatar" />
-            </div>
-            <div class="text">
-              <h4>{{ item.title }}</h4>
-              <p>{{ item.time }}</p>
-            </div>
-          </li>
-        </ul>
-
-        <!-- 待办 -->
-        <ul class="base" v-show="barActiveIndex === 2">
-          <li v-for="(item, index) in pendingList" :key="index">
-            <h4>{{ item.title }}</h4>
-            <p>{{ item.time }}</p>
-          </li>
-        </ul>
-
-        <!-- 空状态 -->
-        <div class="empty-tips" v-show="currentTabIsEmpty">
-          <i class="iconfont-sys">&#xe8d7;</i>
-          <p>{{ $t('notice.text[0]') }}{{ barList[barActiveIndex].name }}</p>
-        </div>
-      </div>
-
-      <div class="btn-wrapper">
-        <ElButton class="view-all" @click="handleViewAll" v-ripple>
-          {{ $t('notice.viewAll') }}
-        </ElButton>
-      </div>
+          </div>
+        </template>
+      </ArtTable>
     </div>
 
-    <div style="height: 100px"></div>
+    <ElDialog
+      v-model="noticeVisible"
+      :title="title"
+      :destroy-on-close="true"
+      :append-to-body="true"
+      body-class="art-form-dialog"
+      width="780px"
+      align-center
+      @close="handleCloseLookNotice"
+    >
+      <ArtRichView :value="currentData?.content" />
+    </ElDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, ref, watch, type Ref, type ComputedRef } from 'vue'
-  import { useI18n } from 'vue-i18n'
-  import AppConfig from '@/config'
-
-  // 导入头像图片
-  import avatar1 from '@/assets/img/avatar/avatar1.webp'
-  import avatar2 from '@/assets/img/avatar/avatar2.webp'
-  import avatar3 from '@/assets/img/avatar/avatar3.webp'
-  import avatar4 from '@/assets/img/avatar/avatar4.webp'
-  import avatar5 from '@/assets/img/avatar/avatar5.webp'
-  import avatar6 from '@/assets/img/avatar/avatar6.webp'
+  import { GetVisibleNotice, ListVisibleNotice } from '@/api/manager/notice/api'
+  import { Notice } from '@/api/manager/notice/type'
+  import { useTable } from '@/composables/useTable'
+  import { formatTime } from '@/utils/time'
+  import { ref, watch } from 'vue'
 
   defineOptions({ name: 'ArtNotification' })
-
-  interface NoticeItem {
-    /** 标题 */
-    title: string
-    /** 时间 */
-    time: string
-    /** 类型 */
-    type: NoticeType
-  }
-
-  interface MessageItem {
-    /** 标题 */
-    title: string
-    /** 时间 */
-    time: string
-    /** 头像 */
-    avatar: string
-  }
-
-  interface PendingItem {
-    /** 标题 */
-    title: string
-    /** 时间 */
-    time: string
-  }
-
-  interface BarItem {
-    /** 名称 */
-    name: ComputedRef<string>
-    /** 数量 */
-    num: number
-  }
-
-  interface NoticeStyle {
-    /** 图标 */
-    icon: string
-    /** 图标颜色 */
-    iconColor: string
-    /** 背景颜色 */
-    backgroundColor: string
-  }
-
-  type NoticeType = 'email' | 'message' | 'collection' | 'user' | 'notice'
-
-  const { t } = useI18n()
 
   const props = defineProps<{
     value: boolean
   }>()
 
+  const noticeVisible = ref(false)
+  const title = ref('系统通知')
+  const currentData = ref<Notice>()
+
+  const activeTab = ref('all')
   const show = ref(false)
   const visible = ref(false)
-  const barActiveIndex = ref(0)
 
-  const useNotificationData = () => {
-    // 通知数据
-    const noticeList = ref<NoticeItem[]>([
-      {
-        title: '新增国际化',
-        time: '2024-6-13 0:10',
-        type: 'notice'
-      },
-      {
-        title: '冷月呆呆给你发了一条消息',
-        time: '2024-4-21 8:05',
-        type: 'message'
-      },
-      {
-        title: '小肥猪关注了你',
-        time: '2020-3-17 21:12',
-        type: 'collection'
-      },
-      {
-        title: '新增使用文档',
-        time: '2024-02-14 0:20',
-        type: 'notice'
-      },
-      {
-        title: '小肥猪给你发了一封邮件',
-        time: '2024-1-20 0:15',
-        type: 'email'
-      },
-      {
-        title: '菜单mock本地真实数据',
-        time: '2024-1-17 22:06',
-        type: 'notice'
-      }
-    ])
+  const searchForm = ref({
+    notRead: false
+  })
 
-    // 消息数据
-    const msgList = ref<MessageItem[]>([
-      {
-        title: '池不胖 关注了你',
-        time: '2021-2-26 23:50',
-        avatar: avatar1
-      },
-      {
-        title: '唐不苦 关注了你',
-        time: '2021-2-21 8:05',
-        avatar: avatar2
-      },
-      {
-        title: '中小鱼 关注了你',
-        time: '2020-1-17 21:12',
-        avatar: avatar3
-      },
-      {
-        title: '何小荷 关注了你',
-        time: '2021-01-14 0:20',
-        avatar: avatar4
-      },
-      {
-        title: '誶誶淰 关注了你',
-        time: '2020-12-20 0:15',
-        avatar: avatar5
-      },
-      {
-        title: '冷月呆呆 关注了你',
-        time: '2020-12-17 22:06',
-        avatar: avatar6
-      }
-    ])
-
-    // 待办数据
-    const pendingList = ref<PendingItem[]>([])
-
-    // 标签栏数据
-    const barList = computed<BarItem[]>(() => [
-      {
-        name: computed(() => t('notice.bar[0]')),
-        num: noticeList.value.length
-      },
-      {
-        name: computed(() => t('notice.bar[1]')),
-        num: msgList.value.length
-      },
-      {
-        name: computed(() => t('notice.bar[2]')),
-        num: pendingList.value.length
-      }
-    ])
-
-    return {
-      noticeList,
-      msgList,
-      pendingList,
-      barList
+  const handleTabClick = (tab: any) => {
+    if (tab.props.name === 'unread') {
+      searchForm.value.notRead = true
+    } else {
+      searchForm.value.notRead = false
     }
+    Object.assign(searchParams, { ...searchForm.value })
+    getData()
   }
 
-  // 样式管理
-  const useNotificationStyles = () => {
-    const noticeStyleMap: Record<NoticeType, NoticeStyle> = {
-      email: {
-        icon: '&#xe72e;',
-        iconColor: 'rgb(var(--art-warning))',
-        backgroundColor: 'rgb(var(--art-bg-warning))'
-      },
-      message: {
-        icon: '&#xe747;',
-        iconColor: 'rgb(var(--art-success))',
-        backgroundColor: 'rgb(var(--art-bg-success))'
-      },
-      collection: {
-        icon: '&#xe714;',
-        iconColor: 'rgb(var(--art-danger))',
-        backgroundColor: 'rgb(var(--art-bg-danger))'
-      },
-      user: {
-        icon: '&#xe608;',
-        iconColor: 'rgb(var(--art-info))',
-        backgroundColor: 'rgb(var(--art-bg-info))'
-      },
-      notice: {
-        icon: '&#xe6c2;',
-        iconColor: 'rgb(var(--art-primary))',
-        backgroundColor: 'rgb(var(--art-bg-primary))'
-      }
-    }
+  const handleLookNotice = async (row: any) => {
+    const data = await GetVisibleNotice({ id: row.id })
+    title.value = data.title
+    currentData.value = data
+    noticeVisible.value = true
+  }
 
-    const getRandomColor = (): string => {
-      const index = Math.floor(Math.random() * AppConfig.systemMainColor.length)
-      return AppConfig.systemMainColor[index]
-    }
-
-    const getNoticeStyle = (type: NoticeType): NoticeStyle => {
-      const defaultStyle: NoticeStyle = {
-        icon: '&#xe747;',
-        iconColor: '#FFFFFF',
-        backgroundColor: getRandomColor()
-      }
-
-      return noticeStyleMap[type] || defaultStyle
-    }
-
-    return {
-      getNoticeStyle
+  const handleCloseLookNotice = () => {
+    if (searchForm.value.notRead) {
+      getData()
+      currentData.value = undefined
     }
   }
 
@@ -319,82 +135,25 @@
     }
   }
 
-  // 标签页管理
-  const useTabManagement = (
-    noticeList: Ref<NoticeItem[]>,
-    msgList: Ref<MessageItem[]>,
-    pendingList: Ref<PendingItem[]>,
-    businessHandlers: {
-      handleNoticeAll: () => void
-      handleMsgAll: () => void
-      handlePendingAll: () => void
-    }
-  ) => {
-    const changeBar = (index: number) => {
-      barActiveIndex.value = index
-    }
-
-    // 检查当前标签页是否为空
-    const currentTabIsEmpty = computed(() => {
-      const tabDataMap = [noticeList.value, msgList.value, pendingList.value]
-
-      const currentData = tabDataMap[barActiveIndex.value]
-      return currentData && currentData.length === 0
-    })
-
-    const handleViewAll = () => {
-      // 查看全部处理器映射
-      const viewAllHandlers: Record<number, () => void> = {
-        0: businessHandlers.handleNoticeAll,
-        1: businessHandlers.handleMsgAll,
-        2: businessHandlers.handlePendingAll
-      }
-
-      const handler = viewAllHandlers[barActiveIndex.value]
-      handler?.()
-    }
-
-    return {
-      changeBar,
-      currentTabIsEmpty,
-      handleViewAll
-    }
-  }
-
-  // 业务逻辑处理
-  const useBusinessLogic = () => {
-    const handleNoticeAll = () => {
-      // 处理查看全部通知
-      console.log('查看全部通知')
-    }
-
-    const handleMsgAll = () => {
-      // 处理查看全部消息
-      console.log('查看全部消息')
-    }
-
-    const handlePendingAll = () => {
-      // 处理查看全部待办
-      console.log('查看全部待办')
-    }
-
-    return {
-      handleNoticeAll,
-      handleMsgAll,
-      handlePendingAll
-    }
-  }
-
-  // 组合所有逻辑
-  const { noticeList, msgList, pendingList, barList } = useNotificationData()
-  const { getNoticeStyle } = useNotificationStyles()
   const { showNotice } = useNotificationAnimation()
-  const { handleNoticeAll, handleMsgAll, handlePendingAll } = useBusinessLogic()
-  const { changeBar, currentTabIsEmpty, handleViewAll } = useTabManagement(noticeList, msgList, pendingList, {
-    handleNoticeAll,
-    handleMsgAll,
-    handlePendingAll
-  })
+
+  const { columns, data, loading, searchParams, pagination, getData, handleSizeChange, handleCurrentChange } = useTable(
+    {
+      // 核心配置
+      core: {
+        apiFn: ListVisibleNotice,
+        apiParams: { ...searchForm.value },
+        columnsFactory: () => [
+          {
+            prop: 'item',
+            label: '通知',
+            useSlot: true,
+            slotName: 'item'
+          }
+        ]
+      }
+    }
+  )
 
   // 监听属性变化
   watch(

@@ -163,7 +163,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['success', 'bind'])
+  const emits = defineEmits(['success', 'info', 'bind'])
 
   // 获取验证码倒计时
   const disableReSend = ref(false)
@@ -225,6 +225,11 @@
           emits('bind', formData.captchaId)
           return
         }
+        if (res.needInfo) {
+          emits('info', formData.captchaId)
+          return
+        }
+
         emits('success', res.token, { ...formData, saveKeys: ['username'] })
         ElMessage.success('登录成功')
       })

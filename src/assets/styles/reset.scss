@@ -35,8 +35,8 @@ body {
   color: var(--art-text-gray-700);
   text-align: left;
   font-family:
-    Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-    '微软雅黑', Arial, sans-serif;
+    Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial,
+    sans-serif;
 }
 
 select {
@@ -106,7 +106,7 @@ q:before,
 q:after,
 blockquote:before,
 blockquote:after {
-  content: ””;
+  content: '';
 }
 
 /*滚动条*/

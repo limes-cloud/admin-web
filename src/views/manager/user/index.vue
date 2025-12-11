@@ -178,7 +178,7 @@
   }
   getApps()
 
-  const searchItems = [
+  const searchItems = reactive([
     {
       label: '用户账户',
       key: 'username',
@@ -217,7 +217,7 @@
             getApps()
           }
         },
-        options: apps.value,
+        options: apps,
         props: {
           label: 'name',
           value: 'id'
@@ -262,7 +262,7 @@
         }
       }
     }
-  ]
+  ])
 
   const offlineFormItems = computed(() => [
     {

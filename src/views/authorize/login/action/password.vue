@@ -160,7 +160,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['success', 'changeTenant'])
+  const emits = defineEmits(['success', 'info', 'changeTenant'])
 
   const timeInter: any = ref(null)
   const captchaBase64 = ref('')
@@ -192,6 +192,11 @@
 
     Login({ ...formData } as LoginRequest)
       .then((res) => {
+        if (res.needInfo) {
+          emits('info', formData.captchaId)
+          return
+        }
+
         emits('success', res.token, { ...formData, saveKeys })
         ElMessage.success('登录成功')
       })

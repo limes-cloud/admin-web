@@ -177,6 +177,15 @@
       }
     },
     {
+      key: 'showName',
+      label: '展示名称',
+      type: 'input',
+      props: {
+        placeholder: '请输入展示名称',
+        rules: [{ required: true, message: '请输入展示名称', trigger: ['blur', 'change'] }]
+      }
+    },
+    {
       key: 'logo',
       label: '应用logo',
       type: 'upload',
@@ -259,6 +268,39 @@
           { label: '输入', value: 'input' },
           { label: '选择', value: 'select' }
         ],
+        rules: [{ required: true, message: '请选择租户模式', trigger: ['blur', 'change'] }]
+      }
+    },
+    {
+      key: 'setting.web.copyright',
+      label: '版权信息',
+      type: 'input',
+      divider: '站点配置',
+      hidden: currentData.value.type === 'base',
+      tip: '显示在登录页和首页底部的版权信息，不输入则不显示',
+      props: {
+        placeholder: '请输入版权信息'
+      }
+    },
+    {
+      key: 'setting.web.watermark',
+      label: '水印信息',
+      type: 'input',
+      divider: '站点配置',
+      hidden: currentData.value.type === 'base',
+      tip: '显示在登录页和首页底部的水印信息，不输入则不显示',
+      props: {
+        placeholder: '请输入水印信息'
+      }
+    },
+    {
+      key: 'setting.jwt.secret',
+      label: '授权密钥',
+      type: 'input',
+      divider: '授权配置',
+      hidden: currentData.value.type === 'base',
+      props: {
+        placeholder: '请输入授权密钥 ',
         rules: [{ required: true, message: '请输入授权密钥', trigger: ['blur', 'change'] }]
       }
     },

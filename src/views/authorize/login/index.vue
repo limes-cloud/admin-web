@@ -22,7 +22,12 @@
           </div>
 
           <div class="form" v-if="oauthWay.action === 'password'">
-            <PasswordLogin :data="loginData" @success="handleLogin" @change-tenant="handleChangeTenant" />
+            <PasswordLogin
+              :data="loginData"
+              @success="handleLogin"
+              @info="handleFillInfo"
+              @change-tenant="handleChangeTenant"
+            />
           </div>
           <div class="form" v-if="oauthWay.action === 'captcha'">
             <CaptchaLogin
@@ -30,6 +35,7 @@
               :data="loginData"
               :oauther="currentOAuther"
               @bind="handleBind"
+              @info="handleFillInfo"
               @success="handleLogin"
             />
           </div>
@@ -125,6 +131,13 @@
         name: 'BindAccount',
         query: { uuid }
       })
+    })
+  }
+
+  const handleFillInfo = (uuid: string) => {
+    router.push({
+      name: 'FillInfo',
+      query: { uuid }
     })
   }
 

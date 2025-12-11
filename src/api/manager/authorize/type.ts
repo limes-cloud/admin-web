@@ -8,6 +8,7 @@ export interface LoginRequest {
 }
 
 export interface LoginReply {
+  needInfo: boolean
   token: string
 }
 
@@ -90,4 +91,20 @@ export interface OAutherLoginReply {
   needBind: boolean
   needInfo: boolean
   token: string
+}
+
+export interface ListFillInfoRequest {
+  uuid: string
+}
+
+export interface FillInfoItem {
+  type: string
+  keyword: string
+  name: string
+  value: any
+}
+
+export interface FillInfoRequest {
+  uuid: string
+  infos: Record<string, any>
 }

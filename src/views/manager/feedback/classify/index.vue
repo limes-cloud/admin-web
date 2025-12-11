@@ -19,7 +19,7 @@
           <template #left>
             <ElSpace wrap>
               <ElButton
-                v-permission="'manager:dept:classify:add'"
+                v-permission="'manager:feedback:classify:add'"
                 v-ripple
                 type="primary"
                 :icon="Plus"
@@ -71,17 +71,26 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { Edit, Plus } from '@element-plus/icons-vue'
-  import { CreateDeptClassify, DeleteDeptClassify, ListDeptClassify, UpdateDeptClassify } from '@/api/manager/dept/api'
-  import { CreateDeptClassifyRequest, DeptClassify, UpdateDeptClassifyRequest } from '@/api/manager/dept/type'
+  import {
+    CreateFeedbackClassify,
+    DeleteFeedbackClassify,
+    ListFeedbackClassify,
+    UpdateFeedbackClassify
+  } from '@/api/manager/feedback/api'
+  import {
+    CreateFeedbackClassifyRequest,
+    FeedbackClassify,
+    UpdateFeedbackClassifyRequest
+  } from '@/api/manager/feedback/type'
   import { Delete } from '@element-plus/icons-vue'
-  import { formatTime } from '@/utils/time'
+  import { parseTime } from '@/utils/time'
 
-  defineOptions({ name: 'DeptClassify' })
+  defineOptions({ name: 'FeedbackClassify' })
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const currentData = ref<Partial<DeptClassify>>({})
+  const currentData = ref<Partial<FeedbackClassify>>({})
 
   // 搜索表单
   const searchForm = ref({
@@ -108,27 +117,6 @@
         placeholder: '请输入分类名称',
         rules: [{ required: true, message: '请输入分类名称', trigger: ['blur', 'change'] }]
       }
-    },
-    {
-      key: 'description',
-      label: '分类描述',
-      type: 'input',
-      props: {
-        placeholder: '请输入分类描述',
-        rules: [{ required: true, message: '请输入分类描述', trigger: ['blur', 'change'] }],
-        type: 'textarea'
-      }
-    },
-    {
-      key: 'weight',
-      label: '分类权重',
-      type: 'number',
-      defaultValue: 0,
-      props: {
-        placeholder: '请输入分类权重',
-        style: { width: '100%' },
-        rules: [{ required: true, message: '请输入分类描述', trigger: ['blur', 'change'] }]
-      }
     }
   ])
 
@@ -137,8 +125,8 @@
       icon: Edit,
       label: '修改分类',
       color: 'warning',
-      permission: 'manager:dept:classify:update',
-      click: async (record: DeptClassify) => {
+      permission: 'manager:feedback:classify:update',
+      click: async (record: FeedbackClassify) => {
         showDialog('edit', record)
       }
     },
@@ -147,9 +135,9 @@
       popConfirm: true,
       label: '删除分类',
       color: 'danger',
-      permission: 'manager:dept:classify:delete',
-      click: async (record: DeptClassify) => {
-        await DeleteDeptClassify({ id: record.id })
+      permission: 'manager:feedback:classify:delete',
+      click: async (record: FeedbackClassify) => {
+        await DeleteFeedbackClassify({ id: record.id })
         refreshRemove()
       }
     }
@@ -173,7 +161,7 @@
   } = useTable({
     // 核心配置
     core: {
-      apiFn: ListDeptClassify,
+      apiFn: ListFeedbackClassify,
       apiParams: {
         page: 1,
         pageSize: 10,
@@ -190,24 +178,16 @@
           label: '分类名称'
         },
         {
-          prop: 'description',
-          label: '分类描述'
-        },
-        {
-          prop: 'weight',
-          label: '分类权重'
-        },
-        {
           prop: 'createdAt',
           label: '创建时间',
           sortable: true,
-          formatter: (row: DeptClassify) => formatTime(row.createdAt)
+          formatter: (row: FeedbackClassify) => parseTime(row.createdAt)
         },
         {
           prop: 'updatedAt',
           label: '修改时间',
           sortable: true,
-          formatter: (row: DeptClassify) => formatTime(row.updatedAt)
+          formatter: (row: FeedbackClassify) => parseTime(row.updatedAt)
         },
         {
           prop: 'operation',
@@ -228,7 +208,7 @@
   }
 
   // 显示用户弹窗
-  const showDialog = (type: Form.DialogType, row?: DeptClassify): void => {
+  const showDialog = (type: Form.DialogType, row?: FeedbackClassify): void => {
     dialogType.value = type
     currentData.value = row || {}
     nextTick(() => {
@@ -240,11 +220,11 @@
   const handleSubmit = async () => {
     const value = currentData.value
     if (dialogType.value === 'add') {
-      await CreateDeptClassify(value as CreateDeptClassifyRequest)
+      await CreateFeedbackClassify(value as CreateFeedbackClassifyRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateDeptClassify(value as UpdateDeptClassifyRequest)
+      await UpdateFeedbackClassify(value as UpdateFeedbackClassifyRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }

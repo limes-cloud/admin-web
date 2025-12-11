@@ -60,12 +60,12 @@
           </div>
         </div>
         <!-- 通知 -->
-        <!-- <div class="btn-box notice-btn" v-if="shouldShowNotification" @click="visibleNotice">
+        <div class="btn-box notice-btn" v-if="shouldShowNotification" @click="visibleNotice">
           <div class="btn notice-button">
             <i class="iconfont-sys notice-btn">&#xe6c2;</i>
             <span class="count notice-btn"></span>
           </div>
-        </div> -->
+        </div>
         <!-- 聊天 -->
         <!-- <div class="btn-box chat-btn" v-if="shouldShowChat" @click="openChat">
           <div class="btn chat-button">
@@ -154,6 +154,10 @@
                     <i class="menu-icon iconfont-sys">&#xe734;</i>
                     <span class="menu-txt">{{ $t('topBar.user.userCenter') }}</span>
                   </li>
+                  <li @click="openFeedback">
+                    <i class="menu-icon iconfont-sys">&#xe6bb;</i>
+                    <span class="menu-txt">{{ $t('topBar.user.feedback') }}</span>
+                  </li>
                   <!-- <li @click="toDocs()">
                     <i class="menu-icon iconfont-sys" style="font-size: 15px">&#xe828;</i>
                     <span class="menu-txt">{{ $t('topBar.user.docs') }}</span>
@@ -181,7 +185,7 @@
 
     <ArtNotification v-model:value="showNotice" ref="notice" />
 
-    <!-- 新增/修改弹窗 -->
+    <!-- 用户中心弹窗 -->
     <ElDialog
       v-model="userDialogVisible"
       title="用户信息"
@@ -195,6 +199,18 @@
         <div class="my-header"> </div>
       </template>
       <ArtUserCenter @close="userDialogVisible = false" />
+    </ElDialog>
+
+    <!-- 新增/修改弹窗 -->
+    <ElDialog
+      v-model="feedbackDialogVisible"
+      title="问题反馈"
+      :destroy-on-close="true"
+      body-class="art-form-dialog"
+      width="380px"
+      align-center
+    >
+      <ArtFeedback @close="feedbackDialogVisible = false" />
     </ElDialog>
   </div>
 </template>
@@ -234,6 +250,7 @@
   defineOptions({ name: 'ArtHeaderBar' })
 
   const userDialogVisible = ref(false)
+  const feedbackDialogVisible = ref(false)
 
   // 检测操作系统类型
   const isWindows = navigator.userAgent.includes('Windows')
@@ -255,7 +272,7 @@
     shouldShowBreadcrumb,
     shouldShowGlobalSearch,
     shouldShowFullscreen,
-    // shouldShowNotification,
+    shouldShowNotification,
     // shouldShowChat,
     shouldShowLanguage,
     shouldShowSettings,
@@ -318,6 +335,15 @@
    */
   const openUserCenter = (): void => {
     userDialogVisible.value = true
+    userMenuPopover.value.hide()
+  }
+
+  /**
+   * 页面跳转
+   * @param {string} path - 目标路径
+   */
+  const openFeedback = (): void => {
+    feedbackDialogVisible.value = true
     userMenuPopover.value.hide()
   }
 
@@ -411,6 +437,19 @@
    */
   const bodyCloseNotice = (e: any): void => {
     let { className } = e.target
+    try {
+      // 判断是否存在dialog-btn类名
+      let target = e.target.parentNode
+      while (target.parentNode != null) {
+        let cn = target.parentNode.className
+        if (cn.indexOf('dialog') !== -1) {
+          return
+        }
+        target = target.parentNode
+      }
+    } catch {
+      // do nothing
+    }
 
     if (showNotice.value) {
       if (typeof className === 'object') {
@@ -426,9 +465,9 @@
   /**
    * 切换通知面板显示状态
    */
-  // const visibleNotice = (): void => {
-  //   showNotice.value = !showNotice.value
-  // }
+  const visibleNotice = (): void => {
+    showNotice.value = !showNotice.value
+  }
 
   /**
    * 打开聊天窗口

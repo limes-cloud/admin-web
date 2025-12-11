@@ -20,6 +20,7 @@
     },
     "user": {
       "userCenter": "个人中心",
+      "feedback": "问题反馈",
       "docs": "使用文档",
       "github": "Github",
       "lockScreen": "锁定屏幕",
@@ -210,6 +211,9 @@
     },
     "bind": {
       "title": "绑定账号"
+    },
+    "fillInfo": {
+      "title": "信息补充"
     },
     "forgetPassword": {
       "title": "忘记密码"

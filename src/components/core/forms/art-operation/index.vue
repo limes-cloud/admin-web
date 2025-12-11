@@ -1,7 +1,7 @@
 <!-- 更多按钮 -->
 <template>
   <div class="btn-more">
-    <ElDropdown v-if="single || rl.length > 1">
+    <ElDropdown v-if="single || rl.length > 2">
       <template v-if="$slots.default">
         <slot></slot>
       </template>
@@ -31,7 +31,7 @@
         </ElDropdownMenu>
       </template>
     </ElDropdown>
-    <div v-else style="text-align: center">
+    <template v-else>
       <template v-for="(item, index) in rl" :key="index">
         <div class="custom-el-button">
           <ElButton
@@ -43,7 +43,7 @@
           ></ElButton>
         </div>
       </template>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -175,7 +175,6 @@
   .btn-more {
     display: flex;
     align-items: center;
-    justify-content: center;
   }
 
   .dropdown-item-content {
@@ -185,6 +184,8 @@
   }
 
   .custom-el-button {
+    margin-right: 8px;
+
     :deep(.el-button) {
       width: 32px !important;
       height: 32px !important;

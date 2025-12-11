@@ -128,10 +128,10 @@ const getFormItemByField = (field: Field, pre: string): FormItem => {
   }
 }
 
-export const toFormItems = (fields: Field[]): FormItem[] => {
+export const toFormItems = (fields: Field[], pre = 'infos'): FormItem[] => {
   const formItems: FormItem[] = []
   fields.forEach((field) => {
-    const formItem = getFormItemByField(field, 'infos')
+    const formItem = getFormItemByField(field, pre)
     if (Object.keys(formItem).length > 0) {
       formItems.push(formItem)
     }

@@ -20,6 +20,7 @@
     },
     "user": {
       "userCenter": "User center",
+      "feedback": "Feedback",
       "docs": "Document",
       "github": "Github",
       "lockScreen": "Lock screen",
@@ -210,6 +211,9 @@
     },
     "bind": {
       "title": "Bind Account"
+    },
+    "fillInfo": {
+      "title": "Fill Info"
     },
     "forgetPassword": {
       "title": "Forget Password"

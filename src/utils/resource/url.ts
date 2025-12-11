@@ -1,4 +1,7 @@
 export const rurl = (key: string, w?: number, h?: number) => {
+  if (!key) {
+    return ''
+  }
   if (key.startsWith('http')) {
     return key
   }

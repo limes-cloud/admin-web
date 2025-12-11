@@ -2,8 +2,11 @@ import request from '@/utils/http'
 import {
   BindReply,
   BindRequest,
+  FillInfoItem,
+  FillInfoRequest,
   GetImageCaptchaReply,
   GetImageCaptchaRquest,
+  ListFillInfoRequest,
   ListOAutherRequest,
   LoginReply,
   LoginRequest,
@@ -15,6 +18,7 @@ import {
   RegisterReply,
   RegisterRequest
 } from './type'
+
 // GetImageCaptcha 获取图像验证码
 export function GetImageCaptcha(params: GetImageCaptchaRquest) {
   return request.get<GetImageCaptchaReply>({ url: '/manager/api/authorize/captcha/image', params })
@@ -44,4 +48,14 @@ export function ListOAuther(params: ListOAutherRequest) {
 // ListOAuther 获取租户应用授权信息列表
 export function OAutherHandle(params: OAutherHandleRequest) {
   return request.post<OAutherHandleReply>({ url: '/manager/api/authorize/oauther/handler', params })
+}
+
+// GetFileInfo 获取租户应用授权信息列表
+export function ListFileInfo(params: ListFillInfoRequest) {
+  return request.get<{ list: FillInfoItem[] }>({ url: '/manager/api/authorize/fill/infos', params })
+}
+
+// FillInfo 补充用户信息
+export function FillInfo(params: FillInfoRequest) {
+  return request.post<{ token: string }>({ url: '/manager/api/authorize/fill/infos', params })
 }
