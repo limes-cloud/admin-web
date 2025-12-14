@@ -78,13 +78,16 @@ export interface OAutherHandleReply {
   codeField: string
 }
 
-export interface OAutherLoginRequest {
-  tenant: string
-  app: string
-  keyword: string
+export interface OAutherReportRequest {
   uuid: string
+  code?: string
+}
+
+export interface OAutherLoginRequest {
+  uuid: string
+  keyword?: string
   account?: string
-  code: string
+  code?: string
 }
 
 export interface OAutherLoginReply {

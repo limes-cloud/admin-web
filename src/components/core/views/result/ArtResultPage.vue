@@ -1,13 +1,15 @@
 <template>
-  <div class="page-content" :class="type">
-    <i class="iconfont-sys icon" v-html="iconCode"></i>
-    <h1 class="title">{{ title }}</h1>
-    <p class="msg">{{ message }}</p>
-    <div class="res">
-      <slot name="content"></slot>
-    </div>
-    <div class="btn-group">
-      <slot name="buttons"></slot>
+  <div class="page-content">
+    <div class="box" :class="type">
+      <i class="iconfont-sys icon" v-html="iconCode"></i>
+      <h1 class="title">{{ title }}</h1>
+      <p class="msg">{{ message }}</p>
+      <div class="res">
+        <slot name="content"></slot>
+      </div>
+      <div class="btn-group">
+        <slot name="buttons"></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -37,8 +39,13 @@
 <style lang="scss" scoped>
   .page-content {
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
     padding: 15px 100px !important;
     text-align: center;
+    border: none !important;
 
     .icon {
       display: block;

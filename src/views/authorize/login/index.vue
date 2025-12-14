@@ -12,33 +12,54 @@
           <ThemeSvg :src="loginIcon" size="100%" />
         </div>
         <div class="login-wrap">
-          <div class="password-back" v-if="oauthWay.action !== 'password'">
-            <el-tag @click="handleCallbackPassword">
-              <div class="password-back-text">
-                <ArtIcon value="iconsys-zuo2"></ArtIcon>
-                密码登陆
-              </div>
-            </el-tag>
-          </div>
+          <template v-if="oauthWay.action !== 'password'">
+            <div class="password-back">
+              <ElTag @click="handleCallbackPassword">
+                <div class="password-back-text">
+                  <ArtIcon value="iconsys-zuo2"></ArtIcon>
+                  密码登陆
+                </div>
+              </ElTag>
+            </div>
+          </template>
 
-          <div class="form" v-if="oauthWay.action === 'password'">
-            <PasswordLogin
-              :data="loginData"
-              @success="handleLogin"
-              @info="handleFillInfo"
-              @change-tenant="handleChangeTenant"
-            />
-          </div>
-          <div class="form" v-if="oauthWay.action === 'captcha'">
-            <CaptchaLogin
-              type="email"
-              :data="loginData"
-              :oauther="currentOAuther"
-              @bind="handleBind"
-              @info="handleFillInfo"
-              @success="handleLogin"
-            />
-          </div>
+          <!-- 密码登陆 -->
+          <template v-if="oauthWay.action === 'password'">
+            <div class="form">
+              <PasswordLogin
+                :data="loginData"
+                @success="handleLogin"
+                @info="handleFillInfo"
+                @change-tenant="handleChangeTenant"
+              />
+            </div>
+          </template>
+
+          <!-- 验证码登陆 -->
+          <template v-if="oauthWay.action === 'captcha'">
+            <div class="form">
+              <CaptchaLogin
+                type="email"
+                :data="loginData"
+                :oauther="currentOAuther"
+                @bind="handleBind"
+                @info="handleFillInfo"
+                @success="handleLogin"
+              />
+            </div>
+          </template>
+
+          <template v-if="oauthWay.action === 'scan'">
+            <div class="form">
+              <QRCodeLogin
+                :data="oauthWay"
+                @bind="handleBind"
+                @info="handleFillInfo"
+                @success="handleLogin"
+              ></QRCodeLogin>
+            </div>
+          </template>
+
           <div class="footer" v-if="!appStore.app.private">
             <p>
               还没有账号？
@@ -65,16 +86,19 @@
 
 <script setup lang="ts">
   import loginIcon from '@imgs/svg/login_icon.svg'
+  import Background from '@/views/authorize/background/index.vue'
   import PasswordLogin from './action/password.vue'
   import CaptchaLogin from './action/captcha.vue'
+  import QRCodeLogin from './action/qrcode.vue'
+
   import { ElMessageBox } from 'element-plus'
   import { useStorage } from '@vueuse/core'
-  import { ListOAuther, OAutherHandle } from '@/api/manager/authorize/api'
+  import { ListOAuther, OAutherHandle, OAutherLogin, OAutherReport } from '@/api/manager/authorize/api'
   import { OAuther, OAutherHandleReply } from '@/api/manager/authorize/type'
   import { useUserStore } from '@/store/modules/user'
   import { useAppStore } from '@/store/modules/app'
   import { ListAppTenant } from '@/api/manager/tenant/api'
-  import Background from '@/views/authorize/background/index.vue'
+  import { getURLParameters } from '@/utils'
 
   const appStore = useAppStore()
   const userStore = useUserStore()
@@ -122,9 +146,9 @@
   }
 
   const handleBind = (uuid: string) => {
-    ElMessageBox.confirm('当前邮箱未绑定账号，立即跳转绑定', '温馨提示', {
+    ElMessageBox.confirm('当前渠道未绑定账号，立即跳转绑定', '温馨提示', {
+      showCancelButton: false,
       confirmButtonText: '确认',
-      cancelButtonText: '取消',
       type: 'warning'
     }).then(async () => {
       router.push({
@@ -135,26 +159,38 @@
   }
 
   const handleFillInfo = (uuid: string) => {
-    router.push({
-      name: 'FillInfo',
-      query: { uuid }
+    ElMessageBox.confirm('当前账号存在信息未补全，为了更好体验请立即前往补充信息', '温馨提示', {
+      showCancelButton: false,
+      confirmButtonText: '确认',
+      type: 'warning'
+    }).then(async () => {
+      router.push({
+        name: 'FillInfo',
+        query: { uuid }
+      })
     })
   }
 
   const handleLogin = async (token: string, value: any) => {
     // 获取需要保存的字段
-    const saveKeys = value.saveKeys
     const saveObject: any = {}
-    saveKeys.forEach((key: string) => {
-      saveObject[key] = value[key]
-    })
 
-    // 删除saveKeys字段
-    delete value.saveKeys
+    if (value && value.saveKeys) {
+      const saveKeys = value.saveKeys
+      saveKeys.forEach((key: string) => {
+        saveObject[key] = value[key]
+      })
+      // 删除saveKeys字段
+      delete value.saveKeys
+    }
+
+    // 赋值
     Object.assign(accountConfig.value, saveObject)
 
     // 登陆
     await userStore.login(token)
+
+    // 跳转到主页
     router.push('/')
   }
 
@@ -175,13 +211,16 @@
 
   // 三方授权相关
   const currentOAuther = ref<OAuther>({} as OAuther)
-  // const currentOAutherLogin = ref<OAutherLoginRequest>()
+
   const captchaTypes = ['email']
   const oauthWay = ref<OAutherHandleReply>({ action: 'password' } as OAutherHandleReply)
 
+  // 切换到密码登陆
   const handleCallbackPassword = () => {
     oauthWay.value = { action: 'password' } as OAutherHandleReply
   }
+
+  // 处理三方授权
   const handleGetOAuthWay = async (oa: OAuther) => {
     const { type, keyword } = oa
     currentOAuther.value = oa
@@ -201,17 +240,101 @@
     }
 
     oauthWay.value = data
-    // currentOAutherLogin.value = {
-    //   keyword: data.keyword,
-    //   uuid: data.uuid,
-    //   code: ''
-    // }
   }
+
+  const handleInit = async (params: Record<string, any>) => {
+    const getCode = async (keyword: string, query: Record<string, any>) => {
+      return query[keyword] || ''
+    }
+
+    // 后续适配新的url在这里添加
+    const getCustomValue = (query: Record<string, any>) => {
+      return (query.state as string) || ''
+    }
+
+    // 获取自定义字段数据
+    const state = getCustomValue(params)
+    const [keyword, action, uuid, codeField] = state.split('.')
+    // 数据格式错误则直接返回
+    if (!keyword || !action || !uuid) return
+
+    // 获取当前keyword对应的数据code
+    const code = await getCode(codeField, params)
+    if (!code.length) return
+
+    // 如果之前是跳转，则直接进行登陆
+    if (action === 'jump') {
+      // 三方直接登陆
+      const data = await OAutherLogin({ uuid, code })
+      if (data.needBind) {
+        handleBind(uuid)
+        return
+      }
+      if (data.needInfo) {
+        handleFillInfo(uuid)
+        return
+      }
+
+      userStore.setToken(data.token as string)
+      return
+    }
+
+    // 如果之前是扫码，则上报扫码信息
+    if (action === 'scan') {
+      OAutherReport({ uuid, code }).then(() => {
+        router.push({
+          name: 'Result',
+          query: {
+            type: 'success',
+            title: '扫码成功',
+            message: '请确认扫码结果'
+          }
+        })
+      })
+    }
+  }
+
+  const getParams = () => {
+    const params = getURLParameters(window.location.href)
+    const keys = Object.keys(params)
+    keys.forEach((key) => {
+      params[key] = decodeURIComponent(params[key])
+      // 移除#后的数据
+      params[key] = params[key].split('#')[0]
+    })
+    return params
+  }
+
+  // 定期刷新二维码，防止登陆失效
+  const timer = ref()
+  const initer = ref(true)
+  watch(
+    () => oauthWay.value,
+    () => {
+      if (oauthWay.value.action === 'scan') {
+        if (initer.value) return
+        initer.value = false
+        timer.value = setInterval(async () => {
+          const data = await OAutherHandle({
+            keyword: oauthWay.value.keyword,
+            tenant: tenantConfig.value.tenant,
+            app: appStore.keyword
+          })
+          oauthWay.value = data
+        }, 1000 * 180)
+      } else {
+        clearInterval(timer.value)
+      }
+    }
+  )
 
   onMounted(() => {
     if (tenantConfig.value.tenant) handleGetOAuther()
 
     getDate()
+
+    // 初始化回调
+    handleInit(getParams())
   })
 </script>
 

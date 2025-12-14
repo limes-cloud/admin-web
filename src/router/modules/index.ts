@@ -1,11 +1,9 @@
 import { AppRouteRecord } from '@/types/router'
 import { dashboardRoutes } from './dashboard'
 import { systemRoutes } from './system'
-import { partyAffairsRoutes } from './partyaffairs'
-// import { resultRoutes } from './result'
-// import { exceptionRoutes } from './exception'
+import { resultRoutes } from './result'
 
 /**
  * 导出所有模块化路由
  */
-export const routeModules: AppRouteRecord[] = [dashboardRoutes, systemRoutes, partyAffairsRoutes]
+export const routeModules: AppRouteRecord[] = [dashboardRoutes, systemRoutes, resultRoutes]

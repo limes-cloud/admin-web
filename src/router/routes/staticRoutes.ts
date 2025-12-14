@@ -67,6 +67,12 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     meta: { title: '500', isHideTab: true }
   },
   {
+    path: '/result',
+    name: 'Result',
+    component: () => import('@views/result/index.vue'),
+    meta: { title: '结果页', isHideTab: true }
+  },
+  {
     path: '/outside',
     component: () => import('@views/index/index.vue'),
     name: 'Outside',

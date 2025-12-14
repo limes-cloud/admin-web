@@ -39,7 +39,7 @@
     max-width: 600px;
     padding: 25px;
     margin: auto;
-    background: #fff;
+    background: var(--el-bg-color);
     border-radius: 8px;
 
     .register-box {
@@ -52,7 +52,7 @@
 
       .register-title {
         margin-bottom: 5px;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
       }
 
@@ -119,6 +119,7 @@
 
     .register-plan {
       box-sizing: border-box;
+      max-width: calc(100% - 40px) !important;
       padding: 15px 30px;
       margin: auto;
 

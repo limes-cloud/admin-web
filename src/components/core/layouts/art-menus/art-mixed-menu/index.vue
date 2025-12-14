@@ -278,7 +278,7 @@
             right: 0;
             bottom: 0;
             left: 0;
-            width: 40px;
+            width: calc(100% - 22px);
             height: 2px;
             margin: auto;
             content: '';

@@ -7,14 +7,16 @@ $menu-icon-size: 20px; // 菜单图标大小
 $menu-font-size: 14px; // 菜单字体大小
 $hover-bg-color: rgba(var(--art-gray-200-rgb), 0.8); // 鼠标移入背景色
 
-.el-menu-item.is-active {
-  .icon {
-    color: var(--main-color) !important;
-  }
+.el-menu--vertical:not(.el-menu-dark) {
+  .el-menu-item.is-active {
+    .icon {
+      color: var(--main-color);
+    }
 
-  .menu-title,
-  .menu-name {
-    color: var(--main-color) !important;
+    .menu-title,
+    .menu-name {
+      color: var(--main-color);
+    }
   }
 }
 

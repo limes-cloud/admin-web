@@ -213,8 +213,6 @@
     }
 
     OAutherLogin({
-      tenant: props.data.tenant,
-      app: props.data.app,
       keyword: props.oauther.keyword,
       uuid: formData.captchaId,
       code: formData.captcha as string,

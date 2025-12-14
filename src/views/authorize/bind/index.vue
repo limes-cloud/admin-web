@@ -126,7 +126,7 @@
 
     Bind({ uuid, ...formData } as BindRequest)
       .then(async (res: BindReply) => {
-        ElMessage.success('注册成功')
+        ElMessage.success('绑定成功')
         await userStore.login(res.token)
         router.push('/')
       })

@@ -416,7 +416,6 @@
       icon: 'iconsys-anquan_2',
       label: '授权管理',
       color: 'primary',
-      permission: 'manager:appoauther:query',
       click: async (record: App) => {
         router.push({
           name: 'AppOAuther',

@@ -15,6 +15,7 @@ import {
   OAutherHandleRequest,
   OAutherLoginReply,
   OAutherLoginRequest,
+  OAutherReportRequest,
   RegisterReply,
   RegisterRequest
 } from './type'
@@ -24,8 +25,16 @@ export function GetImageCaptcha(params: GetImageCaptchaRquest) {
   return request.get<GetImageCaptchaReply>({ url: '/manager/api/authorize/captcha/image', params })
 }
 
-export function OAutherLogin(data: OAutherLoginRequest) {
-  return request.post<OAutherLoginReply>({ url: '/manager/api/authorize/oauther/login', data })
+export function OAutherLogin(data: OAutherLoginRequest, showError = true) {
+  return request.post<OAutherLoginReply>({
+    url: '/manager/api/authorize/oauther/login',
+    data,
+    showErrorMessage: showError
+  })
+}
+
+export function OAutherReport(data: OAutherReportRequest) {
+  return request.post({ url: '/manager/api/authorize/oauther/report', data })
 }
 
 export function Login(data: LoginRequest) {
