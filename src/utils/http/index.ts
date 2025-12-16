@@ -87,12 +87,13 @@ axiosInstance.interceptors.response.use(
 
           return RefreshToken()
             .then(async (res) => {
+              isRefresh = false
               // 处理刷新成功
               const userStore = useUserStore()
               await userStore.login(res.token)
               requests.forEach((cb: any) => cb(res.token))
               requests = []
-              return axios(response)
+              return axios(response) as any
             })
             .catch(() => {
               // 刷新失败，弹窗处理
@@ -101,13 +102,12 @@ axiosInstance.interceptors.response.use(
                 type: 'warning',
                 showCancelButton: false
               }).then(async () => {
+                isRefresh = false
                 // 清空数据
                 await useUserStore().logout()
                 window.location.reload()
+                return Promise.reject(message)
               })
-            })
-            .finally(() => {
-              isRefresh = false
             })
         }
         return new Promise((resolve) => {
