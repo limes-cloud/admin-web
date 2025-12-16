@@ -7,6 +7,8 @@ declare namespace Http {
     message: string
     // 数据
     data: T
+    // 错误原因
+    reason: string
     // 链路ID
     traceId?: string
   }

@@ -41,6 +41,14 @@ export function Login(data: LoginRequest) {
   return request.post<LoginReply>({ url: '/manager/api/authorize/login', data })
 }
 
+export function Logout() {
+  return request.post({ url: '/manager/api/authorize/logout' })
+}
+
+export function RefreshToken() {
+  return request.post<LoginReply>({ url: '/manager/api/authorize/token/refresh' })
+}
+
 export function Register(data: RegisterRequest) {
   return request.post<RegisterReply>({ url: '/manager/api/authorize/register', data })
 }

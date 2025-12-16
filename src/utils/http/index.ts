@@ -3,6 +3,7 @@ import { useUserStore } from '@/store/modules/user'
 import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
 import { $t } from '@/locales'
+import { RefreshToken } from '@/api/manager/authorize/api'
 
 /** 请求配置常量 */
 const REQUEST_TIMEOUT = 15000
@@ -28,7 +29,7 @@ const axiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT,
   baseURL: VITE_API_URL,
   withCredentials: VITE_WITH_CREDENTIALS === 'true',
-  validateStatus: (status) => status >= 200 && status < 300,
+  validateStatus: (status) => status >= 200 && status <= 403,
   transformResponse: [
     (data, headers) => {
       const contentType = headers['content-type']
@@ -50,6 +51,10 @@ axiosInstance.interceptors.request.use(
     const { accessToken } = useUserStore()
     if (accessToken) request.headers.set('Authorization', accessToken)
 
+    if (!request.data) {
+      request.data = {}
+    }
+
     if (request.data && !(request.data instanceof FormData) && !request.headers['Content-Type']) {
       request.headers.set('Content-Type', 'application/json')
       request.data = JSON.stringify(request.data)
@@ -63,12 +68,57 @@ axiosInstance.interceptors.request.use(
   }
 )
 
+// 是否正在刷新的标记
+let isRefresh = false
+// 重试队列，每一项将是一个待执行的函数形式
+let requests: any = []
+
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse<Http.BaseResponse>) => {
-    const { code, message } = response.data
+    const { code, message, reason } = response.data
     if (code === ApiStatus.success) return response
-    if (code === ApiStatus.unauthorized) handleUnauthorizedError(message)
+    if (code === ApiStatus.unauthorized) {
+      // 401未授权，存在登录过期情况
+      const { accessToken } = useUserStore()
+      if (response.status === 401 && reason === 'UNAUTHORIZED' && accessToken) {
+        if (!isRefresh) {
+          isRefresh = true
+
+          return RefreshToken()
+            .then(async (res) => {
+              // 处理刷新成功
+              const userStore = useUserStore()
+              await userStore.login(res.token)
+              requests.forEach((cb: any) => cb(res.token))
+              requests = []
+              return axios(response)
+            })
+            .catch(() => {
+              // 刷新失败，弹窗处理
+              ElMessageBox.confirm('登录状态已失效，请重新登录', '温馨提示', {
+                confirmButtonText: '确认',
+                type: 'warning',
+                showCancelButton: false
+              }).then(async () => {
+                // 清空数据
+                await useUserStore().logout()
+                window.location.reload()
+              })
+            })
+            .finally(() => {
+              isRefresh = false
+            })
+        }
+        return new Promise((resolve) => {
+          requests.push(() => {
+            resolve(axios(response))
+          })
+        })
+      }
+
+      handleUnauthorizedError(message)
+    }
     throw createHttpError(message || $t('httpMsg.requestFailed'), code)
   },
   (error) => {

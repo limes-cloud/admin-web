@@ -10,6 +10,7 @@ import { resetRouterState } from '@/router/guards/beforeEach'
 import { useMenuStore } from './menu'
 import { GetCurrentUser } from '@/api/manager/user/api'
 import { User } from '@/api/manager/user/type'
+import { Logout } from '@/api/manager/authorize/api'
 
 /**
  * 用户状态管理
@@ -116,7 +117,10 @@ export const useUserStore = defineStore(
      * 退出登录
      * 清空所有用户相关状态并跳转到登录页
      */
-    const logout = () => {
+    const logout = async () => {
+      // 调用退出登陆接口
+      await Logout()
+
       // 清空用户信息
       info.value = {}
       // 重置登录状态
