@@ -125,7 +125,7 @@
   const getTenants = async () => {
     const data = await ListAppTenant({ app: appStore.keyword })
     loginData.value.tenants = data.list
-    loginData.value.selectTenant = appStore.app.setting?.tenant.mode == 'select'
+    loginData.value.selectTenant = appStore.app.selectTenant
   }
   getTenants()
 

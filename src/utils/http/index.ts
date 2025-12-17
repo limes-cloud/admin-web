@@ -71,7 +71,7 @@ axiosInstance.interceptors.request.use(
 // 是否正在刷新的标记
 let isRefresh = false
 // 重试队列，每一项将是一个待执行的函数形式
-let requests: any = []
+let requests: Array<(token: string) => void> = []
 
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
@@ -82,6 +82,8 @@ axiosInstance.interceptors.response.use(
       // 401未授权，存在登录过期情况
       const { accessToken } = useUserStore()
       if (response.status === 401 && reason === 'UNAUTHORIZED' && accessToken) {
+        const originalRequest = response.config
+
         if (!isRefresh) {
           isRefresh = true
 
@@ -90,10 +92,13 @@ axiosInstance.interceptors.response.use(
               isRefresh = false
               // 处理刷新成功
               const userStore = useUserStore()
-              await userStore.login(res.token)
-              requests.forEach((cb: any) => cb(res.token))
+              userStore.setToken(res.token)
+              // 执行队列中的请求
+              requests.forEach((cb) => cb(res.token))
               requests = []
-              return axios(response) as any
+              // 重新执行当前请求
+              originalRequest.headers['Authorization'] = res.token
+              return axiosInstance(originalRequest) as any
             })
             .catch(() => {
               // 刷新失败，弹窗处理
@@ -111,8 +116,9 @@ axiosInstance.interceptors.response.use(
             })
         }
         return new Promise((resolve) => {
-          requests.push(() => {
-            resolve(axios(response))
+          requests.push((token) => {
+            originalRequest.headers['Authorization'] = token
+            resolve(axiosInstance(originalRequest))
           })
         })
       }

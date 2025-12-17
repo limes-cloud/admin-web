@@ -109,8 +109,8 @@ export const useUserStore = defineStore(
       setToken(token)
 
       const data = await GetCurrentUser()
-      console.log(data)
       setLoginStatus(true)
+      setUserInfo(data)
     }
 
     /**

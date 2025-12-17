@@ -40,6 +40,7 @@ export interface App {
   description?: string
   copyright?: string
   watermark?: string
+  selectTenant?: boolean
   createdAt: number
   updatedAt: number
 }
