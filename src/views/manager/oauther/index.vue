@@ -139,7 +139,8 @@
     types.value = res.list
   })
 
-  const formItems = computed(() => [
+  const hasCallbackTypes = ['yiban', 'wx_service_account']
+  const formItems = reactive([
     {
       key: 'logo',
       label: '授权logo',
@@ -181,7 +182,7 @@
       label: '授权类型',
       type: 'select',
       props: {
-        options: types.value,
+        options: types,
         placeholder: '请选择授权类型',
         rules: [{ required: true, message: '请选择授权名称', trigger: ['blur', 'change'] }],
         props: {
@@ -222,7 +223,7 @@
       key: 'setting.callback',
       label: '回调地址',
       type: 'input',
-      hidden: currentData.value.type == 'email',
+      hidden: !hasCallbackTypes.includes(currentData.value.type as string),
       props: {
         placeholder: '请输入回调地址',
         rules: [

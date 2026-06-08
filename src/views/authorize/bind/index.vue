@@ -76,7 +76,7 @@
   }
 
   const formRef = useTemplateRef('formRef')
-  const formData = reactive<Partial<BindRequest & { register: boolean }>>({})
+  const formData = reactive<Partial<BindRequest>>({})
 
   const rules = computed<FormRules>(() => ({
     username: [

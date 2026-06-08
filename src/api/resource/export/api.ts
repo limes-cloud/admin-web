@@ -17,12 +17,12 @@ export function GetExport(params?: GetExportRequest) {
 
 // ListExport 获取文件目录信息列表
 export function ListExport(params: ListExportRequest) {
-  return request.get<ListExportReply>({ url: '/resource/api/directories', params })
+  return request.get<ListExportReply>({ url: '/resource/api/exports', params })
 }
 
 // ExportFile 创建文件目录信息
 export function ExportFile(data: ExportFileRequest) {
-  return request.post<ExportFileReply>({ url: '/resource/api/export', data })
+  return request.post<ExportFileReply>({ url: '/resource/api/export/file', data })
 }
 
 // DeleteExport 删除文件目录信息

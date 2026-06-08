@@ -260,7 +260,7 @@
   .scroll-dialog,
   .art-form-dialog {
     max-height: 100% !important;
-    height: 100%;
+    height: calc(100% - 40px);
     overflow-y: scroll;
   }
   .scroll-dialog-footer {
@@ -332,4 +332,8 @@
   background-color: #f3f3f3 !important;
   display: flex;
   justify-content: center;
+}
+
+.image-icon{
+    border-radius: 4px  !important;
 }

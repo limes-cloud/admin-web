@@ -81,11 +81,6 @@ export interface Feedback {
   classify?: FeedbackClassify
 }
 
-export interface Channel {
-  id: number
-  name: string
-}
-
 export interface ListFeedbackReply {
   total: number
   list: Feedback[]

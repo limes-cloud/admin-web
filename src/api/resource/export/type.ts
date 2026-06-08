@@ -6,7 +6,6 @@ export interface GetExportRequest {
 export interface GetExportReply {
   id: number
   userId: number
-  DeptId: number
   scene: string
   name: string
   size: number
@@ -33,12 +32,13 @@ export interface ListExportRequest {
 export interface Export {
   id: number
   userId: number
-  DeptId: number
   scene: string
   name: string
   size: number
+  key?: string
   sha?: string
   src?: string
+  url?: string
   status: string
   reason?: string
   expiredAt: number
@@ -53,10 +53,9 @@ export interface ListExportReply {
 
 export interface ExportFileRequest {
   userId: number
-  DeptId: number
   scene: string
   name: string
-  ids: number[]
+  keys: string[]
 }
 
 export interface ExportFileReply {
@@ -68,12 +67,11 @@ export interface ExportFileReply {
 export interface UpdateExportRequest {
   id: number
   userId: number
-  DeptId: number
   scene: string
 }
 
 export interface DeleteExportRequest {
-  ids: number[]
+  id: number
 }
 
 export interface DeleteExportReply {

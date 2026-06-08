@@ -163,7 +163,7 @@
         disabled: dialogType.value === 'edit',
         rules: [
           { required: true, message: '请输入应用标识', trigger: ['blur', 'change'] },
-          { type: 'string', message: '应用标识格式错误', pattern: /^[a-zA-Z_][a-zA-Z0-9_]*$/ }
+          { type: 'string', message: '应用标识格式错误', pattern: /^[a-zA-Z_-][a-zA-Z0-9_-]*$/ }
         ]
       }
     },

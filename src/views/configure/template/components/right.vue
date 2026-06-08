@@ -1,0 +1,111 @@
+<template>
+  <div class="template-right">
+    <div class="section-title">可用变量</div>
+    <div class="search-bar">
+      <ElInput v-model="query.keyword" placeholder="请输入变量名称" clearable style="width:150px" @keyup.enter="search" />
+      <ElButton type="primary" :icon="Search" @click="search" />
+    </div>
+    <ElRadioGroup v-model="variableType" style="width:100%;margin-bottom:8px" @change="search">
+      <ElRadioButton value="business" style="width:50%">业务变量</ElRadioButton>
+      <ElRadioButton value="resource" style="width:50%">资源变量</ElRadioButton>
+    </ElRadioGroup>
+
+    <div class="field-list">
+      <template v-if="variableType === 'business'">
+        <div v-for="item in businessList" :key="item.id" class="var-item">
+          <div class="var-row">
+            <span class="var-label">字段</span>
+            <ElTag class="copy-tag" type="primary" size="small" @click="copyVal(item.keyword)">{{ item.keyword }} <ElIcon><CopyDocument /></ElIcon></ElTag>
+          </div>
+          <div class="var-row"><span class="var-label">说明</span><span class="var-desc">{{ item.description }}</span></div>
+        </div>
+        <ElEmpty v-if="!businessList.length" :image-size="60" description="暂无可用字段" />
+      </template>
+      <template v-else>
+        <div v-for="item in resourceList" :key="item.id" class="var-item">
+          <div class="var-row"><span class="var-label">字段</span><span style="color:var(--el-color-primary)">{{ item.keyword }}</span></div>
+          <div class="var-row"><span class="var-label">说明</span><span class="var-desc">{{ item.description }}</span></div>
+          <ElDivider style="margin:6px 0" />
+          <ElTag
+            v-for="field in item.fields.split(',')"
+            :key="field"
+            class="copy-tag"
+            type="primary"
+            size="small"
+            style="margin:2px"
+            @click="copyVal(`${item.keyword}.${field}`)"
+          >
+            {{ item.keyword }}.{{ field }} <ElIcon><CopyDocument /></ElIcon>
+          </ElTag>
+        </div>
+        <ElEmpty v-if="!resourceList.length" :image-size="60" description="暂无可用字段" />
+      </template>
+    </div>
+
+    <ElPagination
+      v-if="total > 0"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      layout="total, prev, pager, next"
+      small
+      @current-change="(p) => { query.page = p; fetchData() }"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+  import { Search, CopyDocument } from '@element-plus/icons-vue'
+  import { useClipboard } from '@vueuse/core'
+  import { ListBusiness } from '@/api/configure/business/api'
+  import { ListResource } from '@/api/configure/resource/api'
+  import { Business } from '@/api/configure/business/type'
+  import { Resource } from '@/api/configure/resource/type'
+
+  const props = defineProps<{ serverId?: number }>()
+  const { copy } = useClipboard()
+
+  const variableType = ref('business')
+  const total = ref(0)
+  const businessList = ref<Business[]>([])
+  const resourceList = ref<Resource[]>([])
+  const query = ref({ page: 1, pageSize: 10, keyword: '' })
+
+  const fetchData = async () => {
+    if (!props.serverId) return
+    if (variableType.value === 'business') {
+      const res = await ListBusiness({ ...query.value, serverId: props.serverId })
+      businessList.value = res.list
+      total.value = res.total
+    } else {
+      const res = await ListResource({ ...query.value, serverId: props.serverId })
+      resourceList.value = res.list
+      total.value = res.total
+    }
+  }
+
+  const search = () => {
+    query.value.page = 1
+    fetchData()
+  }
+
+  const copyVal = (key: string) => {
+    copy(`\${${key}}`)
+    ElMessage.success('已复制')
+  }
+
+  watch(() => props.serverId, (val) => { if (val) fetchData() })
+</script>
+
+<style scoped>
+  .template-right { display: flex; flex-direction: column; height: 100%; padding: 10px; }
+  .section-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; padding-left: 8px; border-left: 4px solid var(--el-color-primary); }
+  .search-bar { display: flex; gap: 6px; margin-bottom: 8px; }
+  .field-list { flex: 1; overflow-y: auto; margin-bottom: 8px; }
+  .field-list::-webkit-scrollbar { display: none; }
+  .var-item { border: 1px solid var(--el-border-color-lighter); border-radius: 4px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
+  .var-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .var-label { color: var(--el-text-color-secondary); font-weight: 600; width: 28px; flex-shrink: 0; }
+  .var-desc { color: var(--el-text-color-placeholder); font-size: 11px; }
+  .copy-tag { cursor: pointer; }
+</style>

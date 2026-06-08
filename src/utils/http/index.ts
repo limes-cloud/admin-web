@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { useUserStore } from '@/store/modules/user'
+import { matchProxyHost } from '@/utils/proxyRules'
 import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
 import { $t } from '@/locales'
@@ -51,6 +52,12 @@ axiosInstance.interceptors.request.use(
     const { accessToken } = useUserStore()
     if (accessToken) request.headers.set('Authorization', accessToken)
 
+    // 代理规则劫持：匹配则替换 baseURL
+    if (request.url) {
+      const proxyHost = matchProxyHost(request.url)
+      if (proxyHost) request.baseURL = proxyHost
+    }
+
     if (!request.data) {
       request.data = {}
     }
@@ -82,8 +89,6 @@ axiosInstance.interceptors.response.use(
       // 401未授权，存在登录过期情况
       const { accessToken } = useUserStore()
       if (response.status === 401 && reason === 'UNAUTHORIZED' && accessToken) {
-        const originalRequest = response.config
-
         if (!isRefresh) {
           isRefresh = true
 
@@ -97,8 +102,7 @@ axiosInstance.interceptors.response.use(
               requests.forEach((cb) => cb(res.token))
               requests = []
               // 重新执行当前请求
-              originalRequest.headers['Authorization'] = res.token
-              return axiosInstance(originalRequest) as any
+              return axiosInstance(response.config) as any
             })
             .catch(() => {
               // 刷新失败，弹窗处理
@@ -116,9 +120,8 @@ axiosInstance.interceptors.response.use(
             })
         }
         return new Promise((resolve) => {
-          requests.push((token) => {
-            originalRequest.headers['Authorization'] = token
-            resolve(axiosInstance(originalRequest))
+          requests.push(() => {
+            resolve(axiosInstance(response.config))
           })
         })
       }
@@ -128,6 +131,7 @@ axiosInstance.interceptors.response.use(
     throw createHttpError(message || $t('httpMsg.requestFailed'), code)
   },
   (error) => {
+    console.log(error)
     if (error.response?.status === ApiStatus.unauthorized) handleUnauthorizedError()
     return Promise.reject(handleError(error))
   }

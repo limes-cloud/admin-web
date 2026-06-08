@@ -19,14 +19,7 @@
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
             <ElSpace wrap>
-              <ElButton
-                v-permission="'manager:feedback:classify:query'"
-                v-ripple
-                type="success"
-                :icon="Expand"
-                @click="handleJumpClassify"
-                >类型管理</ElButton
-              >
+              <ElButton v-ripple type="success" :icon="Expand" @click="handleJumpClassify">类型管理</ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -245,7 +238,7 @@
 
   const getPlatformName = (p?: string) => {
     if (!p) return ''
-    if (p === 'h5') {
+    if (p === 'h5' || p === 'web') {
       return '浏览器'
     }
     if (p === 'pc-h5') {
@@ -392,13 +385,21 @@
   }
 
   const showMore = (row: Feedback): void => {
+    console.log(row)
     currentData.value = row || {}
     try {
       currentData.value.deviceInfo = JSON.parse(row.device as string)
-      currentData.value.imageUrls = JSON.parse(row.images as string)
     } catch {
       currentData.value.deviceInfo = {}
     }
+
+    try {
+      currentData.value.imageUrls = JSON.parse(row.images as string)
+    } catch {
+      currentData.value.imageUrls = []
+    }
+
+    console.log(currentData.value)
     nextTick(() => {
       moreVisible.value = true
     })

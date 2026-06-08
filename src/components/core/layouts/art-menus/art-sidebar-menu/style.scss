@@ -1,11 +1,15 @@
 @use '@styles/variables.scss' as *;
 
+
 .menu-left-close {
   :deep(.image-icon) {
     width: 32px !important;
     height: 32px !important;
   }
 }
+
+
+
 
 .layout-sidebar {
   display: flex;
@@ -65,7 +69,8 @@
 
             i,
             span {
-              color: #fff !important;
+              // color: #fff !important;
+              color: var(--main-color) !important;
             }
           }
         }

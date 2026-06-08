@@ -86,5 +86,11 @@ export const staticRoutes: AppRouteRecordRaw[] = [
         meta: { title: 'iframe' }
       }
     ]
+  },
+  {
+    path: '/devtools/proxy',
+    name: 'DevProxy',
+    component: () => import('@views/devtools/proxy.vue'),
+    meta: { title: '接口代理配置', isHideTab: true }
   }
 ]

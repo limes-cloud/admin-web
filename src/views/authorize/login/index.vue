@@ -141,7 +141,7 @@
 
   const oauthers = ref<OAuther[]>([])
   const handleGetOAuther = async () => {
-    const data = await ListOAuther({ ...tenantConfig.value })
+    const data = await ListOAuther({ ...tenantConfig.value, platform: 'web' })
     oauthers.value = data.list
   }
 
@@ -232,7 +232,12 @@
     }
 
     // 处理登陆
-    const data = await OAutherHandle({ keyword, tenant: tenantConfig.value.tenant, app: appStore.keyword })
+    const data = await OAutherHandle({
+      keyword,
+      tenant: tenantConfig.value.tenant,
+      app: appStore.keyword,
+      platform: 'web'
+    })
 
     // 跳转的情况下直接跳转
     if (data.action === 'jump') {
@@ -318,7 +323,8 @@
           const data = await OAutherHandle({
             keyword: oauthWay.value.keyword,
             tenant: tenantConfig.value.tenant,
-            app: appStore.keyword
+            app: appStore.keyword,
+            platform: 'web'
           })
           oauthWay.value = data
         }, 1000 * 180)

@@ -220,6 +220,19 @@
     }
   ]
 
+  const normalizeAccept = (accept?: string | string[]): string[] => {
+    if (isArray(accept)) {
+      return accept
+    }
+    if (!accept) {
+      return []
+    }
+    return accept
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+
   const {
     columns,
     data,
@@ -270,10 +283,8 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: Directory): void => {
     dialogType.value = type
-    currentData.value = row || {}
-    if (!isArray(currentData.value.accept)) {
-      currentData.value.accept = (currentData.value.accept as string).split(',')
-    }
+    currentData.value = row ? { ...row } : {}
+    currentData.value.accept = normalizeAccept(currentData.value.accept)
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -282,9 +293,7 @@
   // 处理弹窗提交事件
   const handleSubmit = async () => {
     const value = { ...currentData.value }
-    if (isArray(value.accept)) {
-      value.accept = (value.accept as string[]).join(',')
-    }
+    value.accept = normalizeAccept(value.accept).join(',')
     if (dialogType.value === 'add') {
       await CreateDirectory(value as CreateDirectoryRequest)
       ElMessage.success('创建成功')

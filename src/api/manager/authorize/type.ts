@@ -26,13 +26,12 @@ export interface RegisterReply {
 }
 
 export interface BindRequest {
-  tenant: string
-  app: string
   username: string
   password: string
   captchaId: string
   captcha: string
   uuid: string
+  register: boolean
 }
 
 export interface BindReply {
@@ -60,6 +59,7 @@ export interface OAuther {
 export interface ListOAutherRequest {
   app: string
   tenant: string
+  platform: string
 }
 
 export interface OAutherHandleRequest {
@@ -67,6 +67,7 @@ export interface OAutherHandleRequest {
   app: string
   account?: string
   keyword: string
+  platform: string
 }
 
 export interface OAutherHandleReply {

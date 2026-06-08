@@ -13,10 +13,12 @@ export const rurl = (key: string, w?: number, h?: number) => {
     h = 100
   }
   const suffix = `?width=${w}&height=${h}&mode=fill`
-  return `${VITE_API_URL}/resource/${key}${suffix}`
+  return `${VITE_API_URL}/resource/redirect/${key}${suffix}`
 }
 
 export const durl = (key: string, name?: string) => {
   const { VITE_API_URL } = import.meta.env
-  return `${VITE_API_URL}/resource/${key}?download=true&saveName=${name}`
+  let url = `${VITE_API_URL}/resource/api/file/download?key=${key}`
+  if (name) url += `&saveName=${name}`
+  return url
 }

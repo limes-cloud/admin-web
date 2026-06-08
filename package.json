@@ -62,6 +62,7 @@
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "next",
     "axios": "^1.12.2",
+    "cron-parser": "^5.5.0",
     "crypto-js": "^4.2.0",
     "echarts": "^5.6.0",
     "element-plus": "^2.11.5",

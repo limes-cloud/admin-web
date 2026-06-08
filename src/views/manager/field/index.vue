@@ -96,6 +96,18 @@
           @submit="handleSubmit"
         ></ArtForm>
       </ElDialog>
+
+      <!-- 新增/修改弹窗 -->
+      <ElDialog
+        :modelValue="true"
+        title="表单测试"
+        :destroy-on-close="true"
+        body-class="art-form-dialog"
+        fullscreen
+        align-center
+      >
+        <ArtFormEditor v-model="editForm"></ArtFormEditor>
+      </ElDialog>
     </ElCard>
   </div>
 </template>
@@ -117,6 +129,8 @@
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
   const currentData = ref<Partial<Field>>({})
+
+  const editForm = ref({})
 
   // 搜索表单
   const searchForm = ref({

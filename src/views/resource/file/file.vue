@@ -19,6 +19,9 @@
           <template #left>
             <ElSpace wrap>
               <ElButton v-ripple type="primary" :icon="Plus" @click="showDialog('add')"> 新增文件 </ElButton>
+              <ElButton v-ripple type="success" :icon="Download" :disabled="!selectedRows.length" @click="handleExport">
+                导出所选 ({{ selectedRows.length }})
+              </ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -31,6 +34,7 @@
           :pagination="pagination"
           @pagination:size-change="handleSizeChange"
           @pagination:current-change="handleCurrentChange"
+          @selection-change="selectedRows = $event"
         >
           <template #logo="{ row }">
             <template v-if="isImage(row.key)">
@@ -83,9 +87,21 @@
           :items="formItems"
           :span="24"
           :show-button="false"
+          :disabled-submit="submitting"
           @submit="handleSubmit"
           @cancel="dialogVisible = false"
-        ></ArtForm>
+        >
+          <template #key>
+            <ArtUpload
+              ref="fileUploadRef"
+              v-model="currentData.key"
+              accept="*"
+              list-type="text"
+              :directory-id="props.directoryId"
+              :auto-upload="false"
+            ></ArtUpload>
+          </template>
+        </ArtForm>
       </ElDialog>
 
       <!-- 新增/修改弹窗 -->
@@ -179,21 +195,36 @@
   import { useTable } from '@/composables/useTable'
   import { CopyDocument, Download, Edit, Plus } from '@element-plus/icons-vue'
   import { DeleteFile, ListFile, UpdateFile } from '@/api/resource/file/api'
+  import { ExportFile } from '@/api/resource/export/api'
   import { File, UpdateFileRequest } from '@/api/resource/file/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
   import { getFileSize } from '@/utils/file'
-  import { durl, rurl } from '@/utils/resource/url'
+  import { rurl } from '@/utils/resource/url'
+  import ArtUpload from '@/components/core/forms/art-upload/index.vue'
 
   const props = defineProps<{ directoryId: number }>()
 
   defineOptions({ name: 'File' })
+
+  const selectedRows = ref<File[]>([])
+
+  const handleExport = async () => {
+    await ExportFile({
+      scene: 'resource:file',
+      name: '文件导出',
+      keys: selectedRows.value.map((r) => r.key)
+    } as any)
+    ElMessage.success('导出任务已创建')
+  }
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
   const currentData = ref<Partial<File>>({})
   const previewVisible = ref<boolean>(false)
+  const fileUploadRef = ref<InstanceType<typeof ArtUpload>>()
+  const submitting = ref(false)
 
   // 搜索表单
   const searchForm = ref({
@@ -262,8 +293,7 @@
         accept: '*',
         listType: 'text',
         directoryId: props.directoryId,
-        placeholder: '请输入文件名称',
-        rules: [{ required: true, message: '请输入文件名称', trigger: ['blur', 'change'] }]
+        placeholder: '请选择文件'
       }
     },
     {
@@ -346,6 +376,10 @@
       },
       columnsFactory: () => [
         {
+          type: 'selection',
+          width: 55
+        },
+        {
           prop: 'logo',
           label: '#',
           slotName: 'logo',
@@ -397,6 +431,7 @@
   const showDialog = (type: Form.DialogType, row?: File): void => {
     dialogType.value = type
     currentData.value = row || {}
+    submitting.value = false
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -404,14 +439,28 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
-    if (dialogType.value === 'add') {
-      refreshCreate()
-    } else {
-      await UpdateFile({ ...currentData.value, directoryId: props.directoryId } as UpdateFileRequest)
-      ElMessage.success('修改成功')
-      refreshUpdate()
+    try {
+      submitting.value = true
+      if (dialogType.value === 'add') {
+        const uploadFiles = fileUploadRef.value?.GetUploadList() || []
+        if (uploadFiles.length === 0) {
+          ElMessage.warning('请选择文件')
+          return
+        }
+        fileUploadRef.value?.Upload()
+        await fileUploadRef.value?.WaitUploadSuccess()
+        refreshCreate()
+      } else {
+        await UpdateFile({ ...currentData.value, directoryId: props.directoryId } as UpdateFileRequest)
+        ElMessage.success('修改成功')
+        refreshUpdate()
+      }
+      dialogVisible.value = false
+    } catch {
+      ElMessage.error('上传失败')
+    } finally {
+      submitting.value = false
     }
-    dialogVisible.value = false
   }
 
   watch(
