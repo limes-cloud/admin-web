@@ -1,4 +1,8 @@
 export interface ListEnvRequest {
+  page?: number
+  pageSize?: number
+  order?: string
+  orderBy?: string
   keyword?: string
   name?: string
   status?: boolean
