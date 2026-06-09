@@ -30,7 +30,6 @@
                 :data="loginData"
                 @success="handleLogin"
                 @info="handleFillInfo"
-                @change-tenant="handleChangeTenant"
               />
             </div>
           </template>
@@ -97,24 +96,21 @@
   import { OAuther, OAutherHandleReply } from '@/api/manager/authorize/type'
   import { useUserStore } from '@/store/modules/user'
   import { useAppStore } from '@/store/modules/app'
-  import { ListAppTenant } from '@/api/manager/tenant/api'
   import { getURLParameters } from '@/utils'
 
   const appStore = useAppStore()
   const userStore = useUserStore()
 
   const router = useRouter()
-  const { tenant, app } = router.currentRoute.value.query
+  const { app } = router.currentRoute.value.query
 
-  const tenantConfig = useStorage('login-tenant', {
-    tenant: 'admin',
+  const appConfig = useStorage('login-app', {
     app: 'manager'
   })
 
-  // 如果存在租户和应用参数，则保存
-  if (tenant && app) {
-    tenantConfig.value.tenant = tenant as string
-    tenantConfig.value.app = app as string
+  // 如果存在应用参数，则保存
+  if (app) {
+    appConfig.value.app = app as string
   }
 
   defineOptions({ name: 'Login' })
@@ -122,26 +118,19 @@
   const loginData = ref<any>({})
   let accountConfig: any = undefined
 
-  const getTenants = async () => {
-    const data = await ListAppTenant({ app: appStore.keyword })
-    loginData.value.tenants = data.list
-    loginData.value.selectTenant = appStore.app.selectTenant
-  }
-  getTenants()
-
   const handleChangeLoginType = () => {
-    const key = 'login-config-' + tenantConfig.value.tenant
+    const key = 'login-config-' + appConfig.value.app
     accountConfig = useStorage(key, {
       rememberPassword: true,
       username: ''
     })
-    Object.assign(loginData.value, { ...accountConfig.value, ...tenantConfig.value })
+    Object.assign(loginData.value, { ...accountConfig.value, ...appConfig.value })
   }
   handleChangeLoginType()
 
   const oauthers = ref<OAuther[]>([])
   const handleGetOAuther = async () => {
-    const data = await ListOAuther({ ...tenantConfig.value, platform: 'web' })
+    const data = await ListOAuther({ app: appConfig.value.app, platform: 'web' })
     oauthers.value = data.list
   }
 
@@ -205,10 +194,6 @@
     else welcome.value = '夜已深'
   }
 
-  const handleChangeTenant = (tenant: string) => {
-    tenantConfig.value.tenant = tenant
-  }
-
   // 三方授权相关
   const currentOAuther = ref<OAuther>({} as OAuther)
 
@@ -234,8 +219,7 @@
     // 处理登陆
     const data = await OAutherHandle({
       keyword,
-      tenant: tenantConfig.value.tenant,
-      app: appStore.keyword,
+      app: appConfig.value.app,
       platform: 'web'
     })
 
@@ -322,8 +306,7 @@
         timer.value = setInterval(async () => {
           const data = await OAutherHandle({
             keyword: oauthWay.value.keyword,
-            tenant: tenantConfig.value.tenant,
-            app: appStore.keyword,
+            app: appConfig.value.app,
             platform: 'web'
           })
           oauthWay.value = data
@@ -335,7 +318,7 @@
   )
 
   onMounted(() => {
-    if (tenantConfig.value.tenant) handleGetOAuther()
+    handleGetOAuther()
 
     getDate()
 

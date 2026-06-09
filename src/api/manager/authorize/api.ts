@@ -57,17 +57,17 @@ export function Bind(data: BindRequest) {
   return request.post<BindReply>({ url: '/manager/api/authorize/oauther/bind', data })
 }
 
-// ListOAuther 获取租户应用授权信息列表
+// ListOAuther 获取应用授权信息列表
 export function ListOAuther(params: ListOAutherRequest) {
   return request.get<{ list: OAuther[] }>({ url: '/manager/api/authorize/oauthers', params })
 }
 
-// ListOAuther 获取租户应用授权信息列表
+// OAutherHandle 处理授权渠道
 export function OAutherHandle(params: OAutherHandleRequest) {
   return request.post<OAutherHandleReply>({ url: '/manager/api/authorize/oauther/handler', params })
 }
 
-// GetFileInfo 获取租户应用授权信息列表
+// GetFileInfo 获取应用授权补充信息列表
 export function ListFileInfo(params: ListFillInfoRequest) {
   return request.get<{ list: FillInfoItem[] }>({ url: '/manager/api/authorize/fill/infos', params })
 }

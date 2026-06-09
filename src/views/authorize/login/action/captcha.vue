@@ -98,16 +98,12 @@
   import { FormRules } from 'element-plus'
   import { OAuther, OAutherLoginReply } from '@/api/manager/authorize/type'
   import { OAutherHandle, OAutherLogin } from '@/api/manager/authorize/api'
-  import { Tenant } from '@/api/manager/tenant/type'
 
   const props = defineProps<{
     data: {
-      tenant: string
       app: string
       username: string
       rememberPassword: boolean
-      selectTenant: boolean
-      tenants: Tenant[]
     }
     oauther: OAuther
   }>()
@@ -124,14 +120,13 @@
 
   const formData = reactive<
     Partial<{
-      tenant: string
       app: string
       username: string
       captcha: string
       captchaId: string
       rememberPassword: boolean
     }>
-  >({ tenant: props.data.tenant, app: props.data.app })
+  >({ app: props.data.app })
 
   const rules = computed<FormRules>(() => ({
     username: [
@@ -188,10 +183,10 @@
     if (!valid) return
 
     const data = await OAutherHandle({
-      tenant: props.data.tenant,
       app: props.data.app,
       keyword: props.oauther.keyword,
-      account: formData.username
+      account: formData.username,
+      platform: 'web'
     })
     ElMessage.success('验证码发送成功，请注意查收')
     formData.captchaId = data.uuid

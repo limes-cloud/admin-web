@@ -8,10 +8,7 @@ export interface GetSampleAppRequest {
 }
 
 export interface AppSetting {
-  tenant: {
-    mode: string
-  }
-  web: {
+  web?: {
     watermark?: string
     copyright?: string
   }
@@ -19,7 +16,8 @@ export interface AppSetting {
     secret: string
     expire: number
     renewal: number
-    unique: boolean
+    uniqueDevice: boolean
+    uniquePlatform: boolean
   }
 }
 
@@ -40,7 +38,6 @@ export interface App {
   description?: string
   copyright?: string
   watermark?: string
-  selectTenant?: boolean
   createdAt: number
   updatedAt: number
 }

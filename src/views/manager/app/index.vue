@@ -256,22 +256,6 @@
       }
     },
     {
-      key: 'setting.tenant.mode',
-      label: '租户模式',
-      type: 'select',
-      divider: '租户配置',
-      hidden: currentData.value.type === 'base',
-      tip: '应用于登陆界面的租户项，输入则需要用户主动输入，选择则会提供选择项',
-      props: {
-        placeholder: '请选择租户模式',
-        options: [
-          { label: '输入', value: 'input' },
-          { label: '选择', value: 'select' }
-        ],
-        rules: [{ required: true, message: '请选择租户模式', trigger: ['blur', 'change'] }]
-      }
-    },
-    {
       key: 'setting.web.copyright',
       label: '版权信息',
       type: 'input',
@@ -286,22 +270,10 @@
       key: 'setting.web.watermark',
       label: '水印信息',
       type: 'input',
-      divider: '站点配置',
       hidden: currentData.value.type === 'base',
       tip: '显示在登录页和首页底部的水印信息，不输入则不显示',
       props: {
         placeholder: '请输入水印信息'
-      }
-    },
-    {
-      key: 'setting.jwt.secret',
-      label: '授权密钥',
-      type: 'input',
-      divider: '授权配置',
-      hidden: currentData.value.type === 'base',
-      props: {
-        placeholder: '请输入授权密钥 ',
-        rules: [{ required: true, message: '请输入授权密钥', trigger: ['blur', 'change'] }]
       }
     },
     {

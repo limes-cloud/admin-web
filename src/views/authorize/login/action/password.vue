@@ -1,18 +1,5 @@
 <template>
   <ElForm class="form-box" ref="formRef" :model="formData" :rules="rules" @keyup.enter="handleSubmit">
-    <ElFormItem prop="tenant">
-      <ElInput v-if="!data.selectTenant" v-model.trim="formData.tenant" placeholder="请输入租户标识" />
-      <ElSelect
-        v-else
-        v-model.trim="formData.tenant"
-        placeholder="请选择所属租户"
-        :options="data.tenants"
-        :props="{ label: 'name', value: 'keyword' }"
-        @change="emits('changeTenant', formData.tenant)"
-      >
-      </ElSelect>
-    </ElFormItem>
-
     <ElFormItem prop="username">
       <ElInput placeholder="请输入用户账户/电话/邮箱" v-model.trim="formData.username" />
     </ElFormItem>
@@ -48,12 +35,6 @@
 </template>
 
 <style lang="scss" scoped>
-  .tenant-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
   .form-box {
     box-sizing: border-box;
 
@@ -112,18 +93,14 @@
   import { FormRules } from 'element-plus'
   import { LoginRequest } from '@/api/manager/authorize/type'
   import { GetImageCaptcha, Login } from '@/api/manager/authorize/api'
-  import { Tenant } from '@/api/manager/tenant/type'
 
   const saveKeys = ['username', 'password', 'rememberPassword']
   const props = defineProps<{
     data: {
-      tenant: string
       app: string
       username: string
       password: string
       rememberPassword: boolean
-      selectTenant: boolean
-      tenants: Tenant[]
     }
   }>()
 
@@ -160,7 +137,7 @@
 
   const loading = ref(false)
 
-  const emits = defineEmits(['success', 'info', 'changeTenant'])
+  const emits = defineEmits(['success', 'info'])
 
   const timeInter: any = ref(null)
   const captchaBase64 = ref('')

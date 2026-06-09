@@ -21,8 +21,7 @@ export const useAppStore = defineStore('appStore', () => {
       keyword: data.keyword,
       description: data.description,
       copyright: data.setting?.web?.copyright,
-      watermark: data.setting?.web?.watermark,
-      selectTenant: data.setting?.tenant?.mode === 'select'
+      watermark: data.setting?.web?.watermark
     })
 
     // 设置水印

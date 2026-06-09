@@ -1,5 +1,4 @@
 export interface LoginRequest {
-  tenant: string
   app: string
   username: string
   password: string
@@ -13,7 +12,6 @@ export interface LoginReply {
 }
 
 export interface RegisterRequest {
-  tenant: string
   app: string
   username: string
   password: string
@@ -58,12 +56,10 @@ export interface OAuther {
 
 export interface ListOAutherRequest {
   app: string
-  tenant: string
   platform: string
 }
 
 export interface OAutherHandleRequest {
-  tenant: string
   app: string
   account?: string
   keyword: string

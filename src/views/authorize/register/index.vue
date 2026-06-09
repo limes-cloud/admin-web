@@ -74,18 +74,17 @@
   const appStore = useAppStore()
   const userStore = useUserStore()
 
-  const tenantConfig = useStorage('login-tenant', {
-    tenant: '',
+  const appConfig = useStorage('login-app', {
     app: ''
   })
 
   //  从缓存中读取，没有则跳转到错误页面
-  if (!tenantConfig.value.tenant || !tenantConfig.value.app) {
+  if (!appConfig.value.app) {
     router.replace({ name: 'Exception500' })
   }
 
   const formRef = useTemplateRef('formRef')
-  const formData = reactive<Partial<RegisterRequest & { rememberPassword: boolean }>>({ ...tenantConfig.value })
+  const formData = reactive<Partial<RegisterRequest & { rememberPassword: boolean }>>({ ...appConfig.value })
 
   const rules = computed<FormRules>(() => ({
     username: [
