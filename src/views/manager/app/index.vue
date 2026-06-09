@@ -32,39 +32,85 @@
           </template>
         </ArtTableHeader>
 
-        <!-- 表格 -->
-        <ArtTable
-          :loading="loading"
-          :data="data"
-          :columns="columns"
-          :pagination="pagination"
-          row-key="id"
-          @pagination:size-change="handleSizeChange"
-          @pagination:current-change="handleCurrentChange"
-        >
-          <template #status="{ row }">
-            <el-tooltip effect="dark" :content="row.status ? '已启用' : row.reason" placement="top-start">
-              <el-switch
-                v-model="row.status"
-                :disabled="!$hasPermission('manager:app:update')"
-                inline-prompt
-                active-text="启用"
-                inactive-text="禁用"
-                :before-change="handleUpdateStatus(row)"
-              />
-            </el-tooltip>
-          </template>
-          <template #logo="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.logo)"></ElAvatar>
-          </template>
-          <template #favicon="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.favicon)"></ElAvatar>
-          </template>
-          <template #operation="{ row }">
-            <ArtOperation :list="operationItems" :data="row"></ArtOperation>
-          </template>
-        </ArtTable>
+        <!-- 卡片列表 -->
+        <div class="app-card-scroll">
+          <ElEmpty v-if="!loading && !appList.length" description="暂无应用" />
+
+          <div v-else v-loading="loading" class="app-grid">
+            <article v-for="item in appList" :key="item.id" class="app-card">
+              <div class="app-card__top">
+                <div class="app-card__logo" :class="getLogoClass(item)">
+                  <ElImage v-if="item.logo" :src="getResourceUrl(item.logo, 72, 72)" fit="cover">
+                    <template #error>
+                      <span class="app-card__logo-fallback">{{ getAppInitial(item) }}</span>
+                    </template>
+                  </ElImage>
+                  <span v-else>{{ getAppInitial(item) }}</span>
+                </div>
+
+                <div class="app-card__title">
+                  <h2>{{ item.showName || item.name }}</h2>
+                  <p>{{ item.description || item.comment || '暂无描述' }}</p>
+                </div>
+
+                <ArtOperation :single="true" :list="operationItems" :data="item" :has-background="false">
+                  <ElButton class="app-card__more" text :icon="MoreFilled" />
+                </ArtOperation>
+              </div>
+
+              <dl class="app-card__meta">
+                <div>
+                  <dt>应用标识</dt>
+                  <dd>{{ item.keyword }}</dd>
+                </div>
+                <div>
+                  <dt>应用名称</dt>
+                  <dd>{{ item.name }}</dd>
+                </div>
+                <div>
+                  <dt>创建时间</dt>
+                  <dd>{{ formatCardTime(item.createdAt) }}</dd>
+                </div>
+              </dl>
+
+              <div class="app-card__footer">
+                <ElTooltip
+                  effect="dark"
+                  :content="item.status ? '已启用' : item.reason || '已禁用'"
+                  placement="top-start"
+                >
+                  <ElSwitch
+                    v-model="item.status"
+                    :disabled="!$hasPermission('manager:app:update')"
+                    inline-prompt
+                    active-text="启用"
+                    inactive-text="禁用"
+                    :before-change="handleUpdateStatus(item)"
+                  />
+                </ElTooltip>
+
+                <ElTag :type="item.type === 'base' ? 'warning' : 'primary'" effect="light">
+                  {{ getAppTypeLabel(item.type) }}
+                </ElTag>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div v-if="pagination.total > 0" class="app-pagination">
+          <ElPagination
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            :current-page="pagination.current"
+            :page-size="pagination.size"
+            :page-sizes="[8, 10, 20, 30, 50]"
+            :total="pagination.total"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
+
       <!-- 新增/修改弹窗 -->
       <ElDialog
         v-model="dialogVisible"
@@ -89,11 +135,12 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { ElMessageBox } from 'element-plus'
-  import { Edit, Fold, Plus } from '@element-plus/icons-vue'
+  import { Delete, Edit, Fold, MoreFilled, Plus } from '@element-plus/icons-vue'
   import { CreateApp, DeleteApp, GetApp, ListApp, UpdateApp } from '@/api/manager/app/api'
   import { CreateAppRequest, App, UpdateAppRequest } from '@/api/manager/app/type'
-  import { Delete } from '@element-plus/icons-vue'
-  import { formatTime } from '@/utils/time'
+  import { formatTime, parseTime } from '@/utils/time'
+  import { rurl } from '@/utils/resource/url'
+
   const router = useRouter()
 
   defineOptions({ name: 'App' })
@@ -435,23 +482,7 @@
     }
   ]
 
-  const {
-    columns,
-    columnChecks,
-    data,
-    loading,
-    pagination,
-    searchParams,
-    getData,
-    resetSearchParams,
-    handleSizeChange,
-    handleCurrentChange,
-    refreshData,
-    refreshCreate,
-    refreshUpdate,
-    refreshRemove
-  } = useTable({
-    // 核心配置
+  const table = useTable({
     core: {
       apiFn: ListApp,
       apiParams: {
@@ -467,9 +498,7 @@
         },
         {
           prop: 'logo',
-          label: '应用Logo',
-          useSlot: true,
-          slotName: 'logo'
+          label: '应用Logo'
         },
         {
           prop: 'keyword',
@@ -481,9 +510,7 @@
         },
         {
           prop: 'status',
-          label: '应用状态',
-          useSlot: true,
-          slotName: 'status'
+          label: '应用状态'
         },
         {
           prop: 'comment',
@@ -505,13 +532,38 @@
           prop: 'operation',
           label: '操作',
           width: 120,
-          fixed: 'right',
-          useSlot: true,
-          slotName: 'operation'
+          fixed: 'right'
         }
       ]
+    },
+    hooks: {
+      resetFormCallback: () => {
+        searchForm.value = {
+          keyword: undefined,
+          name: undefined,
+          status: undefined
+        }
+      }
     }
   })
+
+  const {
+    data: tableData,
+    columnChecks,
+    loading,
+    pagination,
+    searchParams,
+    getData,
+    resetSearchParams,
+    handleSizeChange,
+    handleCurrentChange,
+    refreshData,
+    refreshCreate,
+    refreshUpdate,
+    refreshRemove
+  } = table
+
+  const appList = computed(() => tableData.value as App[])
 
   // 搜索处理
   const handleSearch = () => {
@@ -581,4 +633,280 @@
       })
     }
   }
+
+  const getResourceUrl = (key: string, width = 100, height = 100) => rurl(key, width, height)
+
+  const getAppInitial = (item: App) => (item.showName || item.name || item.keyword || 'A').slice(0, 1).toUpperCase()
+
+  const getAppTypeLabel = (type: string) => appTypes.find((item) => item.value === type)?.label || '标准应用'
+
+  const getLogoClass = (item: App) => {
+    const index = Math.abs(item.id || 0) % 6
+    return `is-tone-${index}`
+  }
+
+  const formatCardTime = (time: number) => parseTime(time, '{y}-{m}-{d}') || formatTime(time)
 </script>
+
+<style lang="scss" scoped>
+  :deep(.table) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .app-card-scroll {
+    flex: 1;
+    min-height: 0;
+    margin-top: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .app-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 216px;
+    padding: 18px;
+    background: var(--art-main-bg-color);
+    border: 1px solid var(--art-border-color);
+    border-radius: 8px;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      box-shadow: var(--art-root-card-box-shadow);
+    }
+
+    &__top {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 32px;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    &__logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: 700;
+      color: rgb(var(--art-primary));
+      background: rgb(var(--art-bg-primary));
+      border-radius: 8px;
+
+      :deep(.el-image) {
+        width: 100%;
+        height: 100%;
+      }
+
+      :deep(.el-image__error) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: inherit;
+        font-size: inherit;
+        background: transparent;
+      }
+
+      &.is-tone-1 {
+        color: rgb(var(--art-success));
+        background: rgb(var(--art-bg-success));
+      }
+
+      &.is-tone-2 {
+        color: rgb(var(--art-warning));
+        background: rgb(var(--art-bg-warning));
+      }
+
+      &.is-tone-3 {
+        color: rgb(var(--art-secondary));
+        background: rgb(var(--art-bg-secondary));
+      }
+
+      &.is-tone-4 {
+        color: rgb(var(--art-error));
+        background: rgb(var(--art-bg-error));
+      }
+
+      &.is-tone-5 {
+        color: rgb(var(--art-info));
+        background: rgb(var(--art-bg-info));
+      }
+    }
+
+    &__title {
+      min-width: 0;
+
+      h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 22px;
+        color: var(--art-gray-900);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        letter-spacing: 0;
+      }
+
+      p {
+        display: -webkit-box;
+        margin: 2px 0 0;
+        overflow: hidden;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 19px;
+        color: var(--art-gray-600);
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    &__more {
+      --el-button-border-color: transparent;
+      --el-button-bg-color: transparent;
+      --el-button-hover-border-color: transparent;
+      --el-button-hover-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
+      --el-button-active-border-color: transparent;
+      --el-button-active-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
+
+      width: 32px !important;
+      height: 32px !important;
+      color: var(--art-gray-500);
+      border-color: transparent !important;
+      border-radius: 6px;
+      box-shadow: none !important;
+
+      &:hover,
+      &:focus,
+      &:focus-visible,
+      &:active {
+        color: var(--art-gray-500);
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none;
+      }
+
+      &:focus-visible {
+        outline: none !important;
+      }
+
+      &:hover,
+      &:active {
+        background: rgba(var(--art-gray-200-rgb), 0.72) !important;
+      }
+
+      :deep(span) {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+
+    &__logo-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    &__meta {
+      display: grid;
+      gap: 8px;
+      padding: 14px 0;
+      margin: 14px 0 0;
+
+      div {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr);
+        gap: 8px;
+        align-items: center;
+      }
+
+      dt,
+      dd {
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        line-height: 19px;
+      }
+
+      dt {
+        color: var(--art-gray-500);
+      }
+
+      dd {
+        overflow: hidden;
+        font-weight: 400;
+        color: var(--art-gray-700);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      margin-top: auto;
+      border-top: 1px solid var(--art-border-color);
+    }
+  }
+
+  @media (max-width: $device-notebook) {
+    .app-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: $device-ipad-pro) {
+    .app-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: $device-phone) {
+    .app-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .app-card {
+      padding: 16px;
+
+      &__top {
+        grid-template-columns: 48px minmax(0, 1fr) 32px;
+        gap: 12px;
+      }
+
+      &__logo {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  }
+
+  .app-pagination {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+</style>
