@@ -92,5 +92,11 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     name: 'DevProxy',
     component: () => import('@views/devtools/proxy.vue'),
     meta: { title: '接口代理配置', isHideTab: true }
+  },
+  {
+    path: '/devtools/form-designer',
+    name: 'FormDesigner',
+    component: () => import('@views/devtools/form-designer.vue'),
+    meta: { title: '表单设计器', isHideTab: true }
   }
 ]

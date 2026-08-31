@@ -15,7 +15,7 @@ export interface ListOAutherRequest {
   keyword?: string
   name?: string
   status?: boolean
-  appId?: number
+  app?: string
 }
 
 export interface OAuther {

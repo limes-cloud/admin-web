@@ -1,17 +1,41 @@
 <template>
   <div class="template-center">
     <div class="actions">
-      <ElButton v-permission="'configure:template:preview'" type="success" :disabled="!template" @click="handlePreview">生成预览</ElButton>
-      <ElButton v-permission="'configure:template:add'" type="primary" :disabled="!template" @click="handleCompare">提交模板</ElButton>
-      <ElButton v-permission="'configure:configure:sync'" type="warning" :disabled="!template" @click="handleSync">同步配置</ElButton>
+      <ElButton
+        v-permission="'configure:template:preview'"
+        type="success"
+        :disabled="!canOperate"
+        @click="handlePreview"
+        >生成预览</ElButton
+      >
+      <ElButton
+        v-permission="'configure:template:add'"
+        type="primary"
+        :disabled="!canOperate"
+        @click="handleCompare"
+        >提交模板</ElButton
+      >
+      <ElButton
+        v-permission="'configure:configure:sync'"
+        type="warning"
+        :disabled="!canOperate"
+        @click="handleSync"
+        >同步配置</ElButton
+      >
     </div>
     <div class="editor-wrap">
-      <ArtCodeEditor v-model="content" :show-switch-lang="true" :style="{ width: '100%', height: '100%' }" @change-lang="(v) => (format = v)" />
+      <ArtCodeEditor
+        v-model="content"
+        :lang="format"
+        :show-switch-lang="true"
+        :style="{ width: '100%', height: '100%' }"
+        @change-lang="(v) => (format = v)"
+      />
     </div>
 
     <!-- 选环境弹窗 -->
     <ElDialog v-model="envVisible" :title="`请选择${envTitle}环境`" width="400px" align-center>
-      <ElSelect v-model="selectedEnvId" placeholder="请选择环境" style="width:100%">
+      <ElSelect v-model="selectedEnvId" placeholder="请选择环境" style="width: 100%">
         <ElOption v-for="env in envs" :key="env.id" :label="env.name" :value="env.id" />
       </ElSelect>
       <template #footer>
@@ -60,7 +84,10 @@
   const SYNC = 'sync'
 
   const props = defineProps<{ template?: Template; envs?: Env[] }>()
-  const emit = defineEmits<{ submit: [data: { serverId: number; content: string; format: string; description: string }]; sync: [data: { serverId: number; envId: number; description: string }] }>()
+  const emit = defineEmits<{
+    submit: [data: { app: string; namespace: string; content: string; format: string; description: string }]
+    sync: [data: { app: string; envId: number; description: string }]
+  }>()
 
   const content = ref('')
   const format = ref('yaml')
@@ -79,11 +106,21 @@
   const descVisible = ref(false)
   const description = ref('')
 
-  watch(() => props.template, (val) => {
-    if (!val) return
-    content.value = val.content || ''
-    format.value = val.format || 'yaml'
-  }, { immediate: true })
+  const canOperate = computed(() => !!props.template?.app && !!props.template?.namespace)
+
+  watch(
+    () => props.template,
+    (val) => {
+      if (!val) {
+        content.value = ''
+        format.value = 'yaml'
+        return
+      }
+      content.value = val.content || ''
+      format.value = val.format || 'yaml'
+    },
+    { immediate: true }
+  )
 
   const handlePreview = () => {
     operator.value = ''
@@ -100,21 +137,49 @@
   }
 
   const handleEnvConfirm = async () => {
-    if (!selectedEnvId.value) { ElMessage.error('请选择环境'); return }
+    if (!props.template?.app) {
+      ElMessage.error('请先选择应用')
+      return
+    }
+    if (!props.template?.namespace) {
+      ElMessage.error('请先选择或输入配置项')
+      return
+    }
+    if (!selectedEnvId.value) {
+      ElMessage.error('请选择环境')
+      return
+    }
     envVisible.value = false
     if (!operator.value) {
-      const res = await ParseTemplate({ content: content.value, format: format.value, envId: selectedEnvId.value, serverId: props.template!.serverId })
-      previewContent.value = format.value === 'json' ? JSON.stringify(JSON.parse(res.content), null, 2) : res.content
+      const res = await ParseTemplate({
+        content: content.value,
+        format: format.value,
+        envId: selectedEnvId.value,
+        app: props.template!.app,
+        namespace: props.template!.namespace
+      })
+      previewContent.value = formatJsonContent(res.content)
       previewVisible.value = true
     } else if (operator.value === SYNC) {
-      const res = await CompareConfigure({ serverId: props.template!.serverId, envId: selectedEnvId.value })
-      if (!res.list.length) { ElMessage.error('配置不存在变更'); return }
+      const res = await CompareConfigure({ app: props.template!.app, envId: selectedEnvId.value })
+      if (!res.list.length) {
+        ElMessage.error('配置不存在变更')
+        return
+      }
       compareData.value = res.list
       compareVisible.value = true
     }
   }
 
   const handleCompare = async () => {
+    if (!props.template?.app) {
+      ElMessage.error('请先选择应用')
+      return
+    }
+    if (!props.template?.namespace) {
+      ElMessage.error('请先选择或输入配置项')
+      return
+    }
     if (!props.template?.id) {
       operator.value = SUBMIT
       description.value = '初始化提交'
@@ -122,7 +187,10 @@
       return
     }
     const res = await CompareTemplate({ id: props.template.id, content: content.value, format: format.value })
-    if (!res.list.length) { ElMessage.error('模板不存在变更'); return }
+    if (!res.list.length) {
+      ElMessage.error('模板不存在变更')
+      return
+    }
     operator.value = SUBMIT
     compareData.value = res.list
     compareVisible.value = true
@@ -135,19 +203,61 @@
   }
 
   const handleDescConfirm = async () => {
-    if (!description.value) { ElMessage.error('请填写变更描述'); return }
+    if (!props.template?.app) {
+      ElMessage.error('请先选择应用')
+      return
+    }
+    if (!props.template?.namespace) {
+      ElMessage.error('请先选择或输入配置项')
+      return
+    }
+    if (!description.value) {
+      ElMessage.error('请填写变更描述')
+      return
+    }
     descVisible.value = false
     if (operator.value === SUBMIT) {
-      const finalContent = format.value === 'json' ? JSON.stringify(JSON.parse(content.value)) : content.value
-      emit('submit', { serverId: props.template!.serverId, content: finalContent, format: format.value, description: description.value })
+      const finalContent = formatJsonContent(content.value, true)
+      if (!finalContent) return
+      emit('submit', {
+        app: props.template!.app,
+        namespace: props.template!.namespace,
+        content: finalContent,
+        format: format.value,
+        description: description.value
+      })
     } else if (operator.value === SYNC) {
-      emit('sync', { serverId: props.template!.serverId, envId: selectedEnvId.value!, description: description.value })
+      emit('sync', { app: props.template!.app, envId: selectedEnvId.value!, description: description.value })
+    }
+  }
+
+  const formatJsonContent = (value: string, compact = false) => {
+    if (format.value !== 'json') return value
+    try {
+      return JSON.stringify(JSON.parse(value), null, compact ? undefined : 2)
+    } catch {
+      ElMessage.error('JSON 格式不正确')
+      return ''
     }
   }
 </script>
 
 <style scoped>
-  .template-center { display: flex; flex-direction: column; height: 100%; padding: 10px; }
-  .actions { display: flex; gap: 12px; margin-bottom: 12px; flex-shrink: 0; }
-  .editor-wrap { flex: 1; overflow: hidden; }
+  .template-center {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .editor-wrap {
+    flex: 1;
+    overflow: hidden;
+  }
 </style>

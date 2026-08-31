@@ -1,12 +1,12 @@
 export interface ListMenuRequest {
-  appId: number
+  app: string
   title?: string
   onlyMenu?: boolean
 }
 
 export interface Menu {
   id: number
-  appId: number
+  app: string
   parentId: number
   title: string
   type: string

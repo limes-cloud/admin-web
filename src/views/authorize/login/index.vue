@@ -296,13 +296,18 @@
 
   // 定期刷新二维码，防止登陆失效
   const timer = ref()
-  const initer = ref(true)
+  const clearQRCodeRefreshTimer = () => {
+    if (timer.value) {
+      clearInterval(timer.value)
+      timer.value = undefined
+    }
+  }
+
   watch(
-    () => oauthWay.value,
+    () => oauthWay.value.action,
     () => {
       if (oauthWay.value.action === 'scan') {
-        if (initer.value) return
-        initer.value = false
+        clearQRCodeRefreshTimer()
         timer.value = setInterval(async () => {
           const data = await OAutherHandle({
             keyword: oauthWay.value.keyword,
@@ -312,10 +317,14 @@
           oauthWay.value = data
         }, 1000 * 180)
       } else {
-        clearInterval(timer.value)
+        clearQRCodeRefreshTimer()
       }
     }
   )
+
+  onBeforeUnmount(() => {
+    clearQRCodeRefreshTimer()
+  })
 
   onMounted(() => {
     handleGetOAuther()

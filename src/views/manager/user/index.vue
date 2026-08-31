@@ -129,7 +129,7 @@
   import { CreateUserRequest, User, UpdateUserRequest, OfflineUserRequest } from '@/api/manager/user/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
-  import { ListRequiredField } from '@/api/manager/field/api'
+  import { ListField } from '@/api/manager/field/api'
   import { toFormItems } from '@/router/utils/field'
   import { FormItem } from '@/components/core/forms/art-form/index.vue'
   import { Dept } from '@/api/manager/dept/type'
@@ -202,7 +202,7 @@
       }
     },
     {
-      key: 'appId',
+      key: 'app',
       label: '所属应用',
       type: 'select',
       props: {
@@ -266,7 +266,7 @@
 
   const offlineFormItems = computed(() => [
     {
-      key: 'appIds',
+      key: 'apps',
       label: '下线应用',
       type: 'select',
       placeholder: '请选择下线应用',
@@ -549,12 +549,12 @@
   }
 
   const handleUserOffline = async () => {
-    await OfflineUser({ appIds: offlineData.value.appIds as number[], userId: currentData.value.id as number })
+    await OfflineUser({ apps: offlineData.value.apps as string[], userId: currentData.value.id as number })
     ElMessage.success('下线成功')
     offlineVisible.value = false
   }
 
-  ListRequiredField().then((res) => {
+  ListField({ page: 1, pageSize: 50, status: true }).then((res) => {
     const items = toFormItems(res.list)
     formItems.value = formItems.value.concat(items)
   })

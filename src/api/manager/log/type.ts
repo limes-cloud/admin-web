@@ -3,6 +3,7 @@ export interface ListLoginLogRequest {
   pageSize: number
   username?: string
   createdAts?: number[]
+  app?: string
 }
 
 export interface LoginLog {
@@ -31,6 +32,7 @@ export interface ListAuthLogRequest {
   pageSize: number
   username?: number
   createdAts?: number[]
+  app?: string
 }
 
 export interface AuthLog {

@@ -1,31 +1,37 @@
 export interface Template {
   id: number
-  serverId: number
+  app: string
+  namespace: string
   version: string
   format: string
   description: string
   content: string
   compare: string
+  isUse?: boolean
   createdAt: number
-  updatedAt: number
+  updatedAt?: number
 }
 
 export interface SwitchTemplateRequest {
-  serverId: number
+  app: string
+  namespace?: string
   id: number
 }
 
 export interface CreateTemplateRequest {
-  serverId: number
+  app: string
+  namespace?: string
   description: string
   content: string
+  format: string
 }
 
 export interface ParseTemplateRequest {
   content: string
   format: string
   envId: number
-  serverId: number
+  app: string
+  namespace?: string
 }
 
 export interface ParseTemplateReply {
@@ -33,7 +39,8 @@ export interface ParseTemplateReply {
 }
 
 export interface ListTemplateRequest {
-  serverId: number
+  app: string
+  namespace?: string
   page: number
   pageSize: number
 }
@@ -41,6 +48,53 @@ export interface ListTemplateRequest {
 export interface ListTemplateReply {
   list: Template[]
   total: number
+}
+
+export interface ListTemplateNamespaceRequest {
+  page: number
+  pageSize: number
+  app: string
+  namespace?: string
+  name?: string
+}
+
+export interface TemplateNamespace {
+  id: number
+  app: string
+  namespace: string
+  name: string
+  description?: string
+  sort: number
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ListTemplateNamespaceReply {
+  list: TemplateNamespace[]
+}
+
+export interface CreateTemplateNamespaceRequest {
+  app: string
+  namespace: string
+  name: string
+  description?: string
+  sort: number
+}
+
+export interface CreateTemplateNamespaceReply {
+  id: number
+}
+
+export interface UpdateTemplateNamespaceRequest {
+  id: number
+  namespace: string
+  name: string
+  description?: string
+  sort: number
+}
+
+export interface DeleteTemplateNamespaceRequest {
+  id: number
 }
 
 export interface CompareTemplateRequest {

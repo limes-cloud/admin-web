@@ -11,13 +11,13 @@
           :icon="Plus"
           @click="showDialog('add')"
         ></ElButton>
-        <ElButton
+        <!-- <ElButton
           v-permission="'manager:entity:load'"
           type="success"
           class="btn-square"
           :icon="Sort"
           @click="handleLoad"
-        ></ElButton>
+        ></ElButton> -->
       </div>
 
       <!-- 表格 -->
@@ -213,7 +213,7 @@
   } from '@/api/manager/entity/type'
   import { GetApp } from '@/api/manager/app/api'
 
-  const props = defineProps<{ appId: number }>()
+  const props = defineProps<{ app: string }>()
 
   const emit = defineEmits<{ select: [data: any] }>()
   defineOptions({ name: 'Entity' })
@@ -232,39 +232,44 @@
     keyword: undefined
   })
 
-  const formItems = [
-    {
-      key: 'database',
-      label: '数据库',
-      type: 'input',
-      props: {
-        placeholder: '请输入数据库',
-        rules: [
-          { required: true, message: '请输入数据库', trigger: ['blur', 'change'] },
-          { type: 'string', message: '数据库格式错误', pattern: /^[a-zA-Z_][a-zA-Z0-9_]*$/ }
-        ]
+  const formItems = computed(() => {
+    const isEdit = dialogType.value === 'edit'
+    return [
+      {
+        key: 'database',
+        label: '数据库',
+        type: 'input',
+        props: {
+          placeholder: '请输入数据库',
+          disabled: isEdit,
+          rules: [
+            { required: true, message: '请输入数据库', trigger: ['blur', 'change'] },
+            { type: 'string', message: '数据库格式错误', pattern: /^[a-zA-Z_][a-zA-Z0-9_]*$/ }
+          ]
+        }
+      },
+      {
+        key: 'name',
+        label: '实体名称',
+        type: 'input',
+        props: {
+          placeholder: '请输入实体名称',
+          disabled: isEdit,
+          rules: [{ required: true, message: '请输入实体名称', trigger: ['blur', 'change'] }]
+        }
+      },
+      {
+        key: 'comment',
+        label: '实体描述',
+        type: 'input',
+        props: {
+          placeholder: '请输入实体描述',
+          rules: [{ required: true, message: '请输入实体描述', trigger: ['blur', 'change'] }],
+          type: 'textarea'
+        }
       }
-    },
-    {
-      key: 'name',
-      label: '实体名称',
-      type: 'input',
-      props: {
-        placeholder: '请输入实体名称',
-        rules: [{ required: true, message: '请输入实体名称', trigger: ['blur', 'change'] }]
-      }
-    },
-    {
-      key: 'comment',
-      label: '实体描述',
-      type: 'input',
-      props: {
-        placeholder: '请输入实体描述',
-        rules: [{ required: true, message: '请输入实体描述', trigger: ['blur', 'change'] }],
-        type: 'textarea'
-      }
-    }
-  ]
+    ]
+  })
 
   const operationItems = [
     {
@@ -309,7 +314,7 @@
       apiParams: {
         page: 1,
         pageSize: 10,
-        appId: props.appId,
+        app: props.app,
         ...searchForm.value
       },
       columnsFactory: () => [
@@ -354,7 +359,7 @@
   const handleSubmit = async () => {
     const value = { ...currentData.value }
     if (dialogType.value === 'add') {
-      await CreateEntity({ ...value, appId: props.appId } as CreateEntityRequest)
+      await CreateEntity({ ...value, app: props.app } as CreateEntityRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
@@ -403,7 +408,7 @@
     await confirm()
 
     // 获取当前app信息
-    const data = await GetApp({ id: props.appId })
+    const data = await GetApp({ keyword: props.app })
 
     const lf = await LoadEntity({ app: data.keyword })
     loadEntities.value = lf.list
@@ -426,7 +431,7 @@
   }
 
   const handleImport = async () => {
-    await ImportEntity({ list: loadEntities.value, appId: props.appId })
+    await ImportEntity({ list: loadEntities.value, app: props.app })
     ElMessage.success('导入成功')
     importVisible.value = false
   }

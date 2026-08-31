@@ -14,6 +14,7 @@ export interface ListUserDeptRequest {
   pageSize: number
   name?: string
   userId: number
+  app?: string
 }
 
 export interface Dept {
@@ -41,6 +42,7 @@ export interface CreateUserDeptRequest {
   deptId: number
   jobId: number
   main: boolean
+  app?: string
 }
 
 export interface UpdateUserDeptRequest {
@@ -48,8 +50,10 @@ export interface UpdateUserDeptRequest {
   deptId?: number
   jobId?: number
   main?: boolean
+  app?: string
 }
 
 export interface DeleteUserDeptRequest {
   id: number
+  app?: string
 }

@@ -8,7 +8,7 @@ export interface OAuther {
 
 export interface AppOAuther {
   id: number
-  appId: number
+  app: string
   oautherId: number
   oauther: OAuther
   createdAt: number
@@ -16,7 +16,7 @@ export interface AppOAuther {
 }
 
 export interface ListAppOAutherRequest {
-  appId: number
+  app: string
   page: number
   pageSize: number
   order?: string
@@ -31,7 +31,7 @@ export interface ListAppOAutherReply {
 }
 
 export interface CreateAppOAutherRequest {
-  appId: number
+  app: string
   oautherId: number
 }
 

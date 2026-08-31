@@ -68,6 +68,14 @@
                   <dd>{{ item.name }}</dd>
                 </div>
                 <div>
+                  <dt>展示名称</dt>
+                  <dd>{{ item.showName || '-' }}</dd>
+                </div>
+                <div>
+                  <dt>允许注册</dt>
+                  <dd>{{ getRegisterLabel(item) }}</dd>
+                </div>
+                <div>
                   <dt>创建时间</dt>
                   <dd>{{ formatCardTime(item.createdAt) }}</dd>
                 </div>
@@ -398,7 +406,7 @@
         router.push({
           name: 'Entity',
           query: {
-            appId: record.id
+            app: record.keyword
           }
         })
       }
@@ -412,21 +420,7 @@
         router.push({
           name: 'EntityRule',
           query: {
-            appId: record.id
-          }
-        })
-      }
-    },
-    {
-      icon: 'iconsys-jilu',
-      label: '字段管理',
-      color: 'primary',
-      permission: 'manager:appfield:query',
-      click: async (record: App) => {
-        router.push({
-          name: 'AppField',
-          query: {
-            appId: record.id
+            app: record.keyword
           }
         })
       }
@@ -439,7 +433,7 @@
         router.push({
           name: 'AppOAuther',
           query: {
-            appId: record.id
+            app: record.keyword
           }
         })
       }
@@ -453,7 +447,7 @@
         router.push({
           name: 'Menu',
           query: {
-            appId: record.id
+            app: record.keyword
           }
         })
       }
@@ -638,7 +632,13 @@
 
   const getAppInitial = (item: App) => (item.showName || item.name || item.keyword || 'A').slice(0, 1).toUpperCase()
 
-  const getAppTypeLabel = (type: string) => appTypes.find((item) => item.value === type)?.label || '标准应用'
+  const getAppTypeLabel = (type?: string) => appTypes.find((item) => item.value === type)?.label || type || '标准应用'
+
+  const getRegisterLabel = (item: App) => {
+    if (item.type === 'base') return '不适用'
+    if (item.private === undefined) return '-'
+    return item.private ? '禁止' : '允许'
+  }
 
   const getLogoClass = (item: App) => {
     const index = Math.abs(item.id || 0) % 6
@@ -683,6 +683,7 @@
       transform 0.2s ease;
 
     &:hover {
+      border-color: rgba(var(--art-primary), 0.45);
       box-shadow: var(--art-root-card-box-shadow);
     }
 

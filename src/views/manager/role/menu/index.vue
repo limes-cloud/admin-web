@@ -39,13 +39,13 @@
     apps.value = data.list
   }
 
-  const getRoleMenuIds = async (appId: number) => {
-    const data = await GetRoleMenuIds({ appId: appId, roleId: roleId.value })
+  const getRoleMenuIds = async (app: string) => {
+    const data = await GetRoleMenuIds({ app: app, roleId: roleId.value })
     currentData.value.menuIds = data.menuIds
   }
 
-  const getMenus = async (appId: number) => {
-    const data = await ListCurrentMenu({ appId: appId, onlyMenu: true })
+  const getMenus = async (app: string) => {
+    const data = await ListCurrentMenu({ app: app, onlyMenu: true })
 
     // 递归去除菜单中type=BA的节点,返回新的节点树
     const removeBase = (list: Menu[]) => {
@@ -84,7 +84,7 @@
 
   const formItems = computed(() => [
     {
-      key: 'appId',
+      key: 'app',
       label: '所属应用',
       type: 'select',
       props: {

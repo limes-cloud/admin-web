@@ -49,12 +49,13 @@ export interface ListNoticeRequest {
   status?: boolean
   isTop?: boolean
   notRead?: boolean
+  app?: string
 }
 
 export interface Notice {
   id: number
   classifyId: number
-  appId: number
+  app: string
   title: string
   description: string
   unit: string
@@ -72,7 +73,7 @@ export interface ListNoticeReply {
 
 export interface CreateNoticeRequest {
   classifyId: number
-  appId: number
+  app: string
   title: string
   description: string
   unit: string
@@ -86,7 +87,7 @@ export interface CreateNoticeReply {
 export interface UpdateNoticeRequest {
   id: number
   classifyId?: number
-  appId?: number
+  app?: string
   title?: string
   description?: string
   unit?: string

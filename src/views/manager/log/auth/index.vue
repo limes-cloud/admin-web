@@ -103,7 +103,7 @@
       }
     },
     {
-      key: 'appId',
+      key: 'app',
       label: '所属应用',
       type: 'select',
       props: {

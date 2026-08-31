@@ -40,7 +40,7 @@ export interface ListFeedbackRequest {
   pageSize: number
   order?: string
   orderBy?: string
-  appId?: number
+  app?: string
   categoryId?: number
   status?: string
   platform?: string
@@ -59,7 +59,7 @@ export interface User {
 
 export interface Feedback {
   id: number
-  appId: number
+  app: string
   userId: number
   classifyId: number
   title: string
@@ -87,7 +87,7 @@ export interface ListFeedbackReply {
 }
 
 export interface CreateFeedbackRequest {
-  appId: number
+  app: string
   categoryId: number
   title: string
   content: string

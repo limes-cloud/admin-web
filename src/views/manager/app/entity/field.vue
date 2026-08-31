@@ -76,7 +76,7 @@
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
 
-  const props = defineProps<{ entityId: number; appId: number }>()
+  const props = defineProps<{ entityId: number; app: string }>()
 
   defineOptions({ name: 'EntityField' })
 
@@ -105,40 +105,44 @@
     }
   ]
 
-  const formItems = [
-    {
-      key: 'name',
-      label: '字段名称',
-      type: 'input',
-      props: {
-        placeholder: '请输入字段名称',
-        rules: [
-          { required: true, message: '请输入字段名称', trigger: ['blur', 'change'] },
-          { type: 'string', message: '字段名称格式错误', pattern: /^[a-zA-Z_][a-zA-Z0-9_]*$/ }
-        ]
+  const formItems = computed(() => {
+    const isEdit = dialogType.value === 'edit'
+    return [
+      {
+        key: 'name',
+        label: '字段名称',
+        type: 'input',
+        props: {
+          placeholder: '请输入字段名称',
+          disabled: isEdit,
+          rules: [
+            { required: true, message: '请输入字段名称', trigger: ['blur', 'change'] },
+            { type: 'string', message: '字段名称格式错误', pattern: /^[a-zA-Z_][a-zA-Z0-9_]*$/ }
+          ]
+        }
+      },
+      {
+        key: 'comment',
+        label: '字段备注',
+        type: 'input',
+        props: {
+          placeholder: '请输入字段备注',
+          rules: [{ required: true, message: '请输入字段备注', trigger: ['blur', 'change'] }]
+        }
+      },
+      {
+        key: 'index',
+        label: '字段排序',
+        type: 'number',
+        defaultField: 0,
+        props: {
+          placeholder: '请输入字段排序',
+          style: { width: '100%' },
+          rules: [{ required: true, message: '请输入字段排序', trigger: ['blur', 'change'] }]
+        }
       }
-    },
-    {
-      key: 'comment',
-      label: '字段备注',
-      type: 'input',
-      props: {
-        placeholder: '请输入标识',
-        rules: [{ required: true, message: '请输入标识', trigger: ['blur', 'change'] }]
-      }
-    },
-    {
-      key: 'index',
-      label: '字段排序',
-      type: 'number',
-      defaultField: 0,
-      props: {
-        placeholder: '请输入字段排序',
-        style: { width: '100%' },
-        rules: [{ required: true, message: '请输入字段排序', trigger: ['blur', 'change'] }]
-      }
-    }
-  ]
+    ]
+  })
 
   const operationItems = [
     {

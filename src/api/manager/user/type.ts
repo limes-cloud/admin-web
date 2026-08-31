@@ -121,5 +121,5 @@ export interface ResetPasswordRequest {
 
 export interface OfflineUserRequest {
   userId: number
-  appIds: number[]
+  apps: string[]
 }

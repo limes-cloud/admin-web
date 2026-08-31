@@ -48,10 +48,10 @@
                   <!-- 下拉选择 -->
                   <template v-if="item.type === 'select' && getProps(item)?.options">
                     <ElOption
-                      v-for="option in getProps(item).options"
-                      :key="option[item.props?.props?.value || 'value']"
-                      :label="option[item.props?.props?.label || 'label']"
-                      :value="option[item.props?.props?.value || 'value']"
+                      v-for="(option, index) in getSelectOptions(item)"
+                      :key="getOptionValue(item, option) ?? index"
+                      :label="getOptionLabel(item, option)"
+                      :value="getOptionValue(item, option)"
                     >
                     </ElOption>
                   </template>
@@ -239,6 +239,38 @@
     const props = { ...item }
     rootProps.forEach((key) => delete (props as Record<string, any>)[key])
     return props
+  }
+
+  const getOptionValue = (item: FormItem, option: Record<string, any> | string | number | boolean) => {
+    if (option === null || option === undefined) return option
+    if (typeof option !== 'object') return option
+
+    const valueKey = item.props?.props?.value || 'value'
+    const value = option[valueKey]
+    if (value !== undefined && value !== null) return value
+
+    return option.value
+  }
+
+  const getOptionLabel = (item: FormItem, option: Record<string, any> | string | number | boolean) => {
+    if (option === null || option === undefined) return option
+    if (typeof option !== 'object') return option
+
+    const labelKey = item.props?.props?.label || 'label'
+    const label = option[labelKey]
+    if (label !== undefined && label !== null) return label
+
+    return option.label ?? getOptionValue(item, option)
+  }
+
+  const getSelectOptions = (item: FormItem) => {
+    const options = getProps(item)?.options
+    if (!Array.isArray(options)) return []
+
+    return options.filter((option) => {
+      const value = getOptionValue(item, option)
+      return value !== undefined && value !== null
+    })
   }
 
   // 获取嵌套对象值（支持多层路径和默认值）

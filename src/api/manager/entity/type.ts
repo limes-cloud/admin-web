@@ -4,7 +4,7 @@ export interface LoadEntityRequest {
 
 export interface LoadEntity {
   id: number
-  appId: number
+  app: string
   database: string
   name: string
   comment?: string
@@ -20,20 +20,20 @@ export interface LoadEntityReply {
 }
 
 export interface ImportEntityRequest {
-  appId: number
+  app: string
   list: LoadEntity[]
 }
 
 export interface ListEntityRequest {
   page: number
   pageSize: number
-  appId?: number
+  app?: string
   name?: string
 }
 
 export interface Entity {
   id: number
-  appId: number
+  app: string
   database: string
   name: string
   comment?: string
@@ -47,7 +47,7 @@ export interface ListEntityReply {
 }
 
 export interface CreateEntityRequest {
-  appId: number
+  app: string
   database: string
   name: string
   comment?: string
@@ -79,7 +79,7 @@ export interface GetEntityRequest {
 
 export interface GetEntityReply {
   id: number
-  appId: number
+  app: string
   database: string
   name: string
   comment?: string

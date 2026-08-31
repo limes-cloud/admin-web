@@ -8,7 +8,7 @@
           placeholder="语言"
           :style="{ width: '90px' }"
           size="small"
-          @change="changeLang"
+          @change="changeLang()"
         >
           <ElOption value="json">JSON</ElOption>
           <ElOption value="yaml">YAML</ElOption>
@@ -246,10 +246,10 @@
   }
 
   // json <-> yaml
-  const changeLang = () => {
+  const changeLang = (convert = true) => {
     monaco.editor.setModelLanguage(getModel() as monaco.editor.ITextModel, innerLang.value)
     emit('changeLang', innerLang.value)
-    if (!content.value) {
+    if (!convert || !content.value) {
       return
     }
 
@@ -276,7 +276,7 @@
       return
     }
     innerLang.value = lang
-    changeLang()
+    changeLang(false)
   }
 
   watch(

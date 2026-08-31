@@ -1,13 +1,33 @@
 <template>
   <div class="art-full-height">
     <ElCard class="art-table-card" shadow="never">
+      <ElAlert
+        class="configure-guide"
+        type="primary"
+        title="资源变量用于维护 MySQL、Redis 等实体资源配置，可被多个服务按需引用和复用。"
+        :closable="false"
+        show-icon
+      />
+
       <div class="search">
-        <ArtSearchBar v-model="searchForm" :card="false" :items="searchItems" @search="handleSearch" @reset="resetSearchParams" />
+        <ArtSearchBar
+          v-model="searchForm"
+          :card="false"
+          :items="searchItems"
+          @search="handleSearch"
+          @reset="handleReset"
+        />
       </div>
       <div class="table">
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
-            <ElButton v-permission="'configure:resource:add'" v-ripple type="primary" :icon="Plus" @click="showDialog('add')">
+            <ElButton
+              v-permission="'configure:resource:add'"
+              v-ripple
+              type="primary"
+              :icon="Plus"
+              @click="showDialog('add')"
+            >
               新增变量
             </ElButton>
           </template>
@@ -21,31 +41,100 @@
           @pagination:size-change="handleSizeChange"
           @pagination:current-change="handleCurrentChange"
         >
+          <template #fields="{ row }">
+            <div class="field-tags">
+              <ElTag
+                v-for="field in getVisibleFields(row.fields)"
+                :key="field"
+                class="field-tags__item"
+                type="info"
+                effect="light"
+                size="small"
+              >
+                {{ field }}
+              </ElTag>
+              <ElTag v-if="getHiddenFieldCount(row.fields)" class="field-tags__more" type="info" effect="light" size="small">
+                <span class="field-tags__more-text">...</span>
+              </ElTag>
+            </div>
+          </template>
+          <template #tag="{ row }">
+            <ElTag type="primary" effect="light" size="small">{{ row.tag }}</ElTag>
+          </template>
           <template #operation="{ row }">
             <ArtOperation :list="operationItems" :data="row" />
           </template>
         </ArtTable>
       </div>
 
-      <ElDialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增变量' : '编辑变量'" :destroy-on-close="true" body-class="art-form-dialog" width="520px" align-center>
+      <ElDialog
+        v-model="dialogVisible"
+        :title="dialogType === 'add' ? '新增变量' : '编辑变量'"
+        :destroy-on-close="true"
+        body-class="art-form-dialog"
+        width="520px"
+        align-center
+      >
         <ElForm ref="formRef" :model="currentData" label-position="top">
-          <ElFormItem label="变量标识" prop="keyword" :rules="[{ required: true, message: '请输入变量标识', trigger: ['blur', 'change'] }]">
-            <ElInput v-model="currentData.keyword" :disabled="dialogType === 'edit'" placeholder="请输入变量标识" clearable />
+          <ElFormItem
+            label="变量标识"
+            prop="keyword"
+            :rules="[{ required: true, message: '请输入变量标识', trigger: ['blur', 'change'] }]"
+          >
+            <ElInput
+              v-model="currentData.keyword"
+              :disabled="dialogType === 'edit'"
+              placeholder="请输入变量标识"
+              clearable
+            />
           </ElFormItem>
-          <ElFormItem label="变量标签" prop="tag" :rules="[{ required: true, message: '请输入变量标签', trigger: ['blur', 'change'] }]">
+          <ElFormItem
+            label="变量标签"
+            prop="tag"
+            :rules="[{ required: true, message: '请输入变量标签', trigger: ['blur', 'change'] }]"
+          >
             <ElInput v-model="currentData.tag" placeholder="请输入变量标签" clearable />
           </ElFormItem>
-          <ElFormItem label="变量字段" prop="fieldList" :rules="[{ required: true, message: '请输入变量字段', trigger: ['blur', 'change'] }]">
-            <ElSelect v-model="currentData.fieldList" multiple allow-create filterable placeholder="输入字段名后回车" style="width:100%" />
+          <ElFormItem
+            label="变量字段"
+            prop="fieldList"
+            :rules="[{ required: true, message: '请输入变量字段', trigger: ['blur', 'change'] }]"
+          >
+            <ElSelect
+              v-model="currentData.fieldList"
+              multiple
+              allow-create
+              filterable
+              placeholder="输入字段名后回车"
+              style="width: 100%"
+            />
           </ElFormItem>
-          <ElFormItem label="变量类型" prop="private" :rules="[{ required: true, message: '请选择变量类型', trigger: ['blur', 'change'] }]">
+          <ElFormItem
+            label="变量类型"
+            prop="private"
+            :rules="[{ required: true, message: '请选择变量类型', trigger: ['blur', 'change'] }]"
+          >
             <ElRadioGroup v-model="currentData.private">
               <ElRadio :value="true">私有变量</ElRadio>
               <ElRadio :value="false">公共变量</ElRadio>
             </ElRadioGroup>
           </ElFormItem>
-          <ElFormItem v-if="currentData.private" label="所属服务" prop="serverIds" :rules="[{ required: true, message: '请选择所属服务', trigger: ['blur', 'change'] }]">
-            <ElSelect v-model="currentData.serverIds" multiple placeholder="请选择所属服务" style="width:100%" :options="serverOptions" />
+          <ElFormItem
+            v-if="currentData.private"
+            label="所属应用"
+            prop="apps"
+            :rules="[{ required: true, message: '请选择所属应用', trigger: ['blur', 'change'] }]"
+          >
+            <ElSelect
+              v-model="currentData.apps"
+              multiple
+              filterable
+              remote
+              :remote-method="loadApps"
+              placeholder="请选择所属应用"
+              style="width: 100%"
+              :options="appOptions"
+            />
           </ElFormItem>
           <ElFormItem label="变量描述">
             <ElInput v-model="currentData.description" type="textarea" placeholder="请输入变量描述" />
@@ -66,7 +155,9 @@
         </ElForm>
         <template #footer>
           <ElButton @click="valueVisible = false">取消</ElButton>
-          <ElButton v-permission="'configure:resource:value:update'" type="primary" @click="handleValueSubmit">保存</ElButton>
+          <ElButton v-permission="'configure:resource:value:update'" type="primary" @click="handleValueSubmit"
+            >保存</ElButton
+          >
         </template>
       </ElDrawer>
     </ElCard>
@@ -76,8 +167,16 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { Plus, Edit, Delete, Setting } from '@element-plus/icons-vue'
-  import { ListResource, CreateResource, UpdateResource, DeleteResource, GetResource, ListResourceValue, UpdateResourceValue } from '@/api/configure/resource/api'
-  import { ListServer } from '@/api/configure/server/api'
+  import {
+    ListResource,
+    CreateResource,
+    UpdateResource,
+    DeleteResource,
+    GetResource,
+    ListResourceValue,
+    UpdateResourceValue
+  } from '@/api/configure/resource/api'
+  import { ListApp } from '@/api/manager/app/api'
   import { ListEnv } from '@/api/configure/env/api'
   import { Resource, CreateResourceRequest, UpdateResourceRequest } from '@/api/configure/resource/type'
   import { Env } from '@/api/configure/env/type'
@@ -96,20 +195,56 @@
   const currentResourceId = ref(0)
   const valueForm = ref<Record<number, string>>({})
   const envs = ref<Env[]>([])
-  const serverOptions = ref<{ label: string; value: number }[]>([])
+  const appOptions = ref<{ label: string; value: string }[]>([])
 
-  const searchForm = ref({ keyword: undefined, tag: undefined, serverId: undefined })
+  const searchForm = ref<{ keyword?: string; tag?: string; app?: string }>({
+    keyword: undefined,
+    tag: undefined,
+    app: undefined
+  })
 
   const searchItems = computed(() => [
     { label: '变量标识', key: 'keyword', type: 'input', props: { placeholder: '请输入变量标识', clearable: true } },
     { label: '变量标签', key: 'tag', type: 'input', props: { placeholder: '请输入变量标签', clearable: true } },
     {
-      label: '所属服务',
-      key: 'serverId',
+      label: '所属应用',
+      key: 'app',
       type: 'select',
-      props: { placeholder: '请选择所属服务', clearable: true, options: serverOptions.value }
+      props: {
+        placeholder: '请选择所属应用',
+        clearable: true,
+        filterable: true,
+        remote: true,
+        remoteMethod: loadApps,
+        options: appOptions.value
+      }
     }
   ])
+
+  const toAppOptions = (list: Awaited<ReturnType<typeof ListApp>>['list']) =>
+    list.map((item) => ({ label: `${item.name}（${item.keyword}）`, value: item.keyword }))
+
+  const getFieldList = (fields?: string) => (fields || '').split(',').filter(Boolean)
+
+  const getVisibleFields = (fields?: string) => getFieldList(fields).slice(0, 5)
+
+  const getHiddenFieldCount = (fields?: string) => Math.max(getFieldList(fields).length - 5, 0)
+
+  const loadApps = async (query?: string) => {
+    const keyword = query?.trim()
+    if (!keyword) {
+      const res = await ListApp({ page: 1, pageSize: 50, status: true })
+      appOptions.value = toAppOptions(res.list)
+      return
+    }
+
+    const [nameRes, keywordRes] = await Promise.all([
+      ListApp({ page: 1, pageSize: 50, status: true, name: keyword }),
+      ListApp({ page: 1, pageSize: 50, status: true, keyword })
+    ])
+    const apps = [...nameRes.list, ...keywordRes.list]
+    appOptions.value = toAppOptions(apps.filter((item, index) => apps.findIndex((app) => app.id === item.id) === index))
+  }
 
   const operationItems = [
     {
@@ -121,7 +256,9 @@
         currentResourceId.value = row.id
         valueForm.value = {}
         const res = await ListResourceValue({ resourceId: row.id })
-        res.list.forEach((item) => { valueForm.value[item.envId] = item.value })
+        res.list.forEach((item) => {
+          valueForm.value[item.envId] = item.value
+        })
         valueVisible.value = true
       }
     },
@@ -132,10 +269,11 @@
       permission: 'configure:resource:update',
       click: async (row: Resource) => {
         const detail = await GetResource({ id: row.id })
-        const serverIds = detail.servers?.map((s) => s.id) || []
-        currentData.value = { ...detail, fieldList: detail.fields?.split(',') || [], serverIds }
+        currentData.value = { ...detail, fieldList: detail.fields?.split(',') || [], apps: detail.apps || [] }
         dialogType.value = 'edit'
-        nextTick(() => { dialogVisible.value = true })
+        nextTick(() => {
+          dialogVisible.value = true
+        })
       }
     },
     {
@@ -151,29 +289,39 @@
     }
   ]
 
-  const { columns, columnChecks, data, loading, pagination, searchParams, getData, resetSearchParams, handleSizeChange, handleCurrentChange, refreshData, refreshCreate, refreshUpdate, refreshRemove } =
-    useTable({
-      core: {
-        apiFn: ListResource,
-        apiParams: { page: 1, pageSize: 10, ...searchForm.value },
-        columnsFactory: () => [
-          { type: 'index', width: '60', label: '#' },
-          { prop: 'keyword', label: '变量标识' },
-          { prop: 'fields', label: '变量字段' },
-          { prop: 'tag', label: '变量标签' },
-          { prop: 'createdAt', label: '创建时间', formatter: (row: Resource) => formatTime(row.createdAt) },
-          { prop: 'updatedAt', label: '更新时间', formatter: (row: Resource) => formatTime(row.updatedAt) },
-          { prop: 'operation', label: '操作', fixed: 'right', useSlot: true, slotName: 'operation' }
-        ]
-      }
-    })
+  const {
+    columns,
+    columnChecks,
+    data,
+    loading,
+    pagination,
+    searchParams,
+    getData,
+    handleSizeChange,
+    handleCurrentChange,
+    refreshData,
+    refreshCreate,
+    refreshUpdate,
+    refreshRemove
+  } = useTable({
+    core: {
+      apiFn: ListResource,
+      apiParams: { page: 1, pageSize: 10, ...searchForm.value },
+      columnsFactory: () => [
+        { type: 'index', width: '60', label: '#' },
+        { prop: 'keyword', label: '变量标识' },
+        { prop: 'fields', label: '变量字段', useSlot: true, slotName: 'fields', minWidth: 220 },
+        { prop: 'tag', label: '变量标签', useSlot: true, slotName: 'tag', width: 120 },
+        { prop: 'createdAt', label: '创建时间', formatter: (row: Resource) => formatTime(row.createdAt) },
+        { prop: 'updatedAt', label: '更新时间', formatter: (row: Resource) => formatTime(row.updatedAt) },
+        { prop: 'operation', label: '操作', fixed: 'right', useSlot: true, slotName: 'operation' }
+      ]
+    }
+  })
 
   const loadInitData = async () => {
-    const [serverRes, envRes] = await Promise.all([
-      ListServer({ page: 1, pageSize: 100 }),
-      ListEnv({ status: true })
-    ])
-    serverOptions.value = serverRes.list.map((s: any) => ({ label: s.name, value: s.id }))
+    const envRes = await ListEnv({ status: true })
+    await loadApps()
     envs.value = envRes.list
   }
   loadInitData()
@@ -183,16 +331,27 @@
     getData()
   }
 
+  const handleReset = () => {
+    searchForm.value = { keyword: undefined, tag: undefined, app: undefined }
+    Object.assign(searchParams, { page: 1, pageSize: 10, keyword: undefined, tag: undefined, app: undefined })
+    getData()
+  }
+
   const showDialog = (type: Form.DialogType) => {
     dialogType.value = type
-    currentData.value = {}
-    nextTick(() => { dialogVisible.value = true })
+    currentData.value = { private: false, apps: [] }
+    nextTick(() => {
+      dialogVisible.value = true
+    })
   }
 
   const handleSubmit = async () => {
     await formRef.value?.validate()
     const payload = { ...currentData.value, fields: currentData.value.fieldList?.join(',') || '' }
     delete (payload as any).fieldList
+    if (!payload.private) {
+      payload.apps = []
+    }
     if (dialogType.value === 'add') {
       await CreateResource(payload as CreateResourceRequest)
       ElMessage.success('创建成功')
@@ -212,3 +371,46 @@
     valueVisible.value = false
   }
 </script>
+
+<style scoped>
+  .configure-guide {
+    margin-bottom: 12px;
+  }
+
+  .field-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .field-tags__item,
+  .field-tags__more {
+    color: var(--el-text-color-regular);
+    background-color: var(--el-fill-color-light);
+    border-color: var(--el-border-color-lighter);
+  }
+
+  .field-tags__more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+  }
+
+  .field-tags__more :deep(.el-tag__content) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    line-height: 1;
+  }
+
+  .field-tags__more-text {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    line-height: 1;
+    transform: translateY(-3px);
+  }
+</style>

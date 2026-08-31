@@ -1,11 +1,11 @@
 export interface SyncConfigureRequest {
-  serverId: number
+  app: string
   envId: number
   description: string
 }
 
 export interface CompareConfigureRequest {
-  serverId: number
+  app: string
   envId: number
 }
 

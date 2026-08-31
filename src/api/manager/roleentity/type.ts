@@ -2,7 +2,7 @@ export interface ListRoleEntityRequest {
   page: number
   pageSize: number
   roleId: number
-  appId?: number
+  app?: string
   entityId?: number
 }
 
@@ -32,7 +32,7 @@ export interface ListRoleEntityReply {
 export interface CreateRoleEntityRequest {
   roleId: number
   entityId?: number
-  appId: number
+  app: string
   action: string
   scope: string
   fields: string
@@ -46,7 +46,7 @@ export interface CreateRoleEntityReply {
 export interface UpdateRoleEntityRequest {
   id: number
   roleId: number
-  appId: number
+  app: string
   entityId?: number
   action: string
   scope: string

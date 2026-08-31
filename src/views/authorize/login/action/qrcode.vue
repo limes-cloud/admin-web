@@ -47,11 +47,20 @@
   })
 
   const timer = ref()
+  const isActive = ref(false)
+
+  const stopPolling = () => {
+    if (timer.value) {
+      clearInterval(timer.value)
+      timer.value = undefined
+    }
+  }
 
   const fetchOAuthLogin = async () => {
-    // 请求验证码
+    if (!props.data.uuid || !isActive.value) return
     OAutherLogin({ uuid: props.data.uuid }, false).then((res: OAutherLoginReply) => {
-      clearInterval(timer.value)
+      if (!isActive.value) return
+      stopPolling()
 
       if (res.needBind) {
         emits('bind', props.data.uuid)
@@ -69,9 +78,15 @@
   }
 
   onMounted(() => {
+    isActive.value = true
     timer.value = setInterval(() => {
       fetchOAuthLogin()
     }, 3000)
+  })
+
+  onBeforeUnmount(() => {
+    isActive.value = false
+    stopPolling()
   })
 </script>
 

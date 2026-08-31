@@ -90,7 +90,7 @@
   defineOptions({ name: 'AppOAuther' })
 
   const router = useRouter()
-  const appId = Number(router.currentRoute.value.query.appId)
+  const app = router.currentRoute.value.query.app as string
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -192,7 +192,7 @@
       apiParams: {
         page: 1,
         pageSize: 10,
-        appId: appId,
+        app: app,
         ...searchForm.value
       },
       columnsFactory: () => [
@@ -246,7 +246,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: AppOAuther): void => {
     dialogType.value = type
-    currentData.value = { appId: appId, ...row }
+    currentData.value = { app: app, ...row }
     nextTick(() => {
       dialogVisible.value = true
     })

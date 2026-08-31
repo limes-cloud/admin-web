@@ -101,7 +101,7 @@
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
   const router = useRouter()
-  const appId = Number(router.currentRoute.value.query.appId)
+  const app = router.currentRoute.value.query.app as string
 
   defineOptions({ name: 'EntityRule' })
 
@@ -114,7 +114,7 @@
   const formFields = ref<EntityField[]>([])
 
   const handleListEntity = (query?: string) => {
-    ListEntity({ page: 1, pageSize: 10, appId, name: query }).then((res) => {
+    ListEntity({ page: 1, pageSize: 10, app, name: query }).then((res) => {
       res.list.forEach((item, ind) => {
         res.list[ind].comment = item.comment + `（${item.name}）`
       })

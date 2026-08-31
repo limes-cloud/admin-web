@@ -3,11 +3,6 @@ export interface GetResourceRequest {
   keyword?: string
 }
 
-export interface ResourceServer {
-  id: number
-  name: string
-}
-
 export interface GetResourceReply {
   id: number
   keyword: string
@@ -17,7 +12,7 @@ export interface GetResourceReply {
   description?: string
   createdAt: number
   updatedAt: number
-  servers: ResourceServer[]
+  apps: string[]
 }
 
 export interface ListResourceRequest {
@@ -28,7 +23,7 @@ export interface ListResourceRequest {
   keyword?: string
   tag?: string
   private?: boolean
-  serverId?: number
+  app?: string
 }
 
 export interface Resource {
@@ -52,7 +47,7 @@ export interface CreateResourceRequest {
   fields: string
   tag: string
   private?: boolean
-  serverIds?: number[]
+  apps?: string[]
   description?: string
 }
 
@@ -66,7 +61,7 @@ export interface UpdateResourceRequest {
   fields: string
   tag: string
   private?: boolean
-  serverIds?: number[]
+  apps?: string[]
   description?: string
 }
 

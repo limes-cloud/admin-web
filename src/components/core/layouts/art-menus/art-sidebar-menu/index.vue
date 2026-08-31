@@ -168,12 +168,12 @@
 
     // 如果不是顶部左侧菜单或双列菜单，直接返回完整菜单列表
     if (!isTopLeftMenu.value && !isDualMenu.value) {
-      return allMenus
+      return flattenSingleRootMenu(allMenus)
     }
 
     // 处理 iframe 路径
     if (isIframe(route.path)) {
-      return findIframeMenuList(route.path, allMenus)
+      return flattenSingleRootMenu(findIframeMenuList(route.path, allMenus))
     }
 
     // 处理一级菜单
@@ -184,8 +184,19 @@
     // 返回当前顶级路径对应的子菜单
     const currentTopPath = `/${route.path.split('/')[1]}`
     const currentMenu = allMenus.find((menu) => menu.path === currentTopPath)
-    return currentMenu?.children ?? []
+    return flattenSingleRootMenu(currentMenu?.children ?? [])
   })
+
+  const flattenSingleRootMenu = (list: AppRouteRecord[]): AppRouteRecord[] => {
+    const visibleMenus = list.filter((menu) => !menu.meta.isHide)
+    if (visibleMenus.length !== 1) {
+      return list
+    }
+
+    const [rootMenu] = visibleMenus
+    const visibleChildren = rootMenu.children?.filter((item) => !item.meta.isHide) ?? []
+    return visibleChildren.length ? visibleChildren : list
+  }
 
   /**
    * 检查是否为移动端屏幕

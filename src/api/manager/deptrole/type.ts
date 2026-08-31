@@ -3,6 +3,7 @@ export interface ListDeptRoleRequest {
   pageSize: number
   name?: string
   deptId: number
+  app?: string
 }
 
 export interface Role {
@@ -19,6 +20,7 @@ export interface ListDeptRoleReply {
 export interface CreateDeptRoleRequest {
   deptId: number
   roleId: number
+  app?: string
 }
 
 export interface CreateDeptRoleReply {
@@ -28,4 +30,5 @@ export interface CreateDeptRoleReply {
 export interface DeleteDeptRoleRequest {
   deptId: number
   roleId: number
+  app?: string
 }

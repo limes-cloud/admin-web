@@ -102,6 +102,8 @@
     ...props.uploadConfig
   }))
 
+  const appKey = import.meta.env.VITE_APP_KEY || 'manager'
+
   // 工具栏配置
   const toolbarConfig = computed((): Partial<IToolbarConfig> => {
     const config: Partial<IToolbarConfig> = {}
@@ -135,7 +137,8 @@
         allowedFileTypes: mergedUploadConfig.value.allowedFileTypes,
         server: uploadServer.value,
         headers: {
-          Authorization: userStore.accessToken
+          Authorization: userStore.accessToken,
+          'X-App-Key': appKey
         },
         onSuccess() {
           ElMessage.success(`图片上传成功 ${EmojiText[200]}`)

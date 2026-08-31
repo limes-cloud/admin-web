@@ -13,7 +13,6 @@
         >
         </ArtSearchBar>
       </div>
-
       <div class="table">
         <!-- 表格头部 -->
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
@@ -109,7 +108,7 @@
     }
   ]
 
-  const curAppId = ref(0)
+  const curApp = ref('')
   const curEntityId = ref(0)
   const curRoleId = Number(router.currentRoute.value.query.roleId)
 
@@ -126,7 +125,7 @@
 
   const entities = ref<Entity[]>([])
   const getEntities = (query?: string) => {
-    ListEntity({ page: 1, pageSize: 10, appId: curAppId.value, name: query }).then((res) => {
+    ListEntity({ page: 1, pageSize: 10, app: curApp.value, name: query }).then((res) => {
       res.list.forEach((item, ind) => {
         res.list[ind].comment = item.comment + `（${item.name}）`
       })
@@ -170,7 +169,7 @@
 
   const formItems = computed(() => [
     {
-      key: 'appId',
+      key: 'app',
       label: '所属应用',
       type: 'select',
       hidden: dialogType.value === 'edit',
@@ -187,7 +186,7 @@
           }
         },
         onChange: async (id: number) => {
-          curAppId.value = id
+          curApp.value = id
           await getEntities()
         },
         options: apps.value,
@@ -322,7 +321,7 @@
       popConfirm: true,
       label: '删除数据权限',
       color: 'danger',
-      permission: 'manager:roleentity:delete',
+      permission: 'manager:role:entity:delete',
       click: async (record: RoleEntity) => {
         await DeleteRoleEntity({ id: record.id })
         refreshRemove()

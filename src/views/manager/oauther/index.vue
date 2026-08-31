@@ -30,36 +30,93 @@
           </template>
         </ArtTableHeader>
 
-        <!-- 表格 -->
-        <ArtTable
-          :loading="loading"
-          :data="data"
-          :columns="columns"
-          :pagination="pagination"
-          row-key="id"
-          @pagination:size-change="handleSizeChange"
-          @pagination:current-change="handleCurrentChange"
-        >
-          <template #status="{ row }">
-            <el-switch
-              v-model="row.status"
-              :disabled="!$hasPermission('manager:oauther:update')"
-              inline-prompt
-              active-text="启用"
-              inactive-text="禁用"
-              :before-change="handleUpdateStatus(row)"
-            />
-          </template>
-          <template #logo="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.logo)"></ElAvatar>
-          </template>
-          <template #favicon="{ row }">
-            <ElAvatar shape="square" :size="60" :src="$rurl(row.favicon)"></ElAvatar>
-          </template>
-          <template #operation="{ row }">
-            <ArtOperation :list="operationItems" :data="row"></ArtOperation>
-          </template>
-        </ArtTable>
+        <!-- 卡片列表 -->
+        <div class="oauth-card-scroll">
+          <ElEmpty v-if="!loading && !oautherList.length" description="暂无授权数据" />
+
+          <div v-else v-loading="loading" class="oauth-grid">
+            <article v-for="item in oautherList" :key="item.id" class="oauth-card">
+              <div class="oauth-card__header">
+                <div class="oauth-card__logo" :class="getLogoClass(item)">
+                  <ElImage v-if="item.logo" :src="getResourceUrl(item.logo, 72, 72)" fit="cover">
+                    <template #error>
+                      <span class="oauth-card__logo-fallback">{{ getOAutherInitial(item) }}</span>
+                    </template>
+                  </ElImage>
+                  <span v-else class="oauth-card__logo-fallback">{{ getOAutherInitial(item) }}</span>
+                </div>
+
+                <div class="oauth-card__title">
+                  <h2>{{ item.name }}</h2>
+                  <p>{{ item.description || '暂无授权描述' }}</p>
+                </div>
+
+                <ArtOperation :single="true" :list="operationItems" :data="item" :has-background="false">
+                  <ElButton class="oauth-card__more" text :icon="MoreFilled" />
+                </ArtOperation>
+              </div>
+
+              <dl class="oauth-card__meta">
+                <div>
+                  <dt>授权标识</dt>
+                  <dd class="oauth-card__copy-field">
+                    <span>{{ item.keyword }}</span>
+                    <ElButton
+                      class="oauth-card__inline-copy"
+                      text
+                      :icon="CopyDocument"
+                      @click="handleCopyKeyword(item)"
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>创建时间</dt>
+                  <dd>{{ formatTime(item.createdAt) }}</dd>
+                </div>
+              </dl>
+
+              <div class="oauth-card__secret">
+                <div class="oauth-card__secret-title">
+                  <span>授权信息</span>
+                </div>
+                <div>
+                  <span>授权AK：</span>
+                  <strong>{{ item.ak || '未配置' }}</strong>
+                </div>
+                <div class="oauth-card__secret-row">
+                  <span>授权SK：</span>
+                  <strong>{{ maskSecret(item.sk) }}</strong>
+                  <ElButton class="oauth-card__inline-copy" text :icon="CopyDocument" @click="handleCopySk(item)" />
+                </div>
+              </div>
+
+              <div class="oauth-card__footer">
+                <ElSwitch
+                  v-model="item.status"
+                  :disabled="!$hasPermission('manager:oauther:update')"
+                  inline-prompt
+                  active-text="启用"
+                  inactive-text="禁用"
+                  :before-change="handleUpdateStatus(item)"
+                />
+                <ElTag type="primary" effect="light">{{ getTypeLabel(item.type) }}</ElTag>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div v-if="pagination.total > 0" class="oauth-pagination">
+          <ElPagination
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            :current-page="pagination.current"
+            :page-size="pagination.size"
+            :page-sizes="[10, 20, 30, 50, 100]"
+            :total="pagination.total"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
 
       <!-- 新增/修改弹窗 -->
@@ -86,13 +143,15 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { ElMessageBox } from 'element-plus'
-  import { Edit, Plus } from '@element-plus/icons-vue'
+  import { CopyDocument, Delete, Edit, MoreFilled, Plus } from '@element-plus/icons-vue'
   import { CreateOAuther, DeleteOAuther, ListOAuther, ListOAutherType, UpdateOAuther } from '@/api/manager/oauther/api'
   import { CreateOAutherRequest, OAuther, OAutherType, UpdateOAutherRequest } from '@/api/manager/oauther/type'
-  import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
+  import { rurl } from '@/utils/resource/url'
 
   defineOptions({ name: 'OAuther' })
+
+  const { copy } = useClipboard()
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -318,9 +377,8 @@
   ]
 
   const {
-    columns,
     columnChecks,
-    data,
+    data: tableData,
     loading,
     pagination,
     searchParams,
@@ -395,6 +453,8 @@
     }
   })
 
+  const oautherList = computed(() => tableData.value as OAuther[])
+
   // 搜索处理
   const handleSearch = () => {
     Object.assign(searchParams, { ...searchForm.value })
@@ -444,4 +504,317 @@
       })
     }
   }
+
+  const getResourceUrl = (key: string, width = 100, height = 100) => rurl(key, width, height)
+
+  const getOAutherInitial = (item: OAuther) => (item.name || item.keyword || 'O').slice(0, 1).toUpperCase()
+
+  const getTypeLabel = (type: string) =>
+    types.value.find((item) => item.keyword === type)?.name || type || '第三方OAuth'
+
+  const getLogoClass = (item: OAuther) => {
+    const index = Math.abs(item.id || 0) % 6
+    return `is-tone-${index}`
+  }
+
+  const maskSecret = (value?: string) => (value ? '*'.repeat(Math.min(Math.max(value.length, 8), 12)) : '未配置')
+
+  const handleCopySk = async (item: OAuther) => {
+    await copy(item.sk || '')
+    ElMessage.success('复制成功')
+  }
+
+  const handleCopyKeyword = async (item: OAuther) => {
+    await copy(item.keyword)
+    ElMessage.success('复制成功')
+  }
 </script>
+
+<style lang="scss" scoped>
+  :deep(.table) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .oauth-card-scroll {
+    flex: 1;
+    min-height: 0;
+    margin-top: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .oauth-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .oauth-card {
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    background: var(--art-main-bg-color);
+    border: 1px solid var(--art-border-color);
+    border-radius: 8px;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: rgba(var(--art-primary), 0.45);
+      box-shadow: var(--art-root-card-box-shadow);
+    }
+
+    &__header {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 32px;
+      gap: 14px;
+      align-items: flex-start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--art-border-color);
+    }
+
+    &__logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      overflow: hidden;
+      font-size: 18px;
+      font-weight: 700;
+      color: rgb(var(--art-primary));
+      background: rgb(var(--art-bg-primary));
+      border-radius: 8px;
+
+      :deep(.el-image) {
+        width: 100%;
+        height: 100%;
+      }
+
+      :deep(.el-image__error) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: inherit;
+        font-size: inherit;
+        background: transparent;
+      }
+
+      &.is-tone-1 {
+        color: rgb(var(--art-success));
+        background: rgb(var(--art-bg-success));
+      }
+
+      &.is-tone-2 {
+        color: rgb(var(--art-warning));
+        background: rgb(var(--art-bg-warning));
+      }
+
+      &.is-tone-3 {
+        color: rgb(var(--art-secondary));
+        background: rgb(var(--art-bg-secondary));
+      }
+
+      &.is-tone-4 {
+        color: rgb(var(--art-error));
+        background: rgb(var(--art-bg-error));
+      }
+
+      &.is-tone-5 {
+        color: rgb(var(--art-info));
+        background: rgb(var(--art-bg-info));
+      }
+    }
+
+    &__logo-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    &__title {
+      min-width: 0;
+
+      h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 22px;
+        color: var(--art-gray-900);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 2px 0 0;
+        overflow: hidden;
+        font-size: 13px;
+        line-height: 19px;
+        color: var(--art-gray-600);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__more,
+    &__copy,
+    &__inline-copy {
+      --el-button-border-color: transparent;
+      --el-button-bg-color: transparent;
+      --el-button-hover-border-color: transparent;
+      --el-button-hover-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
+      --el-button-active-border-color: transparent;
+      --el-button-active-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
+
+      width: 32px !important;
+      height: 32px !important;
+      color: var(--art-gray-500);
+      border-color: transparent !important;
+      border-radius: 6px;
+      box-shadow: none !important;
+
+      &:hover,
+      &:focus,
+      &:focus-visible,
+      &:active {
+        color: var(--art-gray-500);
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+    }
+
+    &__inline-copy {
+      flex-shrink: 0;
+      width: 22px !important;
+      height: 22px !important;
+      padding: 0 !important;
+      font-size: 12px;
+    }
+
+    &__meta {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0 12px;
+
+      div {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr);
+        gap: 8px;
+        align-items: center;
+      }
+
+      dt,
+      dd {
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        line-height: 19px;
+      }
+
+      dt {
+        color: var(--art-gray-600);
+      }
+
+      dd {
+        overflow: hidden;
+        color: var(--art-gray-800);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__copy-field {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__secret {
+      padding: 12px;
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--art-gray-800);
+      background: rgba(var(--art-gray-200-rgb), 0.64);
+      border-radius: 8px;
+
+      strong {
+        font-weight: 400;
+        letter-spacing: 1px;
+      }
+    }
+
+    &__secret-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    &__secret-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+  }
+
+  .oauth-pagination {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  @media (max-width: $device-notebook) {
+    .oauth-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: $device-ipad-pro) {
+    .oauth-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: $device-phone) {
+    .oauth-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .oauth-card {
+      padding: 16px;
+    }
+  }
+</style>

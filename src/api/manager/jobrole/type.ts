@@ -3,6 +3,7 @@ export interface ListJobRoleRequest {
   pageSize: number
   name?: string
   jobId: number
+  app?: string
 }
 
 export interface Role {
@@ -19,6 +20,7 @@ export interface ListJobRoleReply {
 export interface CreateJobRoleRequest {
   jobId: number
   roleId: number
+  app?: string
 }
 
 export interface CreateJobRoleReply {
@@ -28,4 +30,5 @@ export interface CreateJobRoleReply {
 export interface DeleteJobRoleRequest {
   jobId: number
   roleId: number
+  app?: string
 }

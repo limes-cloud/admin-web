@@ -6,12 +6,14 @@ import { $t } from '@/locales'
 export interface ErrorResponse {
   code: number
   message: string
+  reason?: string
   data?: unknown
 }
 
 // 错误日志数据接口
 export interface ErrorLogData {
   code: number
+  reason?: string
   message: string
   data?: unknown
   timestamp: string
@@ -23,6 +25,7 @@ export interface ErrorLogData {
 // 自定义 HttpError 类
 export class HttpError extends Error {
   public readonly code: number
+  public readonly reason?: string
   public readonly data?: unknown
   public readonly timestamp: string
   public readonly url?: string
@@ -33,6 +36,7 @@ export class HttpError extends Error {
     code: number,
     options?: {
       data?: unknown
+      reason?: string
       url?: string
       method?: string
     }
@@ -40,6 +44,7 @@ export class HttpError extends Error {
     super(message)
     this.name = 'HttpError'
     this.code = code
+    this.reason = options?.reason
     this.data = options?.data
     this.timestamp = new Date().toISOString()
     this.url = options?.url
@@ -49,6 +54,7 @@ export class HttpError extends Error {
   public toLogData(): ErrorLogData {
     return {
       code: this.code,
+      reason: this.reason,
       message: this.message,
       data: this.data,
       timestamp: this.timestamp,

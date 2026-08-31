@@ -7,22 +7,17 @@ import {
   CreateFieldRequest,
   UpdateFieldRequest,
   DeleteFieldRequest,
-  FieldType
+  FieldOptions
 } from './type'
 
-// ListField 获取字段信息列表
-export function ListFieldType() {
-  return request.get<{ list: FieldType[] }>({ url: '/manager/api/field/types' })
+// ListFieldOptions 获取组件类型和校验规则枚举
+export function ListFieldOptions() {
+  return request.get<FieldOptions>({ url: '/manager/api/field/options' })
 }
 
 // ListField 获取字段信息列表
 export function ListField(params: ListFieldRequest) {
   return request.get<ListFieldReply>({ url: '/manager/api/fields', params })
-}
-
-// ListRequiredField 获取字段信息列表
-export function ListRequiredField() {
-  return request.get<ListFieldReply>({ url: '/manager/api/fields/required' })
 }
 
 // CreateField 创建字段信息

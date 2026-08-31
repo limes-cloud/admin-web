@@ -8,11 +8,21 @@ import {
   CompareTemplateRequest,
   CompareTemplateReply,
   ListTemplateRequest,
-  ListTemplateReply
+  ListTemplateReply,
+  ListTemplateNamespaceRequest,
+  ListTemplateNamespaceReply,
+  CreateTemplateNamespaceRequest,
+  CreateTemplateNamespaceReply,
+  UpdateTemplateNamespaceRequest,
+  DeleteTemplateNamespaceRequest
 } from './type'
 
-export function CurrentTemplate(serverId: number) {
-  return request.get<Template>({ url: '/configure/api/template/current', params: { serverId } })
+export function CurrentTemplate(app: string, namespace?: string, showErrorMessage = true) {
+  return request.get<Template>({
+    url: '/configure/api/template/current',
+    params: { app, namespace },
+    showErrorMessage
+  })
 }
 
 export function SwitchTemplate(data: SwitchTemplateRequest) {
@@ -33,6 +43,22 @@ export function GetTemplate(id: number) {
 
 export function ListTemplate(params: ListTemplateRequest) {
   return request.get<ListTemplateReply>({ url: '/configure/api/templates', params })
+}
+
+export function ListTemplateNamespace(params: ListTemplateNamespaceRequest) {
+  return request.get<ListTemplateNamespaceReply>({ url: '/configure/api/template/namespaces', params })
+}
+
+export function CreateTemplateNamespace(data: CreateTemplateNamespaceRequest) {
+  return request.post<CreateTemplateNamespaceReply>({ url: '/configure/api/template/namespace', data })
+}
+
+export function UpdateTemplateNamespace(data: UpdateTemplateNamespaceRequest) {
+  return request.put({ url: '/configure/api/template/namespace', data })
+}
+
+export function DeleteTemplateNamespace(params: DeleteTemplateNamespaceRequest) {
+  return request.del({ url: '/configure/api/template/namespace', params })
 }
 
 export function CompareTemplate(data: CompareTemplateRequest) {

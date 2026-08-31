@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Entity class="left" :app-id="appId" @select="handleSelect"></Entity>
-    <Field class="right" :app-id="appId" :entity-id="entityId" />
+    <Entity class="left" :app="app" @select="handleSelect"></Entity>
+    <Field class="right" :app="app" :entity-id="entityId" />
   </div>
 </template>
 
@@ -29,7 +29,7 @@
   import { Entity as EntityType } from '@/api/manager/entity/type'
 
   const router = useRouter()
-  const appId = Number(router.currentRoute.value.query.appId)
+  const app = router.currentRoute.value.query.app as string
 
   const entityId = ref(0)
   const handleSelect = (row: EntityType) => {

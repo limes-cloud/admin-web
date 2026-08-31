@@ -1,6 +1,14 @@
 <template>
   <div class="art-full-height">
-    <ElCard class="env-page-card" shadow="never">
+    <ElCard class="art-table-card" shadow="never">
+      <ElAlert
+        class="env-guide"
+        type="primary"
+        title="环境用于区分开发、测试、生产等不同配置值，环境标识作为接口调用和配置同步的唯一标识，建议使用稳定的英文小写命名。"
+        :closable="false"
+        show-icon
+      />
+
       <div class="search">
         <ArtSearchBar
           v-model="searchForm"
@@ -11,77 +19,85 @@
         />
       </div>
 
-      <div class="env-toolbar">
-        <ElButton v-permission="'configure:env:add'" v-ripple type="primary" :icon="Plus" @click="showDialog('add')">
-          新增环境
-        </ElButton>
-        <ElButton :icon="Refresh" :loading="loading" @click="refreshData">刷新</ElButton>
-      </div>
+      <div class="table">
+        <ArtTableHeader :loading="loading" layout="refresh,fullscreen" @refresh="refreshData">
+          <template #left>
+            <ElSpace wrap>
+              <ElButton
+                v-permission="'configure:env:add'"
+                v-ripple
+                type="primary"
+                :icon="Plus"
+                @click="showDialog('add')"
+              >
+                新增环境
+              </ElButton>
+            </ElSpace>
+          </template>
+        </ArtTableHeader>
 
-      <div v-loading="loading" class="env-content">
-        <div v-if="envList.length" class="env-grid">
-          <div v-for="item in envList" :key="item.id" class="env-card">
-            <div class="env-card__header">
-              <div class="env-card__identity">
-                <div class="env-card__icon">{{ item.name?.slice(0, 1) || item.keyword?.slice(0, 1) || 'E' }}</div>
+        <div class="env-card-scroll">
+          <ElEmpty v-if="!loading && !envList.length" description="暂无环境数据" />
+
+          <div v-else v-loading="loading" class="env-grid">
+            <article v-for="item in envList" :key="item.id" class="env-card">
+              <div class="env-card__header">
+                <div class="env-card__icon" :class="getIconClass(item)">{{ getEnvInitial(item) }}</div>
+
                 <div class="env-card__title">
-                  <div class="env-card__name">{{ item.name }}</div>
-                  <ElTag type="info" size="small">{{ item.keyword }}</ElTag>
+                  <h2>{{ item.name }}</h2>
+                  <p>{{ item.description || '暂无环境描述' }}</p>
                 </div>
-              </div>
-              <ArtOperation :single="true" :list="operationItems" :data="item">
-                <span class="env-card__more">
-                  <ElIcon><MoreFilled /></ElIcon>
-                </span>
-              </ArtOperation>
-            </div>
 
-            <div class="env-card__desc">
-              {{ item.description || '暂无环境描述' }}
-            </div>
+                <ArtOperation :single="true" :list="operationItems" :data="item" :has-background="false">
+                  <ElButton class="env-card__more" text :icon="MoreFilled" />
+                </ArtOperation>
+              </div>
 
-            <div class="env-card__meta">
-              <div>
-                <span>创建</span>
-                <strong>{{ formatTime(item.createdAt) }}</strong>
-              </div>
-              <div>
-                <span>更新</span>
-                <strong>{{ formatTime(item.updatedAt) }}</strong>
-              </div>
-            </div>
+              <dl class="env-card__meta">
+                <div>
+                  <dt>环境标识</dt>
+                  <dd>{{ item.keyword }}</dd>
+                </div>
+                <div>
+                  <dt>创建时间</dt>
+                  <dd>{{ formatTime(item.createdAt) }}</dd>
+                </div>
+                <div>
+                  <dt>更新时间</dt>
+                  <dd>{{ formatTime(item.updatedAt) }}</dd>
+                </div>
+              </dl>
 
-            <div class="env-card__footer">
-              <div class="env-card__status">
-                <span :class="['env-card__dot', { 'is-active': item.status }]"></span>
-                <span>{{ item.status ? '启用中' : '已禁用' }}</span>
+              <div class="env-card__footer">
+                <el-switch
+                  v-model="item.status"
+                  :disabled="!$hasPermission('configure:env:update')"
+                  inline-prompt
+                  active-text="启用"
+                  inactive-text="禁用"
+                  :before-change="handleUpdateStatus(item)"
+                />
+                <ElTag :type="item.status ? 'success' : 'info'" effect="light">
+                  {{ item.status ? '启用中' : '已禁用' }}
+                </ElTag>
               </div>
-              <el-switch
-                v-model="item.status"
-                :disabled="!$hasPermission('configure:env:update')"
-                inline-prompt
-                active-text="启用"
-                inactive-text="禁用"
-                :before-change="handleUpdateStatus(item)"
-              />
-            </div>
+            </article>
           </div>
         </div>
 
-        <ElEmpty v-else description="暂无环境数据" />
-      </div>
-
-      <div v-if="pagination.total > 0" class="env-pagination">
-        <ElPagination
-          background
-          :total="pagination.total"
-          :page-size="pagination.size"
-          :current-page="pagination.current"
-          :page-sizes="[10, 20, 30, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <div v-if="pagination.total > 0" class="env-pagination">
+          <ElPagination
+            background
+            :total="pagination.total"
+            :page-size="pagination.size"
+            :current-page="pagination.current"
+            :page-sizes="[10, 20, 30, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
 
       <ElDialog
@@ -286,231 +302,241 @@
     copy(currentToken.value)
     ElMessage.success('复制成功')
   }
+
+  const getEnvInitial = (item: Env) => (item.name || item.keyword || 'E').slice(0, 1).toUpperCase()
+
+  const getIconClass = (item: Env) => {
+    const index = Math.abs(item.id || 0) % 6
+    return `is-tone-${index}`
+  }
 </script>
 
 <style scoped lang="scss">
-  .env-page-card {
+  :deep(.table) {
     display: flex;
-    flex: 1;
     flex-direction: column;
     min-height: 0;
-    margin-top: 0;
-
-    :deep(.el-card__body) {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
-      overflow: hidden;
-    }
   }
 
-  .env-toolbar {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
-    margin: 12px 0 16px;
+  .env-guide {
+    margin-bottom: 12px;
   }
 
-  .env-content {
+  .env-card-scroll {
     flex: 1;
-    min-height: 280px;
+    min-height: 0;
+    margin-top: 12px;
     overflow-y: auto;
+    padding-right: 4px;
   }
 
   .env-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    padding-bottom: 2px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
   }
 
   .env-card {
     display: flex;
     flex-direction: column;
-    min-height: 210px;
-    padding: 16px;
-    background: var(--el-bg-color);
-    border: 1px solid var(--el-border-color-lighter);
+    min-height: 216px;
+    padding: 18px;
+    background: var(--art-main-bg-color);
+    border: 1px solid var(--art-border-color);
     border-radius: 8px;
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s ease;
 
     &:hover {
-      border-color: var(--el-color-primary-light-5);
-      box-shadow: 0 8px 24px rgb(0 0 0 / 6%);
-    }
-  }
-
-  .env-card__header,
-  .env-card__identity,
-  .env-card__footer,
-  .env-card__status {
-    display: flex;
-    align-items: center;
-  }
-
-  .env-card__header,
-  .env-card__footer {
-    justify-content: space-between;
-  }
-
-  .env-card__identity {
-    min-width: 0;
-    gap: 10px;
-  }
-
-  .env-card__icon {
-    display: flex;
-    flex: 0 0 48px;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--el-color-primary);
-    text-transform: uppercase;
-    background: var(--el-color-primary-light-9);
-    border-radius: 8px;
-  }
-
-  .env-card__title {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    flex: 1;
-    min-width: 0;
-    min-height: 48px;
-    gap: 6px;
-  }
-
-  .env-card__name {
-    overflow: hidden;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .env-card__title :deep(.el-tag) {
-    font-size: 12px;
-  }
-
-  .env-card__more {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    color: var(--el-color-primary);
-    cursor: pointer;
-    border-radius: 6px;
-
-    &:hover {
-      background: var(--el-fill-color-light);
-    }
-  }
-
-  .env-card__desc {
-    display: -webkit-box;
-    min-height: 42px;
-    margin: 16px 0;
-    overflow: hidden;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--el-text-color-secondary);
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .env-card__meta {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    padding: 12px;
-    margin-top: auto;
-    background: var(--el-fill-color-lighter);
-    border-radius: 6px;
-
-    div {
-      min-width: 0;
+      border-color: rgba(var(--art-primary), 0.45);
+      box-shadow: var(--art-root-card-box-shadow);
     }
 
-    span,
-    strong {
-      display: block;
+    &__header {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 32px;
+      gap: 14px;
+      align-items: flex-start;
     }
 
-    span {
-      margin-bottom: 4px;
-      font-size: 12px;
-      color: var(--el-text-color-placeholder);
-    }
-
-    strong {
+    &__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
       overflow: hidden;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--el-text-color-regular);
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 18px;
+      font-weight: 700;
+      color: rgb(var(--art-primary));
+      background: rgb(var(--art-bg-primary));
+      border-radius: 8px;
+
+      &.is-tone-1 {
+        color: rgb(var(--art-success));
+        background: rgb(var(--art-bg-success));
+      }
+
+      &.is-tone-2 {
+        color: rgb(var(--art-warning));
+        background: rgb(var(--art-bg-warning));
+      }
+
+      &.is-tone-3 {
+        color: rgb(var(--art-secondary));
+        background: rgb(var(--art-bg-secondary));
+      }
+
+      &.is-tone-4 {
+        color: rgb(var(--art-error));
+        background: rgb(var(--art-bg-error));
+      }
+
+      &.is-tone-5 {
+        color: rgb(var(--art-info));
+        background: rgb(var(--art-bg-info));
+      }
     }
-  }
 
-  .env-card__footer {
-    min-height: 32px;
-    padding-top: 14px;
-    margin-top: 14px;
-    border-top: 1px solid var(--el-border-color-lighter);
+    &__title {
+      min-width: 0;
 
-    :deep(.el-switch) {
-      flex-shrink: 0;
+      h2 {
+        margin: 0;
+        overflow: hidden;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 22px;
+        color: var(--art-gray-900);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        letter-spacing: 0;
+      }
+
+      p {
+        display: -webkit-box;
+        margin: 2px 0 0;
+        overflow: hidden;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 19px;
+        color: var(--art-gray-600);
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
     }
-  }
 
-  .env-card__status {
-    gap: 6px;
-    font-size: 13px;
-    color: var(--el-text-color-secondary);
-  }
+    &__more {
+      --el-button-border-color: transparent;
+      --el-button-bg-color: transparent;
+      --el-button-hover-border-color: transparent;
+      --el-button-hover-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
+      --el-button-active-border-color: transparent;
+      --el-button-active-bg-color: rgba(var(--art-gray-200-rgb), 0.72);
 
-  .env-card__dot {
-    width: 8px;
-    height: 8px;
-    background: var(--el-color-danger);
-    border-radius: 50%;
+      width: 32px !important;
+      height: 32px !important;
+      color: var(--art-gray-500);
+      border-color: transparent !important;
+      border-radius: 6px;
+      box-shadow: none !important;
 
-    &.is-active {
-      background: var(--el-color-success);
+      &:hover,
+      &:focus,
+      &:focus-visible,
+      &:active {
+        color: var(--art-gray-500);
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+    }
+
+    &__meta {
+      display: grid;
+      gap: 8px;
+      padding: 14px 0;
+      margin: 14px 0 0;
+
+      div {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr);
+        gap: 8px;
+        align-items: center;
+      }
+
+      dt,
+      dd {
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        line-height: 19px;
+      }
+
+      dt {
+        color: var(--art-gray-500);
+      }
+
+      dd {
+        overflow: hidden;
+        font-weight: 400;
+        color: var(--art-gray-700);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    &__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      margin-top: auto;
+
+      :deep(.el-switch) {
+        flex-shrink: 0;
+      }
     }
   }
 
   .env-pagination {
-    display: flex;
     flex-shrink: 0;
+    display: flex;
     justify-content: flex-end;
-    padding-top: 18px;
+    margin-top: 16px;
   }
 
-  @media (width <= 768px) {
-    .env-toolbar {
-      flex-direction: column;
-      align-items: stretch;
+  @media (max-width: $device-notebook) {
+    .env-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
+  }
 
+  @media (max-width: $device-ipad-pro) {
+    .env-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: $device-phone) {
     .env-grid {
       grid-template-columns: 1fr;
+      gap: 14px;
     }
 
-    .env-pagination {
-      justify-content: center;
-      overflow-x: auto;
+    .env-card {
+      padding: 16px;
+
+      &__header {
+        grid-template-columns: 48px minmax(0, 1fr) 32px;
+        gap: 12px;
+      }
+
+      &__icon {
+        width: 48px;
+        height: 48px;
+      }
     }
   }
 </style>

@@ -1,13 +1,34 @@
 <template>
   <div class="art-full-height">
     <ElCard class="art-table-card" shadow="never">
+      <ElAlert
+        class="configure-guide"
+        type="primary"
+        title="业务变量用于维护某个服务自身的业务配置，只作用于当前选择的应用和环境。"
+        :closable="false"
+        show-icon
+      />
+
       <div class="search">
-        <ArtSearchBar v-model="searchForm" :card="false" :items="searchItems" @search="handleSearch" @reset="handleReset" />
+        <ArtSearchBar
+          v-model="searchForm"
+          :card="false"
+          :items="searchItems"
+          @search="handleSearch"
+          @reset="handleReset"
+        />
       </div>
       <div class="table">
-        <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
+        <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="handleRefresh">
           <template #left>
-            <ElButton v-permission="'configure:business:add'" v-ripple type="primary" :icon="Plus" :disabled="!searchForm.serverId" @click="showDialog('add')">
+            <ElButton
+              v-permission="'configure:business:add'"
+              v-ripple
+              type="primary"
+              :icon="Plus"
+              :disabled="!searchForm.app"
+              @click="showDialog('add')"
+            >
               新增变量
             </ElButton>
           </template>
@@ -30,23 +51,61 @@
         </ArtTable>
       </div>
 
-      <ElDialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增变量' : '编辑变量'" :destroy-on-close="true" body-class="art-form-dialog" width="480px" align-center>
-        <ArtForm v-model="currentData" :items="formItems" :span="24" @cancel="dialogVisible = false" @submit="handleSubmit" />
+      <ElDialog
+        v-model="dialogVisible"
+        :title="dialogType === 'add' ? '新增变量' : '编辑变量'"
+        :destroy-on-close="true"
+        body-class="art-form-dialog"
+        width="480px"
+        align-center
+      >
+        <ArtForm
+          v-model="currentData"
+          :items="formItems"
+          :span="24"
+          @cancel="dialogVisible = false"
+          @submit="handleSubmit"
+        />
       </ElDialog>
 
       <!-- 值配置抽屉 -->
       <ElDrawer v-model="valueVisible" title="变量值配置" size="420px" :destroy-on-close="true">
         <ElForm label-position="top">
           <ElFormItem v-for="env in envs" :key="env.id" :label="`${env.name}(${env.keyword})`">
-            <ElInputNumber v-if="currentBusiness.type === 'int'" v-model="valueForm[env.id]" :precision="0" style="width:100%" />
-            <ElInputNumber v-else-if="currentBusiness.type === 'float'" v-model="valueForm[env.id]" style="width:100%" />
-            <ElSwitch v-else-if="currentBusiness.type === 'bool'" v-model="valueForm[env.id]" active-text="是" inactive-text="否" />
-            <ElInput v-else v-model="valueForm[env.id]" :type="currentBusiness.type === 'object' ? 'textarea' : 'text'" :rows="4" placeholder="请输入变量值" />
+            <ElInputNumber
+              v-if="currentBusiness.type === 'int'"
+              v-model="valueForm[env.id]"
+              :precision="0"
+              style="width: 100%"
+            />
+            <ElInputNumber
+              v-else-if="currentBusiness.type === 'float'"
+              v-model="valueForm[env.id]"
+              style="width: 100%"
+            />
+            <ElSwitch
+              v-else-if="currentBusiness.type === 'bool'"
+              v-model="valueForm[env.id]"
+              active-text="是"
+              inactive-text="否"
+            />
+            <ArtCodeEditor
+              v-else-if="currentBusiness.type === 'object'"
+              v-model="valueForm[env.id]"
+              :style="{ width: '100%', height: '180px' }"
+            />
+            <ElInput
+              v-else
+              v-model="valueForm[env.id]"
+              placeholder="请输入变量值"
+            />
           </ElFormItem>
         </ElForm>
         <template #footer>
           <ElButton @click="valueVisible = false">取消</ElButton>
-          <ElButton v-permission="'configure:business:value:update'" type="primary" @click="handleValueSubmit">保存</ElButton>
+          <ElButton v-permission="'configure:business:value:update'" type="primary" @click="handleValueSubmit"
+            >保存</ElButton
+          >
         </template>
       </ElDrawer>
     </ElCard>
@@ -56,15 +115,30 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { Plus, Edit, Delete, Setting } from '@element-plus/icons-vue'
-  import { ListBusiness, CreateBusiness, UpdateBusiness, DeleteBusiness, ListBusinessValue, UpdateBusinessValue } from '@/api/configure/business/api'
+  import {
+    ListBusiness,
+    CreateBusiness,
+    UpdateBusiness,
+    DeleteBusiness,
+    ListBusinessValue,
+    UpdateBusinessValue
+  } from '@/api/configure/business/api'
   import { ListEnv } from '@/api/configure/env/api'
+  import { ListApp } from '@/api/manager/app/api'
   import { Business, CreateBusinessRequest, UpdateBusinessRequest } from '@/api/configure/business/type'
   import { Env } from '@/api/configure/env/type'
   import { formatTime } from '@/utils/time'
+  import ArtCodeEditor from '@/components/core/base/art-code-editor/index.vue'
 
   defineOptions({ name: 'ConfigureBusiness' })
 
-  const variableTypes: Record<string, string> = { int: '整数', float: '浮点数', string: '字符串', bool: '布尔值', object: '对象' }
+  const variableTypes: Record<string, string> = {
+    int: '整数',
+    float: '浮点数',
+    string: '字符串',
+    bool: '布尔值',
+    object: '对象'
+  }
 
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
@@ -74,30 +148,55 @@
   const valueForm = ref<Record<number, any>>({})
   const envs = ref<Env[]>([])
 
-  const searchForm = ref<{ keyword?: string; serverId?: number }>({ keyword: undefined, serverId: undefined })
+  const searchForm = ref<{ keyword?: string; app?: string }>({ keyword: undefined, app: undefined })
 
   const searchItems = computed(() => [
     {
-      label: '所属服务',
-      key: 'serverId',
+      label: '所属应用',
+      key: 'app',
       type: 'select',
       props: {
-        placeholder: '请选择所属服务',
+        placeholder: '请选择所属应用',
         clearable: true,
-        options: serverOptions.value
+        filterable: true,
+        remote: true,
+        remoteMethod: loadApps,
+        options: appOptions.value
       }
     },
     { label: '变量标识', key: 'keyword', type: 'input', props: { placeholder: '请输入变量标识', clearable: true } }
   ])
 
-  const serverOptions = ref<{ label: string; value: number }[]>([])
+  const appOptions = ref<{ label: string; value: string }[]>([])
+
+  const toAppOptions = (list: Awaited<ReturnType<typeof ListApp>>['list']) =>
+    list.map((item) => ({ label: `${item.name}（${item.keyword}）`, value: item.keyword }))
+
+  const loadApps = async (query?: string) => {
+    const keyword = query?.trim()
+    if (!keyword) {
+      const res = await ListApp({ page: 1, pageSize: 50, status: true })
+      appOptions.value = toAppOptions(res.list)
+      return
+    }
+
+    const [nameRes, keywordRes] = await Promise.all([
+      ListApp({ page: 1, pageSize: 50, status: true, name: keyword }),
+      ListApp({ page: 1, pageSize: 50, status: true, keyword })
+    ])
+    const apps = [...nameRes.list, ...keywordRes.list]
+    appOptions.value = toAppOptions(apps.filter((item, index) => apps.findIndex((app) => app.id === item.id) === index))
+  }
 
   const formItems = computed(() => [
     {
       key: 'keyword',
       label: '变量标识',
       type: 'input',
-      props: { placeholder: '请输入变量标识', rules: [{ required: true, message: '请输入变量标识', trigger: ['blur', 'change'] }] }
+      props: {
+        placeholder: '请输入变量标识',
+        rules: [{ required: true, message: '请输入变量标识', trigger: ['blur', 'change'] }]
+      }
     },
     {
       key: 'type',
@@ -152,47 +251,73 @@
     }
   ]
 
-  const { columns, columnChecks, data, loading, pagination, searchParams, getData, resetSearchParams, handleSizeChange, handleCurrentChange, refreshData, refreshCreate, refreshUpdate, refreshRemove } =
-    useTable({
-      core: {
-        apiFn: ListBusiness,
-        apiParams: { page: 1, pageSize: 10, serverId: 0 },
-        columnsFactory: () => [
-          { type: 'index', width: '60', label: '#' },
-          { prop: 'keyword', label: '变量标识' },
-          { prop: 'type', label: '变量类型', useSlot: true, slotName: 'type' },
-          { prop: 'description', label: '变量描述' },
-          { prop: 'createdAt', label: '创建时间', formatter: (row: Business) => formatTime(row.createdAt) },
-          { prop: 'updatedAt', label: '更新时间', formatter: (row: Business) => formatTime(row.updatedAt) },
-          { prop: 'operation', label: '操作', fixed: 'right', useSlot: true, slotName: 'operation' }
-        ]
-      }
-    })
+  const {
+    columns,
+    columnChecks,
+    data,
+    loading,
+    pagination,
+    searchParams,
+    getData,
+    clearData,
+    handleSizeChange,
+    handleCurrentChange,
+    refreshCreate,
+    refreshUpdate,
+    refreshRemove
+  } = useTable({
+    core: {
+      apiFn: ListBusiness,
+      apiParams: { page: 1, pageSize: 10 },
+      immediate: false,
+      columnsFactory: () => [
+        { type: 'index', width: '60', label: '#' },
+        { prop: 'keyword', label: '变量标识' },
+        { prop: 'type', label: '变量类型', useSlot: true, slotName: 'type' },
+        { prop: 'description', label: '变量描述' },
+        { prop: 'createdAt', label: '创建时间', formatter: (row: Business) => formatTime(row.createdAt) },
+        { prop: 'updatedAt', label: '更新时间', formatter: (row: Business) => formatTime(row.updatedAt) },
+        { prop: 'operation', label: '操作', fixed: 'right', useSlot: true, slotName: 'operation' }
+      ]
+    }
+  })
 
   const loadInitData = async () => {
-    const [serverRes, envRes] = await Promise.all([
-      import('@/api/configure/server/api').then(m => m.ListServer({ page: 1, pageSize: 100 })),
-      ListEnv({ status: true })
-    ])
-    serverOptions.value = serverRes.list.map((s: any) => ({ label: s.name, value: s.id }))
+    const envRes = await ListEnv({ status: true })
+    await loadApps()
     envs.value = envRes.list
   }
   loadInitData()
 
-  const handleSearch = () => {
-    Object.assign(searchParams, { ...searchForm.value, serverId: searchForm.value.serverId || 0 })
+  const queryBusiness = () => {
+    if (!searchForm.value.app) {
+      clearData()
+      return
+    }
+    Object.assign(searchParams, { ...searchForm.value })
     getData()
   }
 
+  const handleSearch = () => {
+    queryBusiness()
+  }
+
   const handleReset = () => {
-    resetSearchParams()
-    Object.assign(searchParams, { serverId: 0 })
+    searchForm.value = { keyword: undefined, app: undefined }
+    Object.assign(searchParams, { page: 1, pageSize: 10, keyword: undefined, app: undefined })
+    clearData()
+  }
+
+  const handleRefresh = () => {
+    queryBusiness()
   }
 
   const showDialog = (type: Form.DialogType, row?: Business) => {
     dialogType.value = type
-    currentData.value = row ? { ...row } : { serverId: searchForm.value.serverId }
-    nextTick(() => { dialogVisible.value = true })
+    currentData.value = row ? { ...row } : { app: searchForm.value.app }
+    nextTick(() => {
+      dialogVisible.value = true
+    })
   }
 
   const handleSubmit = async () => {
@@ -201,7 +326,8 @@
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateBusiness(currentData.value as UpdateBusinessRequest)
+      const { id, keyword, type, description } = currentData.value
+      await UpdateBusiness({ id, keyword, type, description } as UpdateBusinessRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
@@ -210,8 +336,18 @@
 
   const handleValueSubmit = async () => {
     const list = envs.value.map((env) => ({ envId: env.id, value: String(valueForm.value[env.id] ?? '') }))
+    if (list.some((item) => !item.value)) {
+      ElMessage.error('请补全所有环境的变量值')
+      return
+    }
     await UpdateBusinessValue({ businessId: currentBusiness.value.id, list })
     ElMessage.success('设置成功')
     valueVisible.value = false
   }
 </script>
+
+<style scoped>
+  .configure-guide {
+    margin-bottom: 12px;
+  }
+</style>

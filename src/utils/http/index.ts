@@ -23,7 +23,8 @@ interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
   showSuccessMessage?: boolean
 }
 
-const { VITE_API_URL, VITE_WITH_CREDENTIALS } = import.meta.env
+const { VITE_API_URL, VITE_WITH_CREDENTIALS, VITE_APP_KEY } = import.meta.env
+const APP_KEY = VITE_APP_KEY || 'manager'
 
 /** Axios实例 */
 const axiosInstance = axios.create({
@@ -51,6 +52,7 @@ axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
     const { accessToken } = useUserStore()
     if (accessToken) request.headers.set('Authorization', accessToken)
+    request.headers.set('X-App-Key', APP_KEY)
 
     // 代理规则劫持：匹配则替换 baseURL
     if (request.url) {
@@ -128,7 +130,7 @@ axiosInstance.interceptors.response.use(
 
       handleUnauthorizedError(message)
     }
-    throw createHttpError(message || $t('httpMsg.requestFailed'), code)
+    throw createHttpError(message || $t('httpMsg.requestFailed'), code, reason)
   },
   (error) => {
     console.log(error)
@@ -138,8 +140,8 @@ axiosInstance.interceptors.response.use(
 )
 
 /** 统一创建HttpError */
-function createHttpError(message: string, code: number) {
-  return new HttpError(message, code)
+function createHttpError(message: string, code: number, reason?: string) {
+  return new HttpError(message, code, { reason })
 }
 
 /** 处理401错误（带防抖） */

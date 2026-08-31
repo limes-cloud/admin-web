@@ -78,12 +78,12 @@
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
   import { arrayToMap } from '@/utils/constants/transform'
-  import { ElTag } from 'element-plus'
+  import { ElTag } from 'element-plus/es'
 
   defineOptions({ name: 'UMenu' })
 
   const router = useRouter()
-  const appId = Number(router.currentRoute.value.query.appId)
+  const app = router.currentRoute.value.query.app as string
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -155,7 +155,7 @@
     core: {
       apiFn: ListMenu,
       apiParams: {
-        appId: appId,
+        app: app,
         ...searchForm.value
       },
       excludeParams: ['page', 'pageSize'],
@@ -473,11 +473,11 @@
   const handleSubmit = async () => {
     const value = { ...currentData.value }
     if (dialogType.value === 'add') {
-      await CreateMenu({ ...value, appId } as CreateMenuRequest)
+      await CreateMenu({ ...value, app } as CreateMenuRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateMenu({ ...value, appId } as UpdateMenuRequest)
+      await UpdateMenu({ ...value, app } as UpdateMenuRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }

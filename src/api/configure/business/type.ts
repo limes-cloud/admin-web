@@ -3,13 +3,13 @@ export interface ListBusinessRequest {
   pageSize: number
   order?: string
   orderBy?: string
-  serverId: number
+  app: string
   keyword?: string
 }
 
 export interface Business {
   id: number
-  serverId: number
+  app: string
   keyword: string
   type: string
   description?: string
@@ -23,7 +23,7 @@ export interface ListBusinessReply {
 }
 
 export interface CreateBusinessRequest {
-  serverId: number
+  app: string
   keyword: string
   type: string
   description?: string

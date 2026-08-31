@@ -109,7 +109,7 @@
       userAgent: sys.ua
     })
 
-    currentData.value.appId = appStore.app.id as number
+    currentData.value.app = appStore.app.keyword as string
     currentData.value.platform = 'H5'
     currentData.value.version = import.meta.env.VITE_VERSION
     const data = { ...currentData.value } as CreateFeedbackRequest

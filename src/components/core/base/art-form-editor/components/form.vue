@@ -1,282 +1,137 @@
 <template>
-  <div class="form-box">
+  <div class="form-box" ref="formBoxRef" @click="handleCancel">
     <div class="form">
-      <el-form :model="formModel" auto-label-width>
-        <template v-for="(ite, ind) in list" :key="ind">
-          <div
-            v-if="ite.type === 'input'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-input v-model="formModel[ite.field]" :placeholder="ite.config.placeholder" />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'textarea'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-input v-model="formModel[ite.field]" :placeholder="ite.config.placeholder" type="textarea" />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'number'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-input-number
-                v-model="formModel[ite.field]"
-                :placeholder="ite.config.placeholder"
-                :step="ite.config.step"
-                :min="ite.config.min"
-                :max="ite.config.max"
-              />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'password'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-input
-                v-model="formModel[ite.field]"
-                type="password"
-                :placeholder="ite.config.placeholder"
-                :step="ite.config.step"
-                :min="ite.config.min"
-                :max="ite.config.max"
-              />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'radio'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-radio-group v-model="formModel[ite.field]">
-                <template v-for="val in ite.config.options" :key="val">
-                  <el-radio :value="val">{{ val }}</el-radio>
-                </template>
-              </el-radio-group>
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'checkbox'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-checkbox-group v-model="formModel[ite.field]">
-                <template v-for="val in ite.config.options" :key="val">
-                  <el-checkbox :value="val">{{ val }}</el-checkbox>
-                </template>
-              </el-checkbox-group>
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'select'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-select v-model="formModel[ite.field]" :placeholder="ite.config.placeholder" allow-clear>
-                <template v-for="val in ite.config.options" :key="val">
-                  <el-option :value="val">{{ val }}</el-option>
-                </template>
-              </el-select>
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'time'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-time-picker :placeholder="ite.config.placeholder" />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'date'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-date-picker :placeholder="ite.config.placeholder" />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-
-          <div
-            v-if="ite.type === 'datetime'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <el-date-picker show-time :placeholder="ite.config.placeholder" />
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-          <div
-            v-if="ite.type === 'upload'"
-            class="form-item"
-            :class="curField === ite.field ? 'form-item-active' : ''"
-            @click="chooseComponent(ite, ind)"
-          >
-            <el-form-item
-              class="form-row"
-              :required="ite.config.required"
-              :field="ite.field"
-              :tooltip="ite.config.disabled ? '初始化隐藏' : '初始显示'"
-              :label="ite.config.label"
-            >
-              <ElUpload></ElUpload>
-              <Build :field="ite.field" @up="handleItemUp" @down="handleItemDown" @delete="handleItemDelete" />
-            </el-form-item>
-          </div>
-        </template>
+      <el-form
+        :model="formModel"
+        :label-position="formConfig?.labelPosition || 'right'"
+        :label-width="formConfig?.labelWidth || 'auto'"
+        :size="formConfig?.size || 'default'"
+        :disabled="formConfig?.disabled || false"
+      >
+        <!-- 递归渲染节点树 -->
+        <VueDraggable
+          v-model="nodes"
+          :group="{ name: 'form-nodes', pull: true, put: true }"
+          handle=".form-node__drag-handle"
+          ghost-class="ghost"
+          :animation="200"
+          class="form-drag-zone"
+          @add="handleAdd"
+        >
+          <template v-for="node in nodes" :key="node.id">
+            <FormNodeRenderer
+              :node="node"
+              :active-id="activeId"
+              :form-model="formModel"
+              @select="handleSelect"
+              @delete="handleDelete"
+              @copy="handleCopy"
+            />
+          </template>
+        </VueDraggable>
       </el-form>
+      <!-- 空状态用绝对定位覆盖，pointer-events: none 不阻挡拖放 -->
+      <div v-if="!nodes || nodes.length === 0" class="form-empty">
+        <span>从左侧拖入或点击组件</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+  import { VueDraggable } from 'vue-draggable-plus'
+  import { FormNode, FormConfig } from '../lib/types'
+  import { removeNodeById, findNodeById, cloneNode, findParentAndIndex } from '../lib/editor'
+  import FormNodeRenderer from './FormNodeRenderer.vue'
   import { ref } from 'vue'
-  import Editor from '../lib/editor'
-  import Build from './build.vue'
-  import { Component } from '../lib/types'
 
   export interface AnyObject {
     [key: string]: any
   }
 
-  const props = defineProps<{
-    list: Component[]
+  defineProps<{
+    formConfig?: FormConfig
   }>()
-  const emit = defineEmits(['update:list', 'choose'])
 
-  const curField = ref('')
+  // 直接使用 defineModel 让 VueDraggable 可以直接修改数组
+  const nodes = defineModel<FormNode[]>('list', { required: true })
+  const emit = defineEmits(['choose', 'cancel'])
+
+  const activeId = ref('')
   const formModel = ref<AnyObject>({})
+  const formBoxRef = ref<HTMLElement>()
 
-  const handleItemUp = (field: string) => {
-    Editor.up(props.list, field)
-    emit('update:list', props.list)
+  const handleAdd = (evt: any) => {
+    // 检查鼠标释放位置是否在设计区内
+    const originalEvent = evt.originalEvent as MouseEvent | TouchEvent | undefined
+    if (!originalEvent || !formBoxRef.value) return
+
+    let clientX: number, clientY: number
+    if ('touches' in originalEvent) {
+      const touch = originalEvent.changedTouches?.[0]
+      if (!touch) return
+      clientX = touch.clientX
+      clientY = touch.clientY
+    } else {
+      clientX = originalEvent.clientX
+      clientY = originalEvent.clientY
+    }
+
+    const rect = formBoxRef.value.getBoundingClientRect()
+    const inside =
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom
+
+    if (!inside && nodes.value) {
+      // 鼠标释放不在设计区，撤销这次添加
+      const newIndex = evt.newIndex as number
+      if (typeof newIndex === 'number' && newIndex >= 0) {
+        nodes.value.splice(newIndex, 1)
+      }
+    }
   }
 
-  const handleItemDown = (field: string) => {
-    Editor.down(props.list, field)
-    emit('update:list', props.list)
+  const handleCancel = () => {
+    activeId.value = ''
+    emit('cancel')
   }
 
-  const handleItemDelete = (field: string) => {
-    Editor.delete(props.list, field)
-    emit('update:list', props.list)
+  const handleSelect = (node: FormNode) => {
+    activeId.value = node.id
+    emit('choose', node)
   }
 
-  const chooseComponent = (ite: Component, ind: number) => {
-    curField.value = ite.field
-    emit('choose', ite, ind)
+  const handleDelete = (id: string) => {
+    if (!nodes.value) return
+    removeNodeById(nodes.value, id)
+    if (activeId.value === id) {
+      activeId.value = ''
+    }
+  }
+
+  const handleCopy = (id: string) => {
+    if (!nodes.value) return
+    const source = findNodeById(nodes.value, id)
+    if (!source) return
+    const copy = cloneNode(source)
+    // 在源节点的同级位置（父容器内）插入副本
+    const location = findParentAndIndex(nodes.value, id)
+    if (location) {
+      location.parent.splice(location.index + 1, 0, copy)
+    } else {
+      nodes.value.push(copy)
+    }
   }
 </script>
 
-<style lang="scss"></style>
 <style lang="scss" scoped>
   .form-box {
     position: relative;
     box-sizing: border-box;
-    width: calc(100% - 500px);
-    min-width: calc(100% - 500px);
-    max-width: calc(100% - 500px);
+    flex: 1;
+    min-width: 0;
     height: 100%;
     padding: 20px 15px;
     background: #fff;
@@ -284,29 +139,37 @@
     border-radius: 4px;
 
     .form {
+      position: relative;
       width: 100%;
       height: 100%;
-      overflow-y: scroll;
+      overflow-y: auto;
 
       &::-webkit-scrollbar {
         display: none;
       }
-
-      .form-row {
-        margin-bottom: 0 !important;
-      }
-
-      .form-item {
-        padding: 0 10px;
-        margin-bottom: 22px;
-        cursor: move;
-        border: 1px dashed #fff;
-        border-radius: 4px;
-      }
-
-      .form-item-active {
-        border: 1px dashed #787be8;
-      }
     }
+
+    .form-empty {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #bbb;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  .form-drag-zone {
+    min-height: 100%;
+    padding-bottom: 80px;
+  }
+
+  :deep(.ghost) {
+    opacity: 0.5;
+    background: #f0f0ff;
   }
 </style>
