@@ -16,37 +16,37 @@ export const staticRoutes: AppRouteRecordRaw[] = [
   //   path: '/welcome',
   //   name: 'WelcomeStatic',
   //   component: () => import('@views/dashboard/console/index.vue'),
-  //   meta: { title: 'menus.dashboard.title' }
+  //   meta: { title: '仪表盘' }
   // },
   {
     path: '/authorize/login',
     name: 'Login',
     component: () => import('@views/authorize/login/index.vue'),
-    meta: { title: 'menus.login.title', isHideTab: true }
+    meta: { title: '登录', isHideTab: true }
   },
   {
     path: '/authorize/register',
     name: 'Register',
     component: () => import('@views/authorize/register/index.vue'),
-    meta: { title: 'menus.register.title', isHideTab: true }
+    meta: { title: '注册', isHideTab: true }
   },
   {
     path: '/authorize/bind',
     name: 'BindAccount',
     component: () => import('@views/authorize/bind/index.vue'),
-    meta: { title: 'menus.bind.title', isHideTab: true }
+    meta: { title: '绑定账号', isHideTab: true }
   },
   {
     path: '/authorize/fillinfo',
     name: 'FillInfo',
     component: () => import('@views/authorize/fillinfo/index.vue'),
-    meta: { title: 'menus.fillInfo.title', isHideTab: true }
+    meta: { title: '信息补充', isHideTab: true }
   },
   {
     path: '/authorize/forget-password',
     name: 'ForgetPassword',
     component: () => import('@views/authorize/forget-password/index.vue'),
-    meta: { title: 'menus.forgetPassword.title', isHideTab: true }
+    meta: { title: '忘记密码', isHideTab: true }
   },
   {
     path: '/403',
@@ -76,7 +76,7 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     path: '/outside',
     component: () => import('@views/index/index.vue'),
     name: 'Outside',
-    meta: { title: 'menus.outside.title' },
+    meta: { title: '内嵌页面' },
     children: [
       // iframe 内嵌页面
       {

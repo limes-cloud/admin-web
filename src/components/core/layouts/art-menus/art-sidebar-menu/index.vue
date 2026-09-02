@@ -11,7 +11,7 @@
             <ElTooltip
               class="box-item"
               effect="dark"
-              :content="$t(menu.meta.title)"
+              :content="formatMenuTitle(menu.meta.title)"
               placement="right"
               :offset="25"
               :hide-after="0"
@@ -44,7 +44,7 @@
                   ></ArtIcon>
                 </div>
                 <span v-if="dualMenuShowText">
-                  {{ $t(menu.meta.title) }}
+                  {{ formatMenuTitle(menu.meta.title) }}
                 </span>
                 <div v-if="menu.meta.showBadge" class="art-badge art-badge-dual" />
               </div>
@@ -114,6 +114,7 @@
   import { isIframe } from '@/utils/navigation'
   import { handleMenuJump } from '@/utils/navigation'
   import SidebarSubmenu from './widget/SidebarSubmenu.vue'
+  import { formatMenuTitle } from '@/router/utils/utils'
   import { useCommon } from '@/composables/useCommon'
   import { useAppStore } from '@/store/modules/app'
   import { AppRouteRecord } from '@/types/router'

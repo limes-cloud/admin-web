@@ -46,12 +46,6 @@
         }
       }
 
-      &.language-btn:hover {
-        i {
-          animation: moveUp 0.4s;
-        }
-      }
-
       &.setting-btn:hover {
         i {
           animation: rotate180 0.5s;
@@ -421,20 +415,6 @@
 
   100% {
     transform: scale(1);
-  }
-}
-
-@keyframes moveUp {
-  0% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-3px);
-  }
-
-  100% {
-    transform: translateY(0);
   }
 }
 

@@ -406,56 +406,6 @@ export const upgradeLogList = ref<UpgradeLog[]>([])
   }
 }
 
-// 清理语言文件
-async function cleanLanguageFiles() {
-  const languageFiles = [
-    { path: 'src/locales/langs/zh.json', name: '中文语言文件' },
-    { path: 'src/locales/langs/en.json', name: '英文语言文件' }
-  ]
-
-  for (const { path: langPath, name } of languageFiles) {
-    try {
-      const fullPath = path.resolve(process.cwd(), langPath)
-      const content = await fs.readFile(fullPath, 'utf-8')
-      const langData = JSON.parse(content)
-
-      const menusToRemove = ['widgets', 'template', 'article', 'examples', 'safeguard', 'plan', 'help']
-
-      if (langData.menus) {
-        menusToRemove.forEach((menuKey) => {
-          if (langData.menus[menuKey]) {
-            delete langData.menus[menuKey]
-          }
-        })
-
-        if (langData.menus.dashboard) {
-          if (langData.menus.dashboard.analysis) {
-            delete langData.menus.dashboard.analysis
-          }
-          if (langData.menus.dashboard.ecommerce) {
-            delete langData.menus.dashboard.ecommerce
-          }
-        }
-
-        if (langData.menus.system) {
-          const systemKeysToRemove = ['nested', 'menu1', 'menu2', 'menu21', 'menu3', 'menu31', 'menu32', 'menu321']
-          systemKeysToRemove.forEach((key) => {
-            if (langData.menus.system[key]) {
-              delete langData.menus.system[key]
-            }
-          })
-        }
-      }
-
-      await fs.writeFile(fullPath, JSON.stringify(langData, null, 2), 'utf-8')
-      console.log(`     ${icons.success} ${fmt.success(`清理${name}完成`)}`)
-    } catch (err) {
-      console.log(`     ${icons.error} ${fmt.error(`清理${name}失败`)}`)
-      console.log(`     ${fmt.dim('错误详情: ' + err)}`)
-    }
-  }
-}
-
 // 清理快速入口组件
 async function cleanFastEnterComponent() {
   const fastEnterPath = path.resolve(process.cwd(), 'src/config/fastEnter.ts')
@@ -627,12 +577,6 @@ async function showCleanupWarning() {
       desc: '演示用的JSON数据、文章列表、评论数据等',
       color: theme.success
     },
-    {
-      icon: icons.globe,
-      name: '多语言文件',
-      desc: '清理中英文语言包中的演示菜单项',
-      color: theme.warning
-    },
     { icon: icons.map, name: '地图组件', desc: '移除art-map-chart地图组件', color: theme.error },
     { icon: icons.chat, name: '评论组件', desc: '移除comment-widget评论组件', color: theme.orange },
     {
@@ -756,17 +700,12 @@ async function main() {
   await cleanChangeLog()
   console.log()
 
-  console.log(`  ${fmt.badge('步骤 5/6', theme.bgBlue)} ${fmt.title('清理语言文件')}`)
-  console.log()
-  await cleanLanguageFiles()
-  console.log()
-
-  console.log(`  ${fmt.badge('步骤 6/7', theme.bgBlue)} ${fmt.title('清理快速入口')}`)
+  console.log(`  ${fmt.badge('步骤 5/6', theme.bgBlue)} ${fmt.title('清理快速入口')}`)
   console.log()
   await cleanFastEnterComponent()
   console.log()
 
-  console.log(`  ${fmt.badge('步骤 7/7', theme.bgBlue)} ${fmt.title('更新菜单接口')}`)
+  console.log(`  ${fmt.badge('步骤 6/6', theme.bgBlue)} ${fmt.title('更新菜单接口')}`)
   console.log()
   await updateMenuApi()
 

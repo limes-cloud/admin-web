@@ -9,23 +9,19 @@
       </div>
       <div class="login-wrap">
         <div class="form">
-          <h3 class="title">{{ $t('forgetPassword.title') }}</h3>
-          <p class="sub-title">{{ $t('forgetPassword.subTitle') }}</p>
+          <h3 class="title">忘记密码？</h3>
+          <p class="sub-title">输入您的电子邮件来重置您的密码</p>
           <div class="input-wrap">
             <span class="input-label" v-if="showInputLabel">账号</span>
-            <ElInput :placeholder="$t('forgetPassword.placeholder')" v-model.trim="username" />
+            <ElInput placeholder="请输入您的电子邮件" v-model.trim="username" />
           </div>
 
           <div style="margin-top: 15px">
-            <ElButton class="login-btn" type="primary" @click="register" :loading="loading" v-ripple>
-              {{ $t('forgetPassword.submitBtnText') }}
-            </ElButton>
+            <ElButton class="login-btn" type="primary" @click="register" :loading="loading" v-ripple> 提交 </ElButton>
           </div>
 
           <div style="margin-top: 15px">
-            <ElButton class="back-btn" plain @click="toLogin">
-              {{ $t('forgetPassword.backBtnText') }}
-            </ElButton>
+            <ElButton class="back-btn" plain @click="toLogin"> 返回 </ElButton>
           </div>
         </div>
       </div>

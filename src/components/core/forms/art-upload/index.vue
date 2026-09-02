@@ -71,7 +71,7 @@
   import { Plus, Camera } from '@element-plus/icons-vue'
   import { UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
   import { rurl } from '@/utils/resource/url'
-  // import FileEle from '@/views/resource/file/index.vue'
+  // import FileEle from '@/views/apps/resource/file/index.vue'
 
   defineOptions({ name: 'ArtUpload' })
 

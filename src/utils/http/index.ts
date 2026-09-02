@@ -3,7 +3,6 @@ import { useUserStore } from '@/store/modules/user'
 import { matchProxyHost } from '@/utils/proxyRules'
 import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
-import { $t } from '@/locales'
 import { RefreshToken } from '@/api/manager/authorize/api'
 
 /** 请求配置常量 */
@@ -72,7 +71,7 @@ axiosInstance.interceptors.request.use(
     return request
   },
   (error) => {
-    showError(createHttpError($t('httpMsg.requestConfigError'), ApiStatus.error))
+    showError(createHttpError('请求配置错误', ApiStatus.error))
     return Promise.reject(error)
   }
 )
@@ -130,7 +129,7 @@ axiosInstance.interceptors.response.use(
 
       handleUnauthorizedError(message)
     }
-    throw createHttpError(message || $t('httpMsg.requestFailed'), code, reason)
+    throw createHttpError(message || '请求失败', code, reason)
   },
   (error) => {
     console.log(error)
@@ -146,7 +145,7 @@ function createHttpError(message: string, code: number, reason?: string) {
 
 /** 处理401错误（带防抖） */
 function handleUnauthorizedError(message?: string): never {
-  const error = createHttpError(message || $t('httpMsg.unauthorized'), ApiStatus.unauthorized)
+  const error = createHttpError(message || '未授权访问，请重新登录', ApiStatus.unauthorized)
 
   if (!isUnauthorizedErrorShown) {
     isUnauthorizedErrorShown = true

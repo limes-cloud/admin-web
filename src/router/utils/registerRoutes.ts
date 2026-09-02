@@ -130,15 +130,21 @@ function loadComponent(componentPath: string, routeName: string): () => Promise<
       })
   }
 
-  // 构建可能的路径
-  const fullPath = `../../views${componentPath}.vue`
-  const fullPathWithIndex = `../../views${componentPath}/index.vue`
+  // 候选路径按优先级排列：业务应用视图（views/apps）先于框架级通用视图（views 根），
+  // 各自再按「直接文件」优先于「目录 index」；后端下发的 menu.component 不含 apps 前缀，
+  // 前缀补齐只在此处发生，调用方一律传原始字符串
+  const candidatePaths = [
+    `../../views/apps${componentPath}.vue`,
+    `../../views/apps${componentPath}/index.vue`,
+    `../../views${componentPath}.vue`,
+    `../../views${componentPath}/index.vue`
+  ]
 
-  // 先尝试直接路径，再尝试添加/index的路径
-  const module = modules[fullPath] || modules[fullPathWithIndex]
+  // 按候选顺序命中第一个已被 glob 收录的模块
+  const module = candidatePaths.map((path) => modules[path]).find(Boolean)
 
   if (!module) {
-    console.error(`[路由错误] 未找到组件：${routeName}，尝试过的路径: ${fullPath} 和 ${fullPathWithIndex}`)
+    console.error(`[路由错误] 未找到组件：${routeName}，尝试过的路径: ${candidatePaths.join('、')}`)
     return () =>
       Promise.resolve({
         render() {

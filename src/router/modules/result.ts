@@ -5,7 +5,7 @@ export const resultRoutes: AppRouteRecord = {
   name: 'Result',
   component: '/index/index',
   meta: {
-    title: 'menus.result.title',
+    title: '结果页面',
     icon: '&#xe715;'
   },
   children: [
@@ -14,7 +14,7 @@ export const resultRoutes: AppRouteRecord = {
       name: 'ResultSuccess',
       component: '/result/success',
       meta: {
-        title: 'menus.result.success',
+        title: '成功页',
         keepAlive: true
       }
     },
@@ -23,7 +23,7 @@ export const resultRoutes: AppRouteRecord = {
       name: 'ResultFail',
       component: '/result/fail',
       meta: {
-        title: 'menus.result.fail',
+        title: '失败页',
         keepAlive: true
       }
     }

@@ -64,9 +64,7 @@
         <ElCol :xs="24" :sm="24" :md="span" :lg="span" :xl="span" class="action-column">
           <div class="action-buttons-wrapper" :style="actionButtonsStyle">
             <div class="form-buttons">
-              <ElButton v-if="showReset" class="reset-button" @click="handleReset" v-ripple>
-                {{ t('table.searchBar.reset') }}
-              </ElButton>
+              <ElButton v-if="showReset" class="reset-button" @click="handleReset" v-ripple> 重置 </ElButton>
               <ElButton
                 v-if="showSearch"
                 type="primary"
@@ -75,7 +73,7 @@
                 v-ripple
                 :disabled="disabledSearch"
               >
-                {{ t('table.searchBar.search') }}
+                查询
               </ElButton>
             </div>
             <div v-if="shouldShowExpandToggle" class="filter-toggle" @click="toggleExpand">
@@ -97,7 +95,6 @@
 <script setup lang="ts">
   import { ArrowUpBold, ArrowDownBold } from '@element-plus/icons-vue'
   import { useWindowSize } from '@vueuse/core'
-  import { useI18n } from 'vue-i18n'
   import type { Component } from 'vue'
   import {
     ElCascader,
@@ -143,7 +140,6 @@
   }
 
   const { width } = useWindowSize()
-  const { t } = useI18n()
   const isMobile = computed(() => width.value < 500)
 
   const formInstance = useTemplateRef<FormInstance>('formRef')
@@ -297,7 +293,7 @@
    * 展开/收起按钮文本
    */
   const expandToggleText = computed(() => {
-    return isExpanded.value ? t('table.searchBar.collapse') : t('table.searchBar.expand')
+    return isExpanded.value ? '收起' : '展开'
   })
 
   /**

@@ -3,7 +3,6 @@ import globalComponents from '@/components';
 import { createApp } from 'vue'
 import { initStore } from './store'                 // Store
 import { initRouter } from './router'               // Router
-import language from './locales'                    // 国际化
 import '@styles/reset.scss'                         // 重置HTML样式
 import '@styles/app.scss'                           // 全局样式
 import '@styles/el-ui.scss'                         // 优化 Element 样式
@@ -38,5 +37,4 @@ app.config.globalProperties.$hasPermission = (ps: string): boolean => {
 }
 
 app.use(globalComponents);
-app.use(language)
 app.mount('#app')

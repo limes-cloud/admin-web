@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios'
 import { ApiStatus } from './status'
-import { $t } from '@/locales'
 
 // 错误响应接口
 export interface ErrorResponse {
@@ -71,19 +70,20 @@ export class HttpError extends Error {
  * @returns 错误消息
  */
 const getErrorMessage = (status: number): string => {
+  // HTTP 状态码到用户可见提示文案的映射表，未命中的状态码统一按服务器内部错误提示
   const errorMap: Record<number, string> = {
-    [ApiStatus.unauthorized]: 'httpMsg.unauthorized',
-    [ApiStatus.forbidden]: 'httpMsg.forbidden',
-    [ApiStatus.notFound]: 'httpMsg.notFound',
-    [ApiStatus.methodNotAllowed]: 'httpMsg.methodNotAllowed',
-    [ApiStatus.requestTimeout]: 'httpMsg.requestTimeout',
-    [ApiStatus.internalServerError]: 'httpMsg.internalServerError',
-    [ApiStatus.badGateway]: 'httpMsg.badGateway',
-    [ApiStatus.serviceUnavailable]: 'httpMsg.serviceUnavailable',
-    [ApiStatus.gatewayTimeout]: 'httpMsg.gatewayTimeout'
+    [ApiStatus.unauthorized]: '未授权访问，请重新登录',
+    [ApiStatus.forbidden]: '禁止访问该资源',
+    [ApiStatus.notFound]: '请求的资源不存在',
+    [ApiStatus.methodNotAllowed]: '请求方法不允许',
+    [ApiStatus.requestTimeout]: '请求超时，请稍后重试',
+    [ApiStatus.internalServerError]: '服务器内部错误，请稍后重试',
+    [ApiStatus.badGateway]: '网关错误，请稍后重试',
+    [ApiStatus.serviceUnavailable]: '服务暂时不可用，请稍后重试',
+    [ApiStatus.gatewayTimeout]: '网关超时，请稍后重试'
   }
 
-  return $t(errorMap[status] || 'httpMsg.internalServerError')
+  return errorMap[status] || '服务器内部错误，请稍后重试'
 }
 
 /**
@@ -95,7 +95,7 @@ export function handleError(error: AxiosError<ErrorResponse>): never {
   // 处理取消的请求
   if (error.code === 'ERR_CANCELED') {
     console.warn('Request cancelled:', error.message)
-    throw new HttpError($t('httpMsg.requestCancelled'), ApiStatus.error)
+    throw new HttpError('请求已取消', ApiStatus.error)
   }
 
   const statusCode = error.response?.status
@@ -104,15 +104,14 @@ export function handleError(error: AxiosError<ErrorResponse>): never {
 
   // 处理网络错误
   if (!error.response) {
-    throw new HttpError($t('httpMsg.networkError'), ApiStatus.error, {
+    throw new HttpError('网络连接异常，请检查网络连接', ApiStatus.error, {
       url: requestConfig?.url,
       method: requestConfig?.method?.toUpperCase()
     })
   }
 
   // 处理 HTTP 状态码错误
-  const message =
-    statusCode && !error.response?.data ? getErrorMessage(statusCode) : errorMessage || $t('httpMsg.requestFailed')
+  const message = statusCode && !error.response?.data ? getErrorMessage(statusCode) : errorMessage || '请求失败'
 
   throw new HttpError(message, statusCode || ApiStatus.error, {
     data: error.response.data,

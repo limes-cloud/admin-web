@@ -1,7 +1,6 @@
 import { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import i18n, { $t } from '@/locales'
 import { useAppStore } from '@/store/modules/app'
 
 /** 扩展的路由配置类型 */
@@ -46,22 +45,12 @@ export const setWebIcon = (path: string): void => {
 }
 
 /**
- * 格式化菜单标题
- * @param title 菜单标题，可以是 i18n 的 key，也可以是字符串
- * @returns 格式化后的菜单标题
+ * 格式化菜单标题，作为菜单标题展示的唯一入口
+ * 菜单标题在路由配置与后端菜单数据里已经是可直接展示的中文文案，这里只做空值归一，
+ * 保证调用点拿到的一定是字符串，不再做任何 key 解析
+ * @param title 菜单标题，来源于路由 meta.title 或后端菜单数据
+ * @returns 有值时返回原标题，无值时返回空字符串
  */
 export const formatMenuTitle = (title: string): string => {
-  if (title) {
-    if (title.startsWith('menus.')) {
-      // 使用 te() 方法检查翻译键值是否存在，避免控制台警告
-      if (i18n.global.te(title)) {
-        return $t(title)
-      } else {
-        // 如果翻译不存在，返回键值的最后部分作为fallback
-        return title.split('.').pop() || title
-      }
-    }
-    return title
-  }
-  return ''
+  return title || ''
 }
