@@ -1,56 +1,67 @@
 import request from '@/utils/http'
+
 import {
-  GetFileReply,
-  GetFileRequest,
-  ListFileReply,
+  CompleteUploadRequest,
+  CompleteUploadResponse,
+  DeleteUserFileRequest,
+  DeleteUserFileResponse,
+  GetUploadChunkSizeRequest,
+  GetUploadChunkSizeResponse,
+  GetUploadPartURLsRequest,
+  GetUploadPartURLsResponse,
+  GetUserFileRequest,
+  GetUserFileResponse,
   ListFileRequest,
-  CreateFileReply,
-  CreateFileRequest,
-  UpdateFileRequest,
-  DeleteFileReply,
-  DeleteFileRequest,
+  ListFileResponse,
+  ListUserFileRequest,
+  ListUserFileResponse,
   PrepareUploadFileRequest,
-  PrepareUploadFileReply,
-  UploadFileReply
+  PrepareUploadFileResponse,
+  UpdateUserFileRequest,
+  UpdateUserFileResponse
 } from './type'
 
-// GetFile 获取指定的文件信息
-export function GetFile(params?: GetFileRequest) {
-  return request.get<GetFileReply>({ url: '/resource/api/file', params })
+// GetUserFile 取单个文件（响应含完整 url 与 size）
+export function GetUserFile(params: GetUserFileRequest) {
+  return request.get<GetUserFileResponse>({ url: '/resource/api/file/detail', params })
 }
 
-// ListFile 获取文件信息列表
+// ListUserFile 我的文件分页
+export function ListUserFile(params: ListUserFileRequest) {
+  return request.get<ListUserFileResponse>({ url: '/resource/api/file/user', params })
+}
+
+// ListFile 目录内文件分页
 export function ListFile(params: ListFileRequest) {
-  return request.get<ListFileReply>({ url: '/resource/api/files', params })
+  return request.get<ListFileResponse>({ url: '/resource/api/file', params })
 }
 
-// CreateFile 创建文件信息
-export function CreateFile(data: CreateFileRequest) {
-  return request.post<CreateFileReply>({ url: '/resource/api/file', data })
+// GetUploadChunkSize 取分片大小与片数（纯函数，客户端先调它）
+export function GetUploadChunkSize(params: GetUploadChunkSizeRequest) {
+  return request.get<GetUploadChunkSizeResponse>({ url: '/resource/api/file/upload/chunk-size', params })
 }
 
-// PrepareUploadFile 预上传文件信息
+// PrepareUploadFile 预上传：秒传判定 / 召回 / 建会话
 export function PrepareUploadFile(data: PrepareUploadFileRequest) {
-  return request.post<PrepareUploadFileReply>({ url: '/resource/api/file/prepare_upload', data })
+  return request.post<PrepareUploadFileResponse>({ url: '/resource/api/file/upload/prepare', data })
 }
 
-// UploadFile 上传文件切片
-export async function UploadChunkFile(data: FormData) {
-  return request.post<UploadFileReply>({
-    url: `/resource/api/chunk_upload`,
-    data: data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
+// GetUploadPartURLs 按批取分片上传预签名地址
+export function GetUploadPartURLs(data: GetUploadPartURLsRequest) {
+  return request.post<GetUploadPartURLsResponse>({ url: '/resource/api/file/upload/part-urls', data })
 }
 
-// UpdateFile 更新文件信息
-export function UpdateFile(data: UpdateFileRequest) {
-  return request.put({ url: '/resource/api/file', data })
+// CompleteUpload 完成分片上传
+export function CompleteUpload(data: CompleteUploadRequest) {
+  return request.post<CompleteUploadResponse>({ url: '/resource/api/file/upload/complete', data })
 }
 
-// DeleteFile 删除文件信息
-export function DeleteFile(params: DeleteFileRequest) {
-  return request.del<DeleteFileReply>({ url: '/resource/api/file', params })
+// UpdateUserFile 改名 / 移动（局部更新）
+export function UpdateUserFile(data: UpdateUserFileRequest) {
+  return request.put<UpdateUserFileResponse>({ url: '/resource/api/file/user', data })
+}
+
+// DeleteUserFile 删除文件（触发对象回收）
+export function DeleteUserFile(params: DeleteUserFileRequest) {
+  return request.del<DeleteUserFileResponse>({ url: '/resource/api/file/user', params })
 }

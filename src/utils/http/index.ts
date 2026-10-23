@@ -4,6 +4,7 @@ import { matchProxyHost } from '@/utils/proxyRules'
 import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
 import { RefreshToken } from '@/api/manager/authorize/api'
+import { getAppKeyword } from '@/utils/app-context'
 
 /** 请求配置常量 */
 const REQUEST_TIMEOUT = 15000
@@ -22,8 +23,8 @@ interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
   showSuccessMessage?: boolean
 }
 
-const { VITE_API_URL, VITE_WITH_CREDENTIALS, VITE_APP_KEY } = import.meta.env
-const APP_KEY = VITE_APP_KEY || 'manager'
+const { VITE_API_URL, VITE_WITH_CREDENTIALS } = import.meta.env
+export const APP_KEY = getAppKeyword()
 
 /** Axios实例 */
 const axiosInstance = axios.create({
@@ -51,7 +52,8 @@ axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
     const { accessToken } = useUserStore()
     if (accessToken) request.headers.set('Authorization', accessToken)
-    request.headers.set('X-App-Key', APP_KEY)
+    // 允许单次请求显式指定应用（如跨应用的固定提示词），未指定时沿用当前登录应用
+    if (!request.headers.get('X-App-Key')) request.headers.set('X-App-Key', getAppKeyword())
 
     // 代理规则劫持：匹配则替换 baseURL
     if (request.url) {

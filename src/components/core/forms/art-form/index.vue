@@ -30,8 +30,13 @@
               <template #label>
                 <div class="label">
                   <span>{{ item.label }}</span>
-                  <el-tooltip effect="dark" :content="item.tip" placement="top">
-                    <span class="icon" v-if="item.tip">
+                  <el-tooltip
+                    v-if="item.tip && item.tipPosition !== 'after'"
+                    effect="dark"
+                    :content="item.tip"
+                    placement="top"
+                  >
+                    <span class="icon">
                       <ArtIcon value="iconsys-fankui" :size="16"></ArtIcon>
                     </span>
                   </el-tooltip>
@@ -39,38 +44,67 @@
               </template>
 
               <slot :name="item.key" :item="item" :modelValue="modelValue">
-                <component
-                  :is="getComponent(item)"
-                  v-model="getNestedValue(modelValue, item.key).value"
-                  v-bind="getProps(item)"
-                  :props="getProps(item).props"
+                <div
+                  class="art-form-control"
+                  :class="{ 'has-suffix': item.suffix, 'has-tip': item.tip && item.tipPosition === 'after' }"
                 >
-                  <!-- 下拉选择 -->
-                  <template v-if="item.type === 'select' && getProps(item)?.options">
-                    <ElOption
-                      v-for="(option, index) in getSelectOptions(item)"
-                      :key="getOptionValue(item, option) ?? index"
-                      :label="getOptionLabel(item, option)"
-                      :value="getOptionValue(item, option)"
-                    >
-                    </ElOption>
-                  </template>
+                  <component
+                    :is="getComponent(item)"
+                    v-model="getNestedValue(modelValue, item.key).value"
+                    v-bind="getProps(item)"
+                    :props="getProps(item).props"
+                  >
+                    <!-- 下拉选择 -->
+                    <template v-if="item.type === 'select' && getProps(item)?.options">
+                      <ElOption
+                        v-for="(option, index) in getSelectOptions(item)"
+                        :key="getOptionValue(item, option) ?? index"
+                        :label="getOptionLabel(item, option)"
+                        :value="getOptionValue(item, option)"
+                      >
+                      </ElOption>
+                    </template>
 
-                  <!-- 复选框组 -->
-                  <template v-if="item.type === 'checkboxgroup' && getProps(item)?.options">
-                    <ElCheckbox v-for="option in getProps(item).options" v-bind="option" :key="option.value" />
-                  </template>
+                    <!-- 复选框组 -->
+                    <template v-if="item.type === 'checkboxgroup' && getProps(item)?.options">
+                      <ElCheckbox v-for="option in getProps(item).options" v-bind="option" :key="option.value" />
+                    </template>
 
-                  <!-- 单选框组 -->
-                  <template v-if="item.type === 'radiogroup' && getProps(item)?.options">
-                    <ElRadio v-for="option in getProps(item).options" v-bind="option" :key="option.value" />
-                  </template>
+                    <!-- 单选框组 -->
+                    <template v-if="item.type === 'radiogroup' && getProps(item)?.options">
+                      <ElRadio v-for="option in getProps(item).options" v-bind="option" :key="option.value" />
+                    </template>
 
-                  <!-- 动态插槽支持 -->
-                  <template v-for="(slotFn, slotName) in getSlots(item)" :key="slotName" #[slotName]>
-                    <component :is="slotFn" />
-                  </template>
-                </component>
+                    <!-- 动态插槽支持 -->
+                    <template v-for="(slotFn, slotName) in getSlots(item)" :key="slotName" #[slotName]>
+                      <component :is="slotFn" />
+                    </template>
+                  </component>
+
+                  <!-- 后置提示：tipPosition 为 'after' 时问号图标显示在控件右侧（悬停展示提示） -->
+                  <el-tooltip
+                    v-if="item.tip && item.tipPosition === 'after'"
+                    effect="dark"
+                    :content="item.tip"
+                    placement="top"
+                  >
+                    <span class="art-form-tip">
+                      <ArtIcon value="iconsys-fankui" :size="16"></ArtIcon>
+                    </span>
+                  </el-tooltip>
+
+                  <!-- 附加操作按钮（如 AI 生成）：配置了 suffix 的表单项显示在控件右侧 -->
+                  <el-tooltip
+                    v-if="item.suffix && !item.suffix.hidden"
+                    effect="dark"
+                    :content="item.suffix.tip"
+                    placement="top"
+                  >
+                    <span class="suffix-icon" :style="item.suffix.style" @click.stop="item.suffix.onclick">
+                      <ArtIcon :value="item.suffix.icon" :size="16"></ArtIcon>
+                    </span>
+                  </el-tooltip>
+                </div>
               </slot>
             </ElFormItem>
           </ElCol>
@@ -160,6 +194,8 @@
     key: string
     /** 表单项的提示信息 */
     tip?: string
+    /** 表单项提示图标的位置：默认不设置 = label 后；'after' = 控件（输入框）右侧，均为悬停展示 */
+    tipPosition?: 'hover' | 'after'
     /** 表单项的标签文本 */
     label: string
     /** 表单项标签的宽度，会覆盖 Form 的 labelWidth */
@@ -176,6 +212,14 @@
     options?: Record<string, any>
     /** 传递给表单项组件的属性 */
     props?: Record<string, any>
+    /** 附加操作按钮（如上传组件的 AI 生成入口；仅配置后透传，含 hidden/icon/tip/style/onclick） */
+    suffix?: {
+      hidden?: boolean
+      icon: string
+      tip?: string
+      style?: Record<string, string>
+      onclick: () => void
+    }
     /** 表单项的插槽配置 */
     slots?: Record<string, (() => any) | undefined>
     /** 表单项的占位符文本 */
@@ -400,6 +444,41 @@
       .icon {
         margin-left: 4px;
         color: var(--el-text-color-secondary) !important;
+      }
+    }
+
+    // 控件容器：占满 el-form-item__content（flex 容器）宽度；只有配置了 suffix 的表单项才启用 flex 布局（组件占满剩余宽度，按钮靠右）
+    .art-form-control {
+      width: 100%;
+
+      .art-form-tip {
+        display: inline-flex;
+        align-items: center;
+        color: var(--el-text-color-secondary);
+      }
+
+      &.has-suffix,
+      &.has-tip {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+
+        > *:first-child {
+          flex: 1;
+          min-width: 0;
+        }
+
+        > :first-child {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .suffix-icon {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          cursor: pointer;
+        }
       }
     }
 

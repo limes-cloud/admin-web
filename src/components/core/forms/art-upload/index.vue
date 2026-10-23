@@ -26,11 +26,52 @@
           <ElIcon v-else><Plus /></ElIcon>
           <span v-if="text" class="text">{{ text }}</span>
         </div>
+        <!-- 从文件管理选择：上传卡片右上角角标（点击不触发上传） -->
+        <div v-if="selectFromFile" class="file-select" title="从文件管理选择" @click.stop="openFileSelect">
+          <ElIcon><FolderOpened /></ElIcon>
+        </div>
         <!-- <div class="option-file" @click.stop.prevent="handleOptionFile">
           <ArtIcon value="iconsys-shanchuwenjian"></ArtIcon>
         </div> -->
       </div>
     </ElUpload>
+
+    <ElDialog
+      v-model="fileVisible"
+      title="从文件管理选择"
+      width="700px"
+      align-center
+      :destroy-on-close="true"
+      @closed="filePage = 1"
+    >
+      <ElTable v-loading="fileLoading" :data="fileData" row-key="id" height="360" @row-dblclick="chooseFile">
+        <ElTableColumn label="预览" width="72">
+          <template #default="{ row }">
+            <ElImage v-if="isImageExt(row.ext)" class="file-thumb" :src="row.url" fit="cover" />
+            <div v-else class="file-thumb"
+              ><ElIcon><Document /></ElIcon
+            ></div>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="name" label="文件名" min-width="200" show-overflow-tooltip />
+        <ElTableColumn label="大小" width="100" :formatter="(row: FileItem) => getFileSize(Number(row.size)) || '0B'" />
+        <ElTableColumn label="上传时间" width="160" :formatter="(row: FileItem) => formatTime(row.created_at)" />
+        <ElTableColumn label="操作" width="80" fixed="right">
+          <template #default="{ row }">
+            <ElButton link type="primary" @click="chooseFile(row)">选择</ElButton>
+          </template>
+        </ElTableColumn>
+      </ElTable>
+      <div class="file-select-pager">
+        <ElPagination
+          v-model:current-page="filePage"
+          :page-size="filePageSize"
+          :total="fileTotal"
+          layout="prev, pager, next, total"
+          @current-change="loadFiles"
+        />
+      </div>
+    </ElDialog>
 
     <el-image-viewer v-if="showPreview" show-progress :url-list="[previewSrc]" @close="showPreview = false">
     </el-image-viewer>
@@ -63,15 +104,16 @@
 
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import cryptoJs from 'crypto-js'
-
-  import { PrepareUploadFile, UploadChunkFile } from '@/api/resource/file/api'
-  import { PrepareUploadFileReply } from '@/api/resource/file/type'
-  import { UploadFiles, UploadFile as UploadFileItem } from 'element-plus'
-  import { Plus, Camera } from '@element-plus/icons-vue'
+  import { UploadFiles, UploadFile as UploadFileItem, type UploadRawFile } from 'element-plus'
+  import { Plus, Camera, FolderOpened, Document } from '@element-plus/icons-vue'
   import { UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
   import { rurl } from '@/utils/resource/url'
-  // import FileEle from '@/views/apps/resource/file/index.vue'
+  import { uploadFile } from '@/utils/resource/upload'
+  import { imageToIco } from '@/utils/resource/image-to-ico'
+  import { getFileSize } from '@/utils/file'
+  import { formatTime } from '@/utils/time'
+  import { ListUserFile } from '@/api/resource/file/api'
+  import type { FileItem } from '@/api/resource/file/type'
 
   defineOptions({ name: 'ArtUpload' })
 
@@ -97,6 +139,10 @@
     rename?: string
     store?: string
     autoUpload?: boolean
+    /** 上传前将图片转为 ICO（favicon 用；非 .ico 文件生效，Canvas 128x128 打包） */
+    convertToIco?: boolean
+    /** 开启后显示"从文件选择"：从资源中心文件管理里挑已有文件回填（无需重新上传） */
+    selectFromFile?: boolean
     cut?: {
       enable: boolean
       width: number
@@ -115,7 +161,8 @@
     limit: 1,
     listType: 'picture-card',
     accept: 'image/*',
-    autoUpload: true
+    autoUpload: true,
+    selectFromFile: false
   })
 
   const showPreview = ref(false)
@@ -307,81 +354,6 @@
     emit('change', res)
   }
 
-  const readBinary = (file: File) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader()
-      fileReader.onload = (e: ProgressEvent<FileReader>): void => {
-        resolve(e.target?.result)
-      }
-      fileReader.onerror = (error) => {
-        reject(error)
-      }
-      fileReader.readAsArrayBuffer(file)
-    })
-  }
-
-  const getPrepareUploadReq = async (data: any, file: File) => {
-    const wordArray = cryptoJs.lib.WordArray.create(data)
-    const hash = cryptoJs.MD5(wordArray).toString()
-    let { name } = file
-    if (props.rename) {
-      const arr = file.name.split('.')
-      const ext = arr[arr.length - 1]
-      name = props.rename + ext
-    }
-    return {
-      directoryId: props.directoryId,
-      directoryPath: props.directoryPath,
-      name,
-      sha: hash,
-      size: Math.ceil(file.size / 1024),
-      store: props.store
-    }
-  }
-
-  const handleUpload = async (info: PrepareUploadFileReply, binary: ArrayBuffer, options: UploadRequestOptions) => {
-    return new Promise((resolve, reject) => {
-      const { onProgress } = options
-      const count = info.chunkCount as number
-      const size = (info.chunkSize as number) * 1024
-      const pArrr: Promise<any>[] = []
-      const uploaed = info.uploadChunks
-      if (count <= 1) {
-        const formData = new FormData()
-        formData.append('data', new Blob([binary]))
-        formData.append('uploadId', info.uploadId as string)
-        formData.append('index', String(1))
-        pArrr.push(UploadChunkFile(formData))
-      } else {
-        for (let i = 0; i < count; i += 1) {
-          if (uploaed && uploaed.includes(i + 1)) continue
-          let data: ArrayBuffer = new ArrayBuffer(0)
-          if ((i + 1) * size > binary.byteLength) {
-            data = binary.slice(i * size, binary.byteLength)
-          } else {
-            data = binary.slice(i * size, (i + 1) * size)
-          }
-
-          const formData = new FormData()
-          formData.append('data', new Blob([data]))
-          formData.append('uploadId', info.uploadId as string)
-          formData.append('index', String(i + 1))
-          pArrr.push(UploadChunkFile(formData))
-        }
-      }
-      pArrr.forEach((fn: Promise<any>, index: number) => {
-        fn.then((res) => {
-          onProgress({ percent: Math.ceil((index + 1) / pArrr.length) } as UploadProgressEvent)
-          if ((index + 1) / pArrr.length) {
-            resolve(res)
-          }
-        }).catch((res) => {
-          reject(res)
-        })
-      })
-    })
-  }
-
   const customRequest = async (options: UploadRequestOptions): Promise<unknown> => {
     const { onProgress, file } = options
     let orifile = file
@@ -395,29 +367,35 @@
     }
 
     if (props.fileSize && (file.size as number) / 1024 > props.fileSize) {
-      // onError(new UploadAjaxError('超过文件大小限制', 400, 'POST', ''))
       return Promise.reject('超过文件大小限制')
     }
     try {
       onProgress({ percent: 0 } as UploadProgressEvent)
-      // 获取文件二进制数据
-      const binary = (await readBinary(orifile)) as ArrayBuffer
 
-      // 进行预上传
-      const params = await getPrepareUploadReq(binary, file)
-      const data = await PrepareUploadFile(params)
-      // 触发秒传
-      if (data.uploaded) {
-        onProgress({ percent: 100 } as UploadProgressEvent)
-        return data
+      // favicon 场景：非 .ico 图片先转成 ICO 再走上传（新上传契约：取片大小 → 分片摘要 → 预上传 → 预签名直传 → 完成）
+      if (props.convertToIco && !file.name.toLowerCase().endsWith('.ico')) {
+        const icoName = (props.rename || file.name.replace(/\.[^.]+$/, '')) + '.ico'
+        const ico = await imageToIco(file, 128)
+        const converted = new File([ico], icoName, { type: 'image/x-icon' }) as UploadRawFile
+        converted.uid = file.uid // 保留原始 uid，避免上传组件按文件身份重复触发
+        orifile = converted
       }
-      // 处理上传逻辑
-      const resp = await handleUpload(data, binary, options)
-      return resp
+      const result = await uploadFile(orifile, {
+        path: props.directoryPath,
+        name: props.rename ? renameFileName(props.rename, file.name) : file.name,
+        onProgress: (percent) => onProgress({ percent: Math.min(99, percent) } as UploadProgressEvent)
+      })
+      onProgress({ percent: 100 } as UploadProgressEvent)
+      return result
     } catch (error) {
-      // onError(new UploadAjaxError('文件上传失败' + error || '', 400, 'POST', ''))
-      return Promise.reject('文件上传失败' + error || '')
+      return Promise.reject('文件上传失败' + (error || ''))
     }
+  }
+
+  // 重命名：保留扩展名，替换主名
+  const renameFileName = (rename: string, name: string): string => {
+    const idx = name.lastIndexOf('.')
+    return idx > 0 ? rename + name.slice(idx) : rename
   }
 
   const handlePreview = (file: UploadFileItem) => {
@@ -441,6 +419,41 @@
     }
 
     emit('change', res)
+  }
+
+  // ===== 从文件管理选择 =====
+  const fileVisible = ref(false)
+  const fileData = ref<FileItem[]>([])
+  const fileLoading = ref(false)
+  const filePage = ref(1)
+  const filePageSize = 20
+  const fileTotal = ref(0)
+
+  // 图片后缀（列表出缩略图；其余显示文件图标）
+  const isImageExt = (ext: string) => ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg'].includes(ext)
+
+  const openFileSelect = () => {
+    fileVisible.value = true
+    loadFiles()
+  }
+
+  const loadFiles = async () => {
+    fileLoading.value = true
+    try {
+      const res = await ListUserFile({ page: filePage.value, page_size: filePageSize })
+      fileData.value = res.list || []
+      fileTotal.value = res.total || 0
+    } catch (e: any) {
+      ElMessage.error(e?.message || '获取文件列表失败')
+    } finally {
+      fileLoading.value = false
+    }
+  }
+
+  const chooseFile = (row: FileItem) => {
+    emit('update:modelValue', row.key)
+    emit('change', [{ key: row.key }])
+    fileVisible.value = false
   }
 
   // const optionVisible = ref(false)
@@ -557,5 +570,47 @@
 
   .square {
     border-radius: 4px;
+  }
+
+  .file-select {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    color: #fff;
+    cursor: pointer;
+    background: var(--el-color-primary);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  .file-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    font-size: 20px;
+    color: var(--el-text-color-secondary);
+    background: var(--el-fill-color-light);
+    border-radius: 6px;
+  }
+
+  .file-select-pager {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
   }
 </style>
