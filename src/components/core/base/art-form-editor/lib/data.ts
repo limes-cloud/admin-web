@@ -509,7 +509,14 @@ export const createTagNode = (): FormNode => ({
   id: uuid(),
   type: 'tag',
   label: '标签',
-  config: { tagText: '标签', tagType: 'primary', tagEffect: 'light', tagSize: 'default', tagRound: false, tagClosable: false }
+  config: {
+    tagText: '标签',
+    tagType: 'primary',
+    tagEffect: 'light',
+    tagSize: 'default',
+    tagRound: false,
+    tagClosable: false
+  }
 })
 
 export const createLinkNode = (): FormNode => ({
@@ -545,7 +552,7 @@ export const createGroupNode = (): FormNode => ({
     hidden: false,
     groupMin: 0,
     groupMax: 10,
-    groupLayout: 'card',
+    groupLayout: 'card'
   },
   children: []
 })

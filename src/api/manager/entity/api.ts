@@ -12,9 +12,6 @@ import {
   DeleteEntityFieldRequest,
   ListEntityFieldReply,
   UpdateEntityFieldRequest,
-  ImportEntityRequest,
-  LoadEntityRequest,
-  LoadEntityReply,
   CreateEntityRuleReply,
   CreateEntityRuleRequest,
   DeleteEntityRuleRequest,
@@ -22,15 +19,6 @@ import {
   ListEntityRuleRequest,
   UpdateEntityRuleRequest
 } from './type'
-
-export function ImportEntity(data: ImportEntityRequest) {
-  return request.post<LoadEntityReply>({ url: '/manager/api/entity/import', data })
-}
-
-// ListEntity 载入实体信息列表
-export function LoadEntity(params: LoadEntityRequest) {
-  return request.get<LoadEntityReply>({ url: `/${params.app}/api/entity/load`, params })
-}
 
 // ListEntity 获取实体信息列表
 export function ListEntity(params: ListEntityRequest) {

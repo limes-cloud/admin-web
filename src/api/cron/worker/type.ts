@@ -64,6 +64,10 @@ export interface GetWorkerReply {
   groupId: number
   status?: boolean
   description?: string
+  apps?: string[]
+  lastCheckAt?: number
+  lastHeartbeat?: number
+  lastError?: string
   createdAt: number
   updatedAt: number
 }
@@ -89,6 +93,10 @@ export interface Worker {
   group?: WorkerGroup
   status?: boolean
   description?: string
+  apps?: string[]
+  lastCheckAt?: number
+  lastHeartbeat?: number
+  lastError?: string
   createdAt: number
   updatedAt: number
 }
@@ -106,6 +114,7 @@ export interface CreateWorkerRequest {
   sk: string
   status?: boolean
   description?: string
+  apps?: string[]
 }
 
 export interface CreateWorkerReply {
@@ -120,6 +129,7 @@ export interface UpdateWorkerRequest {
   sk: string
   groupId: number
   description?: string
+  apps?: string[]
 }
 
 export interface UpdateWorkerStatusRequest {

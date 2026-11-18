@@ -7,24 +7,14 @@
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
             <ElSpace wrap>
-              <ElButton
-                v-permission="'manager:appform:add'"
-                v-ripple
-                type="primary"
-                :icon="Plus"
-                @click="showDialog"
+              <ElButton v-permission="'manager:appform:add'" v-ripple type="primary" :icon="Plus" @click="showDialog"
                 >分配表单</ElButton
               >
             </ElSpace>
           </template>
         </ArtTableHeader>
 
-        <ArtTable
-          :loading="loading"
-          :data="data"
-          :columns="columns"
-          row-key="id"
-        >
+        <ArtTable :loading="loading" :data="data" :columns="columns" row-key="id">
           <template #operation="{ row }">
             <ArtOperation :list="operationItems" :data="row"></ArtOperation>
           </template>
@@ -42,23 +32,9 @@
       >
         <ElForm :model="assignForm" label-width="80px">
           <ElFormItem label="选择表单">
-            <ElSelect
-              v-model="assignForm.formId"
-              placeholder="请选择表单"
-              filterable
-              style="width: 100%"
-            >
-              <ElOptionGroup
-                v-for="group in groupedForms"
-                :key="group.scene"
-                :label="group.sceneName"
-              >
-                <ElOption
-                  v-for="f in group.forms"
-                  :key="f.id"
-                  :label="f.name"
-                  :value="f.id"
-                />
+            <ElSelect v-model="assignForm.formId" placeholder="请选择表单" filterable style="width: 100%">
+              <ElOptionGroup v-for="group in groupedForms" :key="group.scene" :label="group.sceneName">
+                <ElOption v-for="f in group.forms" :key="f.id" :label="f.name" :value="f.id" />
               </ElOptionGroup>
             </ElSelect>
           </ElFormItem>
@@ -94,13 +70,13 @@
 
   // 场景列表
   const scenes = ref<FormScene[]>([])
-  ListFormScene({ page: 1, pageSize: 100 }).then((res) => {
+  ListFormScene({ page: 1, pageSize: 50 }).then((res) => {
     scenes.value = res.list || []
   })
 
   // 所有已发布表单（用于分配选择）
   const allForms = ref<UserForm[]>([])
-  ListUserForm({ page: 1, pageSize: 200, status: true }).then((res) => {
+  ListUserForm({ page: 1, pageSize: 50, status: true }).then((res) => {
     allForms.value = res.list || []
   })
 
@@ -131,16 +107,7 @@
     }
   ]
 
-  const {
-    columns,
-    columnChecks,
-    data,
-    loading,
-    getData,
-    refreshData,
-    refreshCreate,
-    refreshRemove
-  } = useTable({
+  const { columns, columnChecks, data, loading, refreshData, refreshCreate, refreshRemove } = useTable({
     core: {
       apiFn: ListAppForm,
       apiParams: {

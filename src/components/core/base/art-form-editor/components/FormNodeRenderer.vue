@@ -18,11 +18,7 @@
     <!-- 字段组件 -->
     <template v-if="isField">
       <div class="form-node__field">
-        <el-form-item
-          class="form-row"
-          :required="node.config.required"
-          :label="node.label"
-        >
+        <el-form-item class="form-row" :required="node.config.required" :label="node.label">
           <!-- input -->
           <el-input
             v-if="node.type === 'input'"
@@ -69,7 +65,12 @@
             </el-checkbox>
           </el-checkbox-group>
           <!-- select -->
-          <el-select v-else-if="node.type === 'select'" v-model="formModel[node.field!]" :placeholder="node.config.placeholder" disabled>
+          <el-select
+            v-else-if="node.type === 'select'"
+            v-model="formModel[node.field!]"
+            :placeholder="node.config.placeholder"
+            disabled
+          >
             <el-option v-for="opt in node.config.options" :key="opt.value" :label="opt.label" :value="opt.value" />
           </el-select>
           <!-- time -->
@@ -77,7 +78,12 @@
           <!-- date -->
           <el-date-picker v-else-if="node.type === 'date'" :placeholder="node.config.placeholder" disabled />
           <!-- datetime -->
-          <el-date-picker v-else-if="node.type === 'datetime'" type="datetime" :placeholder="node.config.placeholder" disabled />
+          <el-date-picker
+            v-else-if="node.type === 'datetime'"
+            type="datetime"
+            :placeholder="node.config.placeholder"
+            disabled
+          />
           <!-- upload -->
           <el-upload v-else-if="node.type === 'upload'" :disabled="true" action="">
             <el-button size="small" type="primary" disabled>点击上传</el-button>
@@ -85,11 +91,28 @@
           <!-- switch -->
           <el-switch v-else-if="node.type === 'switch'" :model-value="false" disabled />
           <!-- slider -->
-          <el-slider v-else-if="node.type === 'slider'" :model-value="node.config.value ?? 0" :min="node.config.min ?? 0" :max="node.config.max ?? 100" disabled />
+          <el-slider
+            v-else-if="node.type === 'slider'"
+            :model-value="node.config.value ?? 0"
+            :min="node.config.min ?? 0"
+            :max="node.config.max ?? 100"
+            disabled
+          />
           <!-- rate -->
-          <el-rate v-else-if="node.type === 'rate'" :model-value="node.config.value ?? 0" :max="node.config.max ?? 5" disabled />
+          <el-rate
+            v-else-if="node.type === 'rate'"
+            :model-value="node.config.value ?? 0"
+            :max="node.config.max ?? 5"
+            disabled
+          />
           <!-- cascader -->
-          <el-cascader v-else-if="node.type === 'cascader'" :placeholder="node.config.placeholder" :options="(node.config.options as any)" disabled clearable />
+          <el-cascader
+            v-else-if="node.type === 'cascader'"
+            :placeholder="node.config.placeholder"
+            :options="node.config.options as any"
+            disabled
+            clearable
+          />
           <!-- fallback -->
           <el-input v-else v-model="formModel[node.field!]" :placeholder="node.config.placeholder" disabled />
         </el-form-item>
@@ -172,9 +195,7 @@
                   />
                 </template>
               </VueDraggable>
-              <div v-if="!node.children?.length" class="form-node__placeholder">
-                拖入组件
-              </div>
+              <div v-if="!node.children?.length" class="form-node__placeholder"> 拖入组件 </div>
             </div>
           </el-card>
         </template>
@@ -203,9 +224,7 @@
                     />
                   </template>
                 </VueDraggable>
-                <div v-if="!pane.children?.length" class="form-node__placeholder">
-                  拖入组件
-                </div>
+                <div v-if="!pane.children?.length" class="form-node__placeholder"> 拖入组件 </div>
               </div>
             </el-tab-pane>
           </el-tabs>
@@ -235,9 +254,7 @@
                     />
                   </template>
                 </VueDraggable>
-                <div v-if="!item.children?.length" class="form-node__placeholder">
-                  拖入组件
-                </div>
+                <div v-if="!item.children?.length" class="form-node__placeholder"> 拖入组件 </div>
               </div>
             </el-collapse-item>
           </el-collapse>
@@ -265,9 +282,7 @@
                 />
               </template>
             </VueDraggable>
-            <div v-if="!node.children?.length" class="form-node__placeholder">
-              拖入组件（行内排列）
-            </div>
+            <div v-if="!node.children?.length" class="form-node__placeholder"> 拖入组件（行内排列） </div>
           </div>
         </template>
 
@@ -302,9 +317,7 @@
                     />
                   </template>
                 </VueDraggable>
-                <div v-if="!col.children?.length" class="form-node__placeholder">
-                  拖入组件
-                </div>
+                <div v-if="!col.children?.length" class="form-node__placeholder"> 拖入组件 </div>
               </div>
             </div>
           </div>
@@ -314,7 +327,10 @@
         <template v-else-if="node.type === 'box'">
           <div
             class="form-node__box"
-            :style="{ gap: (node.config.gutter || 12) + 'px', flexDirection: node.config.direction === 'horizontal' ? 'row' : 'column' }"
+            :style="{
+              gap: (node.config.gutter || 12) + 'px',
+              flexDirection: node.config.direction === 'horizontal' ? 'row' : 'column'
+            }"
           >
             <VueDraggable
               v-model="node.children!"
@@ -323,7 +339,11 @@
               ghost-class="ghost"
               :animation="200"
               class="form-node__sortable-area"
-              :style="{ display: 'flex', flexDirection: node.config.direction === 'horizontal' ? 'row' : 'column', gap: (node.config.gutter || 12) + 'px' }"
+              :style="{
+                display: 'flex',
+                flexDirection: node.config.direction === 'horizontal' ? 'row' : 'column',
+                gap: (node.config.gutter || 12) + 'px'
+              }"
             >
               <template v-for="child in node.children" :key="child.id">
                 <FormNodeRenderer
@@ -336,9 +356,7 @@
                 />
               </template>
             </VueDraggable>
-            <div v-if="!node.children?.length" class="form-node__placeholder">
-              拖入组件
-            </div>
+            <div v-if="!node.children?.length" class="form-node__placeholder"> 拖入组件 </div>
           </div>
         </template>
 
@@ -351,7 +369,10 @@
 
         <!-- descriptions 描述列表 -->
         <template v-else-if="node.type === 'descriptions'">
-          <div class="form-node__descriptions" :style="{ gridTemplateColumns: `repeat(${node.props?.column || 2}, 1fr)` }">
+          <div
+            class="form-node__descriptions"
+            :style="{ gridTemplateColumns: `repeat(${node.props?.column || 2}, 1fr)` }"
+          >
             <div
               v-for="col in node.children"
               :key="col.id"
@@ -379,9 +400,7 @@
                     />
                   </template>
                 </VueDraggable>
-                <div v-if="!col.children?.length" class="form-node__placeholder">
-                  拖入组件
-                </div>
+                <div v-if="!col.children?.length" class="form-node__placeholder"> 拖入组件 </div>
               </div>
             </div>
           </div>
@@ -410,9 +429,7 @@
                   />
                 </template>
               </VueDraggable>
-              <div v-if="!node.children?.length" class="form-node__placeholder">
-                拖入模板字段（运行时将重复渲染）
-              </div>
+              <div v-if="!node.children?.length" class="form-node__placeholder"> 拖入模板字段（运行时将重复渲染） </div>
             </div>
           </div>
         </template>
@@ -462,7 +479,12 @@
     <template v-else>
       <div class="form-node__aide">
         <el-divider v-if="node.type === 'divider'" />
-        <el-alert v-else-if="node.type === 'alert'" :title="node.label" :type="node.props?.type || 'info'" :closable="false" />
+        <el-alert
+          v-else-if="node.type === 'alert'"
+          :title="node.label"
+          :type="node.props?.type || 'info'"
+          :closable="false"
+        />
         <div v-else-if="node.type === 'text'" class="form-node__text">{{ node.config.description }}</div>
         <el-button
           v-else-if="node.type === 'button'"
@@ -470,21 +492,29 @@
           :size="node.config.buttonSize || 'default'"
           :plain="node.config.buttonPlain"
           :round="node.config.buttonRound"
-        >{{ node.config.buttonText || '按钮' }}</el-button>
+          >{{ node.config.buttonText || '按钮' }}</el-button
+        >
         <div v-else-if="node.type === 'html'" class="form-node__html" v-html="node.config.htmlContent" />
-        <p v-else-if="node.type === 'paragraph'" class="form-node__paragraph" :style="{ textAlign: node.config.paragraphAlign || 'left' }">{{ node.config.paragraphContent }}</p>
+        <p
+          v-else-if="node.type === 'paragraph'"
+          class="form-node__paragraph"
+          :style="{ textAlign: node.config.paragraphAlign || 'left' }"
+          >{{ node.config.paragraphContent }}</p
+        >
         <el-tag
           v-else-if="node.type === 'tag'"
           :type="node.config.tagType || 'primary'"
           :effect="node.config.tagEffect || 'light'"
           :size="node.config.tagSize || 'default'"
           :round="node.config.tagRound"
-        >{{ node.config.tagText || '标签' }}</el-tag>
+          >{{ node.config.tagText || '标签' }}</el-tag
+        >
         <el-link
           v-else-if="node.type === 'link'"
           :type="node.config.linkType || 'primary'"
           :underline="node.config.linkUnderline ?? true"
-        >{{ node.config.linkText || '链接' }}</el-link>
+          >{{ node.config.linkText || '链接' }}</el-link
+        >
         <span v-else-if="node.type === 'tooltip'" class="form-node__tooltip-trigger">
           <el-icon><ChatDotRound /></el-icon>
           {{ node.config.tooltipTriggerText || '悬停查看提示' }}
@@ -782,13 +812,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 4px,
-        #f0f0f0 4px,
-        #f0f0f0 8px
-      );
+      background: repeating-linear-gradient(45deg, transparent, transparent 4px, #f0f0f0 4px, #f0f0f0 8px);
       border: 1px dashed #d9d9d9;
       border-radius: 4px;
 
@@ -815,7 +839,7 @@
           border-right: none;
         }
 
-        &:nth-last-child(-n+2) {
+        &:nth-last-child(-n + 2) {
           border-bottom: none;
         }
       }

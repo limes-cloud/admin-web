@@ -75,6 +75,8 @@
               >
                 查询
               </ElButton>
+              <!-- 追加自定义操作按钮（渲染在查询按钮右侧） -->
+              <slot name="action" />
             </div>
             <div v-if="shouldShowExpandToggle" class="filter-toggle" @click="toggleExpand">
               <span>{{ expandToggleText }}</span>

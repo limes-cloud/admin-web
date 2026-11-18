@@ -29,14 +29,23 @@ export interface ListRoleEntityReply {
   list: RoleEntity[]
 }
 
+export interface RoleEntityItem {
+  action: string
+  scope: string
+  depts?: number[]
+  rules?: number[]
+}
+
 export interface CreateRoleEntityRequest {
   roleId: number
   entityId?: number
   app: string
-  action: string
-  scope: string
-  fields: string
-  rules: string
+  action?: string
+  scope?: string
+  rules?: string
+  depts?: string
+  // 批量配置：非空时按 items 逐条创建
+  items?: RoleEntityItem[]
 }
 
 export interface CreateRoleEntityReply {
@@ -48,7 +57,6 @@ export interface UpdateRoleEntityRequest {
   roleId: number
   app: string
   entityId?: number
-  action: string
   scope: string
   fields: string
   rules: string

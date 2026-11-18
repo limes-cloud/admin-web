@@ -18,14 +18,16 @@
 </template>
 
 <script setup lang="ts">
-  import { ListApp } from '@/api/manager/app/api'
+  import { ListAccessibleApp } from '@/api/manager/app/api'
   import { App } from '@/api/manager/app/type'
   import { ListCurrentMenu } from '@/api/manager/menu/api'
   import { Menu } from '@/api/manager/menu/type'
   import { GetRoleMenuIds, UpdateRoleMenuIds } from '@/api/manager/rolemenu/api'
   import { UpdateRoleMenuIdsRequest } from '@/api/manager/rolemenu/type'
+  import { getAppKeyword } from '@/utils/app-context'
 
   const roleId = ref(0)
+  const roleApp = ref(getAppKeyword())
 
   // 弹窗相关
   const dialogVisible = ref(false)
@@ -34,9 +36,14 @@
   const apps = ref<App[]>([])
   const menus = ref<Menu[]>([])
 
-  const getApp = async (name?: string) => {
-    const data = await ListApp({ page: 1, pageSize: 10, name })
-    apps.value = data.list
+  const getApp = async (query?: string) => {
+    const data = await ListAccessibleApp({ app: roleApp.value })
+    const keyword = query?.trim().toLowerCase()
+    apps.value = keyword
+      ? data.list.filter(
+          (item) => item.name.toLowerCase().includes(keyword) || item.keyword.toLowerCase().includes(keyword)
+        )
+      : data.list
   }
 
   const getRoleMenuIds = async (app: string) => {
@@ -98,13 +105,19 @@
             getApp()
           }
         },
-        onChange: async (id: number) => {
-          await getMenus(id)
-          await getRoleMenuIds(id)
+        /**
+         * 应用选择变更后加载该应用菜单树与角色已选菜单。
+         * 后端 menu / rolemenu 协议的 app 字段是应用 keyword 字符串（max_len 64），因此下拉取 keyword 而不是主键 id。
+         * @param keyword 选中应用的 keyword 标识
+         */
+        onChange: async (keyword: string) => {
+          currentData.value.app = keyword
+          await getMenus(keyword)
+          await getRoleMenuIds(keyword)
         },
         options: apps.value,
         props: {
-          value: 'id',
+          value: 'keyword',
           label: 'name'
         },
         rules: [{ required: true, message: '请选择所属应用', trigger: ['blur', 'change'] }]
@@ -135,15 +148,24 @@
   // 处理弹窗提交事件
   const handleSubmit = async () => {
     await UpdateRoleMenuIds({ ...currentData.value } as UpdateRoleMenuIdsRequest)
-    ElMessage.success('修改成功')
+    ElMessage.success('设置成功')
     dialogVisible.value = false
   }
 
-  const show = (id: number) => {
+  const show = async (id: number, app?: string, appName?: string) => {
     roleId.value = id
-    currentData.value = { roleId: roleId.value }
+    roleApp.value = app || getAppKeyword()
+    currentData.value = { roleId: roleId.value, app: roleApp.value }
     menus.value = []
     dialogVisible.value = true
+    await getApp()
+    if (app && !apps.value.some((item) => item.keyword === app)) {
+      apps.value = [{ keyword: app, name: appName || app } as App, ...apps.value]
+    }
+    if (app) {
+      await getMenus(app)
+      await getRoleMenuIds(app)
+    }
   }
 
   defineExpose({ show })

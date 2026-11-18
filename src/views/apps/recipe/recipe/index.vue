@@ -232,98 +232,86 @@
     }
   })
 
+  // ArtForm 的 items 是平铺的 FormItem 列表（见 art-form/index.vue#FormItem），不支持分组数组
   const formItems = computed(() => [
-    [
-      {
-        label: '菜谱分类',
-        key: 'classifyId',
-        type: 'treeselect',
+    {
+      label: '菜谱分类',
+      key: 'classifyId',
+      type: 'treeselect',
+      props: {
+        placeholder: '请选择菜谱分类',
+        data: classifies.value,
+        rules: [{ required: true, message: '请选择菜谱分类', trigger: ['blur', 'change'] }],
         props: {
-          placeholder: '请选择菜谱分类',
-          data: classifies.value,
-          rules: [{ required: true, message: '请选择菜谱分类', trigger: ['blur', 'change'] }],
-          props: {
-            label: 'name',
-            value: 'id'
-          },
-          multiple: true,
-          filterable: true,
-          remote: true,
-          remoteMethod: (query: string) => {
-            listClassify(query.length > 0 ? query : undefined)
-          }
-        }
-      },
-      {
-        key: 'name',
-        label: '菜谱名称',
-        type: 'input',
-        props: {
-          placeholder: '请输入菜谱名称',
-          rules: [{ required: true, message: '请输入菜谱名称', trigger: ['blur', 'change'] }]
-        }
-      },
-      {
-        key: 'description',
-        label: '菜谱简介',
-        type: 'input',
-        props: {
-          type: 'textarea',
-          placeholder: '请输入菜谱简介',
-          rules: [{ required: true, message: '请输入菜谱简介', trigger: ['blur', 'change'] }]
-        }
-      },
-      {
-        key: 'imageArr',
-        label: '菜谱图片',
-        type: 'upload',
-        suffix: {
-          hidden: !currentData.value.name,
-          icon: 'iconsys-mofa',
-          tip: 'AI自动生成图片',
-          style: {
-            color: '#9a6ce6'
-          },
-          // 生产图片
-          onclick: () => {
-            if (currentData.value.imageArr && currentData.value.imageArr.length >= 3) {
-              ElMessage.error('最多只能选择3张图片')
-              return
-            }
-            loadingService.apply(async () => {
-              const data = await GeneratePromptImage({
-                prompt: 'recipe-image',
-                variables: {
-                  query: currentData.value.name
-                }
-              })
-              currentData.value.imageArr?.push(data.list[0])
-            }, '正在生成中，请稍等')
-          }
+          label: 'name',
+          value: 'id'
         },
-        props: {
-          multiple: true,
-          cut: { enable: true },
-          limit: 3,
-          size: 120,
-          placeholder: '请选择菜谱图片',
-          accept: 'image',
-          directoryPath: '/recipe/recipe/image',
-          rules: [{ required: true, message: '请选择菜谱图片', trigger: ['blur', 'change'] }]
+        multiple: true,
+        filterable: true,
+        remote: true,
+        remoteMethod: (query: string) => {
+          listClassify(query.length > 0 ? query : undefined)
         }
       }
-    ],
-    [
-      {
-        key: 'name1',
-        label: '菜谱名称',
-        type: 'input',
-        props: {
-          placeholder: '请输入菜谱名称',
-          rules: [{ required: true, message: '请输入菜谱名称', trigger: ['blur', 'change'] }]
-        }
+    },
+    {
+      key: 'name',
+      label: '菜谱名称',
+      type: 'input',
+      props: {
+        placeholder: '请输入菜谱名称',
+        rules: [{ required: true, message: '请输入菜谱名称', trigger: ['blur', 'change'] }]
       }
-    ]
+    },
+    {
+      key: 'description',
+      label: '菜谱简介',
+      type: 'input',
+      props: {
+        type: 'textarea',
+        placeholder: '请输入菜谱简介',
+        rules: [{ required: true, message: '请输入菜谱简介', trigger: ['blur', 'change'] }]
+      }
+    },
+    {
+      key: 'imageArr',
+      label: '菜谱图片',
+      type: 'upload',
+      suffix: {
+        hidden: !currentData.value.name,
+        icon: 'iconsys-mofa',
+        tip: 'AI自动生成图片',
+        style: {
+          color: '#9a6ce6'
+        },
+        // 生产图片
+        onclick: () => {
+          if (currentData.value.imageArr && currentData.value.imageArr.length >= 3) {
+            ElMessage.error('最多只能选择3张图片')
+            return
+          }
+          loadingService.apply(async () => {
+            const data = await GeneratePromptImage({
+              prompt: 'recipe-image',
+              variables: {
+                query: currentData.value.name
+              }
+            })
+            currentData.value.imageArr?.push(data.list[0])
+          }, '正在生成中，请稍等')
+        }
+      },
+      props: {
+        multiple: true,
+        cut: { enable: true },
+        limit: 3,
+        size: 120,
+        placeholder: '请选择菜谱图片',
+        accept: 'image',
+        directoryPath: '/recipe/recipe/image',
+        rules: [{ required: true, message: '请选择菜谱图片', trigger: ['blur', 'change'] }]
+      }
+    }
   ])
 
   // 搜索处理

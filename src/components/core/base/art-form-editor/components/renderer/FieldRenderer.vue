@@ -94,11 +94,7 @@
         <template v-if="node.config.prefix" #prepend>{{ node.config.prefix }}</template>
         <template v-if="node.config.suffix" #append>{{ node.config.suffix }}</template>
       </el-input>
-      <el-radio-group
-        v-else-if="node.type === 'radio'"
-        v-model="formData[node.field!]"
-        :disabled="computedDisabled"
-      >
+      <el-radio-group v-else-if="node.type === 'radio'" v-model="formData[node.field!]" :disabled="computedDisabled">
         <el-radio v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</el-radio>
       </el-radio-group>
       <el-checkbox-group
@@ -136,19 +132,10 @@
         :placeholder="node.config.placeholder"
         :disabled="computedDisabled"
       />
-      <el-upload
-        v-else-if="node.type === 'upload'"
-        :disabled="computedDisabled"
-        :limit="node.config.limit"
-        action=""
-      >
+      <el-upload v-else-if="node.type === 'upload'" :disabled="computedDisabled" :limit="node.config.limit" action="">
         <el-button size="small" type="primary" :disabled="computedDisabled">点击上传</el-button>
       </el-upload>
-      <el-switch
-        v-else-if="node.type === 'switch'"
-        v-model="formData[node.field!]"
-        :disabled="computedDisabled"
-      />
+      <el-switch v-else-if="node.type === 'switch'" v-model="formData[node.field!]" :disabled="computedDisabled" />
       <el-slider
         v-else-if="node.type === 'slider'"
         v-model="formData[node.field!]"
@@ -166,7 +153,7 @@
       <el-cascader
         v-else-if="node.type === 'cascader'"
         v-model="formData[node.field!]"
-        :options="(options as any)"
+        :options="options as any"
         :placeholder="node.config.placeholder"
         :disabled="computedDisabled"
         clearable
@@ -356,8 +343,7 @@
 
   // 计算属性
   if (props.node.config.computed?.enabled && props.node.config.computed.expression) {
-    const deps = props.node.config.computed.dependencies
-      || extractDependencies(props.node.config.computed.expression)
+    const deps = props.node.config.computed.dependencies || extractDependencies(props.node.config.computed.expression)
 
     watch(
       () => deps.map((d) => props.formData[d]),
@@ -406,10 +392,18 @@
     }
 
     if (props.node.config.minLength) {
-      rules.push({ min: props.node.config.minLength, message: `最少输入${props.node.config.minLength}个字符`, trigger: 'blur' })
+      rules.push({
+        min: props.node.config.minLength,
+        message: `最少输入${props.node.config.minLength}个字符`,
+        trigger: 'blur'
+      })
     }
     if (props.node.config.maxLength) {
-      rules.push({ max: props.node.config.maxLength, message: `最多输入${props.node.config.maxLength}个字符`, trigger: 'blur' })
+      rules.push({
+        max: props.node.config.maxLength,
+        message: `最多输入${props.node.config.maxLength}个字符`,
+        trigger: 'blur'
+      })
     }
 
     return rules
@@ -429,10 +423,12 @@
 
   const getCheckboxLabels = (val: any): string => {
     if (!Array.isArray(val) || val.length === 0) return '-'
-    return val.map((v) => {
-      const opt = options.value.find((o) => o.value === v)
-      return opt ? opt.label : v
-    }).join('、')
+    return val
+      .map((v) => {
+        const opt = options.value.find((o) => o.value === v)
+        return opt ? opt.label : v
+      })
+      .join('、')
   }
 </script>
 

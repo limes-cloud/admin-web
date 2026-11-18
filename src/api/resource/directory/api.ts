@@ -1,37 +1,56 @@
 import request from '@/utils/http'
+
 import {
-  GetDirectoryReply,
-  GetDirectoryRequest,
-  ListDirectoryReply,
-  ListDirectoryRequest,
-  CreateDirectoryReply,
   CreateDirectoryRequest,
-  DeleteDirectoryReply,
+  CreateDirectoryResponse,
   DeleteDirectoryRequest,
-  UpdateDirectoryRequest
+  DeleteDirectoryResponse,
+  GetDirectoryRequest,
+  GetDirectoryResponse,
+  ListDirectoryRequest,
+  ListDirectoryResponse,
+  UpdateDirectoryRequest,
+  UpdateDirectoryResponse
 } from './type'
 
-// GetDirectory 获取指定的文件目录信息
-export function GetDirectory(params?: GetDirectoryRequest) {
-  return request.get<GetDirectoryReply>({ url: '/resource/api/directory', params })
+// ListDirectory 全量取回某 app 的目录（按 path 升序）
+export function ListDirectory(params: ListDirectoryRequest, app?: string) {
+  return request.get<ListDirectoryResponse>({
+    url: '/resource/api/directory',
+    params: app ? { ...params, app } : params
+  })
 }
 
-// ListDirectory 获取文件目录信息列表
-export function ListDirectory(params?: ListDirectoryRequest) {
-  return request.get<ListDirectoryReply>({ url: '/resource/api/directories', params })
+// GetDirectory 按主键查询目录
+export function GetDirectory(params: GetDirectoryRequest, app?: string) {
+  return request.get<GetDirectoryResponse>({
+    url: '/resource/api/directory/detail',
+    params: app ? { ...params, app } : params
+  })
 }
 
-// CreateDirectory 创建文件目录信息
-export function CreateDirectory(data: CreateDirectoryRequest) {
-  return request.post<CreateDirectoryReply>({ url: '/resource/api/directory', data })
+// CreateDirectory 按完整路径创建目录
+export function CreateDirectory(data: CreateDirectoryRequest, app?: string) {
+  return request.post<CreateDirectoryResponse>({
+    url: '/resource/api/directory',
+    data,
+    params: app ? { app } : undefined
+  })
 }
 
-//UpdateeDirectory 创建文件目录信息
-export function UpdateDirectory(data: UpdateDirectoryRequest) {
-  return request.put({ url: '/resource/api/directory', data })
+// UpdateDirectory 改名 / 移动 / 改策略（局部更新）
+export function UpdateDirectory(data: UpdateDirectoryRequest, app?: string) {
+  return request.put<UpdateDirectoryResponse>({
+    url: '/resource/api/directory',
+    data,
+    params: app ? { app } : undefined
+  })
 }
 
-// DeleteDirectory 删除文件目录信息
-export function DeleteDirectory(params: DeleteDirectoryRequest) {
-  return request.del<DeleteDirectoryReply>({ url: '/resource/api/directory', params })
+// DeleteDirectory 删目录（连带回收子树对象）
+export function DeleteDirectory(params: DeleteDirectoryRequest, app?: string) {
+  return request.del<DeleteDirectoryResponse>({
+    url: '/resource/api/directory',
+    params: app ? { ...params, app } : params
+  })
 }

@@ -29,9 +29,7 @@
 
       <!-- subtitle slot -->
       <slot name="subtitle">
-        <p v-if="subtitle" class="basic-banner__subtitle" :style="{ color: subtitleColor }">{{
-          subtitle
-        }}</p>
+        <p v-if="subtitle" class="basic-banner__subtitle" :style="{ color: subtitleColor }">{{ subtitle }}</p>
       </slot>
 
       <!-- button slot -->
@@ -284,12 +282,7 @@
         position: absolute;
         width: 2px;
         height: 60px;
-        background: linear-gradient(
-          to top,
-          rgb(255 255 255 / 40%),
-          rgb(255 255 255 / 10%),
-          transparent
-        );
+        background: linear-gradient(to top, rgb(255 255 255 / 40%), rgb(255 255 255 / 10%), transparent);
         opacity: 0;
         transform-origin: top left;
         animation-name: meteor-fall;

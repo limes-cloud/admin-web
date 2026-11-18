@@ -134,9 +134,8 @@
 
   // 搜索表单
   const searchForm = ref({
-    keyword: undefined,
-    name: undefined,
-    status: undefined
+    entityId: undefined,
+    name: undefined
   })
 
   const searchItems = computed(() => [

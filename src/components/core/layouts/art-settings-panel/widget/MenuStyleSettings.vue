@@ -1,12 +1,7 @@
 <template>
   <SectionTitle title="菜单风格" />
   <div class="setting-box-wrap">
-    <div
-      class="setting-item"
-      v-for="item in menuThemeList"
-      :key="item.theme"
-      @click="switchMenuStyles(item.theme)"
-    >
+    <div class="setting-item" v-for="item in menuThemeList" :key="item.theme" @click="switchMenuStyles(item.theme)">
       <div
         class="box"
         :class="{ 'is-active': item.theme === menuThemeType }"

@@ -12,6 +12,7 @@
       <div v-if="shouldShow('refresh')" class="btn" @click="refresh" :class="{ loading: loading && isManualRefresh }">
         <i class="iconfont-sys">&#xe615;</i>
       </div>
+      <slot name="right-after-refresh"></slot>
 
       <ElDropdown v-if="shouldShow('size')" @command="handleTableSizeChange">
         <div class="btn">

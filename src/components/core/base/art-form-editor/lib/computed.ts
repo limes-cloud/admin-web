@@ -21,11 +21,8 @@ export const extractDependencies = (expression: string): string[] => {
  */
 const SAFE_CHARS = /^[+\-*/%()?:.<>=!&|,\s\d.]+$/
 
-export const evaluateExpression = (
-  expression: string,
-  formData: Record<string, any>
-): any => {
-  let expr = expression.replace(/\{\{(\w+)\}\}/g, (_, field) => {
+export const evaluateExpression = (expression: string, formData: Record<string, any>): any => {
+  const expr = expression.replace(/\{\{(\w+)\}\}/g, (_, field) => {
     const val = formData[field]
     if (val === undefined || val === null || val === '') return '0'
     if (typeof val === 'string') return JSON.stringify(val)

@@ -56,28 +56,17 @@ export const loadingService = {
     }
   },
 
-  apply(fn: any, text?: string) {
+  async apply(fn: () => unknown, text?: string): Promise<unknown> {
     const cfg: LoadingOptions = {
       background: 'rgba(0, 0, 0, 0.7)',
       text: text || '加载中...'
     }
 
-    const isAsyncFunction = (fn: any): boolean => {
-      return fn && fn.constructor && fn.constructor.name === 'AsyncFunction'
-    }
-    // 判断fn是否为异步函数
-    if (isAsyncFunction(fn)) {
-      this.showLoading(cfg)
-      fn().finally(() => {
-        this.hideLoading()
-      })
-    } else if (fn instanceof Function) {
-      this.showLoading(cfg)
-      try {
-        fn()
-      } finally {
-        this.hideLoading()
-      }
+    this.showLoading(cfg)
+    try {
+      return await fn()
+    } finally {
+      this.hideLoading()
     }
   }
 }

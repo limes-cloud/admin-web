@@ -27,6 +27,13 @@ const isRouteRegistered = ref(false)
 // 跟踪是否需要关闭 loading
 const pendingLoading = ref(false)
 
+class MenuPermissionError extends Error {
+  constructor() {
+    super('暂未开通菜单管理权限')
+    this.name = 'MenuPermissionError'
+  }
+}
+
 /**
  * 设置路由全局前置守卫
  */
@@ -185,6 +192,16 @@ async function handleDynamicRoutes(
       replace: true
     })
   } catch (error) {
+    if (error instanceof MenuPermissionError) {
+      ElMessage.warning(error.message)
+      isRouteRegistered.value = true
+      const menuStore = useMenuStore()
+      menuStore.setMenuList([])
+      menuStore.setPermissions(new Map())
+      next({ name: 'Exception403' })
+      return
+    }
+
     console.error('动态路由注册失败:', error)
     // 401 错误：axios 拦截器已处理退出登录，取消当前导航即可
     if (isUnauthorizedError(error)) {
@@ -222,9 +239,15 @@ async function processFrontendMenu(router: Router): Promise<void> {
  */
 async function processBackendMenu(router: Router): Promise<void> {
   const { list } = await ListCurrentMenu()
+  if (!list?.length) {
+    throw new MenuPermissionError()
+  }
   const parser = new Parser(list)
   const routes = parser.GetRouter()
   const menuList = routes.map((route) => menuDataToRouter(route))
+  if (!hasNavigableMenu(menuList)) {
+    throw new MenuPermissionError()
+  }
 
   const menuStore = useMenuStore()
   menuStore.setPermissions(parser.GetPermission())
@@ -285,6 +308,19 @@ async function registerAndStoreMenu(router: Router, menuList: AppRouteRecord[]):
   registerDynamicRoutes(router, list)
   isRouteRegistered.value = true
   useWorktabStore().validateWorktabs(router)
+}
+
+// 判断菜单树中是否存在真正可访问的页面，避免空应用根节点被当作有效菜单。
+function hasNavigableMenu(menuList: AppRouteRecord[]): boolean {
+  return menuList.some((item) => {
+    if (item.children?.length) {
+      return hasNavigableMenu(item.children)
+    }
+    if (item.meta?.isIframe === true || item.meta?.link) {
+      return true
+    }
+    return Boolean(item.component && item.component !== RoutesAlias.Layout)
+  })
 }
 
 /**

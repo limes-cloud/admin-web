@@ -132,7 +132,9 @@
     if (fc?.filetype) config.filetype = fc.filetype
     if (fc?.limit) config.limit = fc.limit
     if (fc?.options && fc.options.length > 0) {
-      config.options = fc.options.map((o) => (typeof o === 'string' ? { label: o, value: o } : { label: o.label || o.value, value: o.value }))
+      config.options = fc.options.map((o) =>
+        typeof o === 'string' ? { label: o, value: o } : { label: o.label || o.value, value: o.value }
+      )
       config.optionSource = 'static'
     }
     if (fc?.rule) {

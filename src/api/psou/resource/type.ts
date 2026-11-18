@@ -4,13 +4,15 @@ export interface Resource {
   summary: string
   description: string
   categoryId: number
-  tags: string
-  score?: number | null
+  tags: string[]
+  score: number
   cover: string
   viewCount: number
-  transferCount: number
+  clickCount: number
   weight: number
   isBanner: boolean
+  bannerFocusX: number
+  bannerFocusY: number
   status: number
   source: string
   createdAt: number
@@ -19,6 +21,10 @@ export interface Resource {
 
 export interface GetResourceRequest {
   id: number
+}
+
+export interface GetResourceReply {
+  resource: Resource
 }
 
 export interface ListResourceRequest {
@@ -39,14 +45,13 @@ export interface ListResourceReply {
 
 export interface CreateResourceRequest {
   title: string
-  summary?: string
-  description?: string
+  summary: string
+  description: string
   categoryId: number
-  tags?: string
-  score?: number
-  cover?: string
+  tags: string[]
+  score: number
+  cover: string
   weight?: number
-  status?: number
 }
 
 export interface CreateResourceReply {
@@ -69,4 +74,33 @@ export interface UpdateResourceStatusRequest {
 export interface UpdateResourceBannerRequest {
   id: number
   isBanner: boolean
+}
+
+export interface UpdateResourceBannerFocusRequest {
+  id: number
+  x: number
+  y: number
+}
+
+export interface FetchResourceMetadataRequest {
+  title: string
+  type?: 'auto' | 'movie' | 'tv' | 'book'
+}
+
+export interface ResourceMetadata {
+  title: string
+  summary: string
+  description: string
+  tags: string[]
+  score: number
+  year: string
+  kind: string
+  source: string
+  sourceUrl: string
+  covers: string[]
+  coverError?: string
+}
+
+export interface FetchResourceMetadataReply {
+  metadata: ResourceMetadata
 }

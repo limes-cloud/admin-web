@@ -1,3 +1,10 @@
+export interface NetdiskFile {
+  name: string
+  isDir: boolean
+  size: number
+  children?: NetdiskFile[]
+}
+
 export interface Netdisk {
   id: number
   userId: number
@@ -6,18 +13,23 @@ export interface Netdisk {
   resourceId: number
   platform: string
   shareUrl: string
-  fromUrl: string
+  sourceUrl: string
   size: number
-  formatText: string
-  folderCount: number
+  formatSummary: string
   fileCount: number
   status: number
   lastCheckedAt: number
-  checkFailCount: number
-  sort: number
-  ext: string
+  files: NetdiskFile[]
   createdAt: number
   updatedAt: number
+}
+
+export interface GetNetdiskRequest {
+  id: number
+}
+
+export interface GetNetdiskReply {
+  netdisk: Netdisk
 }
 
 export interface ListNetdiskRequest {
@@ -37,25 +49,23 @@ export interface ListNetdiskReply {
 
 export interface CreateNetdiskRequest {
   resourceId: number
-  userId?: number
-  accountId?: number
-  fsId?: string
+  userId: number
+  accountId: number
+  fsId: string
   platform: string
   shareUrl: string
-  fromUrl?: string
-  size?: number
-  formatText?: string
-  folderCount?: number
+  sourceUrl: string
+  size: number
+  formatSummary?: string
   fileCount?: number
-  sort?: number
-  ext?: string
+  files?: NetdiskFile[]
 }
 
 export interface CreateNetdiskReply {
   id: number
 }
 
-export interface UpdateNetdiskRequest extends CreateNetdiskRequest {
+export interface UpdateNetdiskRequest extends Omit<CreateNetdiskRequest, 'resourceId' | 'platform'> {
   id: number
 }
 

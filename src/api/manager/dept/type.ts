@@ -4,10 +4,12 @@ export interface ListDeptClassifyRequest {
   order?: string
   orderBy?: string
   name?: string
+  app?: string
 }
 
 export interface DeptClassify {
   id: number
+  keyword?: string
   name: string
   description?: string
   createdAt: number
@@ -20,8 +22,10 @@ export interface ListDeptClassifyReply {
 }
 
 export interface CreateDeptClassifyRequest {
+  keyword: string
   name: string
   description?: string
+  app?: string
 }
 
 export interface CreateDeptClassifyReply {
@@ -32,10 +36,12 @@ export interface UpdateDeptClassifyRequest {
   id: number
   name: string
   description?: string
+  app?: string
 }
 
 export interface DeleteDeptClassifyRequest {
   id: number
+  app?: string
 }
 
 export interface DeleteDeptClassifyReply {
@@ -43,6 +49,7 @@ export interface DeleteDeptClassifyReply {
 }
 
 export interface ListDeptRequest {
+  app?: string
   name?: string
   keyword?: string
   classifyId?: number
@@ -50,6 +57,7 @@ export interface ListDeptRequest {
 
 export interface Dept {
   id: number
+  app?: string
   parentId: number
   parent?: Dept
   classifyId: number
@@ -70,6 +78,7 @@ export interface ListDeptReply {
 }
 
 export interface CreateDeptRequest {
+  app?: string
   classifyId: number
   parentId: number
   name: string
@@ -84,6 +93,7 @@ export interface CreateDeptReply {
 
 export interface UpdateDeptRequest {
   id: number
+  app?: string
   classifyId?: number
   parentId?: number
   name?: string
@@ -94,6 +104,7 @@ export interface UpdateDeptRequest {
 
 export interface DeleteDeptRequest {
   id: number
+  app?: string
 }
 
 export interface DeleteDeptReply {

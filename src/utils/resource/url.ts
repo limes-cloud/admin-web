@@ -1,22 +1,25 @@
 import { matchProxyHost } from '@/utils/proxyRules'
+import { getAPIBaseURL } from '@/utils/runtime-config'
 
 const normalizeHost = (host: string) => host.replace(/\/$/, '')
 
+// isRemoteResourceURL 判断资源地址是否为可直接访问的远端 URL。
+export const isRemoteResourceURL = (value: string) => /^https?:\/\//i.test(String(value).trim())
+
 // resolveResourceUrl 拼接资源服务完整地址（含 API 域名/代理规则），供 fetch 等直接请求使用
 export const resolveResourceUrl = (path: string) => {
-  const { VITE_API_URL } = import.meta.env
-  const defaultHost = normalizeHost(VITE_API_URL)
+  const defaultHost = normalizeHost(getAPIBaseURL())
   const proxyHost = matchProxyHost(path) || matchProxyHost(`${defaultHost}${path}`)
   return `${proxyHost || defaultHost}${path}`
 }
 
-// rurl 生成图片展示地址：走 resource 的 302 快速展示接口（对象按 md5 内容寻址，只需 key）
+// rurl 生成图片展示地址：远端 URL 原样返回，对象 key 走 resource 的 302 快速展示接口
 // w/h 参数保留兼容旧调用方；后端不处理裁剪，展示尺寸由调用方 CSS 控制
 export const rurl = (key: string, w?: number, h?: number) => {
   if (!key) {
     return ''
   }
-  if (key.startsWith('http')) {
+  if (isRemoteResourceURL(key)) {
     return key
   }
   void w

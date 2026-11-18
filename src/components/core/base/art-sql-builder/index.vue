@@ -27,32 +27,29 @@
 
       <!-- 条件行渲染 -->
       <div v-for="(condition, index) in value.conditions" :key="'condition-' + index" class="condition-row">
-        <ElSelect v-model="condition.field" placeholder="选择字段" size="small">
+        <ElSelect v-model="condition.field" placeholder="选择字段">
           <ElOption v-for="field in fields" :key="field.name" :value="field.name">
             {{ field.comment }}
           </ElOption>
         </ElSelect>
 
-        <ElSelect v-model="condition.operator" @change="handleSelect(condition)" size="small">
+        <ElSelect v-model="condition.operator" @change="handleSelect(condition)">
           <ElOption v-for="op in operators" :key="op.value" :value="op.value">
             {{ op.label }}
           </ElOption>
         </ElSelect>
 
-        <ElInput
-          v-if="hasInput(condition.operator)"
-          v-model="condition.value"
-          type="text"
-          placeholder="输入值"
-          size="small"
-        />
+        <ElInput v-if="hasInput(condition.operator)" v-model="condition.value" type="text" placeholder="输入值" />
 
-        <ElInputTag
+        <ElSelect
           v-if="hasArrar(condition.operator)"
           v-model="condition.value"
+          multiple
+          filterable
+          allow-create
+          default-first-option
           placeholder="输入值"
-          allow-clear
-          size="small"
+          class="value-select"
         />
 
         <div class="delete-btn" @click="value.conditions.splice(index, 1)">
@@ -244,6 +241,14 @@
     display: flex;
     gap: 8px;
     align-items: center;
+  }
+
+  /* 条件行内控件统一使用默认尺寸（--el-component-size 全局 34px），与 ArtForm 外层字段高度一致；
+     多选（IN/NOT IN）输入 tag 换行时自然撑开，不影响单行对齐 */
+  .condition-row {
+    :deep(.value-select) {
+      min-width: 120px;
+    }
   }
 
   .condition-group {

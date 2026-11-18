@@ -275,7 +275,8 @@
       hidden: currentData.value.type !== 'M',
       props: {
         rules: [{ required: true, message: '请选择图标LOGO', trigger: ['blur', 'change'] }],
-        width: '100% !important'
+        width: '100% !important',
+        enableIconify: true
       }
     },
     {

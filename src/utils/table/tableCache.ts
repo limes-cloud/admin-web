@@ -185,9 +185,7 @@ export class TableCache<T> {
 
     for (const [key, item] of this.cache.entries()) {
       // 检查是否包含任意一个标签
-      const hasMatchingTag = tags.some((tag) =>
-        Array.from(item.tags).some((itemTag) => itemTag.includes(tag))
-      )
+      const hasMatchingTag = tags.some((tag) => Array.from(item.tags).some((itemTag) => itemTag.includes(tag)))
 
       if (hasMatchingTag) {
         this.cache.delete(key)

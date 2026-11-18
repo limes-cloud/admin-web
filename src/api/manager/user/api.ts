@@ -12,7 +12,10 @@ import {
   ResetPasswordRequest,
   OfflineUserRequest,
   UpdateCurrentUserRequest,
-  UpdateCurrentUserPasswordRequest
+  UpdateCurrentUserPasswordRequest,
+  GetUserAppsRequest,
+  GetUserAppsReply,
+  UpdateUserAppsRequest
 } from './type'
 
 // GetCurrentUser 获取当前用户信息
@@ -33,6 +36,16 @@ export function ListUser(params: ListUserRequest) {
 // CreateUser 创建用户信息
 export function CreateUser(data: CreateUserRequest) {
   return request.post<CreateUserReply>({ url: '/manager/api/user', data })
+}
+
+// GetUserApps 获取用户的应用授权列表
+export function GetUserApps(params: GetUserAppsRequest) {
+  return request.get<GetUserAppsReply>({ url: '/manager/api/user/apps', params })
+}
+
+// UpdateUserApps 更新用户的应用授权列表
+export function UpdateUserApps(data: UpdateUserAppsRequest) {
+  return request.put({ url: '/manager/api/user/apps', data })
 }
 
 // UpdateUser 更新用户信息

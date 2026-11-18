@@ -2,7 +2,7 @@ import type { AppRouteRecord } from '@/types/router'
 
 // 资源站（psou）后台管理路由
 // 后端控制模式下以 manager 菜单记录为准；此模块用于前端控制模式及菜单配置参考。
-// 菜单 component 填 /psou/category、/psou/resource、/psou/distribute-account、/psou/account、/psou/netdisk、/psou/setting。
+// 菜单 component 填 /psou/category、/psou/resource、/psou/distribute-account、/psou/account、/psou/setting、/psou/hermes、/psou/hermes/transfer。
 export const psouRoutes: AppRouteRecord = {
   path: '/psou',
   name: 'Psou',
@@ -49,15 +49,6 @@ export const psouRoutes: AppRouteRecord = {
       }
     },
     {
-      path: 'netdisk',
-      name: 'PsouNetdisk',
-      component: '/psou/netdisk',
-      meta: {
-        title: '网盘副本',
-        keepAlive: true
-      }
-    },
-    {
       path: 'setting',
       name: 'PsouSetting',
       component: '/psou/setting',
@@ -65,6 +56,34 @@ export const psouRoutes: AppRouteRecord = {
         title: '站点配置',
         keepAlive: true
       }
+    },
+    {
+      path: '_hermes',
+      name: '_PsouHermes',
+      redirect: '/psou/hermes',
+      meta: {
+        title: 'Hermes 管理'
+      },
+      children: [
+        {
+          path: '/psou/hermes',
+          name: 'PsouHermes',
+          component: '/psou/hermes',
+          meta: {
+            title: '凭证管理',
+            keepAlive: true
+          }
+        },
+        {
+          path: '/psou/hermes/transfer',
+          name: 'PsouHermesTransfer',
+          component: '/psou/hermes/transfer',
+          meta: {
+            title: '转存记录',
+            keepAlive: true
+          }
+        }
+      ]
     }
   ]
 }

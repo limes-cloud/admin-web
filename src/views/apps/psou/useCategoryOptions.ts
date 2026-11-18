@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 
-import { ListCategories } from '@/api/psou/category/api'
+import { ListCategory } from '@/api/psou/category/api'
 import type { Category } from '@/api/psou/category/type'
 
 // 分类选项：资源/网盘等页面共用，分类总量小，一次拉全量
@@ -13,7 +13,7 @@ export function useCategoryOptions() {
     list.flatMap((item) => [item, ...flattenCategories(item.children || [])])
 
   const loadCategories = async () => {
-    const res = await ListCategories()
+    const res = await ListCategory()
     categories.value = flattenCategories(res.list)
     loaded.value = true
     return categories.value

@@ -228,7 +228,7 @@
   // 场景列表
   const scenes = ref<FormScene[]>([])
   const loadScenes = () => {
-    ListFormScene({ page: 1, pageSize: 100 }).then((res) => {
+    ListFormScene({ page: 1, pageSize: 50 }).then((res) => {
       scenes.value = res.list || []
     })
   }

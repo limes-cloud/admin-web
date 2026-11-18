@@ -40,8 +40,8 @@ export interface ColumnOption<T = any> {
   minWidth?: string | number
   // 固定列
   fixed?: boolean | 'left' | 'right'
-  // 是否可排序
-  sortable?: boolean
+  // 是否可排序；'custom' 表示由服务端排序
+  sortable?: boolean | 'custom'
   // 过滤器选项
   filters?: any[]
   // 过滤方法

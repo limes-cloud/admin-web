@@ -7,12 +7,7 @@
     :size="schema.config.size"
     :disabled="schema.config.disabled || readonly"
   >
-    <RenderNodes
-      :nodes="schema.nodes"
-      :form-data="formData"
-      :readonly="readonly"
-      :schema="schema"
-    />
+    <RenderNodes :nodes="schema.nodes" :form-data="formData" :readonly="readonly" :schema="schema" />
   </el-form>
 </template>
 
@@ -115,9 +110,13 @@
   }
 
   const getValue = (field: string) => formData[field]
-  const setValue = (field: string, value: any) => { formData[field] = value }
+  const setValue = (field: string, value: any) => {
+    formData[field] = value
+  }
   const getFormData = () => ({ ...formData })
-  const setFormData = (data: Record<string, any>) => { Object.assign(formData, data) }
+  const setFormData = (data: Record<string, any>) => {
+    Object.assign(formData, data)
+  }
   const validateField = (field: string) => formRef.value?.validateField(field)
   const clearValidate = (fields?: string[]) => formRef.value?.clearValidate(fields)
   const scrollToField = (field: string) => formRef.value?.scrollToField(field)
@@ -136,9 +135,18 @@
   }
 
   defineExpose({
-    validate, resetFields, formData,
-    getValue, setValue, getFormData, setFormData,
-    validateField, clearValidate, scrollToField,
-    getGroupData, addGroupItem, removeGroupItem
+    validate,
+    resetFields,
+    formData,
+    getValue,
+    setValue,
+    getFormData,
+    setFormData,
+    validateField,
+    clearValidate,
+    scrollToField,
+    getGroupData,
+    addGroupItem,
+    removeGroupItem
   })
 </script>

@@ -75,7 +75,7 @@
         <ElSpace class="space" direction="vertical" size="small" alignment="center">
           <ElDescriptions title="基础信息" :column="3" border>
             <ElDescriptionsItem :span="1" label="问题分类">{{ currentData?.classify?.name }}</ElDescriptionsItem>
-            <ElDescriptionsItem :span="1" label="所属应用">{{ currentData?.app?.name }}</ElDescriptionsItem>
+            <ElDescriptionsItem :span="1" label="所属应用">{{ currentData?.appInfo?.name }}</ElDescriptionsItem>
             <ElDescriptionsItem :span="1" label="反馈用户">
               {{ currentData?.user?.nickname + '(' + currentData?.user?.username + ')' }}
             </ElDescriptionsItem>
@@ -143,10 +143,13 @@
   import { formatTime } from '@/utils/time'
   import { App } from '@/api/manager/app/type'
   import { ListApp } from '@/api/manager/app/api'
+  import { getAppKeyword } from '@/utils/app-context'
 
   const router = useRouter()
 
   defineOptions({ name: 'Feedback' })
+
+  const isManagerApp = getAppKeyword() === 'manager'
 
   // 弹窗相关
   const moreVisible = ref(false)
@@ -196,6 +199,7 @@
       key: 'app',
       label: '所属应用',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,
@@ -301,7 +305,7 @@
       },
       columnsFactory: () => [
         {
-          prop: 'app.name',
+          prop: 'appInfo.name',
           label: '应用名称'
         },
         {

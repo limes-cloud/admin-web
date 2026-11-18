@@ -22,9 +22,7 @@ export function arrayMin(arr: number[]): number {
 // 数组分割
 export function chunk<T>(arr: T[], size: number = 1): T[][] {
   if (size <= 0) return [arr.slice()]
-  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size)
-  )
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size))
 }
 
 // 检查元素出现次数

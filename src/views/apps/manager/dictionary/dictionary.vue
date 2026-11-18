@@ -135,6 +135,7 @@
       type: 'select',
       props: {
         placeholder: '请选择字典类型',
+        disabled: dialogType.value === 'edit',
         options: [
           { label: '树状字典', value: 'tree' },
           { label: '列表字典', value: 'list' }

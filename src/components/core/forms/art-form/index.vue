@@ -3,7 +3,12 @@
 <!-- 写法同 ElementPlus 官方文档组件，把属性写在 props 里面就可以了 -->
 <template>
   <div class="art-form">
-    <div class="art-form-body">
+    <div
+      class="art-form-body"
+      v-loading="loadingSubmit"
+      :element-loading-text="loadingText"
+      element-loading-background="rgba(255, 255, 255, 0.72)"
+    >
       <ElForm
         ref="formRef"
         :model="modelValue"
@@ -23,6 +28,7 @@
           >
             <el-divider v-if="item.divider" content-position="left">{{ item.divider }}</el-divider>
             <ElFormItem
+              v-if="!item.dividerOnly"
               :prop="item.key"
               :label-width="item.label ? item.labelWidth || labelWidth : undefined"
               :rules="item.props?.rules"
@@ -46,7 +52,10 @@
               <slot :name="item.key" :item="item" :modelValue="modelValue">
                 <div
                   class="art-form-control"
-                  :class="{ 'has-suffix': item.suffix, 'has-tip': item.tip && item.tipPosition === 'after' }"
+                  :class="{
+                    'has-suffix': item.suffix || item.actions?.length,
+                    'has-tip': item.tip && item.tipPosition === 'after'
+                  }"
                 >
                   <component
                     :is="getComponent(item)"
@@ -93,7 +102,7 @@
                     </span>
                   </el-tooltip>
 
-                  <!-- 附加操作按钮（如 AI 生成）：配置了 suffix 的表单项显示在控件右侧 -->
+                  <!-- 附加操作按钮（如 AI 生成、三方数据同步）：显示在控件右侧 -->
                   <el-tooltip
                     v-if="item.suffix && !item.suffix.hidden"
                     effect="dark"
@@ -104,6 +113,13 @@
                       <ArtIcon :value="item.suffix.icon" :size="16"></ArtIcon>
                     </span>
                   </el-tooltip>
+                  <template v-for="(action, index) in item.actions || []" :key="index">
+                    <el-tooltip v-if="!action.hidden" effect="dark" :content="action.tip" placement="top">
+                      <span class="suffix-icon" :style="action.style" @click.stop="action.onclick">
+                        <ArtIcon :value="action.icon" :size="16"></ArtIcon>
+                      </span>
+                    </el-tooltip>
+                  </template>
                 </div>
               </slot>
             </ElFormItem>
@@ -112,14 +128,17 @@
       </ElForm>
     </div>
     <div class="art-form-footer">
-      <ElButton v-if="showCancel" class="cancel-button" @click="handleCancel" v-ripple> 取消 </ElButton>
+      <ElButton v-if="showCancel" class="cancel-button" :disabled="loadingSubmit" @click="handleCancel" v-ripple>
+        取消
+      </ElButton>
       <ElButton
         v-if="showSubmit"
         type="primary"
         class="submit-button"
+        :loading="loadingSubmit"
         @click="handleSubmit"
         v-ripple
-        :disabled="disabledSubmit"
+        :disabled="disabledSubmit || loadingSubmit"
       >
         确定
       </ElButton>
@@ -189,6 +208,14 @@
   const formInstance = useTemplateRef<FormInstance>('formRef')
 
   // 表单项配置
+  export interface FormAction {
+    hidden?: boolean
+    icon: string
+    tip?: string
+    style?: Record<string, string>
+    onclick: () => void
+  }
+
   export interface FormItem {
     /** 表单项的唯一标识 */
     key: string
@@ -212,20 +239,18 @@
     options?: Record<string, any>
     /** 传递给表单项组件的属性 */
     props?: Record<string, any>
-    /** 附加操作按钮（如上传组件的 AI 生成入口；仅配置后透传，含 hidden/icon/tip/style/onclick） */
-    suffix?: {
-      hidden?: boolean
-      icon: string
-      tip?: string
-      style?: Record<string, string>
-      onclick: () => void
-    }
+    /** 附加操作按钮（如上传组件的 AI 生成入口） */
+    suffix?: FormAction
+    /** 更多附加操作按钮，按数组顺序展示 */
+    actions?: FormAction[]
     /** 表单项的插槽配置 */
     slots?: Record<string, (() => any) | undefined>
     /** 表单项的占位符文本 */
     placeholder?: string
     /** 分割线文本 */
     divider?: string
+    /** 仅渲染分割线，不渲染表单控件 */
+    dividerOnly?: boolean
     /** 默认值 */
     defaultValue?: any
     /** 输出格式化 */
@@ -253,6 +278,10 @@
     showSubmit?: boolean
     /** 是否禁用提交按钮 */
     disabledSubmit?: boolean
+    /** 是否提交中：按钮显示 loading，表单区域显示遮罩 */
+    loadingSubmit?: boolean
+    /** 提交中遮罩文案 */
+    loadingText?: string
   }
 
   const props = withDefaults(defineProps<FormProps>(), {
@@ -264,7 +293,9 @@
     buttonLeftLimit: 2,
     showCancel: true,
     showSubmit: true,
-    disabledSubmit: false
+    disabledSubmit: false,
+    loadingSubmit: false,
+    loadingText: '正在提交...'
   })
 
   interface FormEmits {
@@ -401,6 +432,7 @@
     () => props.items,
     (items) => {
       items.forEach((item) => {
+        if (item.dividerOnly) return
         if (item.defaultValue !== undefined) {
           const { value } = getNestedValue(modelValue.value, item.key)
           if (value === undefined || value === null) {

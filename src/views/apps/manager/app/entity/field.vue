@@ -15,20 +15,7 @@
       </div>
       <div class="table">
         <!-- 表格头部 -->
-        <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
-          <template #left>
-            <ElSpace wrap>
-              <ElButton
-                v-permission="'manager:entity:field:add'"
-                v-ripple
-                type="primary"
-                :icon="Plus"
-                @click="showDialog('add')"
-                >新增字段</ElButton
-              >
-            </ElSpace>
-          </template>
-        </ArtTableHeader>
+        <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData"> </ArtTableHeader>
 
         <!-- 表格 -->
         <ArtTable
@@ -70,10 +57,10 @@
 
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
-  import { Edit, Plus } from '@element-plus/icons-vue'
-  import { CreateEntityField, DeleteEntityField, ListEntityField, UpdateEntityField } from '@/api/manager/entity/api'
-  import { CreateEntityFieldRequest, EntityField, UpdateEntityFieldRequest } from '@/api/manager/entity/type'
-  import { Delete } from '@element-plus/icons-vue'
+
+  import { DeleteEntityField, ListEntityField, UpdateEntityField } from '@/api/manager/entity/api'
+  import { EntityField, UpdateEntityFieldRequest } from '@/api/manager/entity/type'
+  import { Edit, Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
 
   const props = defineProps<{ entityId: number; app: string }>()
@@ -85,12 +72,10 @@
   const dialogVisible = ref(false)
   const currentData = ref<Partial<EntityField>>({})
 
-  // 搜索表单
-  const searchForm = ref({
+  // 搜索表单（与 proto ListEntityFieldRequest 对齐：entityId + name）
+  const searchForm = ref<{ entityId: number; name?: string }>({
     entityId: props.entityId,
-    keyword: undefined,
-    name: undefined,
-    status: undefined
+    name: undefined
   })
 
   const searchItems = [
@@ -178,7 +163,6 @@
     handleSizeChange,
     handleCurrentChange,
     refreshData,
-    refreshCreate,
     refreshUpdate,
     refreshRemove
   } = useTable({
@@ -244,16 +228,9 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
-    const value = { ...currentData.value }
-    if (dialogType.value === 'add') {
-      await CreateEntityField({ ...value, entityId: props.entityId } as CreateEntityFieldRequest)
-      ElMessage.success('创建成功')
-      refreshCreate()
-    } else {
-      await UpdateEntityField({ ...value, entityId: props.entityId } as UpdateEntityFieldRequest)
-      ElMessage.success('修改成功')
-      refreshUpdate()
-    }
+    await UpdateEntityField({ ...currentData.value, entityId: props.entityId } as UpdateEntityFieldRequest)
+    ElMessage.success('修改成功')
+    refreshUpdate()
     dialogVisible.value = false
   }
 
@@ -263,16 +240,13 @@
       if (props.entityId === 0) return
 
       Object.assign(searchParams, {
-        entityId: props.entityId,
-        keyword: undefined,
-        name: undefined,
-        status: undefined
+        entityId: props.entityId
       })
       await getData()
 
       searchForm.value = {
         entityId: props.entityId
-      } as any
+      }
     },
     { immediate: true }
   )

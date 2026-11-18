@@ -25,16 +25,19 @@ document.addEventListener(
 )
 
 const app = createApp(App)
-initStore(app)
-initRouter(app)
-setupGlobDirectives(app)
-setupErrorHandle(app)
-
 app.config.globalProperties.$rurl = rurl;
 app.config.globalProperties.$hasPermission = (ps: string): boolean => {
   const permission = usePermission()
   return permission.hasPermission(ps)
 }
 
-app.use(globalComponents);
-app.mount('#app')
+const bootstrap = async () => {
+  await initStore(app)
+  initRouter(app)
+  setupGlobDirectives(app)
+  setupErrorHandle(app)
+  app.use(globalComponents)
+  app.mount('#app')
+}
+
+void bootstrap()

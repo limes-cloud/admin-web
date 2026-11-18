@@ -56,10 +56,31 @@ export interface ListDistributeAccountReply {
   total: number
 }
 
+export interface CreateDistributeAccountQRSessionRequest {
+  platform: string
+}
+
+export interface CreateDistributeAccountQRSessionReply {
+  sessionId: string
+  image: string
+  expiresAt: number
+}
+
+export type DistributeAccountQRState = 'pending' | 'scanned' | 'confirmed' | 'expired' | 'failed'
+
+export interface GetDistributeAccountQRSessionRequest {
+  sessionId: string
+}
+
+export interface GetDistributeAccountQRSessionReply {
+  state: DistributeAccountQRState
+  qrTicket?: string
+}
+
 export interface CreateDistributeAccountRequest {
   channelCode: string
   panAccountId?: number
-  name: string
+  name?: string
   uid?: string
   token?: string
   status?: number
@@ -67,6 +88,7 @@ export interface CreateDistributeAccountRequest {
   priority?: number
   quota?: number
   remark?: string
+  qrTicket?: string
 }
 
 export interface CreateDistributeAccountReply {
@@ -85,6 +107,7 @@ export interface UpdateDistributeAccountRequest {
   priority?: number
   quota?: number
   remark?: string
+  qrTicket?: string
 }
 
 export interface DeleteDistributeAccountRequest {

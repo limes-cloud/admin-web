@@ -50,7 +50,9 @@ export function useHistory(nodes: Ref<FormNode[]>, maxHistory = 50): HistoryStat
     nodes.value = JSON.parse(prev)
     lastSnapshot = prev
     updateFlags()
-    nextTick(() => { applying = false })
+    nextTick(() => {
+      applying = false
+    })
   }
 
   // 重做
@@ -64,7 +66,9 @@ export function useHistory(nodes: Ref<FormNode[]>, maxHistory = 50): HistoryStat
     nodes.value = JSON.parse(next)
     lastSnapshot = next
     updateFlags()
-    nextTick(() => { applying = false })
+    nextTick(() => {
+      applying = false
+    })
   }
 
   // 监听节点变化自动记录（防抖 500ms）

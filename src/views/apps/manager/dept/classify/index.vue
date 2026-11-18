@@ -75,31 +75,85 @@
   import { CreateDeptClassifyRequest, DeptClassify, UpdateDeptClassifyRequest } from '@/api/manager/dept/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
+  import { getAppKeyword } from '@/utils/app-context'
+  import { ListApp } from '@/api/manager/app/api'
+  import { App } from '@/api/manager/app/type'
 
   defineOptions({ name: 'DeptClassify' })
+
+  const initialApp = (useRoute().query.app as string) || getAppKeyword()
+  const isManagerApp = getAppKeyword() === 'manager'
+  const apps = ref<App[]>([])
+  const getApps = (query?: string) => {
+    if (!isManagerApp) return
+    ListApp({ page: 1, pageSize: 10, status: true, query }).then((res) => {
+      apps.value = res.list
+    })
+  }
+  getApps()
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const currentData = ref<Partial<DeptClassify>>({})
+  const currentData = ref<Partial<DeptClassify> & { app?: string }>({})
 
   // 搜索表单
-  const searchForm = ref({
+  const searchForm = ref<{ app?: string; keyword?: string; name?: string; status?: boolean }>({
+    app: initialApp,
     keyword: undefined,
     name: undefined,
     status: undefined
   })
 
-  const searchItems = [
-    {
-      label: '分类名称',
-      key: 'name',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入分类名称', clearable: true }
-    }
-  ]
+  const selectedApp = computed(() => searchForm.value.app || getAppKeyword())
+
+  const searchItems = computed(() => {
+    const baseItems = [
+      {
+        label: '分类名称',
+        key: 'name',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入分类名称', clearable: true }
+      }
+    ]
+    if (!isManagerApp) return baseItems
+    return [
+      {
+        label: '所属应用',
+        key: 'app',
+        type: 'select',
+        props: {
+          placeholder: '请选择所属应用',
+          clearable: true,
+          filterable: true,
+          remote: true,
+          remoteMethod: (query: string) => getApps(query),
+          options: apps.value,
+          props: { label: 'name', value: 'keyword' },
+          onChange: (value: string) => {
+            searchForm.value.app = value
+            handleSearch()
+          }
+        }
+      },
+      ...baseItems
+    ]
+  })
 
   const formItems = computed(() => [
+    {
+      key: 'keyword',
+      label: '分类标识',
+      type: 'input',
+      props: {
+        placeholder: '请输入分类标识',
+        disabled: dialogType.value === 'edit',
+        rules: [
+          { required: true, message: '请输入分类标识', trigger: ['blur', 'change'] },
+          { type: 'string', message: '分类标识格式错误', pattern: /^[a-zA-Z0-9_]+$/ }
+        ]
+      }
+    },
     {
       key: 'name',
       label: '分类名称',
@@ -149,7 +203,7 @@
       color: 'danger',
       permission: 'manager:dept:classify:delete',
       click: async (record: DeptClassify) => {
-        await DeleteDeptClassify({ id: record.id })
+        await DeleteDeptClassify({ id: record.id, app: selectedApp.value })
         refreshRemove()
       }
     }
@@ -230,7 +284,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: DeptClassify): void => {
     dialogType.value = type
-    currentData.value = row || {}
+    currentData.value = { ...(row || {}), app: selectedApp.value }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -240,11 +294,11 @@
   const handleSubmit = async () => {
     const value = currentData.value
     if (dialogType.value === 'add') {
-      await CreateDeptClassify(value as CreateDeptClassifyRequest)
+      await CreateDeptClassify({ ...value, app: value.app || selectedApp.value } as CreateDeptClassifyRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateDeptClassify(value as UpdateDeptClassifyRequest)
+      await UpdateDeptClassify({ ...value, app: value.app || selectedApp.value } as UpdateDeptClassifyRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }

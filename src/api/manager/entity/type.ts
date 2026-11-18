@@ -1,29 +1,3 @@
-export interface LoadEntityRequest {
-  app: string
-}
-
-export interface LoadEntity {
-  id: number
-  app: string
-  database: string
-  name: string
-  comment?: string
-  index: number
-  fields: EntityField[]
-  createdAt: number
-  updatedAt: number
-}
-
-export interface LoadEntityReply {
-  total: number
-  list: LoadEntity[]
-}
-
-export interface ImportEntityRequest {
-  app: string
-  list: LoadEntity[]
-}
-
 export interface ListEntityRequest {
   page: number
   pageSize: number

@@ -26,11 +26,7 @@
           <!-- 密码登陆 -->
           <template v-if="oauthWay.action === 'password'">
             <div class="form">
-              <PasswordLogin
-                :data="loginData"
-                @success="handleLogin"
-                @info="handleFillInfo"
-              />
+              <PasswordLogin :data="loginData" @success="handleLogin" @info="handleFillInfo" />
             </div>
           </template>
 
@@ -108,9 +104,10 @@
     app: 'manager'
   })
 
-  // 如果存在应用参数，则保存
+  // 如果存在应用参数，则保存并切换应用信息（如 ?app=psou）
   if (app) {
     appConfig.value.app = app as string
+    void appStore.setKeyword(app as string)
   }
 
   defineOptions({ name: 'Login' })

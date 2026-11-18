@@ -33,9 +33,19 @@ export interface RemoteConfig {
 export interface NodeRelation {
   field: string // 触发字段标识
   condition:
-    | 'eq' | 'neq' | 'in' | 'notIn' | 'empty' | 'notEmpty'
-    | 'gt' | 'lt' | 'gte' | 'lte'
-    | 'contains' | 'between' | 'pattern'
+    | 'eq'
+    | 'neq'
+    | 'in'
+    | 'notIn'
+    | 'empty'
+    | 'notEmpty'
+    | 'gt'
+    | 'lt'
+    | 'gte'
+    | 'lte'
+    | 'contains'
+    | 'between'
+    | 'pattern'
   value?: any // 条件值（empty/notEmpty 忽略；between 为 [min, max]）
   effect: 'show' | 'hide' | 'disabled' | 'required' | 'value'
   effectValue?: any // effect='value' 时的赋值目标
@@ -210,26 +220,46 @@ export interface ComponentGroupItem {
 
 // --- 类型分类 ---
 export const FIELD_TYPES = [
-  'input', 'textarea', 'password', 'number',
-  'radio', 'checkbox', 'select',
-  'switch', 'slider', 'rate', 'cascader',
-  'time', 'date', 'datetime',
-  'datepicker', 'daterange',
+  'input',
+  'textarea',
+  'password',
+  'number',
+  'radio',
+  'checkbox',
+  'select',
+  'switch',
+  'slider',
+  'rate',
+  'cascader',
+  'time',
+  'date',
+  'datetime',
+  'datepicker',
+  'daterange',
   'upload',
-  'colorpicker', 'treeselect'
+  'colorpicker',
+  'treeselect'
 ] as const
 
 export const CONTAINER_TYPES = [
-  'row', 'col', 'card', 'tabs', 'tab-pane',
-  'collapse', 'collapse-item', 'inline',
-  'table', 'table-col', 'box', 'space', 'descriptions',
-  'group', 'watermark'
+  'row',
+  'col',
+  'card',
+  'tabs',
+  'tab-pane',
+  'collapse',
+  'collapse-item',
+  'inline',
+  'table',
+  'table-col',
+  'box',
+  'space',
+  'descriptions',
+  'group',
+  'watermark'
 ] as const
 
-export const AIDE_TYPES = [
-  'divider', 'alert', 'text',
-  'button', 'html', 'paragraph', 'tag', 'link', 'tooltip'
-] as const
+export const AIDE_TYPES = ['divider', 'alert', 'text', 'button', 'html', 'paragraph', 'tag', 'link', 'tooltip'] as const
 
 export type FieldType = (typeof FIELD_TYPES)[number]
 export type ContainerType = (typeof CONTAINER_TYPES)[number]

@@ -99,57 +99,101 @@
   import { CreateDeptRequest, Dept, DeptClassify, UpdateDeptRequest } from '@/api/manager/dept/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
+  import { getAppKeyword } from '@/utils/app-context'
+  import { ListApp } from '@/api/manager/app/api'
+  import { App } from '@/api/manager/app/type'
 
   const router = useRouter()
 
   defineOptions({ name: 'Dept' })
 
+  const isManagerApp = getAppKeyword() === 'manager'
+  const apps = ref<App[]>([])
+  const getApps = (query?: string) => {
+    if (!isManagerApp) return
+    ListApp({ page: 1, pageSize: 10, status: true, query }).then((res) => {
+      apps.value = res.list
+    })
+  }
+  getApps()
+
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const currentData = ref<Partial<Dept>>({})
+  const currentData = ref<Partial<Dept> & { app?: string }>({})
 
   // 搜索表单
-  const searchForm = ref({
+  const searchForm = ref<{ app?: string; keyword?: string; name?: string; status?: boolean }>({
+    app: getAppKeyword(),
     keyword: undefined,
     name: undefined,
     status: undefined
   })
 
-  const searchItems = [
-    {
-      label: '部门标识',
-      key: 'keyword',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入部门标识', clearable: true }
-    },
-    {
-      label: '部门名称',
-      key: 'name',
-      type: 'input',
-      placeholder: '请输入部门名称',
-      clearable: true,
-      props: { maxlength: '32', placeholder: '请输入部门标识', clearable: true }
-    },
-    {
-      label: '部门状态',
-      key: 'status',
-      type: 'select',
-      props: {
-        placeholder: '请选择部门状态',
+  const selectedApp = computed(() => searchForm.value.app || getAppKeyword())
+
+  const searchItems = computed(() => {
+    const baseItems = [
+      {
+        label: '部门标识',
+        key: 'keyword',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入部门标识', clearable: true }
+      },
+      {
+        label: '部门名称',
+        key: 'name',
+        type: 'input',
+        placeholder: '请输入部门名称',
         clearable: true,
-        options: [
-          { label: '正常', value: true },
-          { label: '禁用', value: false }
-        ]
+        props: { maxlength: '32', placeholder: '请输入部门标识', clearable: true }
+      },
+      {
+        label: '部门状态',
+        key: 'status',
+        type: 'select',
+        props: {
+          placeholder: '请选择部门状态',
+          clearable: true,
+          options: [
+            { label: '正常', value: true },
+            { label: '禁用', value: false }
+          ]
+        }
       }
-    }
-  ]
+    ]
+    if (!isManagerApp) return baseItems
+    return [
+      {
+        label: '所属应用',
+        key: 'app',
+        type: 'select',
+        props: {
+          placeholder: '请选择所属应用',
+          clearable: true,
+          filterable: true,
+          remote: true,
+          remoteMethod: (query: string) => getApps(query),
+          options: apps.value,
+          props: { label: 'name', value: 'keyword' },
+          onChange: (value: string) => {
+            searchForm.value.app = value
+            getTypes()
+            handleSearch()
+          }
+        }
+      },
+      ...baseItems
+    ]
+  })
 
   const types = ref<DeptClassify[]>([])
-  ListDeptClassify({ page: 1, pageSize: 10 }).then((res) => {
-    types.value = res.list
-  })
+  const getTypes = () => {
+    ListDeptClassify({ page: 1, pageSize: 50, app: selectedApp.value }).then((res) => {
+      types.value = res.list
+    })
+  }
+  getTypes()
 
   const operationItems = [
     {
@@ -161,7 +205,8 @@
         router.push({
           name: 'DeptRole',
           query: {
-            deptId: record.id
+            deptId: record.id,
+            app: selectedApp.value
           }
         })
       }
@@ -358,7 +403,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: Dept): void => {
     dialogType.value = type
-    currentData.value = row || {}
+    currentData.value = { ...(row || {}), app: selectedApp.value }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -366,12 +411,13 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
+    const value = currentData.value
     if (dialogType.value === 'add') {
-      await CreateDept(currentData.value as CreateDeptRequest)
+      await CreateDept({ ...value, app: value.app || selectedApp.value } as CreateDeptRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateDept(currentData.value as UpdateDeptRequest)
+      await UpdateDept({ ...value, app: value.app || selectedApp.value } as UpdateDeptRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
@@ -387,7 +433,7 @@
           type: 'warning'
         })
           .then(async () => {
-            await UpdateDept({ id: item.id, status: !item.status })
+            await UpdateDept({ id: item.id, status: !item.status, app: selectedApp.value })
             ElMessage.success('修改成功')
             refreshUpdate()
             resolve(true)
@@ -400,6 +446,6 @@
   }
 
   const handleJumpClassify = () => {
-    router.push({ name: 'DeptClassify' })
+    router.push({ name: 'DeptClassify', query: { app: selectedApp.value } })
   }
 </script>

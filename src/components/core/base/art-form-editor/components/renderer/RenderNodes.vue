@@ -10,13 +10,7 @@
     />
 
     <!-- 字段节点 -->
-    <FieldRenderer
-      v-else-if="isField(node)"
-      :node="node"
-      :form-data="formData"
-      :readonly="readonly"
-      :schema="schema"
-    />
+    <FieldRenderer v-else-if="isField(node)" :node="node" :form-data="formData" :readonly="readonly" :schema="schema" />
 
     <!-- 容器节点 -->
     <ContainerRenderer

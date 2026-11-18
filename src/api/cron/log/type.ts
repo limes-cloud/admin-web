@@ -55,3 +55,32 @@ export interface LogMsg {
   content: string
   time: number
 }
+
+// 执行历史（一次触发）
+export interface Execution {
+  id: string
+  taskId: number
+  triggerAt: number
+  triggerType: string
+  workerId?: number
+  status: string
+  retryCount: number
+  logUuid?: string
+  startedAt?: number
+  finishedAt?: number
+  lastError?: string
+  createdAt: number
+}
+
+export interface ListExecutionRequest {
+  page: number
+  pageSize: number
+  taskId: number
+  status?: string
+  triggerType?: string
+}
+
+export interface ListExecutionReply {
+  total: number
+  list: Execution[]
+}

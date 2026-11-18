@@ -19,7 +19,7 @@
     :style="{ width: size + 'px', height: size + 'px' }"
     :src="value"
   ></el-image>
-  <ArtSvgIcon v-if="icon.type === 'svg'" :icon="value"></ArtSvgIcon>
+  <ArtSvgIcon v-if="icon.type === 'svg'" :icon="value" :style="`width: ${size}px; height: ${size}px`"></ArtSvgIcon>
   <ElIcon v-if="icon.type === 'component'" v-bind="$attrs">
     <component :is="value" />
   </ElIcon>

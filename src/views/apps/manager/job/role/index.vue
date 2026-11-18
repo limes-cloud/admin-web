@@ -68,11 +68,13 @@
   import { ListCurrentRole } from '@/api/manager/role/api'
   import { CreateJobRole, DeleteJobRole, ListJobRole } from '@/api/manager/jobrole/api'
   import { CreateJobRoleRequest, Role } from '@/api/manager/jobrole/type'
+  import { getAppKeyword } from '@/utils/app-context'
 
   defineOptions({ name: 'JobRole' })
 
   const router = useRouter()
   const jobId = Number(router.currentRoute.value.query.jobId)
+  const appKeyword = (router.currentRoute.value.query.app as string) || getAppKeyword()
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -104,7 +106,7 @@
   ]
 
   const roles = ref<Role[]>([])
-  ListCurrentRole().then((res) => {
+  ListCurrentRole({ app: appKeyword }).then((res) => {
     roles.value = res.list
   })
 
@@ -135,7 +137,7 @@
       color: 'danger',
       permission: 'manager:job:role:delete',
       click: async (record: Role) => {
-        await DeleteJobRole({ jobId: jobId, roleId: record.id })
+        await DeleteJobRole({ jobId: jobId, roleId: record.id, app: appKeyword })
         refreshRemove()
       }
     }
@@ -163,6 +165,7 @@
         page: 1,
         pageSize: 10,
         jobId: jobId,
+        app: appKeyword,
         ...searchForm.value
       },
       columnsFactory: () => [
@@ -207,7 +210,7 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
-    await CreateJobRole({ ...formData.value, jobId: jobId } as CreateJobRoleRequest)
+    await CreateJobRole({ ...formData.value, jobId: jobId, app: appKeyword } as CreateJobRoleRequest)
     ElMessage.success('创建成功')
     refreshCreate()
     dialogVisible.value = false

@@ -3,7 +3,8 @@ export interface ListBusinessRequest {
   pageSize: number
   order?: string
   orderBy?: string
-  app: string
+  /** 所属应用；不传时服务端按 X-App-Key / AppKey 兜底 */
+  app?: string
   keyword?: string
 }
 
@@ -12,6 +13,7 @@ export interface Business {
   app: string
   keyword: string
   type: string
+  extra?: string
   description?: string
   createdAt: number
   updatedAt: number
@@ -26,6 +28,7 @@ export interface CreateBusinessRequest {
   app: string
   keyword: string
   type: string
+  extra?: string
   description?: string
 }
 
@@ -37,11 +40,25 @@ export interface UpdateBusinessRequest {
   id: number
   keyword: string
   type: string
+  extra?: string
   description?: string
 }
 
 export interface DeleteBusinessRequest {
   id: number
+}
+
+/** 业务变量渲染元数据（对应后端 entity.BusinessExtra） */
+export interface BusinessExtra {
+  options?: { label?: string; value: string }[]
+  min?: number
+  max?: number
+  unit?: string
+  placeholder?: string
+  default?: string
+  required?: boolean
+  rows?: number
+  maxLength?: number
 }
 
 export interface ListBusinessValueRequest {

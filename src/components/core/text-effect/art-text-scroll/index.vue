@@ -5,12 +5,7 @@
       <i class="iconfont-sys">&#xe64a;</i>
     </div>
     <div class="scroll-wrapper">
-      <div
-        class="text-scroll-content"
-        :class="{ scrolling: shouldScroll }"
-        :style="scrollStyle"
-        ref="scrollContent"
-      >
+      <div class="text-scroll-content" :class="{ scrolling: shouldScroll }" :style="scrollStyle" ref="scrollContent">
         <div class="scroll-item" v-html="sanitizedContent"></div>
         <div class="scroll-item" v-html="sanitizedContent"></div>
       </div>

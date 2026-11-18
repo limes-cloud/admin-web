@@ -1,58 +1,29 @@
-export interface Setting {
-  id: number
-  keyword: string
+export interface SettingItem {
+  key: string
   name: string
-  type: string
-  value: string
-  extra: string
+  widget: string
   description: string
+  placeholder: string
+  rows: number
   sort: number
-  createdAt: number
-  updatedAt: number
-}
-
-export interface ListSettingRequest {
-  keyword?: string
-  name?: string
-  type?: string
+  enabled: boolean
+  value: string
+  required: boolean
+  maxLen: number
+  fileName: string
+  fileNameLabel: string
+  fileNamePlaceholder: string
 }
 
 export interface ListSettingReply {
-  list: Setting[]
-  total: number
-}
-
-export interface CreateSettingRequest {
-  keyword: string
-  name: string
-  type: string
-  value?: string
-  extra?: string
-  description?: string
-  sort?: number
-}
-
-export interface CreateSettingReply {
-  id: number
-}
-
-export interface UpdateSettingRequest {
-  id: number
-  name: string
-  type: string
-  value?: string
-  extra?: string
-  description?: string
-  sort?: number
-}
-
-export interface DeleteSettingRequest {
-  id: number
+  list: SettingItem[]
 }
 
 export interface BatchUpdateSettingItem {
-  id: number
+  key: string
+  enabled: boolean
   value: string
+  fileName: string
 }
 
 export interface BatchUpdateSettingsRequest {

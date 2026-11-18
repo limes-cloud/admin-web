@@ -18,13 +18,15 @@
     :size="node.config.buttonSize || 'default'"
     :plain="node.config.buttonPlain"
     :round="node.config.buttonRound"
-  >{{ node.config.buttonText || '按钮' }}</el-button>
+    >{{ node.config.buttonText || '按钮' }}</el-button
+  >
   <div v-else-if="node.type === 'html'" class="aide-html" v-html="node.config.htmlContent" />
   <p
     v-else-if="node.type === 'paragraph'"
     class="aide-paragraph"
     :style="{ textAlign: node.config.paragraphAlign || 'left' }"
-  >{{ node.config.paragraphContent }}</p>
+    >{{ node.config.paragraphContent }}</p
+  >
   <el-tag
     v-else-if="node.type === 'tag'"
     :type="node.config.tagType || 'primary'"
@@ -32,14 +34,16 @@
     :size="node.config.tagSize || 'default'"
     :round="node.config.tagRound"
     :closable="node.config.tagClosable"
-  >{{ node.config.tagText || '标签' }}</el-tag>
+    >{{ node.config.tagText || '标签' }}</el-tag
+  >
   <el-link
     v-else-if="node.type === 'link'"
     :type="node.config.linkType || 'primary'"
     :underline="node.config.linkUnderline ?? true"
     :href="node.config.linkHref"
     :target="node.config.linkTarget || '_blank'"
-  >{{ node.config.linkText || '链接' }}</el-link>
+    >{{ node.config.linkText || '链接' }}</el-link
+  >
   <el-tooltip
     v-else-if="node.type === 'tooltip'"
     :content="node.config.tooltipContent || '提示文字'"

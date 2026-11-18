@@ -24,10 +24,10 @@
   })
 
   const getSrc = () => {
-    // 获取文件后缀
-    const arr = props.file?.split('.')
-    if (!arr || arr.length < 2) return other
-    return name(arr[arr.length - 1])
+    const fileName = props.file?.trim().toLowerCase() || ''
+    const dotIndex = fileName.lastIndexOf('.')
+    if (dotIndex < 0 || dotIndex === fileName.length - 1) return other
+    return name(fileName.slice(dotIndex + 1))
   }
 
   const name = (tp: string) => {
@@ -38,24 +38,41 @@
 
       case 'xls':
       case 'xlsx':
+      case 'xlsm':
+      case 'csv':
+      case 'tsv':
         return xls
 
       case 'ppt':
       case 'pptx':
+      case 'pps':
+      case 'ppsx':
         return ppt
 
       case 'doc':
       case 'docx':
+      case 'rtf':
+      case 'odt':
         return doc
 
       case 'wav':
       case 'mp3':
       case 'aac':
+      case 'flac':
+      case 'm4a':
+      case 'ogg':
+      case 'opus':
+      case 'wma':
         return audio
 
       case 'yaml':
+      case 'yml':
       case 'conf':
-      case 'yam':
+      case 'toml':
+      case 'ini':
+      case 'env':
+      case 'xml':
+      case 'json':
         return conf
 
       case 'dir':
@@ -64,24 +81,74 @@
       case 'mov':
       case 'avi':
       case 'mp4':
+      case 'mkv':
+      case 'webm':
+      case 'm4v':
+      case 'ogv':
+      case 'flv':
+      case 'wmv':
         return video
 
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'ico':
+      case 'gif':
+      case 'webp':
+      case 'bmp':
+      case 'svg':
+      case 'avif':
+      case 'tif':
+      case 'tiff':
+      case 'heic':
         return image
 
       case 'txt':
+      case 'md':
+      case 'markdown':
+      case 'log':
+      case 'srt':
+      case 'ass':
+      case 'vtt':
         return txt
 
       case 'html':
+      case 'htm':
       case 'js':
+      case 'jsx':
+      case 'ts':
+      case 'tsx':
+      case 'vue':
+      case 'css':
+      case 'scss':
+      case 'less':
+      case 'sql':
+      case 'php':
+      case 'java':
+      case 'go':
+      case 'py':
+      case 'rb':
+      case 'rs':
+      case 'c':
+      case 'h':
+      case 'cpp':
+      case 'cs':
+      case 'sh':
+      case 'bash':
+      case 'zsh':
         return web
 
       case 'zip':
       case 'rar':
       case '7z':
+      case 'tar':
+      case 'gz':
+      case 'tgz':
+      case 'bz2':
+      case 'tbz2':
+      case 'xz':
+      case 'txz':
+      case 'zipx':
         return zip
 
       default:

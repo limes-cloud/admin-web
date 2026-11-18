@@ -6,12 +6,13 @@
           v-if="showSwitchLang"
           v-model="innerLang"
           placeholder="语言"
-          :style="{ width: '90px' }"
+          :style="{ width: '110px' }"
           size="small"
           @change="changeLang()"
         >
           <ElOption value="json">JSON</ElOption>
           <ElOption value="yaml">YAML</ElOption>
+          <ElOption value="javascript" label="JavaScript" />
         </ElSelect>
         <!-- v-debounce:30="toggleFullScreen"  -->
         <div v-if="showFullscreen" class="fullscreen" @click="toggleFullScreen">
@@ -69,17 +70,28 @@
     },
     id: String,
     showSwitchLang: Boolean,
+    /** 自动格式化：停止输入 1.5 秒、粘贴、失焦时格式化整篇，输入 } ; 时格式化当前语句 */
+    autoFormat: {
+      type: Boolean,
+      default: true
+    },
     showFullscreen: Boolean,
     isFullscreen: Boolean
   })
   const content = ref()
+  /** 输入法组合中（中文拼音等）：期间不向外同步内容，也不接受外部回写，也不格式化 */
+  let composing = false
+
+  /** 停止输入多久后自动格式化（毫秒） */
+  const FORMAT_IDLE_MS = 1500
   const innerLang = ref(props.lang)
   const editor: Ref<HTMLDivElement | undefined> = ref(undefined)
 
   const monacoEditor: Ref<monaco.editor.IStandaloneCodeEditor | undefined> = ref(undefined)
   const editTheme = ref(props.theme)
+  // 按实际生效的明暗取主题（systemThemeType 只有 light / dark）；systemThemeMode 为 auto 时没有 vs-auto 主题，会退回白底
   if (!editTheme.value) {
-    editTheme.value = `vs-${settingStore.systemThemeMode}`
+    editTheme.value = `vs-${settingStore.systemThemeType}`
   }
 
   if (props.value) {
@@ -94,30 +106,6 @@
     } catch {
       /* empty */
     }
-  }
-
-  function adjustLineNumbersWidth() {
-    const model = getModel() as monaco.editor.ITextModel
-    const lineCount = model.getLineCount()
-    const width = lineCount > 999 ? '60px' : lineCount > 99 ? '40px' : '30px'
-
-    const style = document.createElement('style')
-    style.textContent = `
-    .monaco-editor .line-numbers,
-    .monaco-editor .current-line,
-    .monaco-editor .margin-view-overlays,
-    .monaco-editor .margin {
-      width: ${width} !important;
-    }
-    .monaco-editor .line-numbers{
-      text-align:center !important;
-    }
-    .monaco-scrollable-element{
-      left: ${width} !important;
-      width: calc(100% - ${width}) !important;
-    }
-  `
-    document.head.appendChild(style)
   }
 
   const getVal = () => {
@@ -164,6 +152,10 @@
       fontSize: 13,
       lineNumbers: props.showLine ? 'on' : 'off',
       glyphMargin: false,
+      formatOnPaste: props.autoFormat, // 粘贴后格式化
+      formatOnType: props.autoFormat, // 输入 } ; 等字符时格式化当前语句
+      lineNumbersMinChars: 3, // 行号区最少 3 个字符宽（由 Monaco 自己布局，替代原来的 CSS 强改宽度）
+      lineDecorationsWidth: 8, // 行号与代码之间的间距
       selectOnLineNumbers: true,
       language: props.lang,
       value: content.value,
@@ -210,25 +202,54 @@
 
     monacoEditor.value?.getAction('editor.action.formatDocument')?.run()
 
-    let isformat = false
     if (monacoEditor.value) {
-      monacoEditor.value.onDidChangeModelContent(() => {
+      const ed = toRaw(monacoEditor.value)
+      const sync = () => {
         content.value = getVal()
         emit('update:modelValue', content.value, props.id)
         emit('change', content.value, props.id)
-        adjustLineNumbersWidth()
-
-        if (!isformat) {
-          isformat = true
-          setTimeout(() => {
-            isformat = false
-            monacoEditor.value?.getAction('editor.action.formatDocument')?.run()
-          }, 2000)
-        }
+      }
+      /** 格式化整篇：只读、输入法组合中、或 autoFormat 关闭时跳过 */
+      const format = () => {
+        if (!props.autoFormat || props.readOnly || composing) return
+        ed.getAction('editor.action.formatDocument')?.run()
+      }
+      /** 停止输入一段时间后自动格式化；格式化本身产生的内容变化不再触发 */
+      let formatTimer: ReturnType<typeof setTimeout> | undefined
+      let formatting = false
+      const scheduleFormat = () => {
+        clearTimeout(formatTimer)
+        formatTimer = setTimeout(async () => {
+          if (composing || !ed.hasTextFocus()) return
+          formatting = true
+          try {
+            await ed.getAction('editor.action.formatDocument')?.run()
+          } finally {
+            formatting = false
+          }
+        }, FORMAT_IDLE_MS)
+      }
+      ed.onDidCompositionStart(() => {
+        composing = true
+        clearTimeout(formatTimer)
       })
+      ed.onDidCompositionEnd(() => {
+        composing = false
+        sync()
+        if (props.autoFormat && !props.readOnly) scheduleFormat()
+      })
+      ed.onDidChangeModelContent(() => {
+        if (composing) return
+        sync()
+        if (props.autoFormat && !props.readOnly && !formatting) scheduleFormat()
+      })
+      // 失焦时立即格式化一次，兜底未等到空闲时间的情况
+      ed.onDidBlurEditorText(() => {
+        clearTimeout(formatTimer)
+        format()
+      })
+      ed.onDidDispose(() => clearTimeout(formatTimer))
     }
-
-    adjustLineNumbersWidth()
   }
 
   const setEditTheme = (val: string) => {
@@ -282,7 +303,7 @@
   watch(
     () => props.modelValue,
     (val) => {
-      if (val === getVal()) {
+      if (composing || val === getVal()) {
         return
       }
       if (!val) {
@@ -296,7 +317,7 @@
   watch(
     () => props.value,
     (val) => {
-      if (val === getVal()) {
+      if (composing || val === getVal()) {
         return
       }
       if (!val) {
@@ -317,9 +338,9 @@
   )
 
   watch(
-    () => settingStore.systemThemeMode,
+    () => settingStore.systemThemeType,
     () => {
-      setEditTheme(settingStore.systemThemeMode)
+      setEditTheme(settingStore.systemThemeType)
     },
     { deep: true, immediate: true }
   )

@@ -122,8 +122,11 @@
   import Classify from './classify/index.vue'
   import { App } from '@/api/manager/app/type'
   import { ListApp } from '@/api/manager/app/api'
+  import { getAppKeyword } from '@/utils/app-context'
 
   defineOptions({ name: 'Notice' })
+
+  const isManagerApp = getAppKeyword() === 'manager'
 
   // 弹窗相关
   const classifyVisible = ref(false)
@@ -180,6 +183,7 @@
       key: 'app',
       label: '所属应用',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,

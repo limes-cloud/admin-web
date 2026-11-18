@@ -2,13 +2,7 @@
   <div class="components" :class="[size]">
     <!-- 搜索框 -->
     <div class="component-search">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索组件"
-        :prefix-icon="Search"
-        clearable
-        size="small"
-      />
+      <el-input v-model="searchKeyword" placeholder="搜索组件" :prefix-icon="Search" clearable size="small" />
     </div>
 
     <template v-if="filteredGroups.length">
@@ -28,12 +22,7 @@
               class="component-drag-list"
               :class="{ 'component-drag-list--mini': size === 'mini' }"
             >
-              <div
-                v-for="node in ite.nodes"
-                :key="node.id"
-                class="item"
-                @click="handleClick(node)"
-              >
+              <div v-for="node in ite.nodes" :key="node.id" class="item" @click="handleClick(node)">
                 <el-icon><component :is="getIcon(node.type)" /></el-icon>
                 <span style="margin-left: 5px">{{ node.name }}</span>
               </div>

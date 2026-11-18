@@ -93,7 +93,7 @@
   const query = ref({ page: 1, pageSize: 10, keyword: '' })
 
   const fetchData = async () => {
-    if (!props.app) return
+    // app 不传时由服务端按 X-App-Key / AppKey 兜底，无需前端判断
     if (variableType.value === 'business') {
       const res = await ListBusiness({ ...query.value, app: props.app })
       businessList.value = res.list
@@ -115,11 +115,13 @@
     ElMessage.success('已复制')
   }
 
+  // 打开即请求（app 可为空，服务端兜底）；app 变化时重新加载
   watch(
     () => props.app,
-    (val) => {
-      if (val) fetchData()
-    }
+    () => {
+      fetchData()
+    },
+    { immediate: true }
   )
 </script>
 

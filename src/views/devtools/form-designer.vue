@@ -18,12 +18,7 @@
     </div>
 
     <div class="page-body">
-      <ArtFormEditor
-        :form-mode="false"
-        :default-nodes="[]"
-        :form-config="formConfig"
-        ref="editorRef"
-      />
+      <ArtFormEditor :form-mode="false" :default-nodes="[]" :form-config="formConfig" ref="editorRef" />
     </div>
 
     <!-- 预览弹窗 -->
@@ -31,12 +26,7 @@
       <div class="preview-toolbar">
         <el-switch v-model="previewReadonly" active-text="阅读模式" inactive-text="编辑模式" />
       </div>
-      <FormRenderer
-        v-if="previewSchema"
-        :schema="previewSchema"
-        v-model="previewData"
-        :readonly="previewReadonly"
-      />
+      <FormRenderer v-if="previewSchema" :schema="previewSchema" v-model="previewData" :readonly="previewReadonly" />
       <template #footer>
         <el-button @click="previewVisible = false">关闭</el-button>
       </template>

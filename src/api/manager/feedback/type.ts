@@ -59,6 +59,7 @@ export interface User {
 
 export interface Feedback {
   id: number
+  // 反馈所属应用的 keyword 标识（后端 entity.Feedback.App，关联 app 表 keyword 字段），不是应用主键
   app: string
   userId: number
   classifyId: number
@@ -76,7 +77,8 @@ export interface Feedback {
   processedResult?: string
   createdAt: number
   updatedAt: number
-  app?: App
+  // 后端按 app keyword 预加载的应用详情（entity 字段名 appInfo），列表与详情展示应用名称时使用
+  appInfo?: App
   user?: User
   classify?: FeedbackClassify
 }

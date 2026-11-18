@@ -2,7 +2,10 @@ export interface Category {
   id: number
   parentId: number
   name: string
+  /** 上传图片的对象 key，或完整的 HTTP(S) 图片地址 */
   icon: string
+  /** 图标主色，形如 #2463eb */
+  iconColor: string
   sort: number
   status: number
   isHome: boolean
@@ -26,6 +29,7 @@ export interface CreateCategoryRequest {
   parentId: number
   name: string
   icon?: string
+  iconColor?: string
   sort?: number
   status?: number
   isHome?: boolean
@@ -40,6 +44,7 @@ export interface UpdateCategoryRequest {
   parentId: number
   name: string
   icon?: string
+  iconColor?: string
   sort?: number
   status?: number
   isHome?: boolean

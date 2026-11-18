@@ -8,18 +8,10 @@
         @click="handlePreview"
         >生成预览</ElButton
       >
-      <ElButton
-        v-permission="'configure:template:add'"
-        type="primary"
-        :disabled="!canOperate"
-        @click="handleCompare"
+      <ElButton v-permission="'configure:template:add'" type="primary" :disabled="!canOperate" @click="handleCompare"
         >提交模板</ElButton
       >
-      <ElButton
-        v-permission="'configure:configure:sync'"
-        type="warning"
-        :disabled="!canOperate"
-        @click="handleSync"
+      <ElButton v-permission="'configure:configure:sync'" type="warning" :disabled="!canOperate" @click="handleSync"
         >同步配置</ElButton
       >
     </div>

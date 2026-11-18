@@ -22,7 +22,7 @@
           <span class="value">
             {{ template.version.substring(0, 12) }}
             <ElLink
-              v-permission="'configure:template:history'"
+              v-permission="'configure:template:query'"
               type="primary"
               style="margin-left: 6px"
               @click="handleShowHistory"

@@ -110,9 +110,12 @@
     UpdateTemplateNamespaceRequest
   } from '@/api/configure/template/type'
   import { formatTime } from '@/utils/time'
+  import { getAppKeyword } from '@/utils/app-context'
   import ConfigureEditor from './configure/index.vue'
 
   defineOptions({ name: 'ConfigureTemplate' })
+
+  const isManagerApp = getAppKeyword() === 'manager'
 
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
@@ -122,8 +125,9 @@
   const appOptions = ref<{ label: string; value: string }[]>([])
   const appNameMap = ref<Record<string, string>>({})
   const searchBarRef = ref()
+  // 默认选中当前应用（AppKey），打开页面即查询；服务端对非 manager 仍强制 AppKey 兜底
   const searchForm = ref<{ app?: string; namespace?: string; name?: string }>({
-    app: undefined,
+    app: getAppKeyword(),
     namespace: undefined,
     name: undefined
   })
@@ -145,6 +149,7 @@
       label: '所属应用',
       key: 'app',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,
@@ -291,7 +296,7 @@
         pageSize: 10,
         ...searchForm.value
       },
-      immediate: false,
+      immediate: true,
       columnsFactory: () => [
         { type: 'index', width: '60', label: '#' },
         { prop: 'name', label: '配置项名称', minWidth: 160 },
@@ -316,10 +321,7 @@
   })
 
   const handleSearch = () => {
-    if (!searchForm.value.app) {
-      clearData()
-      return
-    }
+    // app 不传时由服务端按 X-App-Key / AppKey 兜底，无需前端判断
     Object.assign(searchParams, { ...searchForm.value })
     getData()
   }
@@ -331,10 +333,6 @@
   const handleRefresh = () => refreshData()
 
   const showDialog = (type: Form.DialogType, row?: TemplateNamespace) => {
-    if (!searchForm.value.app) {
-      ElMessage.error('请先选择应用')
-      return
-    }
     dialogType.value = type
     currentData.value = row ? { ...row } : { app: searchForm.value.app, sort: 0 }
     nextTick(() => {

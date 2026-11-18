@@ -6,9 +6,7 @@
 export function setCookie(key: string, value: string, expireDays: number): void {
   const date = new Date()
   date.setDate(date.getDate() + expireDays)
-  document.cookie = `${key}=${encodeURIComponent(value)}${
-    expireDays ? `;expires=${date.toUTCString()}` : ''
-  }`
+  document.cookie = `${key}=${encodeURIComponent(value)}${expireDays ? `;expires=${date.toUTCString()}` : ''}`
 }
 
 // 删除 Cookie

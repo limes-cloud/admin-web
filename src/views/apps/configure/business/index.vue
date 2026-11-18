@@ -26,7 +26,6 @@
               v-ripple
               type="primary"
               :icon="Plus"
-              :disabled="!searchForm.app"
               @click="showDialog('add')"
             >
               新增变量
@@ -56,7 +55,7 @@
         :title="dialogType === 'add' ? '新增变量' : '编辑变量'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
-        width="480px"
+        width="640px"
         align-center
       >
         <ArtForm
@@ -65,39 +64,21 @@
           :span="24"
           @cancel="dialogVisible = false"
           @submit="handleSubmit"
-        />
+        >
+          <template #extra="{ modelValue }">
+            <BusinessExtraEditor v-model="modelValue.extra" :type="modelValue.type" />
+          </template>
+        </ArtForm>
       </ElDialog>
 
       <!-- 值配置抽屉 -->
       <ElDrawer v-model="valueVisible" title="变量值配置" size="420px" :destroy-on-close="true">
         <ElForm label-position="top">
           <ElFormItem v-for="env in envs" :key="env.id" :label="`${env.name}(${env.keyword})`">
-            <ElInputNumber
-              v-if="currentBusiness.type === 'int'"
+            <VariableValueInput
               v-model="valueForm[env.id]"
-              :precision="0"
-              style="width: 100%"
-            />
-            <ElInputNumber
-              v-else-if="currentBusiness.type === 'float'"
-              v-model="valueForm[env.id]"
-              style="width: 100%"
-            />
-            <ElSwitch
-              v-else-if="currentBusiness.type === 'bool'"
-              v-model="valueForm[env.id]"
-              active-text="是"
-              inactive-text="否"
-            />
-            <ArtCodeEditor
-              v-else-if="currentBusiness.type === 'object'"
-              v-model="valueForm[env.id]"
-              :style="{ width: '100%', height: '180px' }"
-            />
-            <ElInput
-              v-else
-              v-model="valueForm[env.id]"
-              placeholder="请输入变量值"
+              :type="currentBusiness.type"
+              :extra="currentBusiness.extra"
             />
           </ElFormItem>
         </ElForm>
@@ -128,16 +109,24 @@
   import { Business, CreateBusinessRequest, UpdateBusinessRequest } from '@/api/configure/business/type'
   import { Env } from '@/api/configure/env/type'
   import { formatTime } from '@/utils/time'
-  import ArtCodeEditor from '@/components/core/base/art-code-editor/index.vue'
+  import { getAppKeyword } from '@/utils/app-context'
+  import BusinessExtraEditor from './components/business-extra-editor.vue'
+  import VariableValueInput from './components/variable-value-input.vue'
 
   defineOptions({ name: 'ConfigureBusiness' })
+
+  const isManagerApp = getAppKeyword() === 'manager'
 
   const variableTypes: Record<string, string> = {
     int: '整数',
     float: '浮点数',
     string: '字符串',
+    text: '长文本',
     bool: '布尔值',
-    object: '对象'
+    enum: '枚举',
+    object: '对象',
+    kv: '键值对',
+    array: '数组'
   }
 
   const dialogType = ref<Form.DialogType>('add')
@@ -148,13 +137,15 @@
   const valueForm = ref<Record<number, any>>({})
   const envs = ref<Env[]>([])
 
-  const searchForm = ref<{ keyword?: string; app?: string }>({ keyword: undefined, app: undefined })
+  // 默认选中当前应用（AppKey），打开页面即查询；服务端对非 manager 仍强制 AppKey 兜底
+  const searchForm = ref<{ keyword?: string; app?: string }>({ keyword: undefined, app: getAppKeyword() })
 
   const searchItems = computed(() => [
     {
       label: '所属应用',
       key: 'app',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,
@@ -208,7 +199,21 @@
         rules: [{ required: true, message: '请选择变量类型', trigger: ['blur', 'change'] }]
       }
     },
-    { key: 'description', label: '变量描述', type: 'input', props: { placeholder: '请输入变量描述', type: 'textarea' } }
+    {
+      key: 'extra',
+      label: '展示配置',
+      type: 'custom'
+    },
+    {
+      key: 'description',
+      label: '变量描述',
+      type: 'input',
+      props: {
+        placeholder: '请输入变量描述',
+        type: 'textarea',
+        rules: [{ required: true, message: '请输入变量描述', trigger: ['blur', 'change'] }]
+      }
+    }
   ])
 
   const operationItems = [
@@ -226,6 +231,13 @@
           if (row.type === 'int') val = parseInt(item.value)
           else if (row.type === 'float') val = parseFloat(item.value)
           else if (row.type === 'bool') val = item.value === 'true'
+          else if (row.type === 'array') {
+            try {
+              val = JSON.parse(item.value)
+            } catch {
+              val = []
+            }
+          }
           valueForm.value[item.envId] = val
         })
         valueVisible.value = true
@@ -286,14 +298,13 @@
     const envRes = await ListEnv({ status: true })
     await loadApps()
     envs.value = envRes.list
+    // 进入页面即请求当前应用（AppKey）的业务变量
+    queryBusiness()
   }
   loadInitData()
 
   const queryBusiness = () => {
-    if (!searchForm.value.app) {
-      clearData()
-      return
-    }
+    // app 不传时由服务端按 X-App-Key / AppKey 兜底，无需前端判断
     Object.assign(searchParams, { ...searchForm.value })
     getData()
   }
@@ -303,9 +314,10 @@
   }
 
   const handleReset = () => {
-    searchForm.value = { keyword: undefined, app: undefined }
-    Object.assign(searchParams, { page: 1, pageSize: 10, keyword: undefined, app: undefined })
+    searchForm.value = { keyword: undefined, app: getAppKeyword() }
+    Object.assign(searchParams, { page: 1, pageSize: 10, keyword: undefined, app: getAppKeyword() })
     clearData()
+    queryBusiness()
   }
 
   const handleRefresh = () => {
@@ -326,8 +338,8 @@
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      const { id, keyword, type, description } = currentData.value
-      await UpdateBusiness({ id, keyword, type, description } as UpdateBusinessRequest)
+      const { id, keyword, type, extra, description } = currentData.value
+      await UpdateBusiness({ id, keyword, type, extra, description } as UpdateBusinessRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
@@ -335,7 +347,12 @@
   }
 
   const handleValueSubmit = async () => {
-    const list = envs.value.map((env) => ({ envId: env.id, value: String(valueForm.value[env.id] ?? '') }))
+    // array 类型序列化为 JSON 数组字符串，其余统一 String 转换
+    const list = envs.value.map((env) => {
+      const raw = valueForm.value[env.id]
+      const value = currentBusiness.value.type === 'array' ? JSON.stringify(raw ?? []) : String(raw ?? '')
+      return { envId: env.id, value }
+    })
     if (list.some((item) => !item.value)) {
       ElMessage.error('请补全所有环境的变量值')
       return

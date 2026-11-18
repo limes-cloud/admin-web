@@ -28,22 +28,11 @@
           :label-width="schema.config.labelWidth"
           :size="schema.config.size"
         >
-          <RenderNodes
-            :nodes="node.children || []"
-            :form-data="item"
-            :readonly="readonly"
-            :schema="schema"
-          />
+          <RenderNodes :nodes="node.children || []" :form-data="item" :readonly="readonly" :schema="schema" />
         </el-form>
       </div>
     </div>
-    <el-button
-      v-if="!readonly && canAdd"
-      type="primary"
-      text
-      :icon="Plus"
-      @click="addItem"
-    >
+    <el-button v-if="!readonly && canAdd" type="primary" text :icon="Plus" @click="addItem">
       添加{{ node.label || '条目' }}
     </el-button>
   </div>

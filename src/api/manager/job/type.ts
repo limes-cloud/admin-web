@@ -5,10 +5,12 @@ export interface ListJobRequest {
   orderBy?: string
   keyword?: string
   name?: string
+  app?: string
 }
 
 export interface Job {
   id: number
+  app?: string
   keyword: string
   name: string
   weight?: number
@@ -24,6 +26,7 @@ export interface ListJobReply {
 }
 
 export interface CreateJobRequest {
+  app?: string
   keyword: string
   name: string
   weight?: number
@@ -36,6 +39,7 @@ export interface CreateJobReply {
 
 export interface UpdateJobRequest {
   id: number
+  app?: string
   keyword?: string
   name?: string
   weight?: number
@@ -45,6 +49,7 @@ export interface UpdateJobRequest {
 
 export interface DeleteJobRequest {
   id: number
+  app?: string
 }
 
 export interface DeleteJobReply {

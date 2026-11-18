@@ -3,9 +3,13 @@ import request from '@/utils/http'
 import {
   CheckDistributeAccountReply,
   CheckDistributeAccountRequest,
+  CreateDistributeAccountQRSessionReply,
+  CreateDistributeAccountQRSessionRequest,
   CreateDistributeAccountReply,
   CreateDistributeAccountRequest,
   DeleteDistributeAccountRequest,
+  GetDistributeAccountQRSessionReply,
+  GetDistributeAccountQRSessionRequest,
   ListDistributeAccountReply,
   ListDistributeAccountRequest,
   ListDistributeChannelsReply,
@@ -21,6 +25,22 @@ export function ListDistributeChannels(params?: ListDistributeChannelsRequest) {
 // ListDistributeAccounts 获取分发账号列表
 export function ListDistributeAccounts(params: ListDistributeAccountRequest) {
   return request.get<ListDistributeAccountReply>({ url: '/psou/api/distribute/accounts', params })
+}
+
+// CreateDistributeAccountQRSession 创建分发账号扫码登录会话
+export function CreateDistributeAccountQRSession(data: CreateDistributeAccountQRSessionRequest) {
+  return request.post<CreateDistributeAccountQRSessionReply>({
+    url: '/psou/api/distribute/accounts/qr/session',
+    data
+  })
+}
+
+// GetDistributeAccountQRSession 查询分发账号扫码登录状态
+export function GetDistributeAccountQRSession(params: GetDistributeAccountQRSessionRequest) {
+  return request.get<GetDistributeAccountQRSessionReply>({
+    url: '/psou/api/distribute/accounts/qr/session',
+    params
+  })
 }
 
 // CreateDistributeAccount 创建分发账号

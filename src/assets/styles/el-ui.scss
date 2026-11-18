@@ -128,12 +128,27 @@ html.dark .el-card {
   border-radius: 100px !important;
   border-radius: calc(var(--custom-radius) / 1.2 + 2px) !important;
   overflow: hidden;
+
+  // 全屏弹窗铺满视口，不要圆角
+  &.is-fullscreen {
+    border-radius: 0 !important;
+  }
+}
+
+// 顶部标签布局：去掉 Element Plus 默认的标签下边距（8px）
+// Element 组件样式按需引入，会在本文件之后注入，同优先级会被覆盖，所以多加一层 .el-form 提高优先级
+.el-form .el-form-item--label-top .el-form-item__label {
+  margin-bottom: 0;
 }
 
 .el-dialog__header {
   .el-dialog__title {
     font-size: 16px;
   }
+}
+
+.el-drawer__header {
+  margin-bottom: 22px !important;
 }
 
 .el-dialog__body {
@@ -354,6 +369,20 @@ html.dark .el-card {
   &:hover {
     background-color: var(--art-gray-200) !important;
     color: var(--art-gray-800) !important;
+  }
+}
+
+// 弹窗关闭按钮与标题垂直居中对齐：按钮放在标题行（上内边距 + 标题行高 24px）内，用 flex 居中图标
+// （图标是 inline-flex，按基线排列会在下方留出字体下行高度，看起来偏低），也不再用 top: 7px 下移
+.el-dialog__headerbtn {
+  top: var(--el-dialog-padding-primary) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 24px !important;
+
+  .el-dialog__close {
+    top: 0 !important;
   }
 }
 

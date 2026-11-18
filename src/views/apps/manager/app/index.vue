@@ -20,6 +20,15 @@
           <template #left>
             <ElSpace wrap>
               <ElButton
+                v-permission="'manager:app:group:query'"
+                v-ripple
+                type="success"
+                :icon="Expand"
+                @click="handleJumpGroup"
+              >
+                分组管理
+              </ElButton>
+              <ElButton
                 v-permission="'manager:app:add'"
                 v-ripple
                 type="primary"
@@ -53,7 +62,7 @@
                   <p>{{ item.description || item.comment || '暂无描述' }}</p>
                 </div>
 
-                <ArtOperation :single="true" :list="operationItems" :data="item" :has-background="false">
+                <ArtOperation :single="true" :list="operationItems(item)" :data="item" :has-background="false">
                   <ElButton class="app-card__more" text :icon="MoreFilled" />
                 </ArtOperation>
               </div>
@@ -66,6 +75,10 @@
                 <div>
                   <dt>应用名称</dt>
                   <dd>{{ item.name }}</dd>
+                </div>
+                <div>
+                  <dt>应用分组</dt>
+                  <dd>{{ getGroupName(item.groupId) }}</dd>
                 </div>
                 <div>
                   <dt>展示名称</dt>
@@ -125,7 +138,7 @@
         :title="dialogType === 'add' ? '添加应用' : '编辑应用'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
-        width="480px"
+        width="560px"
         align-center
       >
         <ArtForm
@@ -134,8 +147,41 @@
           :span="24"
           @cancel="dialogVisible = false"
           @submit="handleSubmit"
-        ></ArtForm>
+        >
+          <template #domains>
+            <div class="domain-editor">
+              <div v-for="(item, index) in domainRows" :key="index" class="domain-row">
+                <ElInput v-model="item.domain" placeholder="例如 app.example.com" clearable />
+                <ElCheckbox v-model="item.isPrimary" @change="handleDomainPrimaryChange(index)">主域名</ElCheckbox>
+                <ElButton text type="danger" :icon="Delete" @click="removeDomain(index)" />
+              </div>
+              <ElButton text type="primary" :icon="Plus" @click="addDomain">添加域名</ElButton>
+            </div>
+          </template>
+          <template #miniPrograms>
+            <div class="domain-editor">
+              <div v-for="(item, index) in miniProgramRows" :key="index" class="domain-row">
+                <ElSelect v-model="item.platform" style="width: 132px">
+                  <ElOption label="微信" value="mp-weixin" />
+                  <ElOption label="支付宝" value="mp-alipay" />
+                  <ElOption label="QQ" value="mp-qq" />
+                  <ElOption label="快手" value="mp-kuaishou" />
+                  <ElOption label="京东" value="mp-jd" />
+                  <ElOption label="小红书" value="mp-xhs" />
+                  <ElOption label="百度" value="mp-baidu" />
+                  <ElOption label="抖音" value="mp-toutiao" />
+                  <ElOption label="飞书" value="mp-lark" />
+                </ElSelect>
+                <ElInput v-model="item.appId" placeholder="例如 wx1234567890" clearable />
+                <ElButton text type="danger" :icon="Delete" @click="removeMiniProgram(index)" />
+              </div>
+              <ElButton text type="primary" :icon="Plus" @click="addMiniProgram">添加小程序 AppID</ElButton>
+            </div>
+          </template>
+        </ArtForm>
       </ElDialog>
+
+      <SeoPushDialog v-model="seoPushVisible" :app="seoPushApp" />
     </ElCard>
   </div>
 </template>
@@ -143,11 +189,16 @@
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
   import { ElMessageBox } from 'element-plus'
-  import { Delete, Edit, Fold, MoreFilled, Plus } from '@element-plus/icons-vue'
-  import { CreateApp, DeleteApp, GetApp, ListApp, UpdateApp } from '@/api/manager/app/api'
-  import { CreateAppRequest, App, UpdateAppRequest } from '@/api/manager/app/type'
+  import { Delete, Edit, Expand, Fold, MoreFilled, Plus, Promotion } from '@element-plus/icons-vue'
+  import { CreateApp, DeleteApp, GetApp, ListApp, ListAppGroup, UpdateApp } from '@/api/manager/app/api'
+  import { App, AppGroup, AppMiniProgram, AppSetting, CreateAppRequest, UpdateAppRequest } from '@/api/manager/app/type'
+  import { GeneratePromptImage } from '@/api/ai-agent/generate/api'
+  import { loadingService } from '@/utils'
+  import { uploadFile } from '@/utils/resource/upload'
+  import { imageToIco } from '@/utils/resource/image-to-ico'
   import { formatTime, parseTime } from '@/utils/time'
-  import { rurl } from '@/utils/resource/url'
+  import { rurl, resolveResourceUrl } from '@/utils/resource/url'
+  import SeoPushDialog from './components/SeoPushDialog.vue'
 
   const router = useRouter()
 
@@ -157,31 +208,105 @@
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
   const currentData = ref<Partial<App>>({})
+  const seoPushVisible = ref(false)
+  const seoPushApp = ref<App>()
+  const domainRows = computed(() => currentData.value.domains ?? [])
+  const miniProgramRows = computed(() => currentData.value.miniPrograms ?? [])
+
+  const normalizeSetting = (setting?: AppSetting): AppSetting => {
+    return {
+      ...setting,
+      jwt: {
+        secret: setting?.jwt?.secret ?? '',
+        expire: setting?.jwt?.expire ?? 3600,
+        renewal: setting?.jwt?.renewal ?? 3600,
+        uniqueDevice: setting?.jwt?.uniqueDevice ?? true,
+        uniquePlatform: setting?.jwt?.uniquePlatform ?? true
+      },
+      web: { ...(setting?.web ?? {}) },
+      modules: [...(setting?.modules ?? [])],
+      adminEmail: setting?.adminEmail ?? '',
+      tracker: {
+        enable: setting?.tracker?.enable ?? false,
+        origins: [...(setting?.tracker?.origins ?? [])],
+        maxPoints: setting?.tracker?.maxPoints ?? 0,
+        conversionPoint: setting?.tracker?.conversionPoint ?? ''
+      }
+    }
+  }
+
+  const addDomain = () => {
+    if (!currentData.value.domains) currentData.value.domains = []
+    currentData.value.domains.push({ domain: '', isPrimary: currentData.value.domains.length === 0 })
+  }
+
+  const removeDomain = (index: number) => {
+    currentData.value.domains?.splice(index, 1)
+  }
+
+  const addMiniProgram = () => {
+    if (!currentData.value.miniPrograms) currentData.value.miniPrograms = []
+    currentData.value.miniPrograms.push({ platform: 'mp-weixin', appId: '' })
+  }
+
+  const removeMiniProgram = (index: number) => {
+    currentData.value.miniPrograms?.splice(index, 1)
+  }
+
+  const handleDomainPrimaryChange = (index: number) => {
+    const rows = currentData.value.domains ?? []
+    if (!rows[index]?.isPrimary) return
+    rows.forEach((item, i) => {
+      if (i !== index) item.isPrimary = false
+    })
+  }
+
+  const groupList = ref<AppGroup[]>([])
 
   const appTypes = [
     { label: '基础设施', value: 'base' },
     { label: '标准应用', value: 'app' }
   ]
 
+  // 基础设施应用选项（开通应用的可选项）
+  const baseAppOptions = ref<{ label: string; value: string }[]>([])
+
+  // 加载 type=base 的应用，作为开通应用选项
+  const loadBaseApps = async () => {
+    try {
+      const res = await ListApp({ page: 1, pageSize: 50, type: 'base' })
+      baseAppOptions.value = (res.list || []).map((item: App) => ({
+        label: item.showName || item.name,
+        value: item.keyword
+      }))
+    } catch {
+      baseAppOptions.value = []
+    }
+  }
+
   // 搜索表单
   const searchForm = ref({
-    keyword: undefined,
-    name: undefined,
+    query: undefined,
+    groupId: undefined,
     status: undefined
   })
 
-  const searchItems = [
+  const searchItems = computed(() => [
     {
-      label: '应用标识',
-      key: 'keyword',
+      label: '应用名称/标识',
+      key: 'query',
       type: 'input',
-      props: { maxlength: '32', placeholder: '请输入应用标识', clearable: true }
+      props: { maxlength: '64', placeholder: '请输入应用名称或标识', clearable: true }
     },
     {
-      label: '应用名称',
-      key: 'name',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入应用名称', clearable: true }
+      label: '应用分组',
+      key: 'groupId',
+      type: 'select',
+      props: {
+        placeholder: '请选择应用分组',
+        clearable: true,
+        options: groupList.value.map((item) => ({ label: item.name, value: item.id }))
+      }
     },
     {
       label: '应用状态',
@@ -196,13 +321,26 @@
         ]
       }
     }
-  ]
+  ])
 
   const formItems = computed(() => [
+    {
+      key: 'groupId',
+      label: '应用分组',
+      type: 'select',
+      tip: '应用所属分组，用于管理端分类展示',
+      props: {
+        placeholder: '请选择应用分组',
+        options: groupList.value.map((item) => ({ label: item.name, value: item.id })),
+        rules: [{ required: true, message: '请选择应用分组', trigger: ['blur', 'change'] }]
+      }
+    },
     {
       key: 'type',
       label: '应用类型',
       type: 'select',
+      tip: 'base = 基础设施应用（供其他应用开通订阅）；app = 标准应用',
+
       props: {
         placeholder: '请选择应用类型',
         options: appTypes,
@@ -213,6 +351,8 @@
       key: 'keyword',
       label: '应用标识',
       type: 'input',
+      tip: '应用唯一标识，创建后不可修改',
+
       props: {
         placeholder: '请输入应用标识',
         disabled: dialogType.value === 'edit',
@@ -226,6 +366,8 @@
       key: 'name',
       label: '应用名称',
       type: 'input',
+      tip: '应用名称，用于列表与识别的展示',
+
       props: {
         placeholder: '请输入应用名称',
         rules: [{ required: true, message: '请输入应用名称', trigger: ['blur', 'change'] }]
@@ -235,6 +377,8 @@
       key: 'showName',
       label: '展示名称',
       type: 'input',
+      tip: '展示在登录页与首页的应用名称',
+
       props: {
         placeholder: '请输入展示名称',
         rules: [{ required: true, message: '请输入展示名称', trigger: ['blur', 'change'] }]
@@ -244,8 +388,32 @@
       key: 'logo',
       label: '应用logo',
       type: 'upload',
+      tip: '应用 Logo，建议 256×256 正方形图片',
+
+      // AI 生成（复用 ai-agent 的 app-logo 提示词，按应用名生成）
+      suffix: {
+        hidden: !currentData.value.name,
+        icon: 'iconsys-mofa',
+        tip: 'AI自动生成Logo',
+        style: {
+          color: '#9a6ce6'
+        },
+        onclick: () => {
+          loadingService.apply(async () => {
+            const data = await GeneratePromptImage({
+              prompt: 'app-logo',
+              variables: {
+                query: currentData.value.name
+              }
+            })
+            currentData.value.logo = data.list[0]
+          }, '正在生成中，请稍等')
+        }
+      },
+
       props: {
         accept: 'image/*',
+        selectFromFile: true,
         rules: [{ required: true, message: '请上传应用logo', trigger: ['blur', 'change'] }],
         directoryPath: 'manager/app/logo',
         cut: {
@@ -260,20 +428,42 @@
       label: '应用图标',
       type: 'upload',
       hidden: currentData.value.type === 'base',
+      tip: '浏览器页签显示的图标（.ico 格式）；支持上传 png/jpg 自动转换为 128×128 ICO',
+
+      // 同步：取当前应用 logo，转换 128×128 ICO 后重新上传为应用图标
+      suffix: {
+        hidden: !currentData.value.logo,
+        icon: 'iconsys-fuzhi',
+        tip: '从应用logo同步生成图标',
+        style: {
+          color: '#9a6ce6'
+        },
+        onclick: () => {
+          loadingService.apply(async () => {
+            // 1. 取应用 logo 图片内容：key 走服务端读流接口（对象存储未开 CORS，fetch 不能直连 302 目标）
+            const key = currentData.value.logo as string
+            const res = await fetch(resolveResourceUrl(`/resource/api/file/read-by-key?key=${key}`))
+            if (!res.ok) {
+              throw new Error('获取应用logo失败')
+            }
+            // 2. 转为 128×128 ICO
+            const ico = await imageToIco(await res.blob(), 128)
+            // 3. 重新上传（与上传组件同链路，返回可访问地址）
+            const result = await uploadFile(new File([ico], 'favicon.ico', { type: 'image/x-icon' }), {
+              path: 'manager/app/logo',
+              name: 'favicon.ico'
+            })
+            // 统一存对象 key，避免 favicon 落成完整 URL
+            currentData.value.favicon = result.key
+          }, '正在同步应用图标，请稍等')
+        }
+      },
+
       props: {
-        accept: '.ico',
+        accept: 'image/*',
+        convertToIco: true,
         rules: [{ required: true, message: '请上传应用图标', trigger: ['blur', 'change'] }],
         directoryPath: 'manager/app/logo'
-      }
-    },
-    {
-      key: 'secret',
-      label: '应用密钥',
-      type: 'input',
-      hidden: currentData.value.type === 'base',
-      props: {
-        placeholder: '请输入应用密钥',
-        rules: [{ required: true, message: '请输入应用密钥', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -282,6 +472,8 @@
       type: 'select',
       placeholder: '请选择是否允许注册',
       hidden: currentData.value.type === 'base',
+      tip: '是否允许用户通过该应用注册账户；禁止 = 仅允许已有账号登录',
+
       props: {
         rules: [{ required: true, message: '请选择是否允许注册', trigger: ['blur', 'change'] }],
         options: [
@@ -291,12 +483,29 @@
       }
     },
     {
+      key: 'loginable',
+      label: '允许登录',
+      type: 'select',
+      placeholder: '请选择是否作为登录入口',
+      hidden: currentData.value.type === 'base',
+      tip: '是否作为登录入口；是 = 用户可通过该应用登录系统',
+
+      props: {
+        rules: [{ required: true, message: '请选择是否作为登录入口', trigger: ['blur', 'change'] }],
+        options: [
+          { label: '是', value: true },
+          { label: '否', value: false }
+        ]
+      }
+    },
+    {
       key: 'description',
       label: '应用描述',
       type: 'input',
+      tip: '应用简介，展示在应用卡片与详情页',
+
       props: {
         placeholder: '请输入应用描述',
-        rules: [{ required: true, message: '请输入应用描述', trigger: ['blur', 'change'] }],
         type: 'textarea'
       }
     },
@@ -304,17 +513,46 @@
       key: 'comment',
       label: '应用备注',
       type: 'input',
+      tip: '内部备注，仅管理端可见',
+
       props: {
         placeholder: '请输入应用备注',
-        rules: [{ required: true, message: '请输入应用备注', trigger: ['blur', 'change'] }],
         type: 'textarea'
       }
+    },
+    {
+      key: 'setting.modules',
+      label: '开通应用',
+      type: 'select',
+      divider: '开通应用',
+      hidden: currentData.value.type === 'base',
+      tip: '开通的基础设施应用（type=base），用于菜单下发与接口鉴权',
+      props: {
+        placeholder: '请选择开通的基础设施应用',
+        options: baseAppOptions.value,
+        multiple: true,
+        clearable: true
+      }
+    },
+    {
+      key: 'domains',
+      label: '域名配置',
+      type: 'input',
+      divider: '站点配置',
+      hidden: currentData.value.type === 'base',
+      tip: '可绑定多个域名，每个应用最多设置一个主域名'
+    },
+    {
+      key: 'miniPrograms',
+      label: '小程序 AppID',
+      type: 'input',
+      hidden: currentData.value.type === 'base',
+      tip: '绑定各小程序平台的 AppID，init 时会优先按平台 + AppID 识别应用'
     },
     {
       key: 'setting.web.copyright',
       label: '版权信息',
       type: 'input',
-      divider: '站点配置',
       hidden: currentData.value.type === 'base',
       tip: '显示在登录页和首页底部的版权信息，不输入则不显示',
       props: {
@@ -332,11 +570,43 @@
       }
     },
     {
+      key: 'setting.web.defaultPassword',
+      label: '默认登录密码',
+      type: 'input',
+      hidden: currentData.value.type === 'base',
+      tip: '新增用户未填写密码以及重置密码时使用',
+      props: {
+        type: 'password',
+        showPassword: true,
+        placeholder: '请输入默认登录密码',
+        maxlength: 32,
+        rules: [
+          { required: true, message: '请输入默认登录密码', trigger: ['blur', 'change'] },
+          { type: 'string', message: '密码最少6位数', min: 6 }
+        ]
+      }
+    },
+    {
+      key: 'setting.adminEmail',
+      label: '管理员邮箱',
+      type: 'input',
+      hidden: currentData.value.type === 'base',
+      tip: '用于接收应用相关的系统通知，例如告警和审核提醒',
+      props: {
+        placeholder: '请输入管理员邮箱',
+        maxlength: 255,
+        clearable: true,
+        rules: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }]
+      }
+    },
+    {
       key: 'setting.jwt.secret',
       label: '授权密钥',
       type: 'input',
       divider: '授权配置',
       hidden: currentData.value.type === 'base',
+      tip: 'JWT 签名密钥，用于生成与校验登录令牌',
+
       props: {
         placeholder: '请输入授权密钥 ',
         rules: [{ required: true, message: '请输入授权密钥', trigger: ['blur', 'change'] }]
@@ -348,6 +618,8 @@
       type: 'number',
       hidden: currentData.value.type === 'base',
       defaultValue: 3600,
+      tip: '令牌有效期（秒），到期后需重新登录',
+
       props: {
         placeholder: '请输入过期时间(秒)',
         style: { width: '100%' },
@@ -360,6 +632,8 @@
       type: 'number',
       hidden: currentData.value.type === 'base',
       defaultValue: 3600,
+      tip: '令牌到期前的续期窗口（秒），未到期前访问可自动续期',
+
       props: {
         placeholder: '请输入续期时间(秒)',
         style: { width: '100%' },
@@ -371,6 +645,8 @@
       label: '唯一设备',
       type: 'select',
       hidden: currentData.value.type === 'base',
+      tip: '开启后同一账号仅允许一个设备登录，新设备登录将使旧设备失效',
+
       props: {
         placeholder: '请选择是否开启唯一设备',
         options: [
@@ -385,6 +661,8 @@
       label: '唯一平台',
       type: 'select',
       hidden: currentData.value.type === 'base',
+      tip: '开启后同一账号仅允许一个平台登录，新平台登录将使旧平台失效',
+
       props: {
         placeholder: '请选择是否开启唯一平台',
         options: [
@@ -393,10 +671,58 @@
         ],
         rules: [{ required: true, message: '请选择是否开启唯一平台', trigger: ['blur', 'change'] }]
       }
+    },
+    {
+      key: 'setting.tracker.enable',
+      label: '开启点位采集',
+      type: 'switch',
+      divider: '点位分析',
+      hidden: currentData.value.type === 'base',
+      tip: '开启后允许该应用向 manager 上报页面访问和业务点位',
+      props: {
+        activeText: '开启',
+        inactiveText: '关闭'
+      }
+    },
+    {
+      key: 'setting.tracker.origins',
+      label: '上报来源白名单',
+      type: 'inputtag',
+      hidden: currentData.value.type === 'base',
+      tip: '按 scheme://host[:port] 配置，例如 https://asou.fun；为空表示不校验',
+      props: {
+        placeholder: '输入 Origin 后回车',
+        clearable: true
+      }
+    },
+    {
+      key: 'setting.tracker.maxPoints',
+      label: '自动注册上限',
+      type: 'number',
+      hidden: currentData.value.type === 'base',
+      tip: '该应用最多自动注册的点位数；0 使用服务端默认值，服务端仍会按硬上限钳制',
+      props: {
+        min: 0,
+        max: 2000,
+        style: { width: '100%' },
+        placeholder: '0 使用服务端默认值'
+      }
+    },
+    {
+      key: 'setting.tracker.conversionPoint',
+      label: '转化点位',
+      type: 'input',
+      hidden: currentData.value.type === 'base',
+      tip: '用于统计全站转化次数，例如 resource_netdisk_open；留空则不展示',
+      props: {
+        placeholder: '例如 resource_netdisk_open',
+        maxlength: 128,
+        clearable: true
+      }
     }
   ])
 
-  const operationItems = [
+  const operationItems = (record: App) => [
     {
       icon: 'iconsys-ziyuan1',
       label: '实体管理',
@@ -450,6 +776,17 @@
             app: record.keyword
           }
         })
+      }
+    },
+    {
+      icon: Promotion,
+      label: 'SEO推送',
+      color: 'primary',
+      permission: 'manager:app:update',
+      hide: !record.domains?.length,
+      click: (row: App) => {
+        seoPushApp.value = row
+        seoPushVisible.value = true
       }
     },
     {
@@ -529,15 +866,6 @@
           fixed: 'right'
         }
       ]
-    },
-    hooks: {
-      resetFormCallback: () => {
-        searchForm.value = {
-          keyword: undefined,
-          name: undefined,
-          status: undefined
-        }
-      }
     }
   })
 
@@ -559,6 +887,11 @@
 
   const appList = computed(() => tableData.value as App[])
 
+  const loadGroups = async () => {
+    const res = await ListAppGroup()
+    groupList.value = res.list || []
+  }
+
   // 搜索处理
   const handleSearch = () => {
     Object.assign(searchParams, { ...searchForm.value })
@@ -568,7 +901,19 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: App): void => {
     dialogType.value = type
-    currentData.value = row || {}
+    currentData.value = row
+      ? {
+          ...row,
+          setting: normalizeSetting(row.setting),
+          domains: (row.domains ?? []).map((item) => ({ ...item })),
+          miniPrograms: (row.miniPrograms ?? []).map((item) => ({ ...item }))
+        }
+      : {
+          groupId: groupList.value[0]?.id,
+          setting: normalizeSetting(),
+          domains: [{ domain: '', isPrimary: true }],
+          miniPrograms: []
+        }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -577,6 +922,12 @@
   // 处理弹窗提交事件
   const handleSubmit = async () => {
     const value = { ...currentData.value }
+    value.domains = (value.domains ?? [])
+      .map((item) => ({ domain: item.domain.trim(), isPrimary: item.isPrimary }))
+      .filter((item) => item.domain)
+    value.miniPrograms = (value.miniPrograms ?? [])
+      .map((item) => ({ appId: item.appId.trim(), platform: item.platform.trim() }))
+      .filter((item): item is AppMiniProgram => Boolean(item.appId && item.platform))
     if (dialogType.value === 'add') {
       await CreateApp(value as CreateAppRequest)
       ElMessage.success('创建成功')
@@ -588,6 +939,8 @@
     }
     dialogVisible.value = false
   }
+
+  const handleJumpGroup = () => router.push({ name: 'AppGroup' })
 
   const handleUpdateStatus = (item: App): (() => Promise<boolean>) => {
     return (): Promise<boolean> => {
@@ -634,6 +987,8 @@
 
   const getAppTypeLabel = (type?: string) => appTypes.find((item) => item.value === type)?.label || type || '标准应用'
 
+  const getGroupName = (id?: number) => groupList.value.find((item) => item.id === id)?.name || '-'
+
   const getRegisterLabel = (item: App) => {
     if (item.type === 'base') return '不适用'
     if (item.private === undefined) return '-'
@@ -646,6 +1001,10 @@
   }
 
   const formatCardTime = (time: number) => parseTime(time, '{y}-{m}-{d}') || formatTime(time)
+
+  onMounted(async () => {
+    await Promise.all([loadGroups(), loadBaseApps()])
+  })
 </script>
 
 <style lang="scss" scoped>
@@ -658,9 +1017,9 @@
   .app-card-scroll {
     flex: 1;
     min-height: 0;
+    padding-right: 4px;
     margin-top: 12px;
     overflow-y: auto;
-    padding-right: 4px;
   }
 
   .app-grid {
@@ -718,8 +1077,8 @@
         justify-content: center;
         width: 100%;
         height: 100%;
-        color: inherit;
         font-size: inherit;
+        color: inherit;
         background: transparent;
       }
 
@@ -760,8 +1119,8 @@
         line-height: 22px;
         color: var(--art-gray-900);
         text-overflow: ellipsis;
-        white-space: nowrap;
         letter-spacing: 0;
+        white-space: nowrap;
       }
 
       p {
@@ -798,8 +1157,8 @@
       &:active {
         color: var(--art-gray-500);
         border-color: transparent !important;
-        box-shadow: none !important;
         outline: none;
+        box-shadow: none !important;
       }
 
       &:focus-visible {
@@ -905,9 +1264,31 @@
   }
 
   .app-pagination {
-    flex-shrink: 0;
     display: flex;
+    flex-shrink: 0;
     justify-content: flex-end;
     margin-top: 16px;
+  }
+
+  .domain-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .domain-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    :deep(.el-input) {
+      flex: 1;
+      min-width: 0;
+    }
+
+    :deep(.el-checkbox) {
+      flex-shrink: 0;
+    }
   }
 </style>

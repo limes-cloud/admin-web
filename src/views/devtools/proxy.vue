@@ -2,21 +2,28 @@
   <div class="proxy-page">
     <ElCard shadow="never">
       <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-weight:700">接口代理规则</span>
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-weight: 700">接口代理规则</span>
           <ElButton type="primary" :icon="Plus" @click="showDialog()">新增规则</ElButton>
         </div>
       </template>
 
-      <ElAlert type="info" :closable="false" style="margin-bottom:16px">
+      <ElAlert type="info" :closable="false" style="margin-bottom: 16px">
         <template #title>
-          <span style="font-weight:600">什么是接口代理规则？</span>
+          <span style="font-weight: 600">什么是接口代理规则？</span>
         </template>
         <template #default>
-          <p style="margin:6px 0 0">在没有统一网关的情况下，前端所有请求默认走同一个 Host。</p>
-          <p style="margin:4px 0 0">通过配置此规则，可以按 <b>URL 前缀</b> 将请求劫持到指定的后端服务 Host，无需修改代码或重启服务。</p>
-          <p style="margin:4px 0 0">示例：将 <code>/configure/api</code> 开头的请求转发到 <code>http://192.168.1.10:8081</code>，其余请求仍走默认 Host。</p>
-          <p style="margin:4px 0 0;color:var(--el-color-warning)">⚠ 规则仅在当前浏览器本地生效，刷新后依然保留，不影响其他人。</p>
+          <p style="margin: 6px 0 0">在没有统一网关的情况下，前端所有请求默认走同一个 Host。</p>
+          <p style="margin: 4px 0 0"
+            >通过配置此规则，可以按 <b>URL 前缀</b> 将请求劫持到指定的后端服务 Host，无需修改代码或重启服务。</p
+          >
+          <p style="margin: 4px 0 0"
+            >示例：将 <code>/configure/api</code> 开头的请求转发到
+            <code>http://192.168.1.10:8081</code>，其余请求仍走默认 Host。</p
+          >
+          <p style="margin: 4px 0 0; color: var(--el-color-warning)"
+            >⚠ 规则仅在当前浏览器本地生效，刷新后依然保留，不影响其他人。</p
+          >
         </template>
       </ElAlert>
 
@@ -46,16 +53,29 @@
           </template>
         </ElTableColumn>
       </ElTable>
-
     </ElCard>
 
-    <ElDialog v-model="dialogVisible" :title="isEdit ? '编辑规则' : '新增规则'" width="480px" align-center :destroy-on-close="true">
+    <ElDialog
+      v-model="dialogVisible"
+      :title="isEdit ? '编辑规则' : '新增规则'"
+      width="480px"
+      align-center
+      :destroy-on-close="true"
+    >
       <ElForm ref="formRef" :model="form" label-position="top">
-        <ElFormItem label="URL 前缀" prop="prefix" :rules="[{ required: true, message: '请输入 URL 前缀', trigger: ['blur', 'change'] }]">
+        <ElFormItem
+          label="URL 前缀"
+          prop="prefix"
+          :rules="[{ required: true, message: '请输入 URL 前缀', trigger: ['blur', 'change'] }]"
+        >
           <ElInput v-model="form.prefix" placeholder="例：/configure/api" clearable />
           <ElText type="info" size="small">请求 URL 以此开头时生效</ElText>
         </ElFormItem>
-        <ElFormItem label="目标 Host" prop="host" :rules="[{ required: true, message: '请输入目标 Host', trigger: ['blur', 'change'] }]">
+        <ElFormItem
+          label="目标 Host"
+          prop="host"
+          :rules="[{ required: true, message: '请输入目标 Host', trigger: ['blur', 'change'] }]"
+        >
           <ElInput v-model="form.host" placeholder="例：http://192.168.1.10:8080" clearable />
           <ElText type="info" size="small">不含路径，末尾无斜杠</ElText>
         </ElFormItem>
@@ -102,7 +122,7 @@
   const handleSubmit = async () => {
     await formRef.value?.validate()
     if (isEdit.value) {
-      const idx = rules.value.findIndex(r => r.id === form.value.id)
+      const idx = rules.value.findIndex((r) => r.id === form.value.id)
       if (idx !== -1) rules.value[idx] = { ...form.value }
     } else {
       rules.value.push({ ...form.value, id: Date.now().toString() })
@@ -113,12 +133,17 @@
   }
 
   const remove = (id: string) => {
-    rules.value = rules.value.filter(r => r.id !== id)
+    rules.value = rules.value.filter((r) => r.id !== id)
     save()
     ElMessage.success('删除成功')
   }
 </script>
 
 <style scoped>
-  .proxy-page { min-height: 100vh; background: #f5f7fa; padding: 24px; box-sizing: border-box; }
+  .proxy-page {
+    min-height: 100vh;
+    background: #f5f7fa;
+    padding: 24px;
+    box-sizing: border-box;
+  }
 </style>

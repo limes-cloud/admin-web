@@ -62,12 +62,14 @@
   import { Job } from '@/api/manager/job/type'
   import { ListJob } from '@/api/manager/job/api'
   import { Dept } from '@/api/manager/dept/type'
-  import { ListCurrentDept } from '@/api/manager/dept/api'
+  import { ListDept } from '@/api/manager/dept/api'
+  import { getAppKeyword } from '@/utils/app-context'
 
   defineOptions({ name: 'UserDept' })
 
   const router = useRouter()
   const curUserId = Number(router.currentRoute.value.query.userId)
+  const targetApp = ref((router.currentRoute.value.query.app as string) || getAppKeyword())
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -75,13 +77,16 @@
   const currentData = ref<Partial<UserDept>>({})
 
   const depts = ref<Dept[]>([])
-  ListCurrentDept().then((res) => {
-    depts.value = res.list
-  })
+  const getDepts = () => {
+    ListDept({ app: targetApp.value }).then((res) => {
+      depts.value = res.list
+    })
+  }
+  getDepts()
 
   const jobs = ref<Job[]>([])
   const getJobs = (query?: string) => {
-    ListJob({ page: 1, pageSize: 10, name: query }).then((res) => {
+    ListJob({ page: 1, pageSize: 50, name: query, app: targetApp.value }).then((res) => {
       jobs.value = res.list
     })
   }
@@ -166,7 +171,7 @@
       color: 'danger',
       permission: 'manager:user:dept:delete',
       click: async (record: UserDept) => {
-        await DeleteUserDept({ id: record.id })
+        await DeleteUserDept({ id: record.id, app: targetApp.value })
         refreshRemove()
       }
     }
@@ -189,6 +194,7 @@
       apiFn: ListUserDept,
       apiParams: {
         ...searchForm.value,
+        app: targetApp.value,
         userId: curUserId
       },
       columnsFactory: () => [
@@ -248,11 +254,11 @@
   // 处理弹窗提交事件
   const handleSubmit = async () => {
     if (dialogType.value === 'add') {
-      await CreateUserDept({ ...currentData.value, userId: curUserId } as CreateUserDeptRequest)
+      await CreateUserDept({ ...currentData.value, userId: curUserId, app: targetApp.value } as CreateUserDeptRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateUserDept({ ...currentData.value, userId: curUserId } as UpdateUserDeptRequest)
+      await UpdateUserDept({ ...currentData.value, userId: curUserId, app: targetApp.value } as UpdateUserDeptRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }

@@ -66,6 +66,8 @@ export interface GetTaskReply {
   workerId: number
   execType: string
   execValue: string
+  /** 执行指定流程的入参 JSON（request.body） */
+  chainInput?: string
   expectCode: number
   retryCount: number
   retryWaitTime: number
@@ -104,6 +106,8 @@ export interface Task {
   workerId: number
   execType: string
   execValue: string
+  /** 执行指定流程的入参 JSON（request.body） */
+  chainInput?: string
   expectCode: number
   retryCount: number
   retryWaitTime: number
@@ -132,6 +136,8 @@ export interface CreateTaskRequest {
   workerId: number
   execType: string
   execValue: string
+  /** 执行指定流程的入参 JSON（request.body） */
+  chainInput?: string
   expectCode: number
   retryCount: number
   retryWaitTime: number
@@ -158,6 +164,8 @@ export interface UpdateTaskRequest {
   workerId: number
   execType: string
   execValue: string
+  /** 执行指定流程的入参 JSON（request.body） */
+  chainInput?: string
   expectCode: number
   retryCount: number
   retryWaitTime: number

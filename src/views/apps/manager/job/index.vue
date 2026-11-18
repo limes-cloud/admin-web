@@ -88,49 +88,89 @@
   import { CreateJobRequest, Job, UpdateJobRequest } from '@/api/manager/job/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
+  import { getAppKeyword } from '@/utils/app-context'
+  import { ListApp } from '@/api/manager/app/api'
+  import { App } from '@/api/manager/app/type'
 
   const router = useRouter()
   defineOptions({ name: 'Job' })
 
+  const isManagerApp = getAppKeyword() === 'manager'
+  const apps = ref<App[]>([])
+  const getApps = (query?: string) => {
+    if (!isManagerApp) return
+    ListApp({ page: 1, pageSize: 10, status: true, query }).then((res) => {
+      apps.value = res.list
+    })
+  }
+  getApps()
+
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const currentData = ref<Partial<Job>>({})
+  const currentData = ref<Partial<Job> & { app?: string }>({})
 
   // 搜索表单
-  const searchForm = ref({
+  const searchForm = ref<{ app?: string; keyword?: string; name?: string; status?: boolean }>({
+    app: getAppKeyword(),
     keyword: undefined,
     name: undefined,
     status: undefined
   })
 
-  const searchItems = [
-    {
-      label: '职位标识',
-      key: 'keyword',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入职位标识', clearable: true }
-    },
-    {
-      label: '职位名称',
-      key: 'name',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入职位名称', clearable: true }
-    },
-    {
-      label: '职位状态',
-      key: 'status',
-      type: 'select',
-      props: {
-        clearable: true,
-        placeholder: '请选择职位状态',
-        options: [
-          { label: '正常', value: true },
-          { label: '禁用', value: false }
-        ]
+  const selectedApp = computed(() => searchForm.value.app || getAppKeyword())
+
+  const searchItems = computed(() => {
+    const baseItems = [
+      {
+        label: '职位标识',
+        key: 'keyword',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入职位标识', clearable: true }
+      },
+      {
+        label: '职位名称',
+        key: 'name',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入职位名称', clearable: true }
+      },
+      {
+        label: '职位状态',
+        key: 'status',
+        type: 'select',
+        props: {
+          clearable: true,
+          placeholder: '请选择职位状态',
+          options: [
+            { label: '正常', value: true },
+            { label: '禁用', value: false }
+          ]
+        }
       }
-    }
-  ]
+    ]
+    if (!isManagerApp) return baseItems
+    return [
+      {
+        label: '所属应用',
+        key: 'app',
+        type: 'select',
+        props: {
+          placeholder: '请选择所属应用',
+          clearable: true,
+          filterable: true,
+          remote: true,
+          remoteMethod: (query: string) => getApps(query),
+          options: apps.value,
+          props: { label: 'name', value: 'keyword' },
+          onChange: (value: string) => {
+            searchForm.value.app = value
+            handleSearch()
+          }
+        }
+      },
+      ...baseItems
+    ]
+  })
 
   const formItems = computed(() => [
     {
@@ -177,7 +217,8 @@
         router.push({
           name: 'JobRole',
           query: {
-            jobId: record.id
+            jobId: record.id,
+            app: selectedApp.value
           }
         })
       }
@@ -198,7 +239,7 @@
       color: 'danger',
       permission: 'manager:job:delete',
       click: async (record: Job) => {
-        await DeleteJob({ id: record.id })
+        await DeleteJob({ id: record.id, app: selectedApp.value })
         refreshRemove()
       }
     }
@@ -285,7 +326,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: Job): void => {
     dialogType.value = type
-    currentData.value = row || {}
+    currentData.value = { ...(row || {}), app: selectedApp.value }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -295,11 +336,11 @@
   const handleSubmit = async () => {
     const value = currentData.value
     if (dialogType.value === 'add') {
-      await CreateJob(value as CreateJobRequest)
+      await CreateJob({ ...value, app: value.app || selectedApp.value } as CreateJobRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateJob(value as UpdateJobRequest)
+      await UpdateJob({ ...value, app: value.app || selectedApp.value } as UpdateJobRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
@@ -315,7 +356,7 @@
           type: 'warning'
         })
           .then(async () => {
-            await UpdateJob({ id: item.id, status: !item.status })
+            await UpdateJob({ id: item.id, status: !item.status, app: selectedApp.value })
             ElMessage.success('修改成功')
             refreshUpdate()
             resolve(true)

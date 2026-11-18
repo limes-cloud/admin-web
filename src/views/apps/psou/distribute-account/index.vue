@@ -15,7 +15,7 @@
         <ArtTableHeader v-model:columns="columnChecks" :loading="loading" @refresh="refreshData">
           <template #left>
             <ElSpace wrap>
-              <ElButton v-ripple type="primary" :icon="Plus" @click="showDialog('add')">新增分发账号</ElButton>
+              <ElButton v-ripple type="primary" :icon="Plus" @click="showDialog('add')">新增账号</ElButton>
             </ElSpace>
           </template>
         </ArtTableHeader>
@@ -38,31 +38,19 @@
           <template #channel="{ row }">
             <ElTag type="primary" effect="plain">{{ channelName(row.channelCode) }}</ElTag>
           </template>
-          <template #credential="{ row }">
-            <div v-if="row.panAccountId" class="credential-cell">
-              <ElTag type="success" effect="light" size="small">网盘账号</ElTag>
-              <small>{{ row.panAccountName || `#${row.panAccountId}` }}</small>
-            </div>
-            <div v-else class="credential-cell">
-              <ElTag type="info" effect="light" size="small">独立 Token</ElTag>
-              <small>{{ row.hasToken ? '凭证已配置' : '凭证缺失' }}</small>
-            </div>
-          </template>
           <template #status="{ row }">
-            <ElTag :type="statusMeta(row.status).type" effect="light" size="small">
+            <ElTooltip v-if="row.status !== 0 && row.reason" :content="row.reason" placement="top">
+              <ElTag class="status-tag" :type="statusMeta(row.status).type" effect="light" size="small">
+                {{ statusMeta(row.status).label }}
+              </ElTag>
+            </ElTooltip>
+            <ElTag v-else :type="statusMeta(row.status).type" effect="light" size="small">
               {{ statusMeta(row.status).label }}
             </ElTag>
-          </template>
-          <template #reason="{ row }">
-            <span v-if="row.reason" class="reason" :title="row.reason">{{ row.reason }}</span>
-            <span v-else class="muted">-</span>
           </template>
           <template #quota="{ row }">
             <span v-if="row.quota">{{ row.quota }}</span>
             <span v-else class="muted">不限</span>
-          </template>
-          <template #lastCheckAt="{ row }">
-            {{ parseExt(row.ext).lastCheckAt ? formatTime(parseExt(row.ext).lastCheckAt!) : '-' }}
           </template>
           <template #operation="{ row }">
             <ArtOperation :list="operationItems(row)" :data="row" />
@@ -72,7 +60,7 @@
 
       <ElDialog
         v-model="dialogVisible"
-        :title="dialogType === 'add' ? '新增分发账号' : '编辑分发账号'"
+        :title="dialogType === 'add' ? '新增账号' : '编辑分发账号'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
         width="720px"
@@ -85,23 +73,90 @@
           label-width="104px"
           @submit="handleSubmit"
           @cancel="dialogVisible = false"
-        />
+        >
+          <template #token="{ modelValue }">
+            <div class="credential-editor">
+              <div class="credential-mode">
+                <ElSegmented
+                  v-model="credentialInputMode"
+                  :options="credentialInputModeOptions"
+                  size="small"
+                  @change="handleCredentialInputModeChange"
+                />
+                <span class="credential-mode-tip">推荐扫码，登录态由服务端直接保存</span>
+              </div>
+
+              <div v-if="useCredentialQR" class="qr-panel">
+                <template v-if="qrImage">
+                  <div class="qr-frame">
+                    <img :src="qrImage" :alt="`${qrAppName}登录二维码`" />
+                    <div v-if="qrState === 'expired' || qrState === 'failed'" class="qr-mask">
+                      {{ qrState === 'expired' ? '二维码已过期' : '获取失败' }}
+                    </div>
+                  </div>
+                  <div class="qr-detail">
+                    <ElTag :type="qrStateMeta.type" effect="light">{{ qrStateMeta.label }}</ElTag>
+                    <p>{{ qrDescription }}</p>
+                    <ElButton
+                      v-if="qrState !== 'confirmed'"
+                      type="primary"
+                      plain
+                      size="small"
+                      :icon="Refresh"
+                      :loading="qrLoading"
+                      @click="startQRSession"
+                    >
+                      刷新二维码
+                    </ElButton>
+                  </div>
+                </template>
+                <div v-else class="qr-empty">
+                  <ElIcon :size="34"><Picture /></ElIcon>
+                  <p>{{ qrEmptyText }}</p>
+                  <ElButton type="primary" plain :loading="qrLoading" @click="startQRSession">
+                    获取登录二维码
+                  </ElButton>
+                </div>
+              </div>
+
+              <template v-else>
+                <ElInput
+                  v-model="modelValue.token"
+                  type="textarea"
+                  :rows="4"
+                  maxlength="8192"
+                  :placeholder="credentialPlaceholder"
+                />
+                <div class="credential-manual-tip">
+                  {{
+                    dialogType === 'edit' && currentData.hasToken
+                      ? '留空将保留原 Token；填写后会用新值覆盖。'
+                      : '扫码不可用时，可手工粘贴渠道 Token。'
+                  }}
+                </div>
+              </template>
+            </div>
+          </template>
+        </ArtForm>
       </ElDialog>
     </ElCard>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref, watch } from 'vue'
+  import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { Delete, Edit, Plus, Refresh, VideoPause, VideoPlay } from '@element-plus/icons-vue'
+  import { Delete, Edit, Picture, Plus, Refresh, VideoPause, VideoPlay } from '@element-plus/icons-vue'
 
   import { useTable } from '@/composables/useTable'
-  import { ListAccounts } from '@/api/psou/account/api'
+  import { ListLegacyAccounts } from '@/api/psou/account/legacy'
+  import type { FormItem } from '@/components/core/forms/art-form/index.vue'
   import {
     CheckDistributeAccount,
     CreateDistributeAccount,
+    CreateDistributeAccountQRSession,
     DeleteDistributeAccount,
+    GetDistributeAccountQRSession,
     ListDistributeAccounts,
     ListDistributeChannels,
     UpdateDistributeAccount
@@ -109,16 +164,16 @@
   import type {
     CreateDistributeAccountRequest,
     DistributeAccount,
-    DistributeAccountExt,
+    DistributeAccountQRState,
     DistributeChannel,
     UpdateDistributeAccountRequest
   } from '@/api/psou/distribute-account/type'
-  import { formatTime } from '@/utils/time'
-
   defineOptions({ name: 'PsouDistributeAccount' })
 
   type TagType = 'primary' | 'success' | 'info' | 'warning' | 'danger'
   type CredentialMode = 'pan' | 'token'
+  type CredentialInputMode = 'qr' | 'manual'
+  type QRViewState = 'idle' | 'loading' | DistributeAccountQRState
 
   interface DistributeAccountForm extends Partial<DistributeAccount> {
     credentialMode: CredentialMode
@@ -130,9 +185,26 @@
   const currentData = ref<DistributeAccountForm>({ credentialMode: 'pan' })
   const checkingAccountId = ref<number | null>(null)
   const channels = ref<DistributeChannel[]>([])
-  const panAccounts = ref<Awaited<ReturnType<typeof ListAccounts>>['list']>([])
+  const panAccounts = ref<Awaited<ReturnType<typeof ListLegacyAccounts>>['list']>([])
+  const credentialInputMode = ref<CredentialInputMode>('qr')
+  const qrSessionId = ref('')
+  const qrImage = ref('')
+  const qrState = ref<QRViewState>('idle')
+  const qrTicket = ref('')
+  const qrExpiresAt = ref(0)
+  const qrLoading = ref(false)
 
-  const statusOptions = [
+  let qrPollTimer: ReturnType<typeof setTimeout> | null = null
+  let qrGeneration = 0
+
+  const qrPlatform = 'baidu'
+  const qrAppName = '百度 App'
+  const credentialInputModeOptions = [
+    { label: '扫码录入', value: 'qr' },
+    { label: '手工 Token', value: 'manual' }
+  ]
+
+  const filterStatusOptions = [
     { label: '正常', value: 0 },
     { label: '失效', value: 1 },
     { label: '冻结', value: 2 },
@@ -176,6 +248,72 @@
 
   const channelName = (code: string) => channelMap.value.get(code)?.name || code || '-'
 
+  const credentialPlaceholder = computed(() =>
+    dialogType.value === 'edit' && currentData.value.hasToken ? '留空表示保持原 Token' : '请输入渠道 Token'
+  )
+
+  const useCredentialQR = computed(
+    () => currentData.value.credentialMode === 'token' && credentialInputMode.value === 'qr'
+  )
+
+  const qrStateMeta = computed((): { label: string; type: TagType } => {
+    const map: Record<QRViewState, { label: string; type: TagType }> = {
+      idle: { label: '待获取', type: 'info' },
+      loading: { label: '加载中', type: 'info' },
+      pending: { label: '待扫码', type: 'warning' },
+      scanned: { label: '待确认', type: 'primary' },
+      confirmed: { label: '已完成', type: 'success' },
+      expired: { label: '已过期', type: 'warning' },
+      failed: { label: '失败', type: 'danger' }
+    }
+    return map[qrState.value]
+  })
+
+  const qrDescription = computed(() => {
+    switch (qrState.value) {
+      case 'pending':
+        return `请使用${qrAppName}扫码，二维码 3 分钟内有效。`
+      case 'scanned':
+        return '已扫码，请在手机上确认登录。'
+      case 'confirmed':
+        return '登录态已安全获取，点击“确定”保存到分发账号。'
+      case 'expired':
+        return '二维码已过期，请刷新后重新扫码。'
+      case 'failed':
+        return '登录二维码获取失败，请稍后重试。'
+      default:
+        return `二维码有效期至 ${new Date(qrExpiresAt.value * 1000).toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`
+    }
+  })
+
+  const qrEmptyText = computed(() =>
+    qrLoading.value ? '正在获取登录二维码…' : `使用${qrAppName}扫码录入登录态，无需手工复制 Token`
+  )
+
+  const validateCredential = (_rule: unknown, _value: unknown, callback: (error?: Error) => void) => {
+    if (currentData.value.credentialMode !== 'token') {
+      callback()
+      return
+    }
+    if (credentialInputMode.value === 'qr') {
+      if (!qrTicket.value) {
+        callback(new Error(`请先扫码完成${qrAppName}登录`))
+        return
+      }
+      callback()
+      return
+    }
+    const hasToken = Boolean(currentData.value.hasToken)
+    if (!hasToken && !String(currentData.value.token || '').trim()) {
+      callback(new Error('请输入渠道 Token'))
+      return
+    }
+    callback()
+  }
+
   const statusMeta = (status: number): { label: string; type: TagType } => {
     const map: Record<number, { label: string; type: TagType }> = {
       0: { label: '正常', type: 'success' },
@@ -187,16 +325,6 @@
       6: { label: '封禁', type: 'danger' }
     }
     return map[status] ?? { label: '未知', type: 'info' }
-  }
-
-  const parseExt = (raw?: string | null): DistributeAccountExt => {
-    if (!raw) return {}
-    try {
-      const ext = JSON.parse(raw)
-      return ext && typeof ext === 'object' && !Array.isArray(ext) ? ext : {}
-    } catch {
-      return {}
-    }
   }
 
   const searchForm = ref({
@@ -233,12 +361,12 @@
       props: {
         placeholder: '请选择账号状态',
         clearable: true,
-        options: statusOptions
+        options: filterStatusOptions
       }
     }
   ])
 
-  const formItems = computed(() => [
+  const formItems = computed<FormItem[]>(() => [
     {
       key: 'channelCode',
       label: '分发渠道',
@@ -254,10 +382,12 @@
       key: 'name',
       label: '账号名称',
       type: 'input',
+      tip: '保存后根据登录态自动获取',
+      tipPosition: 'after',
       props: {
-        placeholder: '请输入渠道内账号名称',
-        maxlength: 128,
-        rules: [{ required: true, message: '请输入账号名称', trigger: ['blur', 'change'] }]
+        disabled: true,
+        placeholder: '保存后自动获取账号名称',
+        maxlength: 128
       }
     },
     {
@@ -269,8 +399,9 @@
         placeholder: '请选择凭证来源',
         options: [
           { label: '关联网盘账号', value: 'pan' },
-          { label: '独立 Token', value: 'token' }
+          { label: '独立凭证', value: 'token' }
         ],
+        onChange: (value: CredentialMode) => handleCredentialModeChange(value),
         rules: [{ required: true, message: '请选择凭证来源', trigger: ['blur', 'change'] }]
       }
     },
@@ -281,6 +412,7 @@
       type: 'select',
       hidden: currentData.value.credentialMode !== 'pan',
       tip: '仅展示状态正常的网盘账号',
+      tipPosition: 'after',
       props: {
         placeholder: panAccountOptions.value.length ? '请选择网盘账号' : '暂无状态正常的网盘账号',
         filterable: true,
@@ -296,36 +428,34 @@
       label: '渠道 UID',
       type: 'input',
       hidden: currentData.value.credentialMode !== 'token',
+      tip: '保存后根据登录态自动获取',
+      tipPosition: 'after',
       props: {
-        placeholder: '请输入渠道侧用户 ID，可选',
+        disabled: true,
+        placeholder: '保存后自动获取渠道 UID',
         maxlength: 128
       }
     },
     {
       key: 'token',
       span: 24,
-      label: 'Token',
+      label: '用户凭证',
       type: 'input',
       hidden: currentData.value.credentialMode !== 'token',
-      tip: dialogType.value === 'edit' && currentData.value.hasToken ? '留空表示保持原 Token' : '',
       props: {
-        type: 'textarea',
-        rows: 4,
-        maxlength: 8192,
-        placeholder:
-          dialogType.value === 'edit' && currentData.value.hasToken ? '留空表示保持原 Token' : '请输入渠道 Token',
         rules:
-          currentData.value.credentialMode === 'token' && !(dialogType.value === 'edit' && currentData.value.hasToken)
-            ? [{ required: true, message: '请输入渠道 Token', trigger: ['blur', 'change'] }]
+          currentData.value.credentialMode === 'token'
+            ? [{ required: true, validator: validateCredential, trigger: ['blur', 'change'] }]
             : []
       }
     },
     {
       key: 'priority',
-      label: '调度优先级',
+      label: '调度权重',
       type: 'number',
       defaultValue: 0,
-      tip: '数值越大越优先',
+      tip: '数值越大权重越高',
+      tipPosition: 'after',
       props: {
         min: -999999,
         max: 999999,
@@ -339,6 +469,7 @@
       label: '额度上限',
       type: 'number',
       tip: '0 或留空表示不限制',
+      tipPosition: 'after',
       props: {
         min: 0,
         max: 999999999,
@@ -346,17 +477,6 @@
         controlsPosition: 'right',
         placeholder: '0 表示不限',
         style: { width: '100%' }
-      }
-    },
-    {
-      key: 'status',
-      label: '账号状态',
-      type: 'select',
-      hidden: dialogType.value === 'add',
-      props: {
-        placeholder: '请选择账号状态',
-        options: statusOptions,
-        rules: [{ required: true, message: '请选择账号状态', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -385,6 +505,106 @@
       }
     }
   ])
+
+  const stopQRPolling = () => {
+    if (qrPollTimer) {
+      clearTimeout(qrPollTimer)
+      qrPollTimer = null
+    }
+  }
+
+  const resetQRState = () => {
+    qrGeneration += 1
+    stopQRPolling()
+    qrSessionId.value = ''
+    qrImage.value = ''
+    qrState.value = 'idle'
+    qrTicket.value = ''
+    qrExpiresAt.value = 0
+    qrLoading.value = false
+  }
+
+  const scheduleQRPoll = (generation: number, delay = 2200) => {
+    stopQRPolling()
+    if (!dialogVisible.value || generation !== qrGeneration) return
+    qrPollTimer = setTimeout(() => {
+      void pollQRSession(generation)
+    }, delay)
+  }
+
+  const pollQRSession = async (generation: number) => {
+    if (!qrSessionId.value || qrTicket.value || generation !== qrGeneration) return
+    try {
+      const res = await GetDistributeAccountQRSession({ sessionId: qrSessionId.value })
+      if (generation !== qrGeneration) return
+      qrState.value = res.state
+      if (res.state === 'confirmed') {
+        qrTicket.value = res.qrTicket || ''
+        stopQRPolling()
+        if (qrTicket.value) {
+          ElMessage.success('扫码成功，提交后将更新分发账号登录态')
+        } else {
+          qrState.value = 'failed'
+        }
+        return
+      }
+      if (res.state === 'expired' || res.state === 'failed') {
+        stopQRPolling()
+        return
+      }
+      scheduleQRPoll(generation)
+    } catch {
+      if (generation !== qrGeneration) return
+      qrState.value = 'failed'
+      stopQRPolling()
+    }
+  }
+
+  const startQRSession = async () => {
+    if (qrLoading.value) return
+    resetQRState()
+    const generation = qrGeneration
+    qrState.value = 'loading'
+    qrLoading.value = true
+    try {
+      const res = await CreateDistributeAccountQRSession({ platform: qrPlatform })
+      if (generation !== qrGeneration) return
+      qrSessionId.value = res.sessionId
+      qrImage.value = res.image
+      qrExpiresAt.value = res.expiresAt
+      qrState.value = 'pending'
+      scheduleQRPoll(generation, 800)
+    } catch {
+      if (generation === qrGeneration) {
+        qrState.value = 'failed'
+      }
+    } finally {
+      if (generation === qrGeneration) {
+        qrLoading.value = false
+      }
+    }
+  }
+
+  const handleCredentialInputModeChange = (value: string | number | boolean) => {
+    if (value === 'manual') {
+      resetQRState()
+      return
+    }
+    if (value === 'qr' && !qrSessionId.value) {
+      void startQRSession()
+    }
+  }
+
+  const handleCredentialModeChange = (value: CredentialMode) => {
+    if (value === 'pan') {
+      currentData.value.token = ''
+      resetQRState()
+      return
+    }
+    currentData.value.panAccountId = undefined
+    credentialInputMode.value = 'qr'
+    void startQRSession()
+  }
 
   const operationItems = (row: DistributeAccount) => {
     const checking = checkingAccountId.value === row.id
@@ -457,61 +677,34 @@
         {
           prop: 'name',
           label: '账号名称',
-          minWidth: 180,
           useSlot: true,
           slotName: 'name'
         },
         {
           prop: 'channel',
           label: '渠道',
-          width: 110,
           useSlot: true,
           slotName: 'channel'
         },
         {
-          prop: 'credential',
-          label: '凭证来源',
-          minWidth: 170,
-          useSlot: true,
-          slotName: 'credential'
-        },
-        {
           prop: 'status',
           label: '状态',
-          width: 90,
           useSlot: true,
           slotName: 'status'
         },
         {
-          prop: 'reason',
-          label: '暂停原因',
-          minWidth: 160,
-          useSlot: true,
-          slotName: 'reason'
-        },
-        {
           prop: 'priority',
-          label: '优先级',
-          width: 90
+          label: '调度权重'
         },
         {
           prop: 'quota',
           label: '额度上限',
-          width: 100,
           useSlot: true,
           slotName: 'quota'
         },
         {
-          prop: 'lastCheckAt',
-          label: '最近检测',
-          width: 170,
-          useSlot: true,
-          slotName: 'lastCheckAt'
-        },
-        {
           prop: 'operation',
           label: '操作',
-          width: 230,
           fixed: 'right',
           useSlot: true,
           slotName: 'operation'
@@ -531,7 +724,7 @@
   }
 
   const loadPanAccounts = async () => {
-    const reply = await ListAccounts({
+    const reply = await ListLegacyAccounts({
       page: 1,
       pageSize: 200,
       status: 1,
@@ -542,7 +735,9 @@
   }
 
   const showDialog = (type: Form.DialogType, row?: DistributeAccount) => {
+    resetQRState()
     dialogType.value = type
+    credentialInputMode.value = type === 'edit' ? 'manual' : 'qr'
     currentData.value =
       type === 'add'
         ? {
@@ -566,30 +761,17 @@
     dialogVisible.value = true
   }
 
-  watch(
-    () => currentData.value.credentialMode,
-    (mode, previous) => {
-      if (!previous || mode === previous) return
-      if (mode === 'pan') {
-        currentData.value.token = ''
-      } else {
-        currentData.value.panAccountId = undefined
-      }
-    }
-  )
-
   const buildPayload = () => {
     const item = currentData.value
     const credentialMode = item.credentialMode
+    const usingQR = credentialMode === 'token' && credentialInputMode.value === 'qr'
     const quota = Number(item.quota)
     const reason = String(item.reason || '').trim()
     return {
       channelCode: String(item.channelCode || ''),
       panAccountId: credentialMode === 'pan' ? Number(item.panAccountId) : 0,
-      name: String(item.name || '').trim(),
-      uid: credentialMode === 'token' ? String(item.uid || '').trim() || undefined : undefined,
-      token: credentialMode === 'token' ? String(item.token || '').trim() || undefined : undefined,
-      status: dialogType.value === 'edit' ? Number(item.status ?? 0) : undefined,
+      token: credentialMode === 'token' && !usingQR ? String(item.token || '').trim() || undefined : undefined,
+      qrTicket: usingQR ? qrTicket.value || undefined : undefined,
       reason: Number(item.status) === 0 ? undefined : reason || undefined,
       priority: Number(item.priority) || 0,
       quota: Number.isFinite(quota) && quota > 0 ? quota : 0,
@@ -634,37 +816,128 @@
     refreshData()
   }
 
+  watch(dialogVisible, (visible) => {
+    if (!visible) resetQRState()
+  })
+
+  onBeforeUnmount(() => {
+    resetQRState()
+  })
+
   onMounted(async () => {
     await Promise.allSettled([loadChannels(), loadPanAccounts()])
   })
 </script>
 
 <style scoped>
-  .name-cell,
-  .credential-cell {
+  .name-cell {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
   }
 
-  .name-cell small,
-  .credential-cell small {
+  .name-cell small {
     overflow: hidden;
     color: var(--el-text-color-secondary);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .reason {
-    display: block;
-    overflow: hidden;
-    color: var(--el-text-color-regular);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .status-tag {
+    cursor: help;
   }
 
   .muted {
     color: var(--el-text-color-placeholder);
+  }
+
+  .credential-editor {
+    width: 100%;
+  }
+
+  .credential-mode {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .credential-mode-tip,
+  .credential-manual-tip {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+
+  .credential-manual-tip {
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .qr-panel {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+    min-height: 210px;
+    padding: 16px;
+    background: var(--el-fill-color-lighter);
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 10px;
+  }
+
+  .qr-frame {
+    position: relative;
+    width: 184px;
+    height: 184px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 8px;
+  }
+
+  .qr-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .qr-mask {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: var(--el-color-white);
+    background: rgb(0 0 0 / 62%);
+  }
+
+  .qr-detail {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .qr-detail p,
+  .qr-empty p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--el-text-color-regular);
+  }
+
+  .qr-empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    min-height: 178px;
+    color: var(--el-text-color-secondary);
+    text-align: center;
   }
 </style>

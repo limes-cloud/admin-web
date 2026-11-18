@@ -230,8 +230,7 @@ export function validateChineseIDCard(value: string): boolean {
   const trimmedValue = value.trim()
 
   // 18位身份证号码正则
-  const idCardRegex =
-    /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/
+  const idCardRegex = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/
 
   if (!idCardRegex.test(trimmedValue)) {
     return false

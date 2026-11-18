@@ -72,11 +72,13 @@
   import { ListCurrentRole } from '@/api/manager/role/api'
   import { CreateDeptRole, DeleteDeptRole, ListDeptRole } from '@/api/manager/deptrole/api'
   import { CreateDeptRoleRequest, Role } from '@/api/manager/deptrole/type'
+  import { getAppKeyword } from '@/utils/app-context'
 
   defineOptions({ name: 'DeptRole' })
 
   const router = useRouter()
   const deptId = Number(router.currentRoute.value.query.deptId)
+  const appKeyword = (router.currentRoute.value.query.app as string) || getAppKeyword()
 
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
@@ -105,7 +107,7 @@
   ]
 
   const roles = ref<Role[]>([])
-  ListCurrentRole().then((res) => {
+  ListCurrentRole({ app: appKeyword }).then((res) => {
     roles.value = res.list
   })
 
@@ -136,7 +138,7 @@
       color: 'danger',
       permission: 'manager:dept:role:delete',
       click: async (record: Role) => {
-        await DeleteDeptRole({ deptId: deptId, roleId: record.id })
+        await DeleteDeptRole({ deptId: deptId, roleId: record.id, app: appKeyword })
         refreshRemove()
       }
     }
@@ -164,6 +166,7 @@
         page: 1,
         pageSize: 10,
         deptId: deptId,
+        app: appKeyword,
         ...searchForm.value
       },
       columnsFactory: () => [
@@ -209,7 +212,7 @@
   // 处理弹窗提交事件
   const handleSubmit = async () => {
     const value = currentData.value
-    await CreateDeptRole({ ...value, deptId: deptId } as CreateDeptRoleRequest)
+    await CreateDeptRole({ ...value, deptId: deptId, app: appKeyword } as CreateDeptRoleRequest)
     ElMessage.success('创建成功')
     refreshCreate()
     dialogVisible.value = false

@@ -11,13 +11,7 @@
     @touchend="dragFinish"
   >
     <!-- 进度条 -->
-    <div
-      class="dv_progress_bar"
-      :class="{ goFirst2: isOk }"
-      ref="progressBar"
-      :style="progressBarStyle"
-    >
-    </div>
+    <div class="dv_progress_bar" :class="{ goFirst2: isOk }" ref="progressBar" :style="progressBarStyle"> </div>
 
     <!-- 提示文本 -->
     <div class="dv_text" :style="textStyle" ref="messageRef">
@@ -213,9 +207,7 @@
   const progressBarStyle = {
     background: props.progressBarBg,
     height: props.height + 'px',
-    borderRadius: props.circle
-      ? props.height / 2 + 'px 0 0 ' + props.height / 2 + 'px'
-      : props.radius
+    borderRadius: props.circle ? props.height / 2 + 'px 0 0 ' + props.height / 2 + 'px' : props.radius
   }
 
   // 文本样式计算
@@ -237,8 +229,7 @@
       state.isMoving = true
       handler.value.style.transition = 'none'
       // 计算拖拽起始位置
-      state.x =
-        (e.pageX || e.touches[0].pageX) - parseInt(handler.value.style.left.replace('px', ''), 10)
+      state.x = (e.pageX || e.touches[0].pageX) - parseInt(handler.value.style.left.replace('px', ''), 10)
     }
     emit('handlerMove')
   }

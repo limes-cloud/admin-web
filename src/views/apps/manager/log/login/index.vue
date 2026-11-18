@@ -66,11 +66,16 @@
   import { ListApp } from '@/api/manager/app/api'
   import { ListOAutherType } from '@/api/manager/oauther/api'
   import { OAutherType } from '@/api/manager/oauther/type'
+  import { getAppKeyword } from '@/utils/app-context'
 
   defineOptions({ name: 'User' })
 
+  const isManagerApp = getAppKeyword() === 'manager'
+
   // 搜索表单
   const searchForm = ref({
+    username: undefined,
+    app: getAppKeyword(),
     keyword: undefined,
     name: undefined,
     status: undefined
@@ -103,7 +108,7 @@
 
   const apps = ref<App[]>([])
   const getApps = (query?: string) => {
-    ListApp({ page: 1, pageSize: 10, name: query }).then((res) => {
+    ListApp({ page: 1, pageSize: 10, status: true, query }).then((res) => {
       apps.value = res.list
     })
   }
@@ -111,18 +116,10 @@
 
   const searchItems = computed(() => [
     {
-      label: '用户账户',
-      key: 'username',
-      type: 'input',
-      props: {
-        placeholder: '请输入用户账户',
-        clearable: true
-      }
-    },
-    {
       key: 'app',
       label: '所属应用',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,
@@ -138,8 +135,17 @@
         options: apps.value || [],
         props: {
           label: 'name',
-          value: 'id'
+          value: 'keyword'
         }
+      }
+    },
+    {
+      label: '用户账户',
+      key: 'username',
+      type: 'input',
+      props: {
+        placeholder: '请输入用户账户',
+        clearable: true
       }
     }
     // {

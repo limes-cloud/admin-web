@@ -88,15 +88,80 @@
           @cancel="dialogVisible = false"
         ></ArtForm>
       </ElDialog>
+
+      <!-- 测试弹窗：按模板变量试跑一次生成 -->
+      <ElDialog
+        v-model="testVisible"
+        :title="`测试提示词：${testRow?.title || ''}`"
+        :destroy-on-close="true"
+        width="640px"
+        align-center
+      >
+        <ElForm v-model="testVars" label-width="70px" label-position="left">
+          <ElFormItem label="场景">
+            <ElText type="info">{{
+              testType === 'image'
+                ? '图片生成（模型：' + (testRow?.model?.keyword || '') + '）'
+                : '文本生成（模型：' + (testRow?.model?.keyword || '') + '）'
+            }}</ElText>
+          </ElFormItem>
+          <ElFormItem v-for="key in testKeys" :key="key" :label="key">
+            <ElInput v-model="testVars[key]" :placeholder="`请输入模板变量 ${key}`" clearable />
+          </ElFormItem>
+          <ElFormItem v-if="testKeys.length === 0" label="参数">
+            <ElText type="info">该模板未使用 &#123;&#123;变量&#125;&#125;，可直接生成</ElText>
+          </ElFormItem>
+        </ElForm>
+        <div style="margin-bottom: 12px; text-align: right">
+          <ElButton type="primary" :icon="VideoPlay" :loading="testLoading" @click="handleTest">生成</ElButton>
+        </div>
+        <template v-if="testType === 'image'">
+          <div style="margin-bottom: 4px; font-weight: 600">生成结果：</div>
+          <div
+            v-if="testImageKeys.length > 0"
+            style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center"
+          >
+            <ElImage
+              v-for="key in testImageKeys"
+              :key="key"
+              :src="rurl(key)"
+              :preview-src-list="testImageKeys.map((k) => rurl(k))"
+              fit="cover"
+              style="width: 160px; height: 160px; border-radius: 4px"
+            />
+          </div>
+          <ElEmpty v-else description="暂无生成结果" :image-size="60" />
+        </template>
+        <template v-else-if="testResult">
+          <div style="margin-bottom: 4px; font-weight: 600">生成结果：</div>
+          <ElInput :model-value="testResult.content" type="textarea" :rows="8" readonly />
+          <template v-if="testResult.format">
+            <ElText type="info" style="display: block; margin-top: 8px">结构化结果（JSON）：</ElText>
+            <pre
+              style="
+                max-height: 220px;
+                overflow: auto;
+                background: var(--el-fill-color-light);
+                padding: 8px;
+                border-radius: 4px;
+              "
+              >{{ JSON.stringify(testResult.format, null, 2) }}</pre
+            >
+          </template>
+        </template>
+      </ElDialog>
     </ElCard>
   </div>
 </template>
 
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
-  import { ElMessageBox } from 'element-plus'
-  import { Edit, Plus, Expand } from '@element-plus/icons-vue'
+  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { Edit, Plus, Expand, VideoPlay } from '@element-plus/icons-vue'
   import { CreatePrompt, DeletePrompt, ListPrompt, ListPromptClassify, UpdatePrompt } from '@/api/ai-agent/prompt/api'
+  import { GeneratePromptText, GeneratePromptImage } from '@/api/ai-agent/generate/api'
+  import { GeneratePromptTextReply } from '@/api/ai-agent/generate/type'
+  import { rurl } from '@/utils/resource/url'
   import { CreatePromptRequest, Prompt, PromptClassify, UpdatePromptRequest } from '@/api/ai-agent/prompt/type'
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
@@ -194,6 +259,15 @@
   ])
 
   const operationItems = [
+    {
+      icon: VideoPlay,
+      label: '测试提示词',
+      color: 'primary',
+      permission: 'ai-agent:prompt:query',
+      click: (record: Prompt) => {
+        openTest(record)
+      }
+    },
     {
       icon: Edit,
       label: '修改提示词',
@@ -424,23 +498,23 @@
     {
       key: 'extraObject.size',
       label: '图片尺寸',
-      type: 'input',
-      tip: '图片尺寸（1024x1024）',
+      type: 'select',
+      tip: '常见图片尺寸（qwen-image 支持 512x512 ~ 2560x2560）',
       span: 12,
       hidden: currentModel.value.type !== 'image',
       defaultValue: '1024x1024',
       props: {
-        rules: [
-          {
-            required: true,
-            message: '请输入图片尺寸（1024x1024）,最小尺寸512，最大尺寸2048',
-            trigger: ['blur', 'change']
-          }
-        ],
-        step: 0.1,
-        max: 1,
-        min: 0,
-        showStops: true
+        placeholder: '请选择图片尺寸',
+        rules: [{ required: true, message: '请选择图片尺寸', trigger: ['blur', 'change'] }],
+        // 仅常见尺寸可选，避免输入非法值（如 256x256 等小于下限的尺寸）
+        options: [
+          { label: '512 × 512', value: '512x512' },
+          { label: '768 × 768', value: '768x768' },
+          { label: '1024 × 1024', value: '1024x1024' },
+          { label: '1280 × 720', value: '1280x720' },
+          { label: '720 × 1280', value: '720x1280' },
+          { label: '1440 × 810', value: '1440x810' }
+        ]
       }
     },
     {
@@ -453,22 +527,6 @@
       defaultValue: '/ai-agent/prompt/image',
       props: {
         rules: [{ required: true, message: '请输入资源存储路径', trigger: ['blur', 'change'] }],
-        step: 0.1,
-        max: 1,
-        min: 0,
-        showStops: true
-      }
-    },
-    {
-      key: 'extraObject.store',
-      label: '存储设施',
-      type: 'input',
-      tip: '资源中心存储设施',
-      span: 12,
-      hidden: currentModel.value.type !== 'image',
-      defaultValue: 'local',
-      props: {
-        rules: [{ required: true, message: '请输入资源存储设施', trigger: ['blur', 'change'] }],
         step: 0.1,
         max: 1,
         min: 0,
@@ -520,12 +578,14 @@
     if (row) {
       currentData.value.extraObject = JSON.parse(row.extra || '{}')
 
-      // 初始化模型选项
-      models.value.push({
+      // 初始化模型选择：编辑时同步模型类型，控制 extra 配置项显隐（onChange 仅在用户切换时触发）
+      const modelItem = {
         id: row.model.id,
         name: row.model.keyword + '（' + row.model.description + '）',
         type: row.model.type
-      } as Model)
+      } as Model
+      currentModel.value = modelItem
+      models.value.push(modelItem)
 
       // 初始化类型选项
       classifies.value.push({
@@ -579,5 +639,55 @@
 
   const handleJumpClassify = () => {
     router.push({ name: 'AIAgentPromptClassify' })
+  }
+
+  // ---- 测试能力：按模板变量试跑一次生成（复用 /ai-agent/api/generate/prompt/text）----
+  const testVisible = ref(false)
+  const testRow = ref<Prompt | null>(null)
+  const testVars = ref<Record<string, string>>({})
+  const testKeys = ref<string[]>([])
+  const testResult = ref<GeneratePromptTextReply | null>(null)
+  const testImageKeys = ref<string[]>([])
+  const testLoading = ref(false)
+  const testType = ref<'text' | 'image'>('text')
+
+  // extractVars 提取模板中的 {{var}} / {{.var}} 变量（去重）
+  const extractVars = (prompt: string): string[] => {
+    const set = new Set<string>()
+    for (const m of prompt.matchAll(/\{\{([\w.]+)\}\}/g)) {
+      set.add(m[1].replace(/\./g, ''))
+    }
+    return [...set]
+  }
+
+  const openTest = (row: Prompt) => {
+    testRow.value = row
+    const keys = extractVars(row.prompt)
+    testKeys.value = keys
+    testVars.value = Object.fromEntries(keys.map((k) => [k, '']))
+    testResult.value = null
+    testImageKeys.value = []
+    // 按提示词绑定的模型类型自动路由（image→图片生成，其余→文本生成）；模型缺失时兜底文本
+    testType.value = row.model?.type === 'image' ? 'image' : 'text'
+    testVisible.value = true
+  }
+
+  const handleTest = async () => {
+    if (!testRow.value) return
+    testLoading.value = true
+    try {
+      if (testType.value === 'image') {
+        // 图片生成：后端返回对象 key（内容指纹），经 rurl 走 302 展示接口直接展示图片
+        const res = await GeneratePromptImage({ prompt: testRow.value.uuid, variables: { ...testVars.value } })
+        testImageKeys.value = res.list || []
+      } else {
+        testResult.value = await GeneratePromptText({ prompt: testRow.value.uuid, variables: { ...testVars.value } })
+      }
+      ElMessage.success('生成成功')
+    } catch {
+      ElMessage.error('生成失败，请检查模型/密钥配置或模板变量')
+    } finally {
+      testLoading.value = false
+    }
   }
 </script>

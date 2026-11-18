@@ -88,50 +88,93 @@
   import { Delete } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
   import Menu from './menu/index.vue'
+  import { getAppKeyword } from '@/utils/app-context'
+  import { ListApp } from '@/api/manager/app/api'
+  import { App } from '@/api/manager/app/type'
 
   const router = useRouter()
 
   defineOptions({ name: 'Role' })
 
+  const isManagerApp = getAppKeyword() === 'manager'
+  const apps = ref<App[]>([])
+  const getApps = (query?: string) => {
+    if (!isManagerApp) return
+    ListApp({ page: 1, pageSize: 10, status: true, query }).then((res) => {
+      apps.value = res.list
+    })
+  }
+  getApps()
+
   // 弹窗相关
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const currentData = ref<Partial<Role>>({})
+  const currentData = ref<Partial<Role> & { app?: string }>({})
 
   // 搜索表单
-  const searchForm = ref({
+  const searchForm = ref<{ app?: string; keyword?: string; name?: string; status?: boolean }>({
+    app: getAppKeyword(),
     keyword: undefined,
     name: undefined,
     status: undefined
   })
 
-  const searchItems = [
-    {
-      label: '角色标识',
-      key: 'keyword',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入角色标识', clearable: true }
-    },
-    {
-      label: '角色名称',
-      key: 'name',
-      type: 'input',
-      props: { maxlength: '32', placeholder: '请输入角色名称', clearable: true }
-    },
-    {
-      label: '角色状态',
-      key: 'status',
-      type: 'select',
-      props: {
-        placeholder: '请选择角色状态',
-        clearable: true,
-        options: [
-          { label: '正常', value: true },
-          { label: '禁用', value: false }
-        ]
+  const selectedApp = computed(() => searchForm.value.app || getAppKeyword())
+  const selectedAppName = computed(() => {
+    return apps.value.find((item) => item.keyword === selectedApp.value)?.name || selectedApp.value
+  })
+
+  const searchItems = computed(() => {
+    const baseItems = [
+      {
+        label: '角色标识',
+        key: 'keyword',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入角色标识', clearable: true }
+      },
+      {
+        label: '角色名称',
+        key: 'name',
+        type: 'input',
+        props: { maxlength: '32', placeholder: '请输入角色名称', clearable: true }
+      },
+      {
+        label: '角色状态',
+        key: 'status',
+        type: 'select',
+        props: {
+          placeholder: '请选择角色状态',
+          clearable: true,
+          options: [
+            { label: '正常', value: true },
+            { label: '禁用', value: false }
+          ]
+        }
       }
-    }
-  ]
+    ]
+    if (!isManagerApp) return baseItems
+    return [
+      {
+        label: '所属应用',
+        key: 'app',
+        type: 'select',
+        props: {
+          placeholder: '请选择所属应用',
+          clearable: true,
+          filterable: true,
+          remote: true,
+          remoteMethod: (query: string) => getApps(query),
+          options: apps.value,
+          props: { label: 'name', value: 'keyword' },
+          onChange: (value: string) => {
+            searchForm.value.app = value
+            handleSearch()
+          }
+        }
+      },
+      ...baseItems
+    ]
+  })
 
   const menu = useTemplateRef('menu')
 
@@ -143,7 +186,7 @@
       permission: 'manager:role:menu:query',
       click: async (record: Role) => {
         currentData.value = record
-        menu.value?.show(record.id)
+        menu.value?.show(record.id, selectedApp.value, selectedAppName.value)
       }
     },
     {
@@ -152,7 +195,7 @@
       color: 'primary',
       permission: 'manager:role:entity:query',
       click: async (record: Role) => {
-        router.push({ name: 'RoleEntity', query: { roleId: record.id } })
+        router.push({ name: 'RoleEntity', query: { roleId: record.id, app: selectedApp.value } })
         // showDialog('add', { parent: record, parentId: record.id } as Role)
       }
     },
@@ -181,7 +224,7 @@
       color: 'danger',
       permission: 'manager:role:delete',
       click: async (record: Role) => {
-        await DeleteRole({ id: record.id })
+        await DeleteRole({ id: record.id, app: selectedApp.value })
         refreshRemove()
       }
     }
@@ -311,7 +354,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: Role): void => {
     dialogType.value = type
-    currentData.value = row || {}
+    currentData.value = { ...(row || {}), app: selectedApp.value }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -321,11 +364,11 @@
   const handleSubmit = async () => {
     const value = currentData.value
     if (dialogType.value === 'add') {
-      await CreateRole(value as CreateRoleRequest)
+      await CreateRole({ ...value, app: value.app || selectedApp.value } as CreateRoleRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
-      await UpdateRole(value as UpdateRoleRequest)
+      await UpdateRole({ ...value, app: value.app || selectedApp.value } as UpdateRoleRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
@@ -341,7 +384,7 @@
           type: 'warning'
         })
           .then(async () => {
-            await UpdateRole({ id: item.id, status: !item.status })
+            await UpdateRole({ id: item.id, status: !item.status, app: selectedApp.value })
             ElMessage.success('修改成功')
             refreshUpdate()
             resolve(true)

@@ -1,10 +1,12 @@
 export interface ListRoleRequest {
+  app?: string
   name?: string
   keyword?: string
 }
 
 export interface Role {
   id: number
+  app?: string
   parentId: number
   parent?: Role
   name: string
@@ -21,6 +23,7 @@ export interface ListRoleReply {
 }
 
 export interface CreateRoleRequest {
+  app?: string
   parentId: number
   name: string
   keyword: string
@@ -33,6 +36,7 @@ export interface CreateRoleReply {
 
 export interface UpdateRoleRequest {
   id: number
+  app?: string
   parentId?: number
   name?: string
   status?: boolean
@@ -41,6 +45,7 @@ export interface UpdateRoleRequest {
 
 export interface DeleteRoleRequest {
   id: number
+  app?: string
 }
 
 export interface DeleteRoleReply {

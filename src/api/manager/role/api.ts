@@ -1,10 +1,17 @@
 import request from '@/utils/http'
 
-import { ListRoleReply, CreateRoleReply, CreateRoleRequest, UpdateRoleRequest, DeleteRoleRequest } from './type'
+import {
+  ListRoleReply,
+  ListRoleRequest,
+  CreateRoleReply,
+  CreateRoleRequest,
+  UpdateRoleRequest,
+  DeleteRoleRequest
+} from './type'
 
 // ListRole 获取角色信息列表
-export function ListCurrentRole() {
-  return request.get<ListRoleReply>({ url: '/manager/api/current/roles' })
+export function ListCurrentRole(params?: ListRoleRequest) {
+  return request.get<ListRoleReply>({ url: '/manager/api/current/roles', params })
 }
 
 // ListRole 获取角色信息列表

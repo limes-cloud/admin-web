@@ -89,12 +89,7 @@
     return Math.max(min, Math.min(value, max))
   }
 
-  const formatNumber = (
-    value: number,
-    decimals: number,
-    decimal: string,
-    separator: string
-  ): string => {
+  const formatNumber = (value: number, decimals: number, decimal: string, separator: string): string => {
     let result = decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString()
 
     // 处理小数点符号
@@ -117,9 +112,7 @@
   const safeDuration = computed(() =>
     clamp(validateNumber(props.duration, 'duration', DEFAULT_DURATION), MIN_DURATION, MAX_DURATION)
   )
-  const safeDecimals = computed(() =>
-    clamp(validateNumber(props.decimals, 'decimals', 0), 0, MAX_DECIMALS)
-  )
+  const safeDecimals = computed(() => clamp(validateNumber(props.decimals, 'decimals', 0), 0, MAX_DECIMALS))
   const safeEasing = computed(() => {
     const easing = props.easing
     if (!(easing in TransitionPresets)) {

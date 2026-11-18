@@ -1,5 +1,5 @@
 <template>
-  <ElTable :data="data" border :max-height="400" style="width:100%">
+  <ElTable :data="data" border :max-height="400" style="width: 100%">
     <ElTableColumn label="变更类型" width="100">
       <template #default="{ row }">
         <ElTag v-if="row.type === 'add'" type="primary">增加字段</ElTag>

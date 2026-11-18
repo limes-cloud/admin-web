@@ -78,11 +78,7 @@
     }
 
     const rect = formBoxRef.value.getBoundingClientRect()
-    const inside =
-      clientX >= rect.left &&
-      clientX <= rect.right &&
-      clientY >= rect.top &&
-      clientY <= rect.bottom
+    const inside = clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
 
     if (!inside && nodes.value) {
       // 鼠标释放不在设计区，撤销这次添加

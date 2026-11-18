@@ -29,7 +29,14 @@
           default-expand-all
         >
           <template #icon="{ row }">
-            <ArtIcon v-if="row.icon && (mdiReady || !row.icon.startsWith('mdi:'))" :value="row.icon" :size="20" />
+            <ElImage
+              v-if="row.icon"
+              class="category-icon"
+              :src="rurl(row.icon)"
+              fit="cover"
+              :preview-src-list="[rurl(row.icon)]"
+              preview-teleported
+            />
             <span v-else class="muted">-</span>
           </template>
           <template #status="{ row }">
@@ -41,6 +48,12 @@
               :disabled="row.isHome"
               :before-change="handleUpdateStatus(row)"
             />
+          </template>
+          <template #iconColor="{ row }">
+            <span class="category-color">
+              <i class="category-color__dot" :style="{ backgroundColor: row.iconColor }" />
+              {{ row.iconColor }}
+            </span>
           </template>
           <template #isHome="{ row }">
             <ElTag v-if="row.parentId === 0" :type="row.isHome ? 'success' : 'info'" effect="light" size="small">
@@ -68,29 +81,34 @@
           :span="24"
           @submit="handleSubmit"
           @cancel="dialogVisible = false"
-        />
+        >
+          <template #icon>
+            <CategoryIconBuilder v-model="currentData.icon" v-model:icon-color="currentData.iconColor" />
+          </template>
+        </ArtForm>
       </ElDialog>
     </ElCard>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref, watch } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { Delete, Edit, HomeFilled, Plus } from '@element-plus/icons-vue'
 
   import { useTable } from '@/composables/useTable'
-  import { CreateCategory, DeleteCategory, ListCategories, UpdateCategory } from '@/api/psou/category/api'
+  import { CreateCategory, DeleteCategory, ListCategory, UpdateCategory } from '@/api/psou/category/api'
   import type { Category, CreateCategoryRequest, UpdateCategoryRequest } from '@/api/psou/category/type'
+  import { rurl } from '@/utils/resource/url'
   import { formatTime } from '@/utils/time'
-  import { loadMdiIcons } from '@/utils/iconify'
   import { useCategoryOptions } from '../useCategoryOptions'
+  import type { FormItem } from '@/components/core/forms/art-form/index.vue'
+  import CategoryIconBuilder from './components/icon-builder.vue'
 
   defineOptions({ name: 'PsouCategory' })
 
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
-  const mdiReady = ref(false)
   const currentData = ref<Partial<Category>>({})
   // 从一级分类行内新增子分类时，记录预设的上级分类
   const parentPresetId = ref<number | undefined>(undefined)
@@ -127,7 +145,7 @@
     }
   ])
 
-  const formItems = computed(() => [
+  const formItems = computed<FormItem[]>(() => [
     {
       key: 'name',
       label: '分类名称',
@@ -140,13 +158,10 @@
     },
     {
       key: 'icon',
-      label: '分类图标',
-      type: 'icon',
+      label: '图标图片',
+      type: 'input',
       props: {
-        width: '100% !important',
-        enableIconify: true,
-        placeholder: '请选择分类图标',
-        rules: [{ required: true, message: '请选择分类图标', trigger: ['blur', 'change'] }]
+        rules: [{ required: true, message: '请生成分类图标', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -182,6 +197,7 @@
       hidden: Number(currentData.value.parentId) !== 0,
       defaultValue: false,
       tip: Number(currentData.value.status) !== 1 ? '隐藏分类不能设为首页' : '',
+      tipPosition: 'after',
       props: {
         activeText: '是',
         inactiveText: '否',
@@ -253,7 +269,7 @@
     refreshRemove
   } = useTable({
     core: {
-      apiFn: ListCategories,
+      apiFn: ListCategory,
       apiParams: { ...searchForm.value },
       excludeParams: ['page', 'pageSize'],
       columnsFactory: () => [
@@ -268,6 +284,13 @@
           width: 100,
           useSlot: true,
           slotName: 'icon'
+        },
+        {
+          prop: 'iconColor',
+          label: '主色',
+          width: 120,
+          useSlot: true,
+          slotName: 'iconColor'
         },
         {
           prop: 'sort',
@@ -322,7 +345,15 @@
     parentPresetId.value = parentId
     currentData.value =
       type === 'add'
-        ? { parentId: parentId ?? 0, name: '', icon: '', sort: 0, status: 1, isHome: false }
+        ? {
+            parentId: parentId ?? 0,
+            name: '',
+            icon: '',
+            iconColor: '#2463eb',
+            sort: 0,
+            status: 1,
+            isHome: false
+          }
         : { ...(row as Category) }
     dialogVisible.value = true
   }
@@ -334,6 +365,7 @@
       parentId,
       name: String(item.name || '').trim(),
       icon: String(item.icon || '').trim(),
+      iconColor: String(item.iconColor || '#2463eb').trim(),
       sort: Number(item.sort) || 0,
       status: Number(item.status) || 0,
       isHome: parentId === 0 ? Boolean(item.isHome) : false
@@ -389,25 +421,12 @@
       parentId: item.parentId,
       name: item.name,
       icon: item.icon,
+      iconColor: item.iconColor,
       sort: item.sort,
       status: item.status,
       isHome: item.parentId === 0 ? Boolean(item.isHome) : false
     } as UpdateCategoryRequest
   }
-
-  // 列表出现 mdi 图标时再加载图标库，避免无谓的大文件下载
-  watch(
-    () => data.value,
-    (list) => {
-      if (mdiReady.value) return
-      if ((list as Category[]).some((item) => item.icon?.startsWith('mdi:'))) {
-        loadMdiIcons()
-          .then(() => (mdiReady.value = true))
-          .catch(() => {})
-      }
-    },
-    { immediate: true }
-  )
 
   onMounted(() => {
     void loadCategories()
@@ -417,5 +436,26 @@
 <style scoped>
   .muted {
     color: var(--el-text-color-placeholder);
+  }
+
+  .category-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .category-color {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    color: var(--el-text-color-secondary);
+    font-size: 12px;
+  }
+
+  .category-color__dot {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--el-border-color);
+    border-radius: 4px;
   }
 </style>

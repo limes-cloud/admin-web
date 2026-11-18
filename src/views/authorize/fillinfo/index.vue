@@ -11,11 +11,7 @@
         <div class="fill-box">
           <div class="fill-wrap">
             <div class="form" v-if="schema">
-              <FormRenderer
-                ref="rendererRef"
-                :schema="schema"
-                v-model="formData"
-              />
+              <FormRenderer ref="rendererRef" :schema="schema" v-model="formData" />
               <div class="form-footer">
                 <ElButton type="primary" :loading="submitting" @click="handleSubmit">提交</ElButton>
               </div>

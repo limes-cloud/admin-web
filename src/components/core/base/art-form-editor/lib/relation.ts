@@ -33,12 +33,17 @@ export const evaluateRelation = (relation: NodeRelation, formData: Record<string
     case 'contains':
       return typeof val === 'string' && val.includes(String(relation.value))
     case 'between':
-      return Array.isArray(relation.value)
-        && Number(val) >= Number(relation.value[0])
-        && Number(val) <= Number(relation.value[1])
+      return (
+        Array.isArray(relation.value) &&
+        Number(val) >= Number(relation.value[0]) &&
+        Number(val) <= Number(relation.value[1])
+      )
     case 'pattern':
-      try { return new RegExp(String(relation.value)).test(String(val ?? '')) }
-      catch { return false }
+      try {
+        return new RegExp(String(relation.value)).test(String(val ?? ''))
+      } catch {
+        return false
+      }
     default:
       return true
   }
@@ -57,10 +62,7 @@ export interface RelationResult {
 /**
  * 多条件联合求值引擎
  */
-export const evaluateRelations = (
-  node: FormNode,
-  formData: Record<string, any>
-): RelationResult => {
+export const evaluateRelations = (node: FormNode, formData: Record<string, any>): RelationResult => {
   const relations = node.relations || []
 
   if (!relations.length) {
@@ -104,7 +106,7 @@ export const evaluateRelations = (
   }
 
   return {
-    visible: matched.hide ? false : (matched.show ? true : !node.config.hidden),
+    visible: matched.hide ? false : matched.show ? true : !node.config.hidden,
     disabled: matched.disabled,
     required: matched.required || !!node.config.required,
     value: assignValue

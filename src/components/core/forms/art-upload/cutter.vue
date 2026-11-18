@@ -1,7 +1,7 @@
 <!-- 图片裁剪组件 github: https://github.com/acccccccb/vue-img-cutter/tree/master -->
 <template>
   <div class="cutter-container">
-    <div class="cutter-component">
+    <div class="cutter-component" :class="{ 'has-preview': showPreview }">
       <ImgCutter
         ref="imgCutterModal"
         @cutDown="cutDownImg"
@@ -68,6 +68,8 @@
     imgMove?: boolean
     /** 是否允许缩放 */
     scaleAble?: boolean
+    /** 是否允许裁剪框超出底图 */
+    toolBoxOverflow?: boolean
 
     // 图片相关
     /** 是否显示原始图片 */
@@ -102,6 +104,23 @@
     file: File
     blob: Blob
     dataURL: string
+  }
+
+  interface CutterInstance {
+    drawImg: {
+      img?: HTMLImageElement
+      x: number
+      y: number
+      width: number
+      height: number
+    }
+    toolBox: { x: number; y: number; width: number; height: number }
+    scaleImg: { rate: number }
+    scaleAble: boolean
+    scaleImgWheel: (event: Event) => void
+    printImg: () => void
+    handleOpen: (image: { name: string; src: string }) => void
+    $refs: { toolBox?: HTMLElement }
   }
 
   const props = withDefaults(defineProps<CutterProps>(), {
@@ -144,7 +163,7 @@
   const emit = defineEmits(['success', 'error', 'imageLoadComplete', 'imageLoadError'])
 
   const temImgPath = ref('')
-  const imgCutterModal = ref()
+  const imgCutterModal = ref<CutterInstance>()
 
   // 计算属性：整合所有ImgCutter的props
   const cutterProps = computed(() => ({
@@ -181,6 +200,67 @@
     }
   }
 
+  function wheelScale(event: WheelEvent): number {
+    const legacyEvent = event as WheelEvent & { wheelDelta?: number; detail?: number }
+    if (typeof legacyEvent.wheelDelta === 'number') {
+      return -(legacyEvent.wheelDelta / 40)
+    }
+    if (typeof legacyEvent.detail === 'number' && legacyEvent.detail !== 0) {
+      return legacyEvent.detail
+    }
+    return event.deltaY / 40
+  }
+
+  function handleCenterZoom(event: Event) {
+    const instance = imgCutterModal.value
+    if (!instance?.drawImg.img || instance.scaleAble !== true) {
+      event.preventDefault()
+      return
+    }
+
+    const scale = wheelScale(event as WheelEvent)
+    const aspectRatio = Number(instance.scaleImg.rate)
+    if (!Number.isFinite(scale) || scale === 0 || !Number.isFinite(aspectRatio) || aspectRatio <= 0) {
+      event.preventDefault()
+      return
+    }
+
+    const { drawImg, toolBox } = instance
+    const minWidth = Math.max(50, toolBox.width, toolBox.height * aspectRatio)
+    const nextWidth = Math.max(minWidth, drawImg.width - scale * 9)
+    if (Math.abs(nextWidth - drawImg.width) < 0.01) {
+      event.preventDefault()
+      return
+    }
+
+    const ratio = nextWidth / drawImg.width
+    const centerX = toolBox.x + toolBox.width / 2
+    const centerY = toolBox.y + toolBox.height / 2
+    const nextHeight = nextWidth / aspectRatio
+
+    drawImg.x = centerX - (centerX - drawImg.x) * ratio
+    drawImg.y = centerY - (centerY - drawImg.y) * ratio
+    drawImg.width = nextWidth
+    drawImg.height = nextHeight
+    drawImg.x = Math.min(toolBox.x, Math.max(toolBox.x + toolBox.width - nextWidth, drawImg.x))
+    drawImg.y = Math.min(toolBox.y, Math.max(toolBox.y + toolBox.height - nextHeight, drawImg.y))
+
+    instance.printImg()
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  function bindCenterZoom() {
+    const instance = imgCutterModal.value
+    const toolBox = instance?.$refs.toolBox
+    if (!toolBox) return
+
+    const wheelHost = toolBox as HTMLElement & { onmousewheel: ((event: Event) => void) | null }
+    toolBox.removeEventListener('DOMMouseScroll', instance.scaleImgWheel)
+    toolBox.addEventListener('DOMMouseScroll', handleCenterZoom)
+    wheelHost.onmousewheel = handleCenterZoom
+  }
+
   // 生命周期钩子
   onMounted(() => {
     if (props.imgUrl) {
@@ -213,6 +293,7 @@
   // 图片加载完成
   function handleImageLoadComplete(result: any) {
     emit('imageLoadComplete', result)
+    setTimeout(bindCenterZoom, 0)
   }
 
   // 图片加载失败
@@ -242,7 +323,6 @@
       box-sizing: border-box;
       display: flex;
       justify-content: flex-end;
-      padding: 0 20px;
     }
 
     .title {
@@ -252,7 +332,9 @@
     }
 
     .cutter-component {
-      margin-right: 30px;
+      &.has-preview {
+        margin-right: 30px;
+      }
     }
 
     .preview-container {

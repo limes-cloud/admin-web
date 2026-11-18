@@ -5,6 +5,7 @@ import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
 import { RefreshToken } from '@/api/manager/authorize/api'
 import { getAppKeyword } from '@/utils/app-context'
+import { getAPIBaseURL } from '@/utils/runtime-config'
 
 /** 请求配置常量 */
 const REQUEST_TIMEOUT = 15000
@@ -23,13 +24,13 @@ interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
   showSuccessMessage?: boolean
 }
 
-const { VITE_API_URL, VITE_WITH_CREDENTIALS } = import.meta.env
+const { VITE_WITH_CREDENTIALS } = import.meta.env
 export const APP_KEY = getAppKeyword()
 
 /** Axios实例 */
 const axiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT,
-  baseURL: VITE_API_URL,
+  baseURL: getAPIBaseURL(),
   withCredentials: VITE_WITH_CREDENTIALS === 'true',
   validateStatus: (status) => status >= 200 && status <= 403,
   transformResponse: [

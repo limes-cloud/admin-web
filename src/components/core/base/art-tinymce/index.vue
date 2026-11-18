@@ -1,12 +1,10 @@
 <script lang="ts" setup>
   import { computed, onMounted, onUnmounted } from 'vue'
 
-  import cryptoJs from 'crypto-js'
-
   import tinymce from 'tinymce/tinymce' // tinymce核心文件
   import Editor from '@tinymce/tinymce-vue'
-  import { PrepareUploadFile, UploadChunkFile } from '@/api/resource/file/api'
-  import { PrepareUploadFileReply } from '@/api/resource/file/type'
+  import { rurl } from '@/utils/resource/url'
+  import { uploadFile } from '@/utils/resource/upload'
 
   import 'tinymce/models/dom' // 引入dom模块。从 tinymce6，开始必须有此模块导入
   import 'tinymce/themes/silver' // 默认主题
@@ -45,7 +43,6 @@
   import 'tinymce/plugins/visualblocks' // 显示元素范围
   import 'tinymce/plugins/visualchars' // 显示不可见字符
   import 'tinymce/plugins/wordcount' // 字数统计
-  import { rurl } from '@/utils/resource/url'
 
   const props = defineProps({
     modelValue: {
@@ -70,7 +67,6 @@
       default: '/tinymec'
     }
   })
-  const imageHost = ref('')
 
   const emit = defineEmits(['update:modelValue'])
 
@@ -82,6 +78,43 @@
       emit('update:modelValue', value)
     }
   })
+
+  const OBJECT_KEY_PATTERN = /^[a-f0-9]{32}\.[a-z0-9]+$/
+
+  // 从对象展示地址（key 查询参数）或预签名地址（末段文件名）中提取对象 key
+  const imageKeyFromSrc = (src: string): string => {
+    if (!src) return ''
+    try {
+      const url = new URL(src, window.location.origin)
+      const queryKey = url.searchParams.get('key') || ''
+      if (OBJECT_KEY_PATTERN.test(queryKey)) return queryKey
+      const name = (url.pathname.split('/').pop() || '').toLowerCase()
+      if (OBJECT_KEY_PATTERN.test(name)) return name
+    } catch {
+      // 非合法 URL 不作为对象图片处理
+    }
+    return ''
+  }
+
+  // 编辑器内统一展示稳定的 object-by-key 地址，并始终保留 data-id（对象 key）
+  const normalizeImageElement = (editor: any, img: HTMLImageElement) => {
+    const key = imageKeyFromSrc(img.getAttribute('src') || '') || img.getAttribute('data-id') || ''
+    if (!OBJECT_KEY_PATTERN.test(key)) return
+    if (img.getAttribute('data-id') !== key) {
+      editor.dom.setAttrib(img, 'data-id', key)
+    }
+    const stableSrc = rurl(key)
+    if (stableSrc && img.getAttribute('src') !== stableSrc) {
+      editor.dom.setAttrib(img, 'src', stableSrc)
+    }
+  }
+
+  const normalizeImages = (editor: any) => {
+    editor
+      .getBody()
+      ?.querySelectorAll('img')
+      .forEach((img: HTMLImageElement) => normalizeImageElement(editor, img))
+  }
 
   const initOptions = {
     language: 'zh-Hans', // 汉化
@@ -132,116 +165,47 @@
     // 如需ajax上传可参考https://www.luweipai.cn/html/1670332196/
     images_file_types: 'jpeg,jpg,png,gif,bmp',
 
-    images_upload_handler: async (blobInfo: { blob: () => File }, progress: (arg0: number) => void) => {
-      const getUrlHost = (url: string): string => {
-        try {
-          const urlObj = new URL(url)
-          return urlObj.host
-        } catch {
-          return ''
+    images_upload_handler: async (
+      blobInfo: { blob: () => Blob; filename: () => string },
+      progress: (arg0: number) => void
+    ) => {
+      // 粘贴图片拿到的是无文件名的 Blob，需补齐名称与扩展名后按 File 上传
+      const toUploadFile = (): File => {
+        const blob = blobInfo.blob()
+        const filename = blobInfo.filename?.() || ''
+        if (blob instanceof File && blob.name) {
+          return blob
         }
-      }
-
-      // 读取二进制数据
-      const readBinary = (file: File) => {
-        return new Promise((resolve, reject) => {
-          const fileReader = new FileReader()
-          fileReader.onload = (e: ProgressEvent<FileReader>): void => {
-            resolve(e.target?.result)
-          }
-          fileReader.onerror = (error) => {
-            reject(error)
-          }
-          fileReader.readAsArrayBuffer(file)
-        })
-      }
-
-      // 获取预上传参数
-      const getPrepareUploadReq = async (data: any, file: File) => {
-        const wordArray = cryptoJs.lib.WordArray.create(data)
-        const hash = cryptoJs.MD5(wordArray).toString()
-        const { name } = file
-        return {
-          directoryPath: props.uploadPath,
-          name,
-          sha: hash,
-          size: Math.ceil(file.size / 1024)
+        const mimeExt: Record<string, string> = {
+          'image/jpeg': 'jpg',
+          'image/png': 'png',
+          'image/gif': 'gif',
+          'image/bmp': 'bmp',
+          'image/webp': 'webp'
         }
-      }
-
-      // 执行上传
-      const handleUpload = (info: PrepareUploadFileReply, binary: ArrayBuffer) => {
-        return new Promise((resolve, reject) => {
-          const count = info.chunkCount as number
-          const size = (info.chunkSize as number) * 1024
-          const pArrr: Promise<any>[] = []
-          const uploaed = info.uploadChunks
-          if (count <= 1) {
-            const formData = new FormData()
-            formData.append('data', new Blob([binary]))
-            formData.append('uploadId', info.uploadId as string)
-            formData.append('index', String(1))
-            pArrr.push(UploadChunkFile(formData))
-          } else {
-            for (let i = 0; i < count; i += 1) {
-              if (uploaed && uploaed.includes(i + 1)) continue
-              let data: ArrayBuffer = new ArrayBuffer(0)
-              if ((i + 1) * size > binary.byteLength) {
-                data = binary.slice(i * size, binary.byteLength)
-              } else {
-                data = binary.slice(i * size, (i + 1) * size)
-              }
-
-              const formData = new FormData()
-              formData.append('data', new Blob([data]))
-              formData.append('uploadId', info.uploadId as string)
-              formData.append('index', String(i + 1))
-              pArrr.push(UploadChunkFile(formData))
-            }
-          }
-          pArrr.forEach((fn: Promise<any>, index: number) => {
-            fn.then((res) => {
-              progress(Math.ceil((index + 1) / pArrr.length))
-              if ((index + 1) / pArrr.length) {
-                resolve(res.data.key)
-              }
-            }).catch((res) => {
-              reject(res)
-            })
-          })
-        })
+        const name = filename.includes('.') ? filename : `image.${mimeExt[blob.type] || 'png'}`
+        return new File([blob], name, { type: blob.type })
       }
 
       return new Promise((resolve, reject) => {
-        const handler = async (resolve: any, reject: any) => {
-          try {
-            progress(0)
-            // 获取文件二进制数据
-            const file = blobInfo.blob() as File
-            const binary = (await readBinary(file)) as ArrayBuffer
-
-            // 进行预上传
-            const params = await getPrepareUploadReq(binary, file)
-            const data = await PrepareUploadFile(params)
-            // 触发秒传
-            if (data.uploaded) {
-              const url = rurl(data.key as string)
-              imageHost.value = getUrlHost(url)
+        try {
+          progress(0)
+          // 新上传契约：取片大小 → 分片摘要 → 预上传 → 预签名直传 → 完成
+          const file = toUploadFile()
+          uploadFile(file, {
+            path: props.uploadPath,
+            onProgress: (percent) => progress(Math.min(99, percent))
+          })
+            .then((result) => {
               progress(100)
-              resolve(url)
-            } else {
-              // 处理上传逻辑
-              const key = await handleUpload(data, binary)
-              const url = rurl(key as string)
-              imageHost.value = getUrlHost(url)
-
-              resolve(url)
-            }
-          } catch (error) {
-            reject(error)
-          }
+              resolve(OBJECT_KEY_PATTERN.test(result.key) ? rurl(result.key) : result.url)
+            })
+            .catch((error) => {
+              reject(error)
+            })
+        } catch (error) {
+          reject(error)
         }
-        handler(resolve, reject)
       })
     },
     placeholder: '在这里输入内容',
@@ -252,15 +216,12 @@
     draggable_modal: true, // 对话框允许拖拽
     setup(editor: any) {
       editor.on('NodeChange', (e: any) => {
-        if (e.element.nodeName.toLowerCase() === 'img') {
-          // 检查图片是否有自定义属性
-          const src = e.element.getAttribute('src')
-          if (src.indexOf(imageHost.value) !== -1) {
-            const arr = src.split('/')
-            const key = arr[arr.length - 1]
-            e.element.setAttribute('data-key', key)
-          }
+        if (e.element?.nodeName?.toLowerCase() === 'img') {
+          normalizeImageElement(editor, e.element)
         }
+      })
+      editor.on('SetContent', () => {
+        setTimeout(() => normalizeImages(editor), 0)
       })
     }
   }

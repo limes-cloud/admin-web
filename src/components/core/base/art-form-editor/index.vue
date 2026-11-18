@@ -56,7 +56,6 @@
   import Form from './components/form.vue'
   import Tool from './components/tool.vue'
   import { FormNode, FormConfig } from './lib/types'
-  import { defaultFormConfig } from './lib/data'
   import { removeNodeById } from './lib/editor'
   import { useHistory } from './lib/useHistory'
   import { Operation } from '@element-plus/icons-vue'
@@ -91,7 +90,6 @@
   const nodes = ref<FormNode[]>([])
   const curNode = ref<FormNode>()
   const showToolEdit = ref(false)
-  const formConfig = ref<FormConfig>(defaultFormConfig())
 
   // 历史记录
   const { canUndo, canRedo, undo, redo } = useHistory(nodes)
@@ -281,4 +279,3 @@
     }
   }
 </style>
-

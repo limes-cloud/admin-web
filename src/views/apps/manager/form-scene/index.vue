@@ -162,8 +162,6 @@
     data,
     loading,
     pagination,
-    searchParams,
-    getData,
     handleSizeChange,
     handleCurrentChange,
     refreshData,

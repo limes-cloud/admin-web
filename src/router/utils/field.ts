@@ -11,9 +11,7 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
   const placeholder = config.placeholder || '请输入' + label
 
   // 构造必填规则
-  const requiredRule = required
-    ? { required: true, message: '请输入' + label, trigger: ['blur', 'change'] }
-    : undefined
+  const requiredRule = required ? { required: true, message: '请输入' + label, trigger: ['blur', 'change'] } : undefined
   const requiredSelectRule = required
     ? { required: true, message: '请选择' + label, trigger: ['blur', 'change'] }
     : undefined
@@ -24,7 +22,7 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
   // 内置正则映射表
   const builtinPatterns: Record<string, RegExp> = {
     phone: /^1[3-9]\d{9}$/,
-    email: /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/,
+    email: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
     idcard: /^([1-9]\d{5})(\d{4})(0[1-9]|1[0-2])([0-2][1-9]|[1-3]\d|4[0-6]|5[0-2])(\d{3})(\d|[Xx])$/,
     url: /^https?:\/\/(([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,})(:\d{1,5})?(\/[^\s]*)?$/,
     chinese: /^[一-龥]+$/,
@@ -55,12 +53,20 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
 
     if (pattern) {
       return {
-        label, key, type: 'input',
+        label,
+        key,
+        type: 'input',
         props: {
-          placeholder, clearable: true, maxlength: config.maxLength,
+          placeholder,
+          clearable: true,
+          maxlength: config.maxLength,
           rules: [
             requiredRule,
-            { message: rule?.message || '请输入' + (ruleNames[ruleType] || label), trigger: ['blur', 'change'], pattern }
+            {
+              message: rule?.message || '请输入' + (ruleNames[ruleType] || label),
+              trigger: ['blur', 'change'],
+              pattern
+            }
           ].filter(Boolean)
         }
       }
@@ -84,9 +90,13 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
     case 'input':
     case 'textarea':
       return {
-        label, key, type: type === 'textarea' ? 'textarea' : 'input',
+        label,
+        key,
+        type: type === 'textarea' ? 'textarea' : 'input',
         props: {
-          placeholder, clearable: true, maxlength: config.maxLength,
+          placeholder,
+          clearable: true,
+          maxlength: config.maxLength,
           rules: [requiredRule].filter(Boolean)
         }
       }
@@ -97,16 +107,22 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
         ? { message: rule?.message || passwordMessages[strength], trigger: ['blur', 'change'], pattern: pwdPattern }
         : undefined
       return {
-        label, key, type: 'password',
+        label,
+        key,
+        type: 'password',
         props: {
-          placeholder, clearable: true, maxlength: config.maxLength,
+          placeholder,
+          clearable: true,
+          maxlength: config.maxLength,
           rules: [requiredRule, pwdRule].filter(Boolean)
         }
       }
     }
     case 'number':
       return {
-        label, key, type: 'inputNumber',
+        label,
+        key,
+        type: 'inputNumber',
         props: {
           placeholder,
           min: config.min,
@@ -117,7 +133,9 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     case 'radio':
       return {
-        label, key, type: 'radioGroup',
+        label,
+        key,
+        type: 'radioGroup',
         props: {
           options: (config.options || []).map((v) => ({ label: v.label, value: v.value })),
           rules: [requiredSelectRule].filter(Boolean)
@@ -125,7 +143,9 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     case 'checkbox':
       return {
-        label, key, type: 'checkboxGroup',
+        label,
+        key,
+        type: 'checkboxGroup',
         props: {
           options: (config.options || []).map((v) => ({ label: v.label, value: v.value })),
           rules: [requiredSelectRule].filter(Boolean)
@@ -133,16 +153,21 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     case 'select':
       return {
-        label, key, type: 'select',
+        label,
+        key,
+        type: 'select',
         props: {
-          placeholder, allowClear: true,
+          placeholder,
+          allowClear: true,
           options: (config.options || []).map((v) => ({ label: v.label, value: v.value })),
           rules: [requiredSelectRule].filter(Boolean)
         }
       }
     case 'time':
       return {
-        label, key, type: 'timePicker',
+        label,
+        key,
+        type: 'timePicker',
         props: {
           placeholder,
           rules: [requiredSelectRule].filter(Boolean)
@@ -150,7 +175,9 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     case 'date':
       return {
-        label, key, type: 'datePicker',
+        label,
+        key,
+        type: 'datePicker',
         props: {
           placeholder,
           rules: [requiredSelectRule].filter(Boolean)
@@ -158,15 +185,20 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     case 'datetime':
       return {
-        label, key, type: 'datePicker',
+        label,
+        key,
+        type: 'datePicker',
         props: {
-          placeholder, showTime: true,
+          placeholder,
+          showTime: true,
           rules: [requiredSelectRule].filter(Boolean)
         }
       }
     case 'upload':
       return {
-        label, key, type: 'upload',
+        label,
+        key,
+        type: 'upload',
         props: {
           limit: config.limit || 1,
           accept: config.filetype === 'image' ? 'image/*' : config.filetype === 'video' ? 'video/*' : '*',
@@ -175,9 +207,12 @@ const getFormItemByField = (field: Field, pre: string, required = true): FormIte
       }
     default:
       return {
-        label, key, type: 'input',
+        label,
+        key,
+        type: 'input',
         props: {
-          placeholder, clearable: true,
+          placeholder,
+          clearable: true,
           rules: [requiredRule].filter(Boolean)
         }
       }

@@ -107,7 +107,7 @@ export interface CompleteUploadResponse {
   key: string
 }
 
-// 局部更新：仅 id 固定必传（app 取自请求头 X-App-Key），name/directory_id 可选
+// 局部更新：仅 id 固定必传（manager 可通过 app 参数指定目标应用），name/directory_id 可选
 export interface UpdateUserFileRequest {
   id: number
   name?: string

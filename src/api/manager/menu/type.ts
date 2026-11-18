@@ -7,7 +7,7 @@ export interface ListMenuRequest {
 export interface Menu {
   id: number
   app: string
-  parentId: number
+  parentId?: number
   title: string
   type: string
   keyword?: string
@@ -41,7 +41,7 @@ export interface ListCurrentMenuReply {
 }
 
 export interface CreateMenuRequest {
-  parentId: number
+  parentId?: number
   title: string
   type: string
   keyword?: string
@@ -65,7 +65,7 @@ export interface CreateMenuReply {
 
 export interface UpdateMenuRequest {
   id: number
-  parentId: number
+  parentId?: number
   title: string
   type: string
   keyword?: string

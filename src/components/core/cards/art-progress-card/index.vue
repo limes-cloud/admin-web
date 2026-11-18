@@ -26,12 +26,7 @@
         <p class="title">{{ title }}</p>
       </div>
     </div>
-    <ElProgress
-      :percentage="currentPercentage"
-      :stroke-width="strokeWidth"
-      :show-text="false"
-      :color="color"
-    />
+    <ElProgress :percentage="currentPercentage" :stroke-width="strokeWidth" :show-text="false" :color="color" />
   </div>
 </template>
 

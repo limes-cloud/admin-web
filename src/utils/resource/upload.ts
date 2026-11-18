@@ -7,6 +7,8 @@ import { PrepareUploadFileResponse } from '@/api/resource/file/type'
 export type UploadProgress = (percent: number) => void
 
 export interface UploadOptions {
+  // 目标应用标识（页面切换 app 时显式指定，缺省沿用当前登录应用）
+  app?: string
   // 目标目录完整路径（如 /images/avatar；空 = 根目录）
   path?: string
   // 文件展示名（默认取 file.name）
@@ -65,7 +67,7 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
 
   // 1. 取服务端权威分片大小（客户端切片与摘要计算都必须以它为准）
   onProgress(1)
-  const { chunk_size } = await GetUploadChunkSize({ total_size: size })
+  const { chunk_size } = await GetUploadChunkSize({ total_size: size }, options.app)
   if (chunk_size <= 0) {
     throw new Error('获取分片大小失败')
   }
@@ -74,15 +76,18 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
   onProgress(3)
   const md5 = await computeDigestOfDigests(file, chunk_size)
 
-  // 3. 预上传：秒传判定 / 召回在飞会话（app 由服务端从 X-App-Key 解析）
+  // 3. 预上传：秒传判定 / 召回在飞会话（app 由服务端从显式 app 参数解析）
   onProgress(5)
-  const prep: PrepareUploadFileResponse = await PrepareUploadFile({
-    path: options.path,
-    name: options.name || file.name,
-    ext: extractExt(file.name),
-    md5,
-    size
-  })
+  const prep: PrepareUploadFileResponse = await PrepareUploadFile(
+    {
+      path: options.path,
+      name: options.name || file.name,
+      ext: extractExt(file.name),
+      md5,
+      size
+    },
+    options.app
+  )
 
   // 秒传命中
   if (prep.skipped) {
@@ -102,7 +107,7 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
   }
   const chunkSize = prep.chunk_size
   if (missing.length > 0) {
-    const { urls } = await GetUploadPartURLs({ upload_id: prep.upload_id, part_numbers: missing })
+    const { urls } = await GetUploadPartURLs({ upload_id: prep.upload_id, part_numbers: missing }, options.app)
     if (urls.length !== missing.length) {
       throw new Error('获取分片上传地址失败')
     }
@@ -130,7 +135,7 @@ export async function uploadFile(file: File, options: UploadOptions): Promise<Up
 
   // 5. 完成分片上传（服务端合并 + 摘要核验）
   onProgress(95)
-  const completed = await CompleteUpload({ upload_id: prep.upload_id })
+  const completed = await CompleteUpload({ upload_id: prep.upload_id }, options.app)
   onProgress(100)
   return { url: completed.url, key: completed.key }
 }

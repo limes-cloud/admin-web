@@ -24,6 +24,7 @@ export interface ListDictionaryReply {
 export interface CreateDictionaryRequest {
   keyword: string
   name: string
+  type: string
   description?: string
 }
 

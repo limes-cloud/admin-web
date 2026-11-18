@@ -30,21 +30,22 @@
             </ElSpace>
           </template>
         </ArtTableHeader>
+
+        <!-- 表格 -->
+        <ArtTable
+          :loading="loading"
+          :data="data"
+          :columns="columns"
+          :pagination="pagination"
+          row-key="id"
+          @pagination:size-change="handleSizeChange"
+          @pagination:current-change="handleCurrentChange"
+        >
+          <template #operation="{ row }">
+            <ArtOperation :list="operationItems" :data="row"></ArtOperation>
+          </template>
+        </ArtTable>
       </div>
-      <!-- 表格 -->
-      <ArtTable
-        :loading="loading"
-        :data="data"
-        :columns="columns"
-        :pagination="pagination"
-        row-key="id"
-        @pagination:size-change="handleSizeChange"
-        @pagination:current-change="handleCurrentChange"
-      >
-        <template #operation="{ row }">
-          <ArtOperation :list="operationItems" :data="row"></ArtOperation>
-        </template>
-      </ArtTable>
 
       <!-- 新增/修改弹窗 -->
       <ElDialog
@@ -52,16 +53,52 @@
         :title="dialogType === 'add' ? '添加数据权限' : '编辑数据权限'"
         :destroy-on-close="true"
         body-class="art-form-dialog"
-        width="420px"
+        width="560px"
         align-center
       >
-        <ArtForm
-          v-model="currentData"
-          :items="formItems"
-          :span="24"
-          @submit="handleSubmit"
-          @cancel="dialogVisible = false"
-        ></ArtForm>
+        <!-- 包裹层：避免 ArtForm 与矩阵在 .art-form-dialog 的 flex 行内互相挤压 -->
+        <div class="role-entity-dialog-body">
+          <!-- 隐藏 ArtForm 自带按钮，底部统一放确定/取消 -->
+          <ArtForm
+            ref="formRef"
+            v-model="currentData"
+            :items="formItems"
+            :span="24"
+            :show-submit="false"
+            :show-cancel="false"
+          ></ArtForm>
+
+          <!-- 批量操作权限矩阵（add 模式）：选中应用和实体后展示，每个操作独立配置权限 -->
+          <div v-if="dialogType === 'add' && curApp && curEntityId" class="action-matrix">
+            <div class="matrix-title">操作权限配置（每个操作各自独立）</div>
+            <div v-for="row in actionRows" :key="row.value" class="matrix-row">
+              <ElCheckbox v-model="row.enabled" class="matrix-action">{{ row.label }}</ElCheckbox>
+              <ElSelect v-model="row.scope" size="small" class="matrix-scope" placeholder="权限范围">
+                <ElOption v-for="s in scopes" :key="s.value" :label="s.label" :value="s.value" />
+              </ElSelect>
+              <ElTreeSelect
+                v-if="row.scope === 'CUSTOM'"
+                v-model="row.depts"
+                class="matrix-depts"
+                :data="depts"
+                :props="{ label: 'name', value: 'id' }"
+                check-strictly
+                show-checkbox
+                multiple
+                collapse-tags
+              />
+              <ElSelect v-model="row.rules" multiple size="small" class="matrix-rules" placeholder="数据规则">
+                <ElOption v-for="r in rules" :key="r.id" :label="r.name" :value="r.id" />
+              </ElSelect>
+            </div>
+          </div>
+
+          <!-- 底部操作按钮：位于矩阵下方 -->
+          <div class="role-entity-footer">
+            <ElButton v-ripple @click="dialogVisible = false">取消</ElButton>
+            <ElButton v-ripple type="primary" @click="handleDialogSubmit">确定</ElButton>
+          </div>
+        </div>
       </ElDialog>
     </ElCard>
     <Menu ref="menu"></Menu>
@@ -75,12 +112,13 @@
   import { formatTime } from '@/utils/time'
   import { ListApp } from '@/api/manager/app/api'
   import { App } from '@/api/manager/app/type'
-  import { ListEntity, ListEntityField, ListEntityRule } from '@/api/manager/entity/api'
-  import { Entity, EntityField, EntityRule } from '@/api/manager/entity/type'
+  import { ListEntity, ListEntityRule } from '@/api/manager/entity/api'
+  import { Entity, EntityRule } from '@/api/manager/entity/type'
   import { DeleteRoleEntity, ListRoleEntity, CreateRoleEntity, UpdateRoleEntity } from '@/api/manager/roleentity/api'
   import { RoleEntity, CreateRoleEntityRequest, UpdateRoleEntityRequest } from '@/api/manager/roleentity/type'
   import { Dept } from '@/api/manager/dept/type'
-  import { ListCurrentDept } from '@/api/manager/dept/api'
+  import { ListDept } from '@/api/manager/dept/api'
+  import { getAppKeyword } from '@/utils/app-context'
   import Menu from '../menu/index.vue'
 
   const router = useRouter()
@@ -108,14 +146,18 @@
     }
   ]
 
-  const curApp = ref('')
+  // 当前选中应用的 keyword 标识，作为实体列表查询条件（后端 app 字段按 keyword 匹配）
+  const curApp = ref((router.currentRoute.value.query.app as string) || '')
   const curEntityId = ref(0)
   const curRoleId = Number(router.currentRoute.value.query.roleId)
 
   const depts = ref<Dept[]>([])
-  ListCurrentDept().then((res) => {
-    depts.value = res.list
-  })
+  const getDepts = (app?: string) => {
+    ListDept({ app: app || curApp.value || getAppKeyword() }).then((res) => {
+      depts.value = res.list
+    })
+  }
+  getDepts()
 
   const apps = ref<App[]>([])
   const getApps = async (name?: string) => {
@@ -130,16 +172,6 @@
         res.list[ind].comment = item.comment + `（${item.name}）`
       })
       entities.value = res.list
-    })
-  }
-
-  const fields = ref<EntityField[]>([])
-  const getFields = () => {
-    ListEntityField({ entityId: curEntityId.value }).then((res) => {
-      res.list.forEach((item, ind) => {
-        res.list[ind].comment = item.comment + `（${item.name}）`
-      })
-      fields.value = res.list
     })
   }
 
@@ -167,6 +199,27 @@
     { label: '无部门限制', value: 'NONE' }
   ]
 
+  // 批量添加：每个操作一行的独立权限配置
+  interface ActionRow {
+    value: string
+    label: string
+    enabled: boolean
+    scope: string
+    depts: number[]
+    rules: number[]
+  }
+  const actionRows = ref<ActionRow[]>([])
+  const resetActionRows = () => {
+    actionRows.value = actions.map((a) => ({
+      value: a.value,
+      label: a.label,
+      enabled: true,
+      scope: 'ALL',
+      depts: [],
+      rules: []
+    }))
+  }
+
   const formItems = computed(() => [
     {
       key: 'app',
@@ -185,13 +238,24 @@
             getApps()
           }
         },
-        onChange: async (id: number) => {
-          curApp.value = id
+        /**
+         * 应用选择变更后刷新实体列表。
+         * 后端 entity / roleentity 协议的 app 字段是应用 keyword 字符串（max_len 64），因此下拉取 keyword 而不是主键 id。
+         * @param keyword 选中应用的 keyword 标识
+         */
+        onChange: async (keyword: string) => {
+          curApp.value = keyword
+          // 切换应用后清空已选实体，避免旧实体的权限配置残留
+          curEntityId.value = 0
+          currentData.value.entityId = undefined
+          getDepts(keyword)
           await getEntities()
+          Object.assign(searchParams, { app: keyword })
+          getData()
         },
         options: apps.value,
         props: {
-          value: 'id',
+          value: 'keyword',
           label: 'name'
         },
         rules: [{ required: true, message: '请选择所属应用', trigger: ['blur', 'change'] }]
@@ -215,7 +279,6 @@
         },
         onChange: (id: number) => {
           curEntityId.value = id
-          getFields()
           getRules()
         },
         options: dialogType.value == 'edit' ? [{ ...currentData.value.entity }] : entities.value,
@@ -230,9 +293,12 @@
       key: 'action',
       label: '操作类型',
       type: 'select',
+      hidden: dialogType.value === 'add',
       placeholder: '请输入操作类型',
       props: {
         options: actions,
+        // 编辑时禁止修改操作类型（后端更新接口不收 action 字段，创建后不可变）
+        disabled: true,
         rules: [{ required: true, message: '请输入操作类型', trigger: ['blur', 'change'] }]
       }
     },
@@ -240,6 +306,7 @@
       key: 'scope',
       label: '权限范围',
       type: 'select',
+      hidden: dialogType.value === 'add',
       placeholder: '请选择权限范围',
       props: {
         options: scopes,
@@ -251,7 +318,7 @@
       label: '部门权限',
       type: 'treeselect',
       placeholder: '请选择部门权限',
-      hidden: currentData.value.scope !== 'CUSTOM',
+      hidden: dialogType.value === 'add' || currentData.value.scope !== 'CUSTOM',
       props: {
         data: depts.value,
         checkStrictly: true,
@@ -268,23 +335,10 @@
       }
     },
     {
-      key: 'fields',
-      label: '字段权限',
-      type: 'select',
-      placeholder: '请选择字段权限',
-      props: {
-        options: fields.value,
-        multiple: true,
-        props: {
-          label: 'comment',
-          value: 'id'
-        }
-      }
-    },
-    {
       key: 'rules',
       label: '数据规则',
       type: 'select',
+      hidden: dialogType.value === 'add',
       placeholder: '请选择数据规则',
       props: {
         filterable: true,
@@ -352,11 +406,12 @@
         page: 1,
         pageSize: 10,
         roleId: curRoleId,
+        app: curApp.value,
         ...searchForm.value
       },
       columnsFactory: () => [
         {
-          prop: 'entity.comment',
+          prop: 'entity.name',
           label: '实体标识'
         },
         {
@@ -410,11 +465,15 @@
   // 显示用户弹窗
   const showDialog = async (type: Form.DialogType, row?: RoleEntity) => {
     dialogType.value = type
+    if (type === 'add') {
+      resetActionRows()
+      // 新增时重置实体选择，未选实体前矩阵不展示
+      curEntityId.value = 0
+    }
     const value = { ...row }
 
     if (row) {
       curEntityId.value = row.entityId
-      await getFields()
       await getRules()
     }
 
@@ -428,14 +487,90 @@
   const handleSubmit = async () => {
     const value: any = { ...currentData.value, roleId: curRoleId }
     if (dialogType.value === 'add') {
+      // 批量：只提交启用的操作，每个操作独立权限
+      value.items = actionRows.value
+        .filter((r) => r.enabled)
+        .map((r) => ({ action: r.value, scope: r.scope, depts: r.depts, rules: r.rules }))
       await CreateRoleEntity(value as CreateRoleEntityRequest)
       ElMessage.success('创建成功')
       refreshCreate()
     } else {
+      // 编辑时操作类型不可变，不随请求下发
+      delete value.action
       await UpdateRoleEntity(value as UpdateRoleEntityRequest)
       ElMessage.success('修改成功')
       refreshUpdate()
     }
     dialogVisible.value = false
   }
+
+  // 底部确定：先通过 ArtForm 暴露的 validate 校验表单，通过后再提交
+  const formRef = ref<{ validate: (...args: any[]) => Promise<any> }>()
+
+  const handleDialogSubmit = async () => {
+    try {
+      const res = await formRef.value?.validate()
+      if (res) {
+        await handleSubmit()
+      }
+    } catch {
+      // 校验失败：保持弹窗不关闭
+    }
+  }
 </script>
+
+<style scoped>
+/* 作为 .art-form-dialog（flex 行）的唯一子元素，占满整行；内部走块级文档流 */
+.role-entity-dialog-body {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+}
+
+.role-entity-footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 10px 0 0;
+}
+
+.action-matrix {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 12px;
+  border-top: 1px dashed var(--el-border-color-lighter);
+  padding-top: 10px;
+}
+.matrix-title {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  margin-bottom: 8px;
+}
+.matrix-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.matrix-row .el-tree-select,
+.matrix-row .el-select {
+  max-width: 100%;
+}
+.matrix-action {
+  width: 72px;
+  flex-shrink: 0;
+}
+.matrix-scope {
+  width: 140px;
+  flex-shrink: 0;
+}
+.matrix-depts {
+  flex: 1;
+  min-width: 180px;
+}
+.matrix-rules {
+  flex: 1;
+  min-width: 160px;
+}
+</style>

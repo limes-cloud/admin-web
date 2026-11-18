@@ -24,8 +24,12 @@ store.use(
 /**
  * 初始化 Store
  */
-export function initStore(app: App<Element>): void {
+export async function initStore(app: App<Element>): Promise<void> {
   app.use(store)
 
-  useAppStore().initApp()
+  try {
+    await useAppStore().initApp()
+  } catch (error) {
+    console.error('[app] initialize current application failed', error)
+  }
 }

@@ -26,50 +26,100 @@
           <ElIcon v-else><Plus /></ElIcon>
           <span v-if="text" class="text">{{ text }}</span>
         </div>
-        <!-- 从文件管理选择：上传卡片右上角角标（点击不触发上传） -->
-        <div v-if="selectFromFile" class="file-select" title="从文件管理选择" @click.stop="openFileSelect">
-          <ElIcon><FolderOpened /></ElIcon>
-        </div>
         <!-- <div class="option-file" @click.stop.prevent="handleOptionFile">
           <ArtIcon value="iconsys-shanchuwenjian"></ArtIcon>
         </div> -->
       </div>
     </ElUpload>
 
+    <!-- 从文件管理选择：上传卡片右上角角标（已有文件时仍保留） -->
+    <div v-if="selectFromFile" class="file-select" title="从文件管理选择" @click.stop="openFileSelect">
+      <ElIcon><FolderOpened /></ElIcon>
+    </div>
+
     <ElDialog
       v-model="fileVisible"
       title="从文件管理选择"
-      width="700px"
+      class="art-upload-file-dialog"
+      width="920px"
       align-center
       :destroy-on-close="true"
-      @closed="filePage = 1"
+      @opened="layoutFileTable"
+      @closed="resetFilePicker"
     >
-      <ElTable v-loading="fileLoading" :data="fileData" row-key="id" height="360" @row-dblclick="chooseFile">
-        <ElTableColumn label="预览" width="72">
-          <template #default="{ row }">
-            <ElImage v-if="isImageExt(row.ext)" class="file-thumb" :src="row.url" fit="cover" />
-            <div v-else class="file-thumb"
-              ><ElIcon><Document /></ElIcon
-            ></div>
-          </template>
-        </ElTableColumn>
-        <ElTableColumn prop="name" label="文件名" min-width="200" show-overflow-tooltip />
-        <ElTableColumn label="大小" width="100" :formatter="(row: FileItem) => getFileSize(Number(row.size)) || '0B'" />
-        <ElTableColumn label="上传时间" width="160" :formatter="(row: FileItem) => formatTime(row.created_at)" />
-        <ElTableColumn label="操作" width="80" fixed="right">
-          <template #default="{ row }">
-            <ElButton link type="primary" @click="chooseFile(row)">选择</ElButton>
-          </template>
-        </ElTableColumn>
-      </ElTable>
-      <div class="file-select-pager">
-        <ElPagination
-          v-model:current-page="filePage"
-          :page-size="filePageSize"
-          :total="fileTotal"
-          layout="prev, pager, next, total"
-          @current-change="loadFiles"
-        />
+      <div class="file-picker">
+        <div class="file-picker__aside">
+          <div class="file-picker__aside-title">目录</div>
+          <ElScrollbar v-loading="directoryLoading" class="file-picker__tree">
+            <ElEmpty v-if="!directoryLoading && !directoryData.length" description="暂无目录" :image-size="52" />
+            <ElTree
+              v-else
+              ref="directoryTreeRef"
+              :data="directoryTree"
+              node-key="id"
+              :props="{ label: 'label', children: 'children' }"
+              :current-node-key="selectedDirectoryId"
+              :expand-on-click-node="false"
+              default-expand-all
+              highlight-current
+              @node-click="handleDirectorySelect"
+            >
+              <template #default="{ data }">
+                <div class="file-directory" :title="data.raw?.path || '全部文件'">
+                  <ElIcon><Folder /></ElIcon>
+                  <span class="file-directory__name">{{ data.label }}</span>
+                </div>
+              </template>
+            </ElTree>
+          </ElScrollbar>
+        </div>
+        <div class="file-picker__main">
+          <div class="file-picker__path" :title="selectedDirectoryPath || '全部文件'">
+            当前目录：{{ selectedDirectoryPath || '全部文件' }}
+            <span v-if="directoryHint" class="file-picker__hint">{{ directoryHint }}</span>
+          </div>
+          <ElTable
+            ref="fileTableRef"
+            v-loading="fileLoading"
+            :data="fileData"
+            row-key="id"
+            height="360"
+            table-layout="fixed"
+            @row-dblclick="chooseFile"
+          >
+            <ElTableColumn label="文件" min-width="220">
+              <template #default="{ row }">
+                <div class="file-cell">
+                  <ElImage v-if="isImageExt(row.ext)" class="file-thumb" :src="row.url" fit="cover" />
+                  <div v-else class="file-thumb"
+                    ><ElIcon><Document /></ElIcon
+                  ></div>
+                  <span class="file-cell__name" :title="row.name">{{ row.name }}</span>
+                </div>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn
+              label="大小"
+              width="90"
+              :formatter="(row: FileItem) => getFileSize(Number(row.size)) || '0B'"
+            />
+            <ElTableColumn label="上传时间" width="160" :formatter="(row: FileItem) => formatTime(row.created_at)" />
+            <ElTableColumn label="操作" width="64">
+              <template #default="{ row }">
+                <ElButton link type="primary" @click="chooseFile(row)">选择</ElButton>
+              </template>
+            </ElTableColumn>
+          </ElTable>
+          <div class="file-select-pager">
+            <ElPagination
+              v-model:current-page="filePage"
+              :page-size="filePageSize"
+              :total="fileTotal"
+              layout="prev, pager, next, total"
+              @current-change="loadFiles"
+            />
+          </div>
+        </div>
       </div>
     </ElDialog>
 
@@ -78,10 +128,11 @@
 
     <ElDialog
       v-model="cutVisible"
-      :fullscreen="true"
       :destroy-on-close="true"
+      class="art-upload-crop-dialog"
       modal-class="cut-dialog"
       title="图片裁剪"
+      width="720px"
       align-center
     >
       <div class="cutter">
@@ -89,6 +140,8 @@
           :img-url="cutFile?.url"
           :cut-width="cut?.width"
           :cut-height="cut?.height"
+          :box-width="cut?.boxWidth || 680"
+          :box-height="cut?.boxHeight"
           @success="handleCutter"
         ></Cutter>
       </div>
@@ -103,17 +156,20 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue'
+  import { computed, nextTick, ref } from 'vue'
   import { UploadFiles, UploadFile as UploadFileItem, type UploadRawFile } from 'element-plus'
-  import { Plus, Camera, FolderOpened, Document } from '@element-plus/icons-vue'
+  import { Plus, Camera, FolderOpened, Folder, Document } from '@element-plus/icons-vue'
   import { UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
   import { rurl } from '@/utils/resource/url'
   import { uploadFile } from '@/utils/resource/upload'
   import { imageToIco } from '@/utils/resource/image-to-ico'
+  import { isPortraitImage } from '@/utils/resource/image'
   import { getFileSize } from '@/utils/file'
   import { formatTime } from '@/utils/time'
-  import { ListUserFile } from '@/api/resource/file/api'
+  import { ListFile, ListUserFile } from '@/api/resource/file/api'
   import type { FileItem } from '@/api/resource/file/type'
+  import { ListDirectory } from '@/api/resource/directory/api'
+  import type { DirectoryView } from '@/api/resource/directory/type'
 
   defineOptions({ name: 'ArtUpload' })
 
@@ -141,12 +197,14 @@
     autoUpload?: boolean
     /** 上传前将图片转为 ICO（favicon 用；非 .ico 文件生效，Canvas 128x128 打包） */
     convertToIco?: boolean
-    /** 开启后显示"从文件选择"：从资源中心文件管理里挑已有文件回填（无需重新上传） */
+    /** 是否显示"从文件选择"：默认从资源中心文件管理里挑已有文件回填（无需重新上传） */
     selectFromFile?: boolean
     cut?: {
       enable: boolean
       width: number
       height: number
+      boxWidth?: number
+      boxHeight?: number
     }
   }
 
@@ -162,7 +220,7 @@
     listType: 'picture-card',
     accept: 'image/*',
     autoUpload: true,
-    selectFromFile: false
+    selectFromFile: true
   })
 
   const showPreview = ref(false)
@@ -330,8 +388,15 @@
   }
 
   // 上传修改触发
-  const uploadChange = (item: UploadFileItem, list: UploadFiles) => {
+  const uploadChange = async (item: UploadFileItem, list: UploadFiles) => {
     if (item.status === 'ready' && props.cut) {
+      const raw = item.raw as File | undefined
+      if (raw && (await isPortraitImage(raw))) {
+        if (item.status !== 'ready') return
+        await nextTick()
+        uploadRef.value?.submit()
+        return
+      }
       cutVisible.value = true
       cutFile.value = item
     }
@@ -428,31 +493,171 @@
   const filePage = ref(1)
   const filePageSize = 20
   const fileTotal = ref(0)
+  const fileTableRef = ref()
 
   // 图片后缀（列表出缩略图；其余显示文件图标）
   const isImageExt = (ext: string) => ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg'].includes(ext)
 
-  const openFileSelect = () => {
-    fileVisible.value = true
-    loadFiles()
+  // 目录树：0 表示「全部文件」（当前用户全部文件），其余为资源目录 id
+  const ALL_FILES_ID = 0
+  const directoryLoading = ref(false)
+  const directoryData = ref<DirectoryView[]>([])
+  const directoryHint = ref('')
+  const directoryTreeRef = ref()
+  const selectedDirectoryId = ref<number>(ALL_FILES_ID)
+  const selectedDirectoryPath = ref('')
+
+  interface DirectoryTreeNode {
+    id: number
+    label: string
+    raw?: DirectoryView
+    children: DirectoryTreeNode[]
   }
 
-  const loadFiles = async () => {
-    fileLoading.value = true
+  const parentPathOf = (path: string) => {
+    const normalized = path.replace(/\/+$/, '')
+    const index = normalized.lastIndexOf('/')
+    return index > 0 ? normalized.slice(0, index) : ''
+  }
+
+  const normalizeDirectoryPath = (path?: string) => {
+    const value = (path || '').trim().replace(/^\/+|\/+$/g, '')
+    return value ? `/${value}` : ''
+  }
+
+  // 平铺目录按 path 组装为树；父目录缺失时该节点作为根
+  const directoryTree = computed<DirectoryTreeNode[]>(() => {
+    const allNode: DirectoryTreeNode = { id: ALL_FILES_ID, label: '全部文件', children: [] }
+    const byPath: Record<string, DirectoryTreeNode> = {}
+    directoryData.value.forEach((directory) => {
+      const path = normalizeDirectoryPath(directory.path)
+      if (!path) return
+      byPath[path] = {
+        id: directory.id,
+        label: directory.name || path.split('/').filter(Boolean).pop() || path,
+        raw: directory,
+        children: []
+      }
+    })
+
+    const roots: DirectoryTreeNode[] = []
+    Object.entries(byPath).forEach(([path, node]) => {
+      const parent = byPath[parentPathOf(path)]
+      if (parent) parent.children.push(node)
+      else roots.push(node)
+    })
+    return [allNode, ...roots]
+  })
+
+  const resetFilePicker = () => {
+    filePage.value = 1
+    fileData.value = []
+    fileTotal.value = 0
+    directoryData.value = []
+    directoryHint.value = ''
+    selectedDirectoryId.value = ALL_FILES_ID
+    selectedDirectoryPath.value = ''
+    directoryTreeRef.value?.setCurrentKey(ALL_FILES_ID)
+  }
+
+  const openFileSelect = async () => {
+    resetFilePicker()
+    fileVisible.value = true
+    await loadDirectories()
+    if (!fileVisible.value) return
+    await loadFiles()
+  }
+
+  const loadDirectories = async () => {
+    directoryLoading.value = true
     try {
-      const res = await ListUserFile({ page: filePage.value, page_size: filePageSize })
-      fileData.value = res.list || []
-      fileTotal.value = res.total || 0
+      const res = await ListDirectory({})
+      directoryData.value = res.list || []
+
+      const wantedPath = normalizeDirectoryPath(props.directoryPath)
+      const wantedId = props.directoryId
+      const matched =
+        (wantedId && directoryData.value.find((directory) => directory.id === wantedId)) ||
+        (wantedPath && directoryData.value.find((directory) => normalizeDirectoryPath(directory.path) === wantedPath))
+
+      if (matched) {
+        selectedDirectoryId.value = matched.id
+        selectedDirectoryPath.value = normalizeDirectoryPath(matched.path)
+        directoryHint.value = ''
+      } else {
+        selectedDirectoryId.value = ALL_FILES_ID
+        selectedDirectoryPath.value = ''
+        directoryHint.value = wantedPath ? '（当前上传目录尚未创建，已显示全部文件）' : ''
+      }
+
+      await nextTick()
+      directoryTreeRef.value?.setCurrentKey(selectedDirectoryId.value)
     } catch (e: any) {
-      ElMessage.error(e?.message || '获取文件列表失败')
+      directoryData.value = []
+      selectedDirectoryId.value = ALL_FILES_ID
+      selectedDirectoryPath.value = ''
+      directoryHint.value = '（目录加载失败，已显示全部文件）'
+      ElMessage.error(e?.message || '获取目录列表失败')
     } finally {
-      fileLoading.value = false
+      directoryLoading.value = false
     }
   }
 
+  const layoutFileTable = async () => {
+    await nextTick()
+    fileTableRef.value?.doLayout()
+  }
+
+  let fileRequestId = 0
+  const loadFiles = async () => {
+    const requestId = ++fileRequestId
+    fileLoading.value = true
+    try {
+      const directoryId = selectedDirectoryId.value
+      const res = directoryId
+        ? await ListFile({ directory_id: directoryId, page: filePage.value, page_size: filePageSize })
+        : await ListUserFile({ page: filePage.value, page_size: filePageSize })
+      if (requestId !== fileRequestId) return
+      fileData.value = res.list || []
+      fileTotal.value = res.total || 0
+      layoutFileTable()
+    } catch (e: any) {
+      if (requestId !== fileRequestId) return
+      ElMessage.error(e?.message || '获取文件列表失败')
+    } finally {
+      if (requestId === fileRequestId) fileLoading.value = false
+    }
+  }
+
+  const handleDirectorySelect = (node: DirectoryTreeNode) => {
+    selectedDirectoryId.value = node.id
+    selectedDirectoryPath.value = node.raw ? normalizeDirectoryPath(node.raw.path) : ''
+    directoryHint.value = ''
+    filePage.value = 1
+    loadFiles()
+  }
+
   const chooseFile = (row: FileItem) => {
-    emit('update:modelValue', row.key)
-    emit('change', [{ key: row.key }])
+    const current = props.modelValue
+    if (props.limit === 1 || !props.multiple) {
+      emit('update:modelValue', row.key)
+      emit('change', [{ key: row.key }])
+      fileVisible.value = false
+      return
+    }
+
+    const keys = (Array.isArray(current) ? current : current ? [current] : []).filter(Boolean)
+    if (!keys.includes(row.key) && keys.length >= props.limit) {
+      ElMessage.warning(`最多选择 ${props.limit} 个文件`)
+      return
+    }
+
+    const nextKeys = keys.includes(row.key) ? keys : [...keys, row.key]
+    emit('update:modelValue', nextKeys)
+    emit(
+      'change',
+      nextKeys.map((key) => ({ key }))
+    )
     fileVisible.value = false
   }
 
@@ -482,18 +687,24 @@
     background: var(--el-fill-color-light);
   }
 
-  :deep(.cut-dialog .el-dialog) {
-    background: rgb(0 0 0 / 10%) !important;
+  :global(.art-upload-crop-dialog) {
+    max-width: calc(100vw - 48px);
+  }
+
+  :global(.art-upload-file-dialog) {
+    max-width: calc(100vw - 32px);
   }
 
   .cutter {
     display: flex;
     justify-content: center;
-    width: 100vw;
+    width: 100%;
     height: 100%;
   }
 
   .upload {
+    position: relative;
+
     :deep(.el-icon) {
       font-size: 14px !important;
     }
@@ -517,6 +728,10 @@
       width: v-bind(domwidth) !important;
       height: v-bind(domheight) !important;
       border-radius: 4px !important;
+    }
+
+    :deep(.el-upload-list--picture-card .el-upload-list__item-thumbnail) {
+      object-fit: cover !important;
     }
   }
 
@@ -575,7 +790,7 @@
   .file-select {
     position: absolute;
     top: 0;
-    right: 0;
+    left: calc(v-bind(domwidth) - 18px);
     z-index: 10;
     box-sizing: border-box;
     display: flex;
@@ -595,17 +810,91 @@
     }
   }
 
+  .file-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .file-cell__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .file-thumb {
     display: flex;
+    flex: 0 0 36px;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     overflow: hidden;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--el-text-color-secondary);
     background: var(--el-fill-color-light);
     border-radius: 6px;
+  }
+
+  .file-picker {
+    display: flex;
+    gap: 16px;
+    min-height: 400px;
+  }
+
+  .file-picker__main {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .file-picker__path {
+    margin-bottom: 10px;
+    overflow: hidden;
+    font-size: 13px;
+    color: var(--el-text-color-regular);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-picker__hint {
+    margin-left: 6px;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+
+  .file-picker__aside {
+    display: flex;
+    flex: 0 0 220px;
+    flex-direction: column;
+    min-width: 0;
+    padding-right: 14px;
+    border-right: 1px solid var(--el-border-color-lighter);
+  }
+
+  .file-picker__aside-title {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+
+  .file-picker__tree {
+    height: 396px;
+  }
+
+  .file-directory {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .file-directory__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .file-select-pager {

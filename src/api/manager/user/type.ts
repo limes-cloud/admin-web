@@ -26,6 +26,7 @@ export interface GetUserReply {
 export interface ListUserRequest {
   page: number
   pageSize: number
+  app?: string
   deptId?: number
   jobId?: number
   username?: string
@@ -48,6 +49,7 @@ export interface UserDept {
 
 export interface User {
   id: number
+  app?: string
   avatar: string
   username: string
   nickname: string
@@ -66,6 +68,7 @@ export interface ListUserReply {
 export interface CreateUserRequest {
   username: string
   nickname: string
+  app?: string
   status?: boolean
 }
 
@@ -122,4 +125,34 @@ export interface ResetPasswordRequest {
 export interface OfflineUserRequest {
   userId: number
   apps: string[]
+}
+
+export interface GetUserAppsRequest {
+  userId: number
+}
+
+export interface UserApp {
+  id: number
+  keyword: string
+  name: string
+  logo: string
+  status: boolean
+  private: boolean
+  loginable: boolean
+  authorized: boolean
+  denied: boolean
+  canLogin: boolean
+  authorizedAt: number
+  loggedAt: number
+  expiredAt: number
+}
+
+export interface GetUserAppsReply {
+  list: UserApp[]
+}
+
+export interface UpdateUserAppsRequest {
+  userId: number
+  apps: string[]
+  deniedApps: string[]
 }

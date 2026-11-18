@@ -51,7 +51,7 @@
           </template>
           <template #status="{ row }">
             <ElSwitch
-              :model-value="row.status === 0"
+              :model-value="row.status === 1"
               inline-prompt
               active-text="正常"
               inactive-text="失效"
@@ -72,14 +72,16 @@
         width="760px"
         align-center
       >
-        <ArtForm
-          v-model="currentData"
-          :items="formItems"
-          :span="12"
-          label-width="104px"
-          @submit="handleSubmit"
-          @cancel="dialogVisible = false"
-        />
+        <div v-loading="dialogLoading" class="netdisk-form-body">
+          <ArtForm
+            v-model="currentData"
+            :items="formItems"
+            :span="12"
+            label-width="104px"
+            @submit="handleSubmit"
+            @cancel="dialogVisible = false"
+          />
+        </div>
       </ElDialog>
     </ElCard>
   </div>
@@ -91,37 +93,37 @@
   import { Delete, Edit, Plus } from '@element-plus/icons-vue'
 
   import { useTable } from '@/composables/useTable'
-  import { GetResource, ListResources } from '@/api/psou/resource/api'
+  import { GetResource, ListResource } from '@/api/psou/resource/api'
   import type { Resource } from '@/api/psou/resource/type'
   import {
     CreateNetdisk,
     DeleteNetdisk,
-    ListNetdisks,
+    GetNetdisk,
+    ListNetdisk,
     UpdateNetdisk,
     UpdateNetdiskStatus
   } from '@/api/psou/netdisk/api'
   import type { CreateNetdiskRequest, Netdisk, UpdateNetdiskRequest } from '@/api/psou/netdisk/type'
   import { getFileSize } from '@/utils/file'
   import { formatTime } from '@/utils/time'
+  import type { FormItem } from '@/components/core/forms/art-form/index.vue'
 
   defineOptions({ name: 'PsouNetdisk' })
 
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
+  const dialogLoading = ref(false)
   const currentData = ref<Partial<Netdisk>>({})
 
   const platformOptions = [
     { label: '夸克', value: 'quark' },
-    { label: '百度', value: 'baidu' },
-    { label: '迅雷', value: 'xunlei' }
+    { label: '百度', value: 'baidu' }
   ]
 
   const platformMeta = (platform: string) => {
     switch (platform) {
       case 'baidu':
         return { label: '百度', type: 'primary' as const }
-      case 'xunlei':
-        return { label: '迅雷', type: 'warning' as const }
       case 'quark':
         return { label: '夸克', type: 'success' as const }
       default:
@@ -142,7 +144,7 @@
   }
 
   const loadResourceOptions = async (keyword?: string) => {
-    const res = await ListResources({
+    const res = await ListResource({
       page: 1,
       pageSize: 50,
       keyword: keyword || undefined
@@ -161,7 +163,7 @@
         resolvingResourceIds.add(id)
         try {
           const item = await GetResource({ id })
-          mergeResourceOptions([item])
+          mergeResourceOptions([item.resource])
         } catch {
           // 资源已删除时保留 #id 占位，不阻断列表
         } finally {
@@ -213,14 +215,14 @@
         placeholder: '请选择副本状态',
         clearable: true,
         options: [
-          { label: '正常', value: 0 },
-          { label: '失效', value: 1 }
+          { label: '正常', value: 1 },
+          { label: '失效', value: 0 }
         ]
       }
     }
   ])
 
-  const formItems = computed(() => [
+  const formItems = computed<FormItem[]>(() => [
     {
       key: 'resourceId',
       label: '所属资源',
@@ -256,13 +258,14 @@
       }
     },
     {
-      key: 'fromUrl',
+      key: 'sourceUrl',
       span: 24,
       label: '来源链接',
       type: 'input',
       props: {
         placeholder: '请输入来源链接',
-        maxlength: 512
+        maxlength: 512,
+        rules: [{ required: true, message: '请输入来源链接', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -271,11 +274,13 @@
       type: 'number',
       defaultValue: 0,
       tip: '填写用户 ID，0 表示系统上传',
+      tipPosition: 'after',
       props: {
         min: 0,
         align: 'left',
         controlsPosition: 'right',
-        style: { width: '100%' }
+        style: { width: '100%' },
+        rules: [{ required: true, message: '请输入上传用户 ID', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -283,22 +288,26 @@
       label: '网盘账号',
       type: 'number',
       defaultValue: 0,
-      tip: '填写网盘账号 ID，0 表示未绑定',
+      tip: '填写用于转存的网盘账号 ID',
+      tipPosition: 'after',
       props: {
-        min: 0,
+        min: 1,
         align: 'left',
         controlsPosition: 'right',
-        style: { width: '100%' }
+        style: { width: '100%' },
+        rules: [{ required: true, message: '请输入网盘账号 ID', trigger: ['blur', 'change'] }]
       }
     },
     {
       key: 'fsId',
       label: '平台文件',
       type: 'input',
-      tip: '网盘平台内的文件 ID，可留空',
+      tip: '网盘平台内的文件 ID',
+      tipPosition: 'after',
       props: {
-        placeholder: '可留空',
-        maxlength: 128
+        placeholder: '请输入平台文件 ID',
+        maxlength: 128,
+        rules: [{ required: true, message: '请输入平台文件 ID', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -307,32 +316,22 @@
       type: 'number',
       defaultValue: 0,
       tip: '单位：字节',
+      tipPosition: 'after',
       props: {
         min: 0,
         align: 'left',
         controlsPosition: 'right',
-        style: { width: '100%' }
+        style: { width: '100%' },
+        rules: [{ required: true, message: '请输入文件大小', trigger: ['blur', 'change'] }]
       }
     },
     {
-      key: 'formatText',
-      label: '格式文本',
+      key: 'formatSummary',
+      label: '格式摘要',
       type: 'input',
       props: {
         placeholder: '如 4K / MKV',
         maxlength: 64
-      }
-    },
-    {
-      key: 'folderCount',
-      label: '文件夹数',
-      type: 'number',
-      defaultValue: 0,
-      props: {
-        min: 0,
-        align: 'left',
-        controlsPosition: 'right',
-        style: { width: '100%' }
       }
     },
     {
@@ -345,30 +344,6 @@
         align: 'left',
         controlsPosition: 'right',
         style: { width: '100%' }
-      }
-    },
-    {
-      key: 'sort',
-      label: '排序权重',
-      type: 'number',
-      defaultValue: 0,
-      props: {
-        min: -9999,
-        max: 9999,
-        align: 'left',
-        controlsPosition: 'right',
-        style: { width: '100%' }
-      }
-    },
-    {
-      key: 'ext',
-      label: '扩展配置',
-      type: 'input',
-      span: 24,
-      props: {
-        type: 'textarea',
-        rows: 6,
-        placeholder: '可选，格式为 JSON 对象'
       }
     }
   ])
@@ -409,7 +384,7 @@
     refreshRemove
   } = useTable({
     core: {
-      apiFn: ListNetdisks,
+      apiFn: ListNetdisk,
       apiParams: {
         page: 1,
         pageSize: 10,
@@ -451,9 +426,10 @@
           slotName: 'status'
         },
         {
-          prop: 'sort',
-          label: '排序权重',
-          width: 100
+          prop: 'formatSummary',
+          label: '格式摘要',
+          width: 120,
+          formatter: (row: Netdisk) => row.formatSummary || '-'
         },
         {
           prop: 'lastCheckedAt',
@@ -495,17 +471,20 @@
     getData()
   }
 
-  const showDialog = (type: Form.DialogType, row?: Netdisk) => {
+  const showDialog = async (type: Form.DialogType, row?: Netdisk) => {
     dialogType.value = type
     if (type === 'add') {
       currentData.value = {
         platform: 'quark',
         userId: 0,
         accountId: 0,
+        fsId: '',
+        shareUrl: '',
+        sourceUrl: '',
         size: 0,
-        folderCount: 0,
+        formatSummary: '',
         fileCount: 0,
-        sort: 0
+        files: []
       }
     } else if (row) {
       if (!resourceOptions.value.some((item) => item.value === row.resourceId)) {
@@ -517,42 +496,45 @@
       currentData.value = {
         ...row,
         userId: Number(row.userId) || 0,
-        size: Number(row.size) || 0
+        accountId: Number(row.accountId) || 0,
+        size: Number(row.size) || 0,
+        files: row.files || []
       }
     }
     dialogVisible.value = true
+    if (type !== 'edit' || !row) return
+
+    dialogLoading.value = true
+    try {
+      const { netdisk: detail } = await GetNetdisk({ id: row.id })
+      currentData.value = {
+        ...detail,
+        userId: Number(detail.userId) || 0,
+        accountId: Number(detail.accountId) || 0,
+        size: Number(detail.size) || 0,
+        files: detail.files || []
+      }
+    } catch {
+      dialogVisible.value = false
+    } finally {
+      dialogLoading.value = false
+    }
   }
 
   const buildPayload = () => {
     const item = currentData.value
-    const ext = String(item.ext || '').trim()
-    if (ext) {
-      let parsed: unknown
-      try {
-        parsed = JSON.parse(ext)
-      } catch {
-        ElMessage.error('扩展 JSON 格式不正确')
-        return null
-      }
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        ElMessage.error('扩展 JSON 必须是对象')
-        return null
-      }
-    }
     return {
       resourceId: Number(item.resourceId),
       platform: String(item.platform || ''),
       shareUrl: String(item.shareUrl || '').trim(),
-      fromUrl: String(item.fromUrl || '').trim(),
+      sourceUrl: String(item.sourceUrl || '').trim(),
       userId: Number(item.userId) || 0,
       accountId: Number(item.accountId) || 0,
       fsId: String(item.fsId || '').trim(),
       size: Number(item.size) || 0,
-      formatText: String(item.formatText || '').trim(),
-      folderCount: Number(item.folderCount) || 0,
+      formatSummary: String(item.formatSummary || '').trim(),
       fileCount: Number(item.fileCount) || 0,
-      sort: Number(item.sort) || 0,
-      ext
+      files: item.files || []
     }
   }
 
@@ -561,7 +543,7 @@
     if (!payload) return
     if (dialogType.value === 'add') {
       await CreateNetdisk(payload as CreateNetdiskRequest)
-      ElMessage.success('创建成功，副本初始为失效，请检测后标记正常')
+      ElMessage.success('创建成功，副本初始为正常')
       refreshCreate()
     } else {
       await UpdateNetdisk({ id: Number(currentData.value.id), ...payload } as UpdateNetdiskRequest)
@@ -573,10 +555,10 @@
 
   const handleToggleStatus = (row: Netdisk): (() => Promise<boolean>) => {
     return async () => {
-      const next = row.status === 0 ? 1 : 0
+      const next = row.status === 1 ? 0 : 1
       try {
         await ElMessageBox.confirm(
-          `确定将「${resourceLabel(row.resourceId)} · ${platformMeta(row.platform).label}」标记为${next === 0 ? '正常' : '失效'}吗？`,
+          `确定将「${resourceLabel(row.resourceId)} · ${platformMeta(row.platform).label}」标记为${next === 1 ? '正常' : '失效'}吗？`,
           '温馨提示',
           { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
         )
@@ -598,5 +580,9 @@
 <style scoped>
   .muted {
     color: var(--el-text-color-placeholder);
+  }
+
+  .netdisk-form-body {
+    min-height: 240px;
   }
 </style>

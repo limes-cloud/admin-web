@@ -53,7 +53,13 @@
               >
                 {{ field }}
               </ElTag>
-              <ElTag v-if="getHiddenFieldCount(row.fields)" class="field-tags__more" type="info" effect="light" size="small">
+              <ElTag
+                v-if="getHiddenFieldCount(row.fields)"
+                class="field-tags__more"
+                type="info"
+                effect="light"
+                size="small"
+              >
                 <span class="field-tags__more-text">...</span>
               </ElTag>
             </div>
@@ -181,9 +187,12 @@
   import { Resource, CreateResourceRequest, UpdateResourceRequest } from '@/api/configure/resource/type'
   import { Env } from '@/api/configure/env/type'
   import { formatTime } from '@/utils/time'
+  import { getAppKeyword } from '@/utils/app-context'
   import ArtCodeEditor from '@/components/core/base/art-code-editor/index.vue'
 
   defineOptions({ name: 'ConfigureResource' })
+
+  const isManagerApp = getAppKeyword() === 'manager'
 
   type FormData = (Partial<CreateResourceRequest> | Partial<UpdateResourceRequest>) & { fieldList?: string[] }
 
@@ -200,7 +209,7 @@
   const searchForm = ref<{ keyword?: string; tag?: string; app?: string }>({
     keyword: undefined,
     tag: undefined,
-    app: undefined
+    app: getAppKeyword()
   })
 
   const searchItems = computed(() => [
@@ -210,6 +219,7 @@
       label: '所属应用',
       key: 'app',
       type: 'select',
+      hidden: !isManagerApp,
       props: {
         placeholder: '请选择所属应用',
         clearable: true,
@@ -332,8 +342,14 @@
   }
 
   const handleReset = () => {
-    searchForm.value = { keyword: undefined, tag: undefined, app: undefined }
-    Object.assign(searchParams, { page: 1, pageSize: 10, keyword: undefined, tag: undefined, app: undefined })
+    searchForm.value = { keyword: undefined, tag: undefined, app: getAppKeyword() }
+    Object.assign(searchParams, {
+      page: 1,
+      pageSize: 10,
+      keyword: undefined,
+      tag: undefined,
+      app: getAppKeyword()
+    })
     getData()
   }
 

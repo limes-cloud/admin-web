@@ -4,20 +4,6 @@
       <!-- 搜索栏 -->
       <div class="search-box">
         <ElInput v-model="searchForm.keyword" placeholder="请输入实体名称" @input="handleSearch" clearable />
-        <ElButton
-          v-permission="'manager:entity:add'"
-          type="primary"
-          class="btn-square"
-          :icon="Plus"
-          @click="showDialog('add')"
-        ></ElButton>
-        <!-- <ElButton
-          v-permission="'manager:entity:load'"
-          type="success"
-          class="btn-square"
-          :icon="Sort"
-          @click="handleLoad"
-        ></ElButton> -->
       </div>
 
       <!-- 表格 -->
@@ -70,60 +56,6 @@
         ></ArtForm>
       </ElDialog>
     </ElCard>
-
-    <ElDialog
-      v-model="importVisible"
-      title="导入数据预览"
-      :destroy-on-close="true"
-      body-class="import-dialog"
-      width="620px"
-      align-center
-    >
-      <div class="import-box cuetom-table">
-        <div class="import-left">
-          <ElTable :data="loadEntities" :show-header="false" :stripe="false" :row-class-name="importTableRowClassName">
-            <el-table-column prop="name" label="Date" width="180">
-              <template #default="{ row, $index }">
-                <div class="dict-item">
-                  <div class="item-content" @click="handleSelectEntity($index)">
-                    <ElTooltip :content="row.database">
-                      <span>{{ row.comment }}（{{ row.name }}）</span>
-                    </ElTooltip>
-                  </div>
-                  <div @click="handleDeleteEntity($index)">
-                    <ElIcon><Delete /></ElIcon>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-          </ElTable>
-        </div>
-        <div class="import-right">
-          <ElTable :data="loadEntities[currentEntityIndex].fields" :show-header="false">
-            <el-table-column prop="name">
-              <template #default="{ row, $index }">
-                <div class="dict-item">
-                  <div class="item-content">
-                    <ElSpace>
-                      <ElInput v-model="row.name"></ElInput>
-                      <ElInput v-model="row.comment"></ElInput>
-                    </ElSpace>
-                  </div>
-                  <div @click="handleDeleteField($index)">
-                    <ElIcon><Delete /></ElIcon>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-          </ElTable>
-        </div>
-      </div>
-
-      <template #footer>
-        <el-button @click="importVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleImport"> 确认 </el-button>
-      </template>
-    </ElDialog>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -195,33 +127,15 @@
 
 <script setup lang="ts">
   import { useTable } from '@/composables/useTable'
-  import { ElInput, ElMessageBox } from 'element-plus'
-  import { Edit, Plus, Sort, Delete } from '@element-plus/icons-vue'
-  import {
-    CreateEntity,
-    DeleteEntity,
-    ImportEntity,
-    ListEntity,
-    LoadEntity,
-    UpdateEntity
-  } from '@/api/manager/entity/api'
-  import {
-    CreateEntityRequest,
-    Entity,
-    LoadEntity as LoadEntityType,
-    UpdateEntityRequest
-  } from '@/api/manager/entity/type'
-  import { GetApp } from '@/api/manager/app/api'
+  import { ElInput } from 'element-plus'
+  import { Edit, Delete } from '@element-plus/icons-vue'
+  import { DeleteEntity, ListEntity, UpdateEntity } from '@/api/manager/entity/api'
+  import { Entity, UpdateEntityRequest } from '@/api/manager/entity/type'
 
   const props = defineProps<{ app: string }>()
 
   const emit = defineEmits<{ select: [data: any] }>()
   defineOptions({ name: 'Entity' })
-
-  // 弹窗相关
-  const importVisible = ref(false)
-  const loadEntities = ref<LoadEntityType[]>([])
-  const currentEntityIndex = ref(0)
 
   const dialogType = ref<Form.DialogType>('add')
   const dialogVisible = ref(false)
@@ -304,7 +218,6 @@
     resetSearchParams,
     handleSizeChange,
     handleCurrentChange,
-    refreshCreate,
     refreshUpdate,
     refreshRemove
   } = useTable({
@@ -357,16 +270,9 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
-    const value = { ...currentData.value }
-    if (dialogType.value === 'add') {
-      await CreateEntity({ ...value, app: props.app } as CreateEntityRequest)
-      ElMessage.success('创建成功')
-      refreshCreate()
-    } else {
-      await UpdateEntity(value as UpdateEntityRequest)
-      ElMessage.success('修改成功')
-      refreshUpdate()
-    }
+    await UpdateEntity(currentData.value as UpdateEntityRequest)
+    ElMessage.success('修改成功')
+    refreshUpdate()
     dialogVisible.value = false
   }
 
@@ -379,60 +285,7 @@
     emit('select', row)
   }
 
-  const importTableRowClassName = (data: { row: any; rowIndex: number }) => {
-    return data.rowIndex === currentEntityIndex.value ? 'active' : ''
-  }
-
   const tableRowClassName = ({ row }: { row: any }) => {
     return row.id === currentSelectId.value ? 'active' : ''
-  }
-
-  const handleLoad = async () => {
-    const confirm = () => {
-      return new Promise<void>((reslove, reject) => {
-        ElMessageBox.confirm(`您确认要载入应用实体数据么？载入不会影响增量数据，相同字段会同步更新`, '温馨提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            reslove()
-          })
-          .catch(() => {
-            reject()
-          })
-      })
-    }
-
-    // 等待用户确定
-    await confirm()
-
-    // 获取当前app信息
-    const data = await GetApp({ keyword: props.app })
-
-    const lf = await LoadEntity({ app: data.keyword })
-    loadEntities.value = lf.list
-    // setLoadEntityIndex(loadEntities.value)
-    currentEntityIndex.value = 0
-
-    importVisible.value = true
-  }
-
-  const handleSelectEntity = (index: number) => {
-    currentEntityIndex.value = index
-  }
-
-  const handleDeleteField = (index: number) => {
-    loadEntities.value[currentEntityIndex.value].fields.splice(index, 1)
-  }
-
-  const handleDeleteEntity = (index: number) => {
-    loadEntities.value.splice(index, 1)
-  }
-
-  const handleImport = async () => {
-    await ImportEntity({ list: loadEntities.value, app: props.app })
-    ElMessage.success('导入成功')
-    importVisible.value = false
   }
 </script>
