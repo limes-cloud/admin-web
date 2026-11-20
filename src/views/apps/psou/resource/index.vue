@@ -1073,6 +1073,42 @@
         }
       },
       {
+        key: 'preview',
+        span: 24,
+        label: '预览媒体',
+        tip: '支持图片、视频、音频，最多 20 个',
+        type: 'upload',
+        props: {
+          accept: 'image/*,video/*,audio/*',
+          directoryPath: 'psou/resource/preview',
+          multiple: true,
+          limit: 20,
+          listType: 'text',
+          text: '上传预览',
+          selectFromFile: true,
+          rules: [
+            {
+              type: 'array',
+              max: 20,
+              message: '预览媒体最多20个',
+              trigger: ['blur', 'change']
+            }
+          ]
+        }
+      },
+      {
+        key: 'manual',
+        span: 24,
+        label: '操作指南',
+        tip: '支持富文本编辑，可插入图片、视频等内容',
+        type: 'rich',
+        props: {
+          id: 'psou-resource-manual',
+          height: 360,
+          uploadPath: 'psou/resource/manual'
+        }
+      },
+      {
         key: 'tagsArray',
         span: 24,
         label: '资源标签',
@@ -1975,12 +2011,16 @@
       currentData.value = {
         categoryId: categoryOptions.value[0]?.value,
         weight: 0,
+        preview: [],
+        manual: '',
         tagsArray: []
       }
     } else if (row) {
       currentData.value = {
         ...row,
         score: row.score ?? undefined,
+        preview: Array.isArray(row.preview) ? row.preview : [],
+        manual: row.manual || '',
         tagsArray: normalizeTags(row.tags)
       }
     }
@@ -1998,6 +2038,8 @@
       tags: (item.tagsArray || []).slice(0, RESOURCE_TAGS_MAX),
       ...(score === undefined ? {} : { score }),
       cover: String(item.cover || '').trim(),
+      preview: (item.preview || []).filter(Boolean).slice(0, 20),
+      manual: String(item.manual || ''),
       weight: Number(item.weight) || 0
     }
   }
@@ -2193,14 +2235,14 @@
   .banner-focus__stage {
     position: relative;
     width: 100%;
+    aspect-ratio: 12 / 5;
     overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
     background: #0b0f14;
     border-radius: 10px;
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 18%);
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-    aspect-ratio: 12 / 5;
 
     &.is-dragging {
       cursor: grabbing;
@@ -2211,8 +2253,8 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     pointer-events: none;
+    object-fit: cover;
   }
 
   .banner-focus__grid {
@@ -2249,8 +2291,8 @@
     bottom: 10px;
     left: 50%;
     padding: 4px 10px;
-    color: #fff;
     font-size: 12px;
+    color: #fff;
     white-space: nowrap;
     pointer-events: none;
     background: rgb(0 0 0 / 56%);
@@ -2263,15 +2305,15 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: rgb(255 255 255 / 56%);
     font-size: 13px;
+    color: rgb(255 255 255 / 56%);
   }
 
   .banner-focus__toolbar {
     display: flex;
+    gap: 12px;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
   }
 
   .banner-focus__meta {
@@ -2281,14 +2323,14 @@
   }
 
   .banner-focus__ratio {
-    color: var(--el-text-color-primary);
     font-size: 12px;
     font-weight: 500;
+    color: var(--el-text-color-primary);
   }
 
   .banner-focus__position {
-    color: var(--el-text-color-secondary);
     font-size: 12px;
+    color: var(--el-text-color-secondary);
   }
 
   .cutter {

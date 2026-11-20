@@ -7,6 +7,8 @@ export interface Resource {
   tags: string[]
   score: number
   cover: string
+  preview: string[]
+  manual: string
   viewCount: number
   clickCount: number
   weight: number
@@ -51,6 +53,8 @@ export interface CreateResourceRequest {
   tags: string[]
   score: number
   cover: string
+  preview: string[]
+  manual: string
   weight?: number
 }
 

@@ -35,8 +35,12 @@ const axiosInstance = axios.create({
   validateStatus: (status) => status >= 200 && status <= 403,
   transformResponse: [
     (data, headers) => {
-      const contentType = headers['content-type']
-      if (contentType?.includes('application/json')) {
+      const contentType = headers?.['content-type']
+      const text = typeof data === 'string' ? data.trim() : data
+      // 网关等中间层转发非 200 响应时可能丢失/改写 content-type，
+      // 因此 body 以 JSON 起始字符开头时也按 JSON 解析，避免拿不到 code/reason。
+      const looksLikeJSON = typeof text === 'string' && (text.startsWith('{') || text.startsWith('['))
+      if (contentType?.includes('application/json') || looksLikeJSON) {
         try {
           return JSON.parse(data)
         } catch {
@@ -87,12 +91,18 @@ let requests: Array<(token: string) => void> = []
 /** 响应拦截器 */
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse<Http.BaseResponse>) => {
-    const { code, message, reason } = response.data
+    // 响应体可能未被解析成对象（例如网关丢失 content-type），此时回退用 HTTP 状态码判断
+    const payload = response.data && typeof response.data === 'object' ? response.data : ({} as Http.BaseResponse)
+    const code = payload.code ?? response.status
+    const { message, reason } = payload
     if (code === ApiStatus.success) return response
     if (code === ApiStatus.unauthorized) {
       // 401未授权，存在登录过期情况
       const { accessToken } = useUserStore()
-      if (response.status === 401 && reason === 'UNAUTHORIZED' && accessToken) {
+      const isRefreshRequest = response.config?.url?.includes('/manager/api/authorize/token/refresh')
+      // reason 缺失说明响应体未被正确解析，此时 401 + 已登录同样应当尝试续期
+      const shouldRefresh = response.status === 401 && accessToken && !isRefreshRequest
+      if (shouldRefresh && (reason === 'UNAUTHORIZED' || !reason)) {
         if (!isRefresh) {
           isRefresh = true
 
