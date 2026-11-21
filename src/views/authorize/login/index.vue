@@ -12,6 +12,30 @@
           <ThemeSvg :src="loginIcon" size="100%" />
         </div>
         <div class="login-wrap">
+          <!-- 主登录渠道：优先展示，不展示账号密码表单 -->
+          <template v-if="primaryOAuther && showPrimary && oauthWay.action === 'password'">
+            <div class="primary-login">
+              <div class="primary-login-badge" :class="{ 'is-loading': primaryLoading }">
+                <ElImage v-if="primaryOAuther.logo" class="primary-login-logo" :src="$rurl(primaryOAuther.logo)" />
+                <span v-else class="primary-login-initial">{{ primaryOAuther.name.slice(0, 1) }}</span>
+              </div>
+              <div class="primary-login-title">{{ primaryOAuther.name }}</div>
+              <div v-if="primaryLoading || primaryOAuther.recommendText" class="primary-login-desc">
+                {{ primaryLoading ? '正在验证身份，请稍候…' : primaryOAuther.recommendText }}
+              </div>
+              <ElButton
+                class="primary-login-btn"
+                type="primary"
+                size="large"
+                :loading="primaryLoading"
+                @click="handlePrimaryLogin"
+              >
+                {{ primaryLoading ? '登录中' : `使用${primaryOAuther.name}登录` }}
+              </ElButton>
+              <ElButton class="primary-login-switch" link @click="usePassword = true">使用账号密码登录</ElButton>
+            </div>
+          </template>
+
           <template v-if="oauthWay.action !== 'password'">
             <div class="password-back">
               <ElTag @click="handleCallbackPassword">
@@ -24,7 +48,7 @@
           </template>
 
           <!-- 密码登陆 -->
-          <template v-if="oauthWay.action === 'password'">
+          <template v-if="oauthWay.action === 'password' && !showPrimary">
             <div class="form">
               <PasswordLogin :data="loginData" @success="handleLogin" @info="handleFillInfo" />
             </div>
@@ -55,17 +79,17 @@
             </div>
           </template>
 
-          <div class="footer" v-if="!appStore.app.private">
+          <div class="footer" v-if="!appStore.app.private && !showPrimary">
             <p>
               还没有账号？
               <RouterLink :to="{ name: 'Register' }">立即注册</RouterLink>
             </p>
           </div>
 
-          <div class="other-login-box" v-if="oauthers.length">
+          <div class="other-login-box" v-if="otherOAuthers.length">
             <el-divider content-position="center">其他登陆方式</el-divider>
-            <div class="other-login">
-              <template v-for="(item, index) in oauthers" :key="index">
+            <div class="other-login" :class="{ 'is-chips': showPrimary }">
+              <template v-for="(item, index) in otherOAuthers" :key="index">
                 <div class="other-login-item" @click="handleGetOAuthWay(item)">
                   <ElImage class="login-item-logo" :src="$rurl(item.logo)" />
                   <span class="login-item-text"> {{ item.name }}</span>
@@ -90,7 +114,7 @@
   import { useStorage } from '@vueuse/core'
   import { ListOAuther, OAutherHandle, OAutherLogin, OAutherReport } from '@/api/manager/authorize/api'
   import { OAuther, OAutherHandleReply } from '@/api/manager/authorize/type'
-  import { useUserStore } from '@/store/modules/user'
+  import { useUserStore, ZT_AUTO_LOGIN_DISABLED_KEY } from '@/store/modules/user'
   import { useAppStore } from '@/store/modules/app'
   import { getURLParameters } from '@/utils'
 
@@ -129,6 +153,43 @@
   const handleGetOAuther = async () => {
     const data = await ListOAuther({ app: appConfig.value.app, platform: 'web' })
     oauthers.value = data.list
+    handleAutoPrimaryLogin()
+  }
+
+  // 主登录渠道：登录页优先展示，隐藏账号密码表单；用户可切换到账号密码登录
+  const primaryOAuther = computed(() => oauthers.value.find((item) => item.primary))
+  const usePassword = ref(false)
+  const showPrimary = computed(() => !!primaryOAuther.value && !usePassword.value)
+  // 切换到账号密码后，主登录渠道回到「其他登陆方式」中，可随时点回
+  const otherOAuthers = computed(() =>
+    showPrimary.value ? oauthers.value.filter((item) => !item.primary) : oauthers.value
+  )
+
+  const primaryLoading = ref(false)
+  const handlePrimaryLogin = async () => {
+    if (!primaryOAuther.value) return
+    primaryLoading.value = true
+    try {
+      await handleGetOAuthWay(primaryOAuther.value)
+    } finally {
+      primaryLoading.value = false
+    }
+  }
+
+  // 零信任主登录渠道自动登录：仅在已携带 ZT 身份（direct）时静默登录；
+  // 未携带身份（jump）时不自动跳转，停留在登录页，由用户点击按钮或切换账号密码。
+  // 用户主动退出后本会话不再自动登录。
+  const handleAutoPrimaryLogin = async () => {
+    if (sessionStorage.getItem(ZT_AUTO_LOGIN_DISABLED_KEY)) return
+    const oa = primaryOAuther.value
+    if (oa?.type !== 'zt') return
+    primaryLoading.value = true
+    try {
+      const data = await OAutherHandle({ keyword: oa.keyword, app: appConfig.value.app, platform: 'web' })
+      if (data.action === 'direct') await handleDirectLogin(data.uuid)
+    } finally {
+      primaryLoading.value = false
+    }
   }
 
   const handleBind = (uuid: string) => {
@@ -220,12 +281,32 @@
       platform: 'web'
     })
 
-    // 跳转的情况下直接跳转
+    // 跳转的情况下直接跳转（零信任渠道未携带身份时跳转到零信任入口认证）
     if (data.action === 'jump') {
       window.location.href = data.value
+      return
+    }
+
+    // 身份已随请求携带（零信任），直接登录
+    if (data.action === 'direct') {
+      await handleDirectLogin(data.uuid)
+      return
     }
 
     oauthWay.value = data
+  }
+
+  const handleDirectLogin = async (uuid: string) => {
+    const data = await OAutherLogin({ uuid })
+    if (data.needBind) {
+      handleBind(uuid)
+      return
+    }
+    if (data.needInfo) {
+      handleFillInfo(uuid)
+      return
+    }
+    await handleLogin(data.token as string, null)
   }
 
   const handleInit = async (params: Record<string, any>) => {

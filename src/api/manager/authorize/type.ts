@@ -52,6 +52,10 @@ export interface OAuther {
   keyword: string
   name: string
   type: string
+  /** 推荐文案（渠道实现给出，或渠道配置的描述） */
+  recommendText?: string
+  /** 主登录渠道：登录页优先展示，不展示账号密码表单 */
+  primary?: boolean
 }
 
 export interface ListOAutherRequest {

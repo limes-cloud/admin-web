@@ -175,7 +175,7 @@
                 <ElInput v-model="item.appId" placeholder="例如 wx1234567890" clearable />
                 <ElButton text type="danger" :icon="Delete" @click="removeMiniProgram(index)" />
               </div>
-              <ElButton text type="primary" :icon="Plus" @click="addMiniProgram">添加小程序 AppID</ElButton>
+              <ElButton text type="primary" :icon="Plus" @click="addMiniProgram">添加小程序ID</ElButton>
             </div>
           </template>
         </ArtForm>
@@ -224,6 +224,11 @@
         uniquePlatform: setting?.jwt?.uniquePlatform ?? true
       },
       web: { ...(setting?.web ?? {}) },
+      // 默认密码已迁移至用户配置，编辑旧数据时回填 web.defaultPassword
+      user: {
+        defaultAvatar: setting?.user?.defaultAvatar ?? '',
+        defaultPassword: setting?.user?.defaultPassword || setting?.web?.defaultPassword || ''
+      },
       modules: [...(setting?.modules ?? [])],
       adminEmail: setting?.adminEmail ?? '',
       tracker: {
@@ -544,7 +549,7 @@
     },
     {
       key: 'miniPrograms',
-      label: '小程序 AppID',
+      label: '小程序ID',
       type: 'input',
       hidden: currentData.value.type === 'base',
       tip: '绑定各小程序平台的 AppID，init 时会优先按平台 + AppID 识别应用'
@@ -570,33 +575,51 @@
       }
     },
     {
-      key: 'setting.web.defaultPassword',
-      label: '默认登录密码',
+      key: 'setting.adminEmail',
+      label: '管理邮箱',
+      type: 'input',
+      hidden: currentData.value.type === 'base',
+      tip: '用于接收应用相关的系统通知，例如告警和审核提醒',
+      props: {
+        placeholder: '请输入管理邮箱',
+        maxlength: 255,
+        clearable: true,
+        rules: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }]
+      }
+    },
+    {
+      key: 'setting.user.defaultAvatar',
+      label: '默认头像',
+      type: 'upload',
+      divider: '用户配置',
+      hidden: currentData.value.type === 'base',
+      tip: '新建用户未设置头像以及用户头像为空时使用，不上传则不设置',
+      props: {
+        accept: 'image/*',
+        selectFromFile: true,
+        directoryPath: 'manager/app/avatar',
+        cut: {
+          enable: true,
+          width: 256,
+          height: 256
+        }
+      }
+    },
+    {
+      key: 'setting.user.defaultPassword',
+      label: '默认密码',
       type: 'input',
       hidden: currentData.value.type === 'base',
       tip: '新增用户未填写密码以及重置密码时使用',
       props: {
         type: 'password',
         showPassword: true,
-        placeholder: '请输入默认登录密码',
+        placeholder: '请输入默认密码',
         maxlength: 32,
         rules: [
-          { required: true, message: '请输入默认登录密码', trigger: ['blur', 'change'] },
+          { required: true, message: '请输入默认密码', trigger: ['blur', 'change'] },
           { type: 'string', message: '密码最少6位数', min: 6 }
         ]
-      }
-    },
-    {
-      key: 'setting.adminEmail',
-      label: '管理员邮箱',
-      type: 'input',
-      hidden: currentData.value.type === 'base',
-      tip: '用于接收应用相关的系统通知，例如告警和审核提醒',
-      props: {
-        placeholder: '请输入管理员邮箱',
-        maxlength: 255,
-        clearable: true,
-        rules: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }]
       }
     },
     {
@@ -674,7 +697,7 @@
     },
     {
       key: 'setting.tracker.enable',
-      label: '开启点位采集',
+      label: '点位采集',
       type: 'switch',
       divider: '点位分析',
       hidden: currentData.value.type === 'base',
@@ -686,7 +709,7 @@
     },
     {
       key: 'setting.tracker.origins',
-      label: '上报来源白名单',
+      label: '上报来源',
       type: 'inputtag',
       hidden: currentData.value.type === 'base',
       tip: '按 scheme://host[:port] 配置，例如 https://asou.fun；为空表示不校验',
@@ -697,7 +720,7 @@
     },
     {
       key: 'setting.tracker.maxPoints',
-      label: '自动注册上限',
+      label: '注册上限',
       type: 'number',
       hidden: currentData.value.type === 'base',
       tip: '该应用最多自动注册的点位数；0 使用服务端默认值，服务端仍会按硬上限钳制',

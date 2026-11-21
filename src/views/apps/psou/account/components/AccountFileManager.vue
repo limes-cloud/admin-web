@@ -182,10 +182,8 @@
     () => dirPickerCrumbs.value[dirPickerCrumbs.value.length - 1]?.ref ?? rootDirRef.value
   )
   const dirPickerCurrentLabel = computed(() => directoryLabel(dirPickerCrumbs.value))
-  const shareSupportsCommand = computed(
-    () => props.account?.platform === 'baidu' || props.account?.platform === 'quark'
-  )
-  const shareCommandUsesPasscode = computed(() => props.account?.platform === 'quark')
+  const shareSupportsCommand = computed(() => props.account?.platform === 'baidu')
+  const shareUsesPasscode = computed(() => props.account?.platform === 'quark')
   const shareLinkURL = computed(() => {
     const raw = shareResult.value?.shareUrl?.trim() || ''
     const suffixIndex = raw.lastIndexOf('&&')
@@ -193,10 +191,15 @@
     return raw
   })
   const shareCommandText = computed(() => {
-    if (shareMode.value !== 'command') return ''
+    if (shareMode.value !== 'command' || !shareSupportsCommand.value) return ''
     const result = shareResult.value
     if (!result) return ''
-    return result.commandWord?.trim() || result.password?.trim() || ''
+    return result.commandWord?.trim() || ''
+  })
+  const sharePasscodeText = computed(() => {
+    const result = shareResult.value
+    if (!result) return ''
+    return result.password?.trim() || ''
   })
 
   function close() {
@@ -279,41 +282,30 @@
         ElMessage.warning('当前平台暂不支持口令模式')
         return false
       }
-      if (shareCommandUsesPasscode.value) {
-        const passcode = sharePasscode.value.trim()
-        if (!passcode) {
-          ElMessage.warning('请输入夸克口令')
-          return false
-        }
-        const length = Array.from(passcode).length
-        if (length < 3 || length > 5) {
-          ElMessage.warning('夸克口令必须为 3-5 个字符')
-          return false
-        }
-        if (/\s/.test(passcode)) {
-          ElMessage.warning('夸克口令不能包含空格')
-          return false
-        }
-      } else {
-        const commandWord = shareCommandWord.value.trim()
-        if (!commandWord) {
-          ElMessage.warning('请输入中文口令')
-          return false
-        }
-        const length = Array.from(commandWord).length
-        if (length < 4 || length > 10 || !BAIDU_COMMAND_WORD_RE.test(commandWord)) {
-          ElMessage.warning('中文口令需为 4-10 个汉字')
-          return false
-        }
+      const commandWord = shareCommandWord.value.trim()
+      if (!commandWord) {
+        ElMessage.warning('请输入中文口令')
+        return false
+      }
+      const length = Array.from(commandWord).length
+      if (length < 4 || length > 10 || !BAIDU_COMMAND_WORD_RE.test(commandWord)) {
+        ElMessage.warning('中文口令需为 4-10 个汉字')
+        return false
       }
     }
     const passcode = sharePasscode.value.trim()
-    if (
-      shareMode.value === 'command' &&
-      !shareCommandUsesPasscode.value &&
-      passcode &&
-      !/^[A-Za-z0-9]{4}$/.test(passcode)
-    ) {
+    if (shareUsesPasscode.value && passcode) {
+      const length = Array.from(passcode).length
+      if (length < 3 || length > 5) {
+        ElMessage.warning('夸克提取码必须为 3-5 个字符')
+        return false
+      }
+      if (/\s/.test(passcode)) {
+        ElMessage.warning('夸克提取码不能包含空格')
+        return false
+      }
+    }
+    if (shareMode.value === 'command' && passcode && !/^[A-Za-z0-9]{4}$/.test(passcode)) {
       ElMessage.warning('百度提取码必须为 4 位字母或数字')
       return false
     }
@@ -330,9 +322,12 @@
         files: [{ fsId: row.fsId, path: row.path }],
         title: shareTitle.value.trim() || row.name,
         periodDays: Number(sharePeriod.value) as 0 | 1 | 7 | 30,
-        password: shareMode.value === 'command' ? sharePasscode.value.trim() || undefined : undefined,
+        password:
+          shareUsesPasscode.value || shareMode.value === 'command'
+            ? sharePasscode.value.trim() || undefined
+            : undefined,
         commandWord:
-          shareMode.value === 'command' && !shareCommandUsesPasscode.value ? shareCommandWord.value.trim() : undefined
+          shareMode.value === 'command' && shareSupportsCommand.value ? shareCommandWord.value.trim() : undefined
       })
       ElMessage.success('分享创建成功')
     } catch {
@@ -354,6 +349,13 @@
     if (!command) return
     await copy(command)
     ElMessage.success('口令已复制')
+  }
+
+  async function copySharePasscode() {
+    const passcode = sharePasscodeText.value
+    if (!passcode) return
+    await copy(passcode)
+    ElMessage.success('提取码已复制')
   }
 
   function detectSharePlatform(rawUrl: string): 'baidu' | 'quark' | '' {
@@ -1205,30 +1207,21 @@
       <ElFormItem label="文件">
         <ElInput :model-value="shareRow?.name || ''" readonly />
       </ElFormItem>
-      <ElFormItem label="分享模式" required>
+      <ElFormItem v-if="shareSupportsCommand" label="分享模式" required>
         <div class="fm-share-mode">
           <ElRadioGroup v-model="shareMode" :disabled="shareSubmitting">
-            <ElRadioButton value="command" :disabled="!shareSupportsCommand">口令模式</ElRadioButton>
+            <ElRadioButton value="command">口令模式</ElRadioButton>
             <ElRadioButton value="plain">普通链接</ElRadioButton>
           </ElRadioGroup>
-          <div v-if="shareCommandUsesPasscode" class="fm-quick-tip">
-            夸克固定使用「咐置…叩苓」口令格式，仅中间 3-5 个字符可自定义。
-          </div>
-          <div v-else-if="!shareSupportsCommand" class="fm-quick-tip">当前平台暂不支持口令分享，使用普通链接。</div>
+          <div class="fm-quick-tip">支持自定义中文口令；创建后会在分享文本末尾追加 &&口令@。</div>
         </div>
       </ElFormItem>
-      <ElFormItem v-if="shareMode === 'command'" :label="shareCommandUsesPasscode ? '口令' : '中文口令'" required>
+      <ElFormItem v-else label="分享方式">
+        <ElInput model-value="普通链接" readonly />
+        <div class="fm-quick-tip">当前平台不支持口令分享。夸克可选设置提取码。</div>
+      </ElFormItem>
+      <ElFormItem v-if="shareMode === 'command' && shareSupportsCommand" label="中文口令" required>
         <ElInput
-          v-if="shareCommandUsesPasscode"
-          v-model="sharePasscode"
-          clearable
-          maxlength="5"
-          show-word-limit
-          placeholder="请输入 3-5 个字符，可包含中文"
-          :disabled="shareSubmitting"
-        />
-        <ElInput
-          v-else
           v-model="shareCommandWord"
           clearable
           maxlength="10"
@@ -1236,10 +1229,7 @@
           placeholder="请输入 4-10 个汉字"
           :disabled="shareSubmitting"
         />
-        <div v-if="shareCommandUsesPasscode" class="fm-quick-tip">
-          前后的「咐置」「叩苓」由夸克固定，不能修改；创建后复制完整口令即可。
-        </div>
-        <div v-else class="fm-quick-tip">百度支持；创建后会在分享文本末尾追加 &&口令@。</div>
+        <div class="fm-quick-tip">支持；创建后会在分享文本末尾追加 &&口令@。</div>
       </ElFormItem>
       <ElFormItem label="分享标题">
         <ElInput v-model="shareTitle" maxlength="255" clearable :disabled="shareSubmitting" />
@@ -1252,7 +1242,18 @@
           <ElOption value="30" label="30 天" />
         </ElSelect>
       </ElFormItem>
-      <ElFormItem v-if="shareMode === 'command' && !shareCommandUsesPasscode" label="提取码">
+      <ElFormItem v-if="shareUsesPasscode" label="提取码">
+        <ElInput
+          v-model="sharePasscode"
+          clearable
+          maxlength="5"
+          show-word-limit
+          placeholder="可选，3-5 个字符"
+          :disabled="shareSubmitting"
+        />
+        <div class="fm-quick-tip">可选，支持中文；留空则创建公开链接。</div>
+      </ElFormItem>
+      <ElFormItem v-else-if="shareMode === 'command'" label="提取码">
         <ElInput
           v-model="sharePasscode"
           clearable
@@ -1277,6 +1278,12 @@
           <div class="fm-share-link">
             <ElInput :model-value="shareCommandText" readonly />
             <ElButton :icon="CopyDocument" @click="copyShareCommand">复制口令</ElButton>
+          </div>
+        </ElFormItem>
+        <ElFormItem v-if="sharePasscodeText" label="提取码">
+          <div class="fm-share-link">
+            <ElInput :model-value="sharePasscodeText" readonly />
+            <ElButton :icon="CopyDocument" @click="copySharePasscode">复制提取码</ElButton>
           </div>
         </ElFormItem>
       </ElForm>
@@ -1369,8 +1376,8 @@
 
   .fm-head__title {
     display: flex;
-    align-items: center;
     gap: 10px;
+    align-items: center;
   }
 
   .fm-head__title h2 {
@@ -1381,15 +1388,15 @@
 
   .fm-head__identity p {
     margin: 6px 0 0;
-    color: var(--art-text-gray-600);
     font-size: 12px;
+    color: var(--art-text-gray-600);
   }
 
   .fm-toolbar {
     display: flex;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
     padding: 12px 22px;
     border-bottom: 1px solid var(--art-border-color);
 
@@ -1403,11 +1410,11 @@
 
   .fm-crumb {
     padding: 0;
-    color: var(--art-text-gray-600);
     font-size: 13px;
+    color: var(--art-text-gray-600);
+    cursor: pointer;
     background: transparent;
     border: 0;
-    cursor: pointer;
   }
 
   .fm-crumb:hover,
@@ -1430,8 +1437,8 @@
     gap: 16px;
     align-items: center;
     padding: 10px 22px;
-    color: var(--art-text-gray-600);
     font-size: 12px;
+    color: var(--art-text-gray-600);
     background: rgba(var(--el-color-primary-rgb), 0.06);
     border-bottom: 1px solid var(--art-border-color);
   }
@@ -1439,9 +1446,9 @@
   .fm-quick-tip {
     width: 100%;
     margin-top: 6px;
-    color: var(--art-text-gray-600);
     font-size: 12px;
     line-height: 1.5;
+    color: var(--art-text-gray-600);
   }
 
   .fm-share-mode {
@@ -1458,14 +1465,14 @@
 
   .fm-share-link {
     display: flex;
-    width: 100%;
     gap: 10px;
+    width: 100%;
   }
 
   .fm-dir-field {
     display: flex;
-    width: 100%;
     gap: 10px;
+    width: 100%;
   }
 
   .fm-dir-picker {
@@ -1485,17 +1492,17 @@
 
   .fm-dir-item {
     display: flex;
+    gap: 9px;
     align-items: center;
     width: 100%;
-    gap: 9px;
     padding: 11px 12px;
-    color: var(--art-text-gray-900);
     font-size: 13px;
+    color: var(--art-text-gray-900);
     text-align: left;
+    cursor: pointer;
     background: transparent;
     border: 0;
     border-radius: 6px;
-    cursor: pointer;
   }
 
   .fm-dir-item:hover {
@@ -1517,17 +1524,17 @@
 
   .fm-dir-picker__footer {
     display: flex;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 16px;
   }
 
   .fm-dir-picker__footer > span {
     min-width: 0;
     overflow: hidden;
-    color: var(--art-text-gray-600);
     font-size: 12px;
+    color: var(--art-text-gray-600);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -1548,15 +1555,15 @@
 
   .fm-name {
     display: inline-flex;
-    align-items: center;
     gap: 8px;
+    align-items: center;
     max-width: 100%;
     padding: 0;
-    color: var(--art-text-gray-900);
     font-size: 13px;
+    color: var(--art-text-gray-900);
+    cursor: default;
     background: transparent;
     border: 0;
-    cursor: default;
   }
 
   .fm-name.is-dir {
@@ -1583,16 +1590,16 @@
 
   .fm-footer {
     display: flex;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
     padding: 12px 22px 16px;
   }
 
   .fm-summary,
   .fm-page-index {
-    color: var(--art-text-gray-600);
     font-size: 12px;
+    color: var(--art-text-gray-600);
   }
 
   .fm-page-size {
@@ -1639,8 +1646,8 @@
   }
 
   .fm-preview__text {
-    width: 100%;
     align-self: stretch;
+    width: 100%;
     overflow: auto;
   }
 
@@ -1651,15 +1658,15 @@
   .fm-preview__text pre {
     box-sizing: border-box;
     min-height: 260px;
-    margin: 0;
     padding: 16px;
+    margin: 0;
     overflow: auto;
-    color: var(--art-text-gray-900);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 13px;
     line-height: 1.65;
-    white-space: pre-wrap;
+    color: var(--art-text-gray-900);
     overflow-wrap: anywhere;
+    white-space: pre-wrap;
     background: var(--art-fill-color-light);
     border: 1px solid var(--art-border-color);
     border-radius: 8px;

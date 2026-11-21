@@ -36,6 +36,88 @@
     width: 100%;
   }
 
+  // 主登录渠道：居中的身份卡片，替代账号密码表单
+  .primary-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 0 8px;
+    text-align: center;
+
+    .primary-login-badge {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      margin-bottom: 18px;
+      background: color-mix(in srgb, var(--main-color) 10%, transparent);
+      border-radius: 20px;
+
+      // 外圈光晕：登录中时缓慢呼吸
+      &::after {
+        position: absolute;
+        inset: -6px;
+        content: '';
+        border: 1px solid color-mix(in srgb, var(--main-color) 25%, transparent);
+        border-radius: 24px;
+      }
+
+      &.is-loading::after {
+        animation: primaryPulse 1.6s ease-in-out infinite;
+      }
+    }
+
+    .primary-login-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+
+    .primary-login-initial {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--main-color);
+    }
+
+    .primary-login-title {
+      margin-bottom: 6px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--art-text-gray-900);
+    }
+
+    .primary-login-desc {
+      min-height: 20px;
+      margin-bottom: 26px;
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--el-color-info);
+    }
+
+    .primary-login-btn {
+      width: 100%;
+      height: 44px;
+      font-size: 15px;
+      border-radius: 10px;
+      box-shadow: 0 6px 16px color-mix(in srgb, var(--main-color) 28%, transparent);
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+
+      &:hover {
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--main-color) 36%, transparent);
+        transform: translateY(-1px);
+      }
+    }
+
+    .primary-login-switch {
+      margin-top: 16px;
+      font-size: 13px;
+    }
+  }
+
   .other-login {
     display: flex;
     flex-direction: row;
@@ -50,11 +132,41 @@
       padding: 0 10px;
       font-size: 12px;
       color: var(--el-color-info);
+      cursor: pointer;
 
       .login-item-logo {
         width: 32px;
         height: 32px;
         margin-bottom: 5px;
+      }
+    }
+
+    // 有主登录渠道时，其他方式以次要的胶囊按钮展示
+    &.is-chips {
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .other-login-item {
+        flex-direction: row;
+        gap: 6px;
+        padding: 6px 12px;
+        color: var(--art-text-gray-700);
+        border: 1px solid var(--el-border-color-lighter);
+        border-radius: 999px;
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
+
+        &:hover {
+          color: var(--main-color);
+          border-color: var(--main-color);
+        }
+
+        .login-item-logo {
+          width: 18px;
+          height: 18px;
+          margin-bottom: 0;
+        }
       }
     }
   }
@@ -195,6 +307,19 @@
         right: 24px;
       }
     }
+  }
+}
+
+@keyframes primaryPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
   }
 }
 

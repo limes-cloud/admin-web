@@ -5,6 +5,7 @@ import {
   ListAppOAutherRequest,
   CreateAppOAutherReply,
   CreateAppOAutherRequest,
+  UpdateAppOAutherRequest,
   DeleteAppOAutherRequest
 } from './type'
 
@@ -16,6 +17,11 @@ export function ListAppOAuther(params: ListAppOAutherRequest) {
 // CreateAppOAuther 创建应用授权信息
 export function CreateAppOAuther(data: CreateAppOAutherRequest) {
   return request.post<CreateAppOAutherReply>({ url: '/manager/api/app/oauther', data })
+}
+
+// UpdateAppOAuther 更新应用授权配置（自动注册、主登录渠道）
+export function UpdateAppOAuther(data: UpdateAppOAutherRequest) {
+  return request.put({ url: '/manager/api/app/oauther', data })
 }
 
 // DeleteAppOAuther 删除应用授权信息

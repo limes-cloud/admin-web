@@ -47,6 +47,18 @@
           <template #logo="{ row }">
             <ElAvatar shape="square" :size="60" :src="$rurl(row.oauther.logo)"></ElAvatar>
           </template>
+          <template #autoRegister="{ row }">
+            <ElTag v-if="row.autoRegister" type="success">开启</ElTag>
+            <ElTag v-else type="info">关闭</ElTag>
+          </template>
+          <template #forceBind="{ row }">
+            <ElTag v-if="row.forceBind" type="warning">开启</ElTag>
+            <ElTag v-else type="info">关闭</ElTag>
+          </template>
+          <template #isPrimary="{ row }">
+            <ElTag v-if="row.isPrimary" type="primary">主登录</ElTag>
+            <span v-else>-</span>
+          </template>
           <template #operation="{ row }">
             <ArtOperation :list="operationItems" :data="row"></ArtOperation>
           </template>
@@ -79,13 +91,13 @@
   import { computed } from 'vue'
   import { useTable } from '@/composables/useTable'
   import { Plus } from '@element-plus/icons-vue'
-  import { Delete } from '@element-plus/icons-vue'
+  import { Delete, Edit } from '@element-plus/icons-vue'
   import { formatTime } from '@/utils/time'
   import { arrayToMap } from '@/utils/constants/transform'
   import { ListOAuther, ListOAutherType } from '@/api/manager/oauther/api'
-  import { CreateAppOAuther, DeleteAppOAuther, ListAppOAuther } from '@/api/manager/appoauther/api'
+  import { CreateAppOAuther, DeleteAppOAuther, ListAppOAuther, UpdateAppOAuther } from '@/api/manager/appoauther/api'
   import { CreateAppOAutherRequest, AppOAuther } from '@/api/manager/appoauther/type'
-  import { OAuther } from '@/api/manager/oauther/type'
+  import { OAuther, OAutherType } from '@/api/manager/oauther/type'
 
   defineOptions({ name: 'AppOAuther' })
 
@@ -122,9 +134,20 @@
     }
   ]
 
-  const types = ref({})
+  const types = ref<Map<string, OAutherType>>(new Map())
   ListOAutherType().then((res) => {
     types.value = arrayToMap(res.list, 'keyword')
+  })
+
+  // 当前选中渠道的类型（新增时按选中的渠道，编辑时按已绑定渠道）
+  const currentType = computed(() => {
+    if (currentData.value.oauther?.type) return currentData.value.oauther.type
+    return oauthers.value.find((item) => item.id === currentData.value.oautherId)?.type
+  })
+  // 自动注册能力由渠道实现决定，服务端经类型列表返回
+  const supportAutoRegister = computed(() => {
+    const tp = currentType.value
+    return !!tp && !!types.value.get(tp)?.autoRegister
   })
 
   const oauthers = ref<OAuther[]>([])
@@ -152,12 +175,40 @@
           value: 'id',
           label: 'name'
         },
+        disabled: dialogType.value === 'edit',
         rules: [{ required: true, message: '请输入授权标识', trigger: ['blur', 'change'] }]
       }
+    },
+    {
+      key: 'autoRegister',
+      label: '自动注册',
+      type: 'switch',
+      hidden: !supportAutoRegister.value,
+      tip: '渠道身份未绑定账号时自动创建用户并授权当前应用，不受应用「允许注册」限制'
+    },
+    {
+      key: 'forceBind',
+      label: '强制绑定',
+      type: 'switch',
+      hidden: !supportAutoRegister.value,
+      tip: '渠道身份未绑定、但已存在同名账号时，直接绑定该账号，无需输入密码确认；关闭时需用户输入密码绑定'
+    },
+    {
+      key: 'isPrimary',
+      label: '主登录渠道',
+      type: 'switch',
+      tip: '登录页优先使用该渠道登录，不展示账号密码表单；每个应用最多一个'
     }
   ])
 
   const operationItems = [
+    {
+      icon: Edit,
+      label: '修改授权',
+      color: 'warning',
+      permission: 'manager:appoauther:update',
+      click: (record: AppOAuther) => showDialog('edit', record)
+    },
     {
       icon: Delete,
       popConfirm: true,
@@ -184,6 +235,7 @@
     handleCurrentChange,
     refreshData,
     refreshCreate,
+    refreshUpdate,
     refreshRemove
   } = useTable({
     // 核心配置
@@ -220,6 +272,24 @@
           label: '授权名称'
         },
         {
+          prop: 'autoRegister',
+          label: '自动注册',
+          useSlot: true,
+          slotName: 'autoRegister'
+        },
+        {
+          prop: 'forceBind',
+          label: '强制绑定',
+          useSlot: true,
+          slotName: 'forceBind'
+        },
+        {
+          prop: 'isPrimary',
+          label: '主登录渠道',
+          useSlot: true,
+          slotName: 'isPrimary'
+        },
+        {
           prop: 'createdAt',
           label: '创建时间',
           sortable: true,
@@ -246,7 +316,7 @@
   // 显示用户弹窗
   const showDialog = (type: Form.DialogType, row?: AppOAuther): void => {
     dialogType.value = type
-    currentData.value = { app: app, ...row }
+    currentData.value = row ? { ...row } : { app: app, autoRegister: false, isPrimary: false, forceBind: false }
     nextTick(() => {
       dialogVisible.value = true
     })
@@ -254,9 +324,22 @@
 
   // 处理弹窗提交事件
   const handleSubmit = async () => {
-    await CreateAppOAuther(currentData.value as CreateAppOAutherRequest)
-    ElMessage.success('创建成功')
-    refreshCreate()
+    const autoRegister = supportAutoRegister.value && !!currentData.value.autoRegister
+    const forceBind = supportAutoRegister.value && !!currentData.value.forceBind
+    if (dialogType.value === 'add') {
+      await CreateAppOAuther({ ...currentData.value, autoRegister, forceBind } as CreateAppOAutherRequest)
+      ElMessage.success('创建成功')
+      refreshCreate()
+    } else {
+      await UpdateAppOAuther({
+        id: currentData.value.id as number,
+        autoRegister,
+        forceBind,
+        isPrimary: !!currentData.value.isPrimary
+      })
+      ElMessage.success('修改成功')
+      refreshUpdate()
+    }
     dialogVisible.value = false
   }
 </script>

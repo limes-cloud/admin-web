@@ -7,6 +7,15 @@ export interface ListLoginLogRequest {
 }
 
 export interface LoginLog {
+  /** 应用标识 */
+  app: string
+  /** 应用信息（logo、名称） */
+  appInfo?: {
+    id: number
+    name: string
+    keyword: string
+    logo: string
+  }
   user: {
     id: number
     username: string

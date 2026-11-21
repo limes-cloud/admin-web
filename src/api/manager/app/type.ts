@@ -16,8 +16,11 @@ export interface AppSetting {
   web?: {
     watermark?: string
     copyright?: string
+    /** 已迁移至 user.defaultPassword，仅作旧数据兜底 */
     defaultPassword?: string
   }
+  /** 用户配置 */
+  user?: AppSettingUser
   seo?: AppSettingSEO
   /** 私有推送配置，仅管理端可见，不会通过 init 接口下发 */
   seoPush?: AppSettingSEOPush
@@ -33,6 +36,13 @@ export interface AppSetting {
   tracker?: AppSettingTracker
   /** 管理员邮箱，用于接收应用相关的系统通知 */
   adminEmail?: string
+}
+
+export interface AppSettingUser {
+  /** 默认头像，新建用户未设置头像以及用户头像为空时使用 */
+  defaultAvatar?: string
+  /** 默认登录密码，新增用户未填写密码以及重置密码时使用 */
+  defaultPassword?: string
 }
 
 export interface AppSettingTracker {

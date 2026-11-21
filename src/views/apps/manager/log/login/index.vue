@@ -37,9 +37,9 @@
           </template>
           <template #username="{ row }"> {{ row.user.username }}({{ row.user.nickname }}) </template>
           <template #appLogo="{ row }">
-            <ElAvatar shape="square" :size="36" :src="$rurl(row.app.logo)"></ElAvatar>
+            <ElAvatar shape="square" :size="36" :src="$rurl(row.appInfo?.logo)"></ElAvatar>
           </template>
-          <template #appName="{ row }"> {{ row.app.keyword }}({{ row.app.name }}) </template>
+          <template #appName="{ row }"> {{ row.appInfo?.keyword ?? row.app }}({{ row.appInfo?.name }}) </template>
           <template #code="{ row }">
             <ElTag v-if="row.code == 200" type="success">成功</ElTag>
             <ElTooltip v-else :content="row.description">

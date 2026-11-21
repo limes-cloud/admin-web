@@ -8,7 +8,11 @@ import { resetRouterState } from '@/router/guards/beforeEach'
 import { useMenuStore } from './menu'
 import { GetCurrentUser } from '@/api/manager/user/api'
 import { User } from '@/api/manager/user/type'
+
 import { Logout } from '@/api/manager/authorize/api'
+
+/** 主动退出后在本会话内禁用零信任自动登录 */
+export const ZT_AUTO_LOGIN_DISABLED_KEY = 'zt-auto-login-disabled'
 
 /**
  * 用户状态管理
@@ -107,6 +111,9 @@ export const useUserStore = defineStore(
     const logout = async () => {
       // 调用退出登陆接口
       await Logout()
+
+      // 主动退出后本次会话不再自动走零信任登录，否则会被立即登回
+      sessionStorage.setItem(ZT_AUTO_LOGIN_DISABLED_KEY, '1')
 
       // 清空用户信息
       info.value = {}

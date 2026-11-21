@@ -198,8 +198,9 @@
     types.value = res.list
   })
 
-  const hasCallbackTypes = ['yiban', 'wx_service_account']
-  const formItems = reactive([
+  const hasCallbackTypes = ['yiban', 'wx_service_account', 'zt']
+  // 用 computed：字段显隐依赖当前选择的授权类型，reactive 只会在初始化时求值一次
+  const formItems = computed(() => [
     {
       key: 'logo',
       label: '授权logo',
@@ -241,7 +242,7 @@
       label: '授权类型',
       type: 'select',
       props: {
-        options: types,
+        options: types.value,
         placeholder: '请选择授权类型',
         rules: [{ required: true, message: '请选择授权名称', trigger: ['blur', 'change'] }],
         props: {
@@ -264,7 +265,8 @@
       label: '授权SK',
       type: 'input',
       props: {
-        placeholder: '请输入授权SK',
+        placeholder:
+          currentData.value.type === 'zt' ? '零信任 JWT Secret（当前仅解码不验签，可填任意值）' : '请输入授权SK',
         rules: [{ required: true, message: '请输入授权SK', trigger: ['blur', 'change'] }]
       }
     },
@@ -280,11 +282,13 @@
     },
     {
       key: 'setting.callback',
-      label: '回调地址',
+      label: currentData.value.type === 'zt' ? '零信任入口' : '回调地址',
       type: 'input',
       hidden: !hasCallbackTypes.includes(currentData.value.type as string),
+      tip:
+        currentData.value.type === 'zt' ? '未经零信任访问时跳转到该地址认证，如 https://sso.example.com/' : undefined,
       props: {
-        placeholder: '请输入回调地址',
+        placeholder: currentData.value.type === 'zt' ? '请输入零信任入口地址' : '请输入回调地址',
         rules: [
           { required: true, message: '请输入回调地址', trigger: ['blur', 'change'] },
           { type: 'url', message: '回调地址格式错误' }
@@ -540,9 +544,9 @@
   .oauth-card-scroll {
     flex: 1;
     min-height: 0;
+    padding-right: 4px;
     margin-top: 12px;
     overflow-y: auto;
-    padding-right: 4px;
   }
 
   .oauth-grid {
@@ -600,8 +604,8 @@
         justify-content: center;
         width: 100%;
         height: 100%;
-        color: inherit;
         font-size: inherit;
+        color: inherit;
         background: transparent;
       }
 
@@ -650,8 +654,8 @@
         line-height: 22px;
         color: var(--art-gray-900);
         text-overflow: ellipsis;
-        white-space: nowrap;
         letter-spacing: 0;
+        white-space: nowrap;
       }
 
       p {
@@ -688,8 +692,8 @@
       &:active {
         color: var(--art-gray-500);
         border-color: transparent !important;
-        box-shadow: none !important;
         outline: none !important;
+        box-shadow: none !important;
       }
     }
 
@@ -790,8 +794,8 @@
   }
 
   .oauth-pagination {
-    flex-shrink: 0;
     display: flex;
+    flex-shrink: 0;
     justify-content: flex-end;
     margin-top: 16px;
   }

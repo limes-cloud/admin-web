@@ -1,6 +1,8 @@
 export interface OAutherType {
   keyword: string
   name: string
+  /** 渠道实现是否支持自动注册（由服务端代码确定） */
+  autoRegister?: boolean
 }
 
 export interface OAutherSettting {
